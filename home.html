@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #6c63ff; --bg: #0a0b14; --surface: #12141f; --surface2: #1a1c2b; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14); --text: #f1f5f9; --text2: #94a3b8; --text3: #475569; --green: #34d399; --red: #f87171; --yellow: #fbbf24; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; position: sticky; top: 0; flex-shrink: 0; }
+  .sidebar-logo { padding: 0 24px 24px; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; border-bottom: 1px solid var(--border); }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-user { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .sidebar-user img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+  .sidebar-user-info { overflow: hidden; }
+  .sidebar-user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-user-email { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-section { padding: 16px 12px 8px; }
+  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 0 12px; margin-bottom: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; text-decoration: none; }
+  .nav-item:hover, .nav-item.active { background: rgba(108,99,255,0.12); color: var(--text); }
+  .nav-item.active { color: var(--accent); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-bottom { margin-top: auto; padding: 16px 24px; }
+  .btn-logout { width: 100%; padding: 8px; background: none; border: 1px solid var(--border2); border-radius: 8px; color: var(--text3); font-size: 12.5px; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* Main */
+  .main { flex: 1; min-height: 100vh; overflow-x: hidden; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
+  .topbar-title { font-size: 17px; font-weight: 700; }
+  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all .15s; text-decoration: none; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #7b74ff; }
+  .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+  .btn-secondary:hover { color: var(--text); border-color: var(--border2); background: rgba(255,255,255,0.06); }
+  .btn-danger { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+  .btn-danger:hover { background: rgba(248,113,113,0.2); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+  .content { padding: 32px; }
+
+  /* Page visibility */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .stat-label { font-size: 11.5px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
+  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  /* Store cards */
+  .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .store-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .2s, transform .2s; }
+  .store-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .store-card-banner { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.03em; }
+  .store-card-body { padding: 18px; }
+  .store-card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .store-card-slug { font-size: 11.5px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 12px; }
+  .store-meta { display: flex; gap: 12px; margin-bottom: 14px; }
+  .meta-badge { font-size: 11px; background: var(--surface2); border: 1px solid var(--border2); padding: 3px 9px; border-radius: 6px; color: var(--text3); }
+  .store-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+  .store-status.published { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+  .store-status.draft { background: rgba(148,163,184,0.1); color: var(--text3); border: 1px solid var(--border); }
+  .store-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+  /* Table */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--surface2); }
+  th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .product-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--surface2); }
+  .product-thumb-placeholder { width: 40px; height: 40px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+
+  /* Status badges */
+  .status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+  .status.active, .status.delivered { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+  .status.draft, .status.pending { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+  .status.confirmed, .status.processing { background: rgba(108,99,255,0.1); color: #a78bfa; border: 1px solid rgba(108,99,255,0.2); }
+  .status.shipped { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+  .status.cancelled, .status.archived { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 32px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 9px; padding: 10px 14px; font-size: 14px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; transition: border-color .15s; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: #1a1c2b; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Topbar store selector */
+  .store-selector { display: flex; align-items: center; gap: 10px; }
+  .store-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; cursor: pointer; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty h3 { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+  .empty p { font-size: 13.5px; line-height: 1.6; margin-bottom: 20px; }
+
+  /* Search + filter bar */
+  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border2); border-radius: 9px; padding: 8px 14px; font-size: 13.5px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* Category chip list */
+  .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cat-chip { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border2); font-size: 12.5px; color: var(--text2); }
+  .cat-chip button { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 14px 20px; font-size: 13.5px; display: none; z-index: 2000; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+  .toast.show { display: block; }
+  .toast.success { border-color: rgba(52,211,153,0.4); color: var(--green); }
+  .toast.error { border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+  /* Product image preview */
+  .img-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .img-preview img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border2); }
+
+  /* Variants */
+  .variant-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .variant-row input { flex: 1; }
+  .variant-row button { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--red); padding: 5px 8px; cursor: pointer; font-size: 14px; }
+
+  @media(max-width:768px) {
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">e<span>K</span>art</div>
+  <div class="sidebar-user">
+    <img id="userAvatar" src="" alt="">
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="userName">Loading...</div>
+      <div class="sidebar-user-email" id="userEmail"></div>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Merchant</div>
+    <a class="nav-item active" data-page="stores" onclick="showPage('stores')"><span class="icon">🏪</span> My Stores</a>
+    <a class="nav-item" data-page="products" onclick="showPage('products')"><span class="icon">📦</span> Products</a>
+    <a class="nav-item" data-page="categories" onclick="showPage('categories')"><span class="icon">🗂️</span> Categories</a>
+    <a class="nav-item" data-page="orders" onclick="showPage('orders')"><span class="icon">📋</span> Orders</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">My Stores</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="store-selector" id="storeSelectorWrap" style="display:none;">
+        <span style="font-size:12px;color:var(--text3);">Store:</span>
+        <select class="store-select" id="storeSelector" onchange="onStoreChange()"></select>
+      </div>
+      <button class="btn btn-primary" id="topbarAction" onclick="openCreateStore()">+ New Store</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STORES PAGE -->
+    <div class="page active" id="page-stores">
+      <div class="stats-row" id="dashStats" style="display:none;">
+        <div class="stat-card"><div class="stat-label">Total Stores</div><div class="stat-value" id="statStores">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="statOrders">0</div></div>
+        <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="statToday">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="statRevenue">₹0</div></div>
+      </div>
+      <div class="stores-grid" id="storesGrid">
+        <div class="empty"><div class="empty-icon">🏪</div><h3>No stores yet</h3><p>Create your first store to start selling</p></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS PAGE -->
+    <div class="page" id="page-products">
+      <div class="toolbar">
+        <input class="search-input" id="productSearch" placeholder="🔍 Search products..." oninput="filterProducts()">
+        <select class="store-select" id="productCatFilter" onchange="filterProducts()" style="width:160px;">
+          <option value="">All Categories</option>
+        </select>
+        <select class="store-select" id="productStatusFilter" onchange="filterProducts()" style="width:140px;">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="productsBody"><tr><td colspan="6"><div class="empty" style="padding:40px;"><div class="empty-icon">📦</div><p>Select a store and add products</p></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATEGORIES PAGE -->
+    <div class="page" id="page-categories">
+      <div class="toolbar">
+        <input class="search-input" id="catNewName" placeholder="New category name..." style="max-width:280px;">
+        <button class="btn btn-primary" onclick="createCategory()">+ Add Category</button>
+      </div>
+      <div class="cat-chips" id="catChips"><p style="color:var(--text3);font-size:13px;">No categories yet.</p></div>
+    </div>
+
+    <!-- ORDERS PAGE -->
+    <div class="page" id="page-orders">
+      <div class="toolbar">
+        <input class="search-input" id="orderSearch" placeholder="🔍 Search orders, customers..." oninput="filterOrders()" style="max-width:320px;">
+        <select class="store-select" id="orderStatusFilter" onchange="filterOrders()" style="width:160px;">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="ordersBody"><tr><td colspan="7"><div class="empty" style="padding:40px;"><div class="empty-icon">📋</div><p>No orders yet</p></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Create/Edit Store -->
+<div class="modal-overlay" id="storeModal">
+  <div class="modal">
+    <h2 id="storeModalTitle">Create New Store</h2>
+    <input type="hidden" id="storeEditId">
+    <div class="field"><label>Store Name *</label><input type="text" id="storeName" placeholder="My Awesome Store"></div>
+    <div class="field"><label>Tagline</label><input type="text" id="storeTagline" placeholder="The best deals online"></div>
+    <div class="field"><label>Description</label><textarea id="storeDesc" placeholder="What does your store sell?"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Contact Email</label><input type="email" id="storeEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Phone</label><input type="text" id="storePhone" placeholder="+91 98765 43210"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Currency</label>
+        <select id="storeCurrency">
+          <option value="INR">INR (₹)</option>
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+        </select>
+      </div>
+      <div class="field"><label>Brand Color</label><input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;"></div>
+    </div>
+    <div class="field"><label>Logo (paste base64 or URL)</label><input type="text" id="storeLogo" placeholder="data:image/... or https://..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStore()">Save Store</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Create/Edit Product -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <h2 id="productModalTitle">Add Product</h2>
+    <input type="hidden" id="productEditId">
+    <div class="field"><label>Product Name *</label><input type="text" id="productName" placeholder="Wireless Headphones"></div>
+    <div class="field"><label>Description</label><textarea id="productDesc" placeholder="Describe your product..."></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Price *</label><input type="number" id="productPrice" placeholder="999" step="0.01" min="0"></div>
+      <div class="field"><label>Compare at Price</label><input type="number" id="productCompare" placeholder="1499" step="0.01" min="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>SKU</label><input type="text" id="productSku" placeholder="SKU-001"></div>
+      <div class="field"><label>Category</label>
+        <select id="productCategory"><option value="">No Category</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Stock Qty</label><input type="number" id="productStock" placeholder="100" min="0"></div>
+      <div class="field"><label>Status</label>
+        <select id="productStatus">
+          <option value="active">Active</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Tags (comma separated)</label><input type="text" id="productTags" placeholder="electronics, wireless, audio"></div>
+    <div class="field">
+      <label>Images (paste base64 or URLs, one per line)</label>
+      <textarea id="productImages" placeholder="data:image/... or https://example.com/image.jpg" style="min-height:70px;"></textarea>
+    </div>
+    <div class="field">
+      <label>Variants</label>
+      <div id="variantsList"></div>
+      <button class="btn btn-secondary btn-sm" onclick="addVariantRow()" style="margin-top:6px;">+ Add Variant</button>
+      <p style="font-size:11.5px;color:var(--text3);margin-top:4px;">e.g. "Size: S, M, L" or "Color: Red, Blue"</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Update Order -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <h2>Update Order</h2>
+    <input type="hidden" id="orderEditId">
+    <div id="orderDetailView" style="margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:10px;font-size:13.5px;line-height:1.8;"></div>
+    <div class="field"><label>Status</label>
+      <select id="orderStatus">
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="processing">Processing</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="field"><label>Tracking Number</label><input type="text" id="orderTracking" placeholder="AWB12345678"></div>
+    <div class="field"><label>Internal Notes</label><textarea id="orderNotes" placeholder="Any notes about this order..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Update Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = ''
+let token = ''
+let currentUser = null
+let currentStore = null
+let allStores = []
+let allProducts = []
+let allOrders = []
+let allCategories = []
+let catMap = {}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const p = new URLSearchParams(location.search)
+  if (p.get('token')) {
+    localStorage.setItem('ekart_token', p.get('token'))
+    history.replaceState({}, '', '/home.html')
+  }
+  token = localStorage.getItem('ekart_token')
+  if (!token) return location.replace('/')
+  try {
+    const r = await apiFetch('/auth/me')
+    currentUser = r
+    document.getElementById('userName').textContent = r.name
+    document.getElementById('userEmail').textContent = r.email
+    document.getElementById('storeEmail').value = r.email || ''
+    if (r.avatar) document.getElementById('userAvatar').src = r.avatar
+    await loadStores()
+    await loadDashboard()
+  } catch { location.replace('/') }
+})
+
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  })
+  if (!res.ok) { const e = await res.json().catch(() => ({ error: 'Error' })); throw new Error(e.error || 'Request failed') }
+  return res.json()
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.getElementById('page-' + name).classList.add('active')
+  document.querySelector(`[data-page="${name}"]`).classList.add('active')
+  const titles = { stores: 'My Stores', products: 'Products', categories: 'Categories', orders: 'Orders' }
+  document.getElementById('pageTitle').textContent = titles[name]
+  const actions = {
+    stores: { label: '+ New Store', fn: 'openCreateStore()' },
+    products: { label: '+ Add Product', fn: 'openCreateProduct()' },
+    categories: { label: '', fn: '' },
+    orders: { label: '', fn: '' }
+  }
+  const topBtn = document.getElementById('topbarAction')
+  topBtn.textContent = actions[name].label
+  topBtn.onclick = actions[name].fn ? new Function(actions[name].fn) : null
+  topBtn.style.display = actions[name].label ? 'flex' : 'none'
+  const showSelector = name !== 'stores'
+  document.getElementById('storeSelectorWrap').style.display = showSelector ? 'flex' : 'none'
+  if (name === 'products') loadProducts()
+  if (name === 'categories') loadCategories()
+  if (name === 'orders') loadOrders()
+}
+
+// ── Stores ────────────────────────────────────────────────────────────────────
+async function loadStores() {
+  allStores = await apiFetch('/stores')
+  renderStores()
+  // Update store selector
+  const sel = document.getElementById('storeSelector')
+  sel.innerHTML = allStores.map(s => `<option value="${s._id}">${s.name}</option>`).join('')
+  if (allStores.length) {
+    currentStore = allStores[0]
+    sel.value = currentStore._id
+  }
+}
+
+function renderStores() {
+  const grid = document.getElementById('storesGrid')
+  if (!allStores.length) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">🏪</div><h3>No stores yet</h3><p>Create your first store to start selling</p><button class="btn btn-primary" onclick="openCreateStore()">+ Create Store</button></div>`
+    return
+  }
+  grid.innerHTML = allStores.map(s => {
+    const bg = s.brand_color || '#6c63ff'
+    const logo = s.logo_base64 ? `<img src="${s.logo_base64}" style="height:48px;object-fit:contain;">` : s.name.slice(0, 2).toUpperCase()
+    return `<div class="store-card">
+      <div class="store-card-banner" style="background:linear-gradient(135deg,${bg}dd,${bg}88);">${logo}</div>
+      <div class="store-card-body">
+        <div class="store-card-name">${s.name}</div>
+        <div class="store-card-slug">/${s.slug}</div>
+        <div class="store-meta">
+          <span class="meta-badge">📦 ${s.product_count || 0} products</span>
+          <span class="meta-badge">📋 ${s.order_count || 0} orders</span>
+        </div>
+        <span class="store-status ${s.published ? 'published' : 'draft'}">
+          ${s.published ? '● Live' : '○ Draft'}
+        </span>
+        <div class="store-actions">
+          ${s.published ? `<a href="${s.published_url}" target="_blank" class="btn btn-secondary btn-sm">🌐 View</a>` : ''}
+          <button class="btn btn-secondary btn-sm" onclick="publishStore('${s._id}')">🚀 ${s.published ? 'Republish' : 'Publish'}</button>
+          <button class="btn btn-secondary btn-sm" onclick="openEditStore('${s._id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteStore('${s._id}','${s.name}')">🗑</button>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+async function loadDashboard() {
+  try {
+    const d = await apiFetch('/dashboard')
+    document.getElementById('dashStats').style.display = 'grid'
+    document.getElementById('statStores').textContent = d.stores_count
+    document.getElementById('statOrders').textContent = d.total_orders
+    document.getElementById('statToday').textContent = d.today_orders
+    document.getElementById('statRevenue').textContent = '₹' + (d.total_revenue || 0).toFixed(0)
+  } catch {}
+}
+
+function openCreateStore() {
+  document.getElementById('storeModalTitle').textContent = 'Create New Store'
+  document.getElementById('storeEditId').value = ''
+  document.getElementById('storeName').value = ''
+  document.getElementById('storeTagline').value = ''
+  document.getElementById('storeDesc').value = ''
+  document.getElementById('storeEmail').value = currentUser?.email || ''
+  document.getElementById('storePhone').value = ''
+  document.getElementById('storeBrandColor').value = '#6c63ff'
+  document.getElementById('storeLogo').value = ''
+  openModal('storeModal')
+}
+
+function openEditStore(id) {
+  const s = allStores.find(x => x._id === id)
+  if (!s) return
+  document.getElementById('storeModalTitle').textContent = 'Edit Store'
+  document.getElementById('storeEditId').value = id
+  document.getElementById('storeName').value = s.name
+  document.getElementById('storeTagline').value = s.tagline || ''
+  document.getElementById('storeDesc').value = s.description || ''
+  document.getElementById('storeEmail').value = s.contact_email || ''
+  document.getElementById('storePhone').value = s.phone || ''
+  document.getElementById('storeCurrency').value = s.currency || 'INR'
+  document.getElementById('storeBrandColor').value = s.brand_color || '#6c63ff'
+  document.getElementById('storeLogo').value = s.logo_base64 || ''
+  openModal('storeModal')
+}
+
+async function saveStore() {
+  const id = document.getElementById('storeEditId').value
+  const body = {
+    name: document.getElementById('storeName').value.trim(),
+    tagline: document.getElementById('storeTagline').value.trim(),
+    description: document.getElementById('storeDesc').value.trim(),
+    contact_email: document.getElementById('storeEmail').value.trim(),
+    phone: document.getElementById('storePhone').value.trim(),
+    currency: document.getElementById('storeCurrency').value,
+    brand_color: document.getElementById('storeBrandColor').value,
+    logo_base64: document.getElementById('storeLogo').value.trim() || null
+  }
+  if (!body.name) return toast('Store name is required', 'error')
+  try {
+    if (id) await apiFetch(`/stores/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    else await apiFetch('/stores', { method: 'POST', body: JSON.stringify(body) })
+    closeModal('storeModal')
+    await loadStores()
+    toast(id ? 'Store updated!' : 'Store created!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function publishStore(id) {
+  try {
+    const r = await apiFetch(`/stores/${id}/publish`, { method: 'POST', body: '{}' })
+    await loadStores()
+    toast('Store is live! URL copied to clipboard.')
+    navigator.clipboard.writeText(r.url).catch(() => {})
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function deleteStore(id, name) {
+  if (!confirm(`Delete "${name}" and all its products & orders? This cannot be undone.`)) return
+  try {
+    await apiFetch(`/stores/${id}`, { method: 'DELETE', body: '{}' })
+    await loadStores()
+    toast('Store deleted')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function onStoreChange() {
+  const id = document.getElementById('storeSelector').value
+  currentStore = allStores.find(s => s._id === id)
+  const page = document.querySelector('.page.active').id.replace('page-', '')
+  if (page === 'products') loadProducts()
+  if (page === 'categories') loadCategories()
+  if (page === 'orders') loadOrders()
+}
+
+// ── Products ──────────────────────────────────────────────────────────────────
+async function loadProducts() {
+  if (!currentStore) return
+  try {
+    allProducts = await apiFetch(`/stores/${currentStore._id}/products`)
+    // Also load categories for filter
+    allCategories = await apiFetch(`/stores/${currentStore._id}/categories`)
+    catMap = {}; allCategories.forEach(c => catMap[c._id] = c.name)
+    const catFilter = document.getElementById('productCatFilter')
+    catFilter.innerHTML = '<option value="">All Categories</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
+    const catSel = document.getElementById('productCategory')
+    catSel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
+    renderProducts(allProducts)
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function filterProducts() {
+  const q = document.getElementById('productSearch').value.toLowerCase()
+  const cat = document.getElementById('productCatFilter').value
+  const status = document.getElementById('productStatusFilter').value
+  let filtered = allProducts
+  if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q))
+  if (cat) filtered = filtered.filter(p => p.category_id === cat || (p.category_id && p.category_id.$oid === cat))
+  if (status) filtered = filtered.filter(p => p.status === status)
+  renderProducts(filtered)
+}
+
+function renderProducts(products) {
+  const body = document.getElementById('productsBody')
+  if (!products.length) { body.innerHTML = '<tr><td colspan="6"><div class="empty" style="padding:40px;"><div class="empty-icon">📦</div><p>No products found</p></div></td></tr>'; return }
+  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
+  body.innerHTML = products.map(p => {
+    const thumb = p.images?.[0] ? `<img class="product-thumb" src="${p.images[0]}" alt="">` : `<div class="product-thumb-placeholder">📦</div>`
+    const catName = p.category_id ? (catMap[p.category_id] || catMap[p.category_id?.$oid] || '—') : '—'
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">${thumb}<div><div style="font-weight:600;font-size:13.5px;">${p.name}</div><div style="font-size:11.5px;color:var(--text3);">${p.sku || '—'}</div></div></div></td>
+      <td style="color:var(--text2);font-size:13px;">${catName}</td>
+      <td><strong>${currency}${p.price.toFixed(2)}</strong>${p.compare_at_price ? `<br><s style="font-size:11px;color:var(--text3);">${currency}${p.compare_at_price.toFixed(2)}</s>` : ''}</td>
+      <td style="color:var(--text2);">${p.track_inventory ? p.stock_qty : '∞'}</td>
+      <td><span class="status ${p.status}">${p.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-sm" onclick="openEditProduct('${p._id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p._id}','${p.name.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </td>
+    </tr>`
+  }).join('')
+}
+
+function openCreateProduct() {
+  if (!currentStore) return toast('Select a store first', 'error')
+  document.getElementById('productModalTitle').textContent = 'Add Product'
+  document.getElementById('productEditId').value = ''
+  document.getElementById('productName').value = ''
+  document.getElementById('productDesc').value = ''
+  document.getElementById('productPrice').value = ''
+  document.getElementById('productCompare').value = ''
+  document.getElementById('productSku').value = ''
+  document.getElementById('productStock').value = ''
+  document.getElementById('productTags').value = ''
+  document.getElementById('productImages').value = ''
+  document.getElementById('productStatus').value = 'active'
+  document.getElementById('variantsList').innerHTML = ''
+  // Populate categories
+  const sel = document.getElementById('productCategory')
+  sel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
+  openModal('productModal')
+}
+
+function openEditProduct(id) {
+  const p = allProducts.find(x => x._id === id)
+  if (!p) return
+  document.getElementById('productModalTitle').textContent = 'Edit Product'
+  document.getElementById('productEditId').value = id
+  document.getElementById('productName').value = p.name
+  document.getElementById('productDesc').value = p.description || ''
+  document.getElementById('productPrice').value = p.price
+  document.getElementById('productCompare').value = p.compare_at_price || ''
+  document.getElementById('productSku').value = p.sku || ''
+  document.getElementById('productStock').value = p.stock_qty || ''
+  document.getElementById('productTags').value = (p.tags || []).join(', ')
+  document.getElementById('productImages').value = (p.images || []).join('\n')
+  document.getElementById('productStatus').value = p.status || 'active'
+  const catId = p.category_id?.$oid || p.category_id || ''
+  const sel = document.getElementById('productCategory')
+  sel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}" ${c._id === catId ? 'selected' : ''}>${c.name}</option>`).join('')
+  // Variants
+  document.getElementById('variantsList').innerHTML = ''
+  ;(p.variants || []).forEach(v => addVariantRow(v.label, v.options))
+  openModal('productModal')
+}
+
+async function saveProduct() {
+  const id = document.getElementById('productEditId').value
+  const images = document.getElementById('productImages').value.trim().split('\n').filter(Boolean)
+  const variantRows = document.querySelectorAll('.variant-row')
+  const variants = Array.from(variantRows).map(row => ({
+    label: row.querySelector('.var-label').value.trim(),
+    options: row.querySelector('.var-options').value.trim()
+  })).filter(v => v.label)
+
+  const body = {
+    name: document.getElementById('productName').value.trim(),
+    description: document.getElementById('productDesc').value.trim(),
+    price: document.getElementById('productPrice').value,
+    compare_at_price: document.getElementById('productCompare').value || null,
+    sku: document.getElementById('productSku').value.trim(),
+    stock_qty: document.getElementById('productStock').value || 0,
+    track_inventory: !!document.getElementById('productStock').value,
+    category_id: document.getElementById('productCategory').value || null,
+    tags: document.getElementById('productTags').value,
+    images: JSON.stringify(images),
+    status: document.getElementById('productStatus').value,
+    variants: JSON.stringify(variants)
+  }
+  if (!body.name || !body.price) return toast('Name and price required', 'error')
+  try {
+    if (id) await apiFetch(`/stores/${currentStore._id}/products/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    else await apiFetch(`/stores/${currentStore._id}/products`, { method: 'POST', body: JSON.stringify(body) })
+    closeModal('productModal')
+    await loadProducts()
+    toast(id ? 'Product updated!' : 'Product added!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function deleteProduct(id, name) {
+  if (!confirm(`Delete "${name}"?`)) return
+  try {
+    await apiFetch(`/stores/${currentStore._id}/products/${id}`, { method: 'DELETE', body: '{}' })
+    await loadProducts()
+    toast('Product deleted')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function addVariantRow(label = '', options = '') {
+  const div = document.createElement('div')
+  div.className = 'variant-row'
+  div.innerHTML = `<input class="var-label" type="text" placeholder="Label (e.g. Size)" value="${label}" style="flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+  <input class="var-options" type="text" placeholder="Options (e.g. S, M, L)" value="${options}" style="flex:2;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+  <button onclick="this.parentElement.remove()">✕</button>`
+  document.getElementById('variantsList').appendChild(div)
+}
+
+// ── Categories ────────────────────────────────────────────────────────────────
+async function loadCategories() {
+  if (!currentStore) return
+  allCategories = await apiFetch(`/stores/${currentStore._id}/categories`)
+  catMap = {}; allCategories.forEach(c => catMap[c._id] = c.name)
+  renderCategories()
+}
+
+function renderCategories() {
+  const container = document.getElementById('catChips')
+  if (!allCategories.length) { container.innerHTML = '<p style="color:var(--text3);font-size:13px;">No categories yet. Add one above.</p>'; return }
+  container.innerHTML = allCategories.map(c => `
+    <div class="cat-chip">
+      <span>🗂 ${c.name}</span>
+      <button onclick="deleteCategory('${c._id}','${c.name.replace(/'/g,"\\'")}')">✕</button>
+    </div>`).join('')
+}
+
+async function createCategory() {
+  if (!currentStore) return toast('Select a store first', 'error')
+  const name = document.getElementById('catNewName').value.trim()
+  if (!name) return toast('Enter a category name', 'error')
+  try {
+    await apiFetch(`/stores/${currentStore._id}/categories`, { method: 'POST', body: JSON.stringify({ name }) })
+    document.getElementById('catNewName').value = ''
+    await loadCategories()
+    toast('Category added!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function deleteCategory(id, name) {
+  if (!confirm(`Delete category "${name}"?`)) return
+  try {
+    await apiFetch(`/stores/${currentStore._id}/categories/${id}`, { method: 'DELETE', body: '{}' })
+    await loadCategories()
+    toast('Category deleted')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  if (!currentStore) return
+  allOrders = await apiFetch(`/stores/${currentStore._id}/orders`)
+  renderOrders(allOrders)
+}
+
+function filterOrders() {
+  const q = document.getElementById('orderSearch').value.toLowerCase()
+  const status = document.getElementById('orderStatusFilter').value
+  let filtered = allOrders
+  if (q) filtered = filtered.filter(o => o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q) || o.customer_email.toLowerCase().includes(q))
+  if (status) filtered = filtered.filter(o => o.status === status)
+  renderOrders(filtered)
+}
+
+function renderOrders(orders) {
+  const body = document.getElementById('ordersBody')
+  if (!orders.length) { body.innerHTML = '<tr><td colspan="7"><div class="empty" style="padding:40px;"><div class="empty-icon">📋</div><p>No orders found</p></div></td></tr>'; return }
+  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
+  body.innerHTML = orders.map(o => `<tr>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12.5px;">${o.order_number}</strong></td>
+    <td><div style="font-weight:600;font-size:13px;">${o.customer_name}</div><div style="font-size:11.5px;color:var(--text3);">${o.customer_email}</div></td>
+    <td style="font-size:13px;color:var(--text2);">${o.items?.length || 0} item(s)</td>
+    <td><strong>${currency}${o.total?.toFixed(2)}</strong><br><span style="font-size:11px;color:var(--text3);">COD</span></td>
+    <td><span class="status ${o.status}">${o.status}</span></td>
+    <td style="font-size:12px;color:var(--text3);">${new Date(o.created_at).toLocaleDateString()}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openOrderEdit('${o._id}')">✏️ Update</button></td>
+  </tr>`).join('')
+}
+
+function openOrderEdit(id) {
+  const o = allOrders.find(x => x._id === id)
+  if (!o) return
+  document.getElementById('orderEditId').value = id
+  document.getElementById('orderStatus').value = o.status
+  document.getElementById('orderTracking').value = o.tracking_number || ''
+  document.getElementById('orderNotes').value = o.notes || ''
+  const currency = currentStore?.currency === 'USD' ? '$' : '₹'
+  document.getElementById('orderDetailView').innerHTML = `
+    <strong>#${o.order_number}</strong> — ${o.customer_name} (${o.customer_email})<br>
+    Phone: ${o.customer_phone || '—'}<br>
+    Address: ${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}<br>
+    Items: ${(o.items || []).map(i => `${i.name} x${i.qty} @ ${currency}${i.price}`).join(', ')}<br>
+    <strong>Total: ${currency}${o.total?.toFixed(2)}</strong>`
+  openModal('orderModal')
+}
+
+async function saveOrder() {
+  const id = document.getElementById('orderEditId').value
+  const body = {
+    status: document.getElementById('orderStatus').value,
+    tracking_number: document.getElementById('orderTracking').value.trim(),
+    notes: document.getElementById('orderNotes').value.trim()
+  }
+  try {
+    await apiFetch(`/stores/${currentStore._id}/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    closeModal('orderModal')
+    await loadOrders()
+    toast('Order updated!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
+function logout() { localStorage.removeItem('ekart_token'); location.replace('/') }
+
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = 'toast show ' + type
+  setTimeout(() => t.classList.remove('show'), 3000)
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open') })
+})
+</script>
+</body>
+</html>
