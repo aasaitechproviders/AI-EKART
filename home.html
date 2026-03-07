@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root { --accent: #6c63ff; --bg: #0a0b14; --surface: #12141f; --surface2: #1a1c2b; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14); --text: #f1f5f9; --text2: #94a3b8; --text3: #475569; --green: #34d399; --red: #f87171; --yellow: #fbbf24; }
@@ -58,6 +59,15 @@
   /* Store cards */
   .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
   .store-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .2s, transform .2s; }
+  .store-card-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; border-top: 1px solid var(--border); margin-top: 12px; }
+  .store-stat { padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); }
+  .store-stat:last-child { border-right: none; }
+  .store-stat-val { font-size: 15px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); line-height: 1; margin-bottom: 3px; }
+  .store-stat-val.loading { color: var(--border2); animation: pulse 1.2s infinite; }
+  .store-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+  .store-stat.today-stat .store-stat-val { color: var(--accent); }
+  .store-stat.revenue-stat .store-stat-val { color: var(--green); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .store-card:hover { border-color: var(--accent); transform: translateY(-2px); }
   .store-card-banner { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.03em; }
   .store-card-body { padding: 18px; }
@@ -170,24 +180,44 @@
   .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 3px; }
   .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
 
-  /* Charts */
-  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
-  .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
-  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .chart-bar-label { font-size: 11.5px; color: var(--text3); width: 72px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
-  .chart-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; overflow: hidden; }
-  .chart-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: white; transition: width 0.6s ease; min-width: 2px; }
-  .chart-bar-val { font-size: 11.5px; color: var(--text2); width: 80px; text-align: right; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  /* Analytics */
+  .analytics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .analytics-store-label { font-size: 13px; color: var(--text3); font-weight: 600; }
   .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
-  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
-  .kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
-  .kpi-delta { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; transition: box-shadow .15s; }
+  .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .kpi-card.kpi-accent { border-color: rgba(108,99,255,0.3); background: linear-gradient(135deg,rgba(108,99,255,0.05),rgba(108,99,255,0.02)); }
+  .kpi-icon { font-size: 28px; flex-shrink: 0; }
+  .kpi-body { flex: 1; min-width: 0; }
+  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .kpi-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
+  .kpi-delta { font-size: 12px; margin-top: 3px; font-weight: 600; }
   .kpi-delta.up { color: var(--green); }
   .kpi-delta.down { color: var(--red); }
   .kpi-delta.neutral { color: var(--text3); }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  /* Chart layouts */
+  .charts-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .charts-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .chart-total { font-size: 12px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; }
+  /* Top products bars */
+  .tp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tp-rank { font-size: 11px; font-weight: 800; color: var(--text3); width: 18px; text-align: center; flex-shrink: 0; }
+  .tp-img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; }
+  .tp-img img { width: 100%; height: 100%; object-fit: cover; }
+  .tp-name { flex: 1; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tp-bar-wrap { width: 80px; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; flex-shrink: 0; }
+  .tp-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .6s ease; }
+  .tp-val { font-size: 12px; font-weight: 700; color: var(--text2); font-family: 'DM Mono', monospace; width: 64px; text-align: right; flex-shrink: 0; }
+  /* Status donut */
+  .status-donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .status-donut-wrap canvas { flex-shrink: 0; }
+  .status-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .status-leg-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .status-leg-name { flex: 1; color: var(--text2); text-transform: capitalize; font-weight: 600; }
+  .status-leg-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); }
   /* Coupon table */
   .coupon-code { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border2); padding: 3px 10px; border-radius: 6px; letter-spacing: 0.05em; }
   .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
@@ -294,36 +324,80 @@
 
     <!-- ANALYTICS PAGE -->
     <div class="page" id="page-analytics">
-      <div class="day-tabs">
-        <div class="day-tab active" onclick="setAnalyticsDays(7,this)">7 Days</div>
-        <div class="day-tab" onclick="setAnalyticsDays(14,this)">14 Days</div>
-        <div class="day-tab" onclick="setAnalyticsDays(30,this)">30 Days</div>
+      <div class="analytics-header">
+        <div class="day-tabs">
+          <div class="day-tab active" onclick="setAnalyticsDays(7,this)">7 Days</div>
+          <div class="day-tab" onclick="setAnalyticsDays(14,this)">14 Days</div>
+          <div class="day-tab" onclick="setAnalyticsDays(30,this)">30 Days</div>
+        </div>
+        <div class="analytics-store-label" id="analyticsStoreLabel"></div>
       </div>
-      <div class="kpi-grid" id="analyticsKpis">
-        <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpiRevenue">—</div><div class="kpi-delta neutral" id="kpiRevenueDelta">Loading...</div></div>
-        <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value" id="kpiOrders">—</div><div class="kpi-delta neutral" id="kpiOrdersDelta">Loading...</div></div>
-        <div class="kpi-card"><div class="kpi-label">Today Orders</div><div class="kpi-value" id="kpiToday">—</div><div class="kpi-delta neutral" id="kpiTodayDelta"></div></div>
-        <div class="kpi-card"><div class="kpi-label">Active Products</div><div class="kpi-value" id="kpiProducts">—</div><div class="kpi-delta neutral">in this store</div></div>
-      </div>
-      <div class="two-col">
-        <div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>📈 Daily Revenue</span></div>
-            <div id="revenueChart"></div>
-          </div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>📦 Daily Orders</span></div>
-            <div id="ordersChart"></div>
+
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-accent">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-value" id="kpiRevenue">—</div>
+            <div class="kpi-delta neutral" id="kpiRevenueDelta">vs yesterday</div>
           </div>
         </div>
-        <div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>🏆 Top Products by Revenue</span></div>
-            <div id="topProductsChart"></div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📦</div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Orders</div>
+            <div class="kpi-value" id="kpiOrders">—</div>
+            <div class="kpi-delta neutral" id="kpiOrdersDelta">vs yesterday</div>
           </div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>🔄 Order Status Breakdown</span></div>
-            <div id="statusChart"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🕐</div>
+          <div class="kpi-body">
+            <div class="kpi-label">Today's Orders</div>
+            <div class="kpi-value" id="kpiToday">—</div>
+            <div class="kpi-delta neutral" id="kpiTodayDelta"></div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">🛍️</div>
+          <div class="kpi-body">
+            <div class="kpi-label">Active Products</div>
+            <div class="kpi-value" id="kpiProducts">—</div>
+            <div class="kpi-delta neutral">in this store</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN CHARTS ROW -->
+      <div class="charts-main-row">
+        <div class="chart-wrap chart-large">
+          <div class="chart-title">
+            <span>📈 Daily Revenue</span>
+            <span class="chart-total" id="chartRevTotal"></span>
+          </div>
+          <canvas id="revenueChart" height="100"></canvas>
+        </div>
+        <div class="chart-wrap chart-medium">
+          <div class="chart-title">
+            <span>📦 Daily Orders</span>
+            <span class="chart-total" id="chartOrdTotal"></span>
+          </div>
+          <canvas id="ordersChart" height="100"></canvas>
+        </div>
+      </div>
+
+      <!-- BOTTOM CHARTS ROW -->
+      <div class="charts-bottom-row">
+        <div class="chart-wrap">
+          <div class="chart-title"><span>🏆 Top Products by Revenue</span></div>
+          <div id="topProductsChart"></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title"><span>🔄 Order Status</span></div>
+          <div class="status-donut-wrap">
+            <canvas id="statusChart" width="180" height="180"></canvas>
+            <div id="statusLegend"></div>
           </div>
         </div>
       </div>
@@ -615,6 +689,29 @@ async function loadStores() {
     currentStore = allStores[0]
     sel.value = currentStore._id
   }
+  // Fetch analytics for each store in parallel (non-blocking)
+  allStores.forEach(s => loadStoreCardStats(s))
+}
+
+async function loadStoreCardStats(s) {
+  try {
+    const cur = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
+    const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
+    const revEl = document.getElementById(`stat-rev-${s._id}`)
+    const ordEl = document.getElementById(`stat-ord-${s._id}`)
+    const todEl = document.getElementById(`stat-today-${s._id}`)
+    if (!revEl) return
+    const rev = data.total_revenue || 0
+    revEl.textContent = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L'
+      : rev >= 1000 ? cur + (rev/1000).toFixed(1)+'k'
+      : cur + rev.toFixed(0)
+    ordEl.textContent = (data.total_orders || 0).toLocaleString()
+    todEl.textContent = data.today_orders || 0
+    ;[revEl, ordEl, todEl].forEach(el => el.classList.remove('loading'))
+  } catch(e) {
+    const revEl = document.getElementById(`stat-rev-${s._id}`)
+    if (revEl) { revEl.textContent = '—'; revEl.classList.remove('loading') }
+  }
 }
 
 function renderStores() {
@@ -638,7 +735,12 @@ function renderStores() {
         <span class="store-status ${s.published ? 'published' : 'draft'}">
           ${s.published ? '● Live' : '○ Draft'}
         </span>
-        <div class="store-actions">
+        <div class="store-card-stats" id="stats-${s._id}">
+          <div class="store-stat revenue-stat"><div class="store-stat-val loading" id="stat-rev-${s._id}">—</div><div class="store-stat-label">Revenue</div></div>
+          <div class="store-stat"><div class="store-stat-val loading" id="stat-ord-${s._id}">—</div><div class="store-stat-label">Orders</div></div>
+          <div class="store-stat today-stat"><div class="store-stat-val loading" id="stat-today-${s._id}">—</div><div class="store-stat-label">Today</div></div>
+        </div>
+        <div class="store-actions" style="margin-top:12px;">
           ${s.published ? `<a href="${s.published_url}" target="_blank" class="btn btn-secondary btn-sm">🌐 View</a>` : ''}
           <button class="btn btn-secondary btn-sm" onclick="publishStore('${s._id}')">🚀 ${s.published ? 'Republish' : 'Publish'}</button>
           <button class="btn btn-secondary btn-sm" onclick="openEditStore('${s._id}')">✏️ Edit</button>
@@ -1042,75 +1144,152 @@ function setAnalyticsDays(days, el) {
   loadAnalytics()
 }
 
+// Chart instances — destroy before recreating
+let _chartRev = null, _chartOrd = null, _chartStatus = null
+
 async function loadAnalytics() {
   if (!currentStore) return
+  document.getElementById('analyticsStoreLabel').textContent = currentStore.name
   try {
     const data = await apiFetch(`/stores/${currentStore._id}/analytics?days=${analyticsDays}`)
-    const currency = currentStore.currency === 'USD' ? '$' : currentStore.currency === 'EUR' ? '€' : '₹'
+    const cur = currentStore.currency === 'USD' ? '$' : currentStore.currency === 'EUR' ? '€' : '₹'
 
-    // KPIs
-    document.getElementById('kpiRevenue').textContent = currency + (data.total_revenue || 0).toFixed(0)
-    document.getElementById('kpiOrders').textContent = data.total_orders || 0
-    document.getElementById('kpiToday').textContent = data.today_orders || 0
-    document.getElementById('kpiProducts').textContent = data.product_count || 0
+    // ── KPIs ──
+    document.getElementById('kpiRevenue').textContent = cur + (data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})
+    document.getElementById('kpiOrders').textContent = (data.total_orders||0).toLocaleString()
+    document.getElementById('kpiToday').textContent = data.today_orders||0
+    document.getElementById('kpiProducts').textContent = data.product_count||0
 
-    // Revenue delta vs yesterday
-    const revDelta = data.today_revenue - data.yesterday_revenue
+    const revDelta = (data.today_revenue||0) - (data.yesterday_revenue||0)
     const revEl = document.getElementById('kpiRevenueDelta')
-    revEl.textContent = (revDelta >= 0 ? '↑ ' : '↓ ') + currency + Math.abs(revDelta).toFixed(0) + ' vs yesterday'
-    revEl.className = 'kpi-delta ' + (revDelta > 0 ? 'up' : revDelta < 0 ? 'down' : 'neutral')
+    revEl.textContent = (revDelta>=0?'↑ ':'↓ ') + cur + Math.abs(revDelta).toFixed(0) + ' vs yesterday'
+    revEl.className = 'kpi-delta ' + (revDelta>0?'up':revDelta<0?'down':'neutral')
 
-    const ordDelta = data.today_orders - data.yesterday_orders
+    const ordDelta = (data.today_orders||0) - (data.yesterday_orders||0)
     const ordEl = document.getElementById('kpiOrdersDelta')
-    ordEl.textContent = (ordDelta >= 0 ? '↑ ' : '↓ ') + Math.abs(ordDelta) + ' vs yesterday'
-    ordEl.className = 'kpi-delta ' + (ordDelta > 0 ? 'up' : ordDelta < 0 ? 'down' : 'neutral')
+    ordEl.textContent = (ordDelta>=0?'↑ ':'↓ ') + Math.abs(ordDelta) + ' vs yesterday'
+    ordEl.className = 'kpi-delta ' + (ordDelta>0?'up':ordDelta<0?'down':'neutral')
 
-    // Revenue bar chart
-    const maxRev = Math.max(...(data.daily_stats || []).map(d => d.revenue), 1)
-    document.getElementById('revenueChart').innerHTML = (data.daily_stats || []).map(d => `
-      <div class="chart-bar-row">
-        <div class="chart-bar-label">${d._id.slice(5)}</div>
-        <div class="chart-bar-wrap">
-          <div class="chart-bar-fill" style="width:${Math.max((d.revenue/maxRev)*100,2)}%;background:var(--accent);"></div>
-        </div>
-        <div class="chart-bar-val">${currency}${d.revenue.toFixed(0)}</div>
-      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No data yet</p>'
+    // ── Fill missing dates ──
+    const stats = data.daily_stats || []
+    const filledDates = []
+    const today = new Date()
+    for (let i = analyticsDays-1; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate()-i)
+      const key = d.toISOString().slice(0,10)
+      const found = stats.find(s => s._id === key)
+      filledDates.push({ date: key, label: key.slice(5), revenue: found?.revenue||0, orders: found?.orders||0 })
+    }
 
-    // Orders bar chart
-    const maxOrd = Math.max(...(data.daily_stats || []).map(d => d.orders), 1)
-    document.getElementById('ordersChart').innerHTML = (data.daily_stats || []).map(d => `
-      <div class="chart-bar-row">
-        <div class="chart-bar-label">${d._id.slice(5)}</div>
-        <div class="chart-bar-wrap">
-          <div class="chart-bar-fill" style="width:${Math.max((d.orders/maxOrd)*100,2)}%;background:#60a5fa;"></div>
-        </div>
-        <div class="chart-bar-val">${d.orders} orders</div>
-      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No data yet</p>'
+    const labels = filledDates.map(d => d.label)
+    const revVals = filledDates.map(d => d.revenue)
+    const ordVals = filledDates.map(d => d.orders)
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6c63ff'
+    const totalRev = revVals.reduce((a,b)=>a+b,0)
+    const totalOrd = ordVals.reduce((a,b)=>a+b,0)
+    document.getElementById('chartRevTotal').textContent = cur + totalRev.toLocaleString('en-IN',{maximumFractionDigits:0})
+    document.getElementById('chartOrdTotal').textContent = totalOrd + ' orders'
 
-    // Top products
-    const maxProdRev = Math.max(...(data.top_products || []).map(p => p.revenue), 1)
-    document.getElementById('topProductsChart').innerHTML = (data.top_products || []).map(p => `
-      <div class="chart-bar-row">
-        <div class="chart-bar-label" style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.name}">${p.name.slice(0,12)}${p.name.length>12?'…':''}</div>
-        <div class="chart-bar-wrap">
-          <div class="chart-bar-fill" style="width:${Math.max((p.revenue/maxProdRev)*100,2)}%;background:#34d399;"></div>
-        </div>
-        <div class="chart-bar-val">${currency}${p.revenue.toFixed(0)}</div>
-      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
+    // ── Revenue Line Chart ──
+    if (_chartRev) _chartRev.destroy()
+    _chartRev = new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue',
+          data: revVals,
+          borderColor: accent,
+          backgroundColor: accent + '18',
+          borderWidth: 2.5,
+          pointBackgroundColor: accent,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: ctx => ` ${cur}${ctx.parsed.y.toLocaleString('en-IN',{maximumFractionDigits:0})}` }
+        }},
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
+          y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8',
+            callback: v => cur + (v>=1000?(v/1000).toFixed(1)+'k':v) } }
+        }
+      }
+    })
 
-    // Status breakdown
+    // ── Orders Bar Chart ──
+    if (_chartOrd) _chartOrd.destroy()
+    _chartOrd = new Chart(document.getElementById('ordersChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Orders',
+          data: ordVals,
+          backgroundColor: '#60a5fa',
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: ctx => ` ${ctx.parsed.y} orders` }
+        }},
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
+          y: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', stepSize: 1 } }
+        }
+      }
+    })
+
+    // ── Top Products ──
+    const topProds = data.top_products || []
+    const maxProdRev = Math.max(...topProds.map(p=>p.revenue), 1)
+    document.getElementById('topProductsChart').innerHTML = topProds.length
+      ? topProds.map((p,i) => `
+        <div class="tp-row">
+          <div class="tp-rank">#${i+1}</div>
+          <div class="tp-img">${p.image?`<img src="${p.image}" alt="">`:'📦'}</div>
+          <div class="tp-name" title="${p.name}">${p.name}</div>
+          <div class="tp-bar-wrap"><div class="tp-bar-fill" style="width:${Math.max((p.revenue/maxProdRev)*100,4)}%"></div></div>
+          <div class="tp-val">${cur}${p.revenue.toFixed(0)}</div>
+        </div>`).join('')
+      : '<p style="color:var(--text3);font-size:13px;padding:20px 0;">No orders yet</p>'
+
+    // ── Status Donut Chart ──
     const statusColors = { pending:'#fbbf24', confirmed:'#a78bfa', processing:'#60a5fa', shipped:'#38bdf8', delivered:'#34d399', cancelled:'#f87171' }
-    const totalStatusOrders = (data.status_breakdown || []).reduce((s, x) => s + x.count, 0) || 1
-    document.getElementById('statusChart').innerHTML = (data.status_breakdown || []).map(s => `
-      <div class="chart-bar-row">
-        <div class="chart-bar-label"><span class="status-dot" style="background:${statusColors[s._id]||'#94a3b8'}"></span>${s._id}</div>
-        <div class="chart-bar-wrap">
-          <div class="chart-bar-fill" style="width:${Math.max((s.count/totalStatusOrders)*100,2)}%;background:${statusColors[s._id]||'#94a3b8'};"></div>
-        </div>
-        <div class="chart-bar-val">${s.count}</div>
-      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
+    const breakdown = data.status_breakdown || []
+    if (_chartStatus) _chartStatus.destroy()
+    if (breakdown.length) {
+      _chartStatus = new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+          labels: breakdown.map(s=>s._id),
+          datasets: [{ data: breakdown.map(s=>s.count), backgroundColor: breakdown.map(s=>statusColors[s._id]||'#94a3b8'), borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
+        },
+        options: {
+          responsive: false, cutout: '65%',
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } } }
+        }
+      })
+      document.getElementById('statusLegend').innerHTML = breakdown.map(s => `
+        <div class="status-leg-row">
+          <div class="status-dot" style="background:${statusColors[s._id]||'#94a3b8'}"></div>
+          <span class="status-leg-name">${s._id}</span>
+          <span class="status-leg-val">${s.count}</span>
+        </div>`).join('')
+    } else {
+      document.getElementById('statusChart').style.display = 'none'
+      document.getElementById('statusLegend').innerHTML = '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
+    }
 
-  } catch (e) { toast('Analytics error: ' + e.message, 'error') }
+  } catch(e) { toast('Analytics error: ' + e.message, 'error') }
 }
 
 // ── Coupons ───────────────────────────────────────────────────────────────────
