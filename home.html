@@ -138,6 +138,38 @@
   .variant-row input { flex: 1; }
   .variant-row button { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--red); padding: 5px 8px; cursor: pointer; font-size: 14px; }
 
+  /* Card Style Picker */
+  .card-style-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 4px; }
+  .card-style-opt { border: 2px solid var(--border); border-radius: 12px; padding: 10px 8px 8px; cursor: pointer; text-align: center; transition: all .15s; }
+  .card-style-opt:hover { border-color: var(--accent); background: rgba(108,99,255,0.04); }
+  .card-style-opt.active { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .card-style-opt span { font-size: 11.5px; font-weight: 700; color: var(--text2); display: block; margin-top: 6px; }
+  .card-style-opt.active span { color: var(--accent); }
+  .card-style-preview { height: 52px; display: flex; align-items: center; justify-content: center; }
+  /* Grid preview */
+  .cspr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 44px; }
+  .cspr-grid div { background: var(--border2); border-radius: 3px; height: 18px; }
+  .card-style-opt.active .cspr-grid div { background: var(--accent); opacity: 0.5; }
+  /* List preview */
+  .cspr-list { display: flex; gap: 4px; align-items: center; width: 52px; margin-bottom: 3px; }
+  .cspr-list-img { width: 18px; height: 18px; background: var(--border2); border-radius: 3px; flex-shrink: 0; }
+  .cspr-list-lines { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .cspr-list-lines span { display: block; height: 4px; background: var(--border2); border-radius: 2px; }
+  .cspr-list-lines span:first-child { width: 90%; }
+  .cspr-list-lines span:last-child { width: 55%; }
+  .card-style-opt.active .cspr-list-img, .card-style-opt.active .cspr-list-lines span { background: var(--accent); opacity: 0.5; }
+  /* Minimal preview */
+  .cspr-minimal { position: relative; width: 44px; height: 44px; border-radius: 5px; overflow: hidden; }
+  .cspr-min-img { position: absolute; inset: 0; background: var(--border2); }
+  .cspr-min-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: rgba(0,0,0,0.25); }
+  .card-style-opt.active .cspr-min-img { background: var(--accent); opacity: 0.4; }
+  /* Magazine preview */
+  .cspr-magazine { display: flex; gap: 3px; width: 52px; height: 44px; }
+  .cspr-mag-big { flex: 2; background: var(--border2); border-radius: 3px; }
+  .cspr-mag-small { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 3px; }
+  .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
+
   /* Charts */
   .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
   .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
@@ -356,6 +388,37 @@
         </select>
       </div>
       <div class="field"><label>Brand Color</label><input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;"></div>
+    </div>
+    <div class="field">
+      <label>Product Card Style</label>
+      <div class="card-style-picker" id="cardStylePicker">
+        <div class="card-style-opt active" data-style="grid" onclick="selectCardStyle('grid',this)">
+          <div class="card-style-preview">
+            <div class="cspr-grid"><div></div><div></div><div></div><div></div></div>
+          </div>
+          <span>Grid</span>
+        </div>
+        <div class="card-style-opt" data-style="list" onclick="selectCardStyle('list',this)">
+          <div class="card-style-preview">
+            <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span><span></span></div></div>
+            <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div>
+          </div>
+          <span>List</span>
+        </div>
+        <div class="card-style-opt" data-style="minimal" onclick="selectCardStyle('minimal',this)">
+          <div class="card-style-preview">
+            <div class="cspr-minimal"><div class="cspr-min-img"></div><div class="cspr-min-overlay"></div></div>
+          </div>
+          <span>Minimal</span>
+        </div>
+        <div class="card-style-opt" data-style="magazine" onclick="selectCardStyle('magazine',this)">
+          <div class="card-style-preview">
+            <div class="cspr-magazine"><div class="cspr-mag-big"></div><div class="cspr-mag-small"><div></div><div></div></div></div>
+          </div>
+          <span>Magazine</span>
+        </div>
+      </div>
+      <input type="hidden" id="storeCardStyle" value="grid">
     </div>
     <div class="field"><label>Store Logo</label>
         <input type="file" id="storeLogoFile" accept="image/*" onchange="previewLogo(this)" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
@@ -609,6 +672,7 @@ function openCreateStore() {
   document.getElementById('storeLogoFile').value = ''
   document.getElementById('storeLogoExisting').value = ''
   document.getElementById('storeLogoPreview').style.display = 'none'
+  selectCardStyle('grid', document.querySelector('[data-style="grid"]'))
   openModal('storeModal')
 }
 
@@ -626,6 +690,8 @@ function openEditStore(id) {
   document.getElementById('storeBrandColor').value = s.brand_color || '#6c63ff'
   document.getElementById('storeLogoFile').value = ''
   document.getElementById('storeLogoExisting').value = s.logo_url || ''
+  const cs = s.card_style || 'grid'
+  selectCardStyle(cs, document.querySelector(`[data-style="${cs}"]`))
   if (s.logo_url) {
     document.getElementById('storeLogoImg').src = s.logo_url
     document.getElementById('storeLogoPreview').style.display = 'block'
@@ -648,6 +714,7 @@ async function saveStore() {
   fd.append('phone', document.getElementById('storePhone').value.trim())
   fd.append('currency', document.getElementById('storeCurrency').value)
   fd.append('brand_color', document.getElementById('storeBrandColor').value)
+  fd.append('card_style', document.getElementById('storeCardStyle').value || 'grid')
   // Attach logo file if selected, else keep existing URL
   const logoFile = document.getElementById('storeLogoFile').files[0]
   if (logoFile) fd.append('logo', logoFile)
@@ -1161,6 +1228,12 @@ function previewProductImages(input) {
     }
     reader.readAsDataURL(f)
   })
+}
+
+function selectCardStyle(style, el) {
+  document.querySelectorAll('.card-style-opt').forEach(o => o.classList.remove('active'))
+  if (el) el.classList.add('active')
+  document.getElementById('storeCardStyle').value = style
 }
 
 // Close modals on overlay click
