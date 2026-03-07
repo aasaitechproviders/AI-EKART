@@ -138,6 +138,37 @@
   .variant-row input { flex: 1; }
   .variant-row button { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--red); padding: 5px 8px; cursor: pointer; font-size: 14px; }
 
+  /* Charts */
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .chart-bar-label { font-size: 11.5px; color: var(--text3); width: 72px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .chart-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; overflow: hidden; }
+  .chart-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: white; transition: width 0.6s ease; min-width: 2px; }
+  .chart-bar-val { font-size: 11.5px; color: var(--text2); width: 80px; text-align: right; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .kpi-delta { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-delta.neutral { color: var(--text3); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  /* Coupon table */
+  .coupon-code { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border2); padding: 3px 10px; border-radius: 6px; letter-spacing: 0.05em; }
+  .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 22px; transition: .3s; }
+  .toggle-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: var(--text3); border-radius: 50%; transition: .3s; }
+  input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
+  input:checked + .toggle-slider:before { transform: translateX(18px); background: white; }
+  /* Day selector */
+  .day-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .day-tab { padding: 5px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text3); transition: all .15s; }
+  .day-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
   @media(max-width:768px) {
     .sidebar { display: none; }
     .stats-row { grid-template-columns: repeat(2,1fr); }
@@ -162,6 +193,8 @@
     <a class="nav-item" data-page="products" onclick="showPage('products')"><span class="icon">📦</span> Products</a>
     <a class="nav-item" data-page="categories" onclick="showPage('categories')"><span class="icon">🗂️</span> Categories</a>
     <a class="nav-item" data-page="orders" onclick="showPage('orders')"><span class="icon">📋</span> Orders</a>
+    <a class="nav-item" data-page="coupons" onclick="showPage('coupons')"><span class="icon">🎟️</span> Coupons</a>
+    <a class="nav-item" data-page="analytics" onclick="showPage('analytics')"><span class="icon">📊</span> Analytics</a>
   </div>
   <div class="sidebar-bottom">
     <button class="btn-logout" onclick="logout()">↩ Logout</button>
@@ -225,6 +258,56 @@
         <button class="btn btn-primary" onclick="createCategory()">+ Add Category</button>
       </div>
       <div class="cat-chips" id="catChips"><p style="color:var(--text3);font-size:13px;">No categories yet.</p></div>
+    </div>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page" id="page-analytics">
+      <div class="day-tabs">
+        <div class="day-tab active" onclick="setAnalyticsDays(7,this)">7 Days</div>
+        <div class="day-tab" onclick="setAnalyticsDays(14,this)">14 Days</div>
+        <div class="day-tab" onclick="setAnalyticsDays(30,this)">30 Days</div>
+      </div>
+      <div class="kpi-grid" id="analyticsKpis">
+        <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpiRevenue">—</div><div class="kpi-delta neutral" id="kpiRevenueDelta">Loading...</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value" id="kpiOrders">—</div><div class="kpi-delta neutral" id="kpiOrdersDelta">Loading...</div></div>
+        <div class="kpi-card"><div class="kpi-label">Today Orders</div><div class="kpi-value" id="kpiToday">—</div><div class="kpi-delta neutral" id="kpiTodayDelta"></div></div>
+        <div class="kpi-card"><div class="kpi-label">Active Products</div><div class="kpi-value" id="kpiProducts">—</div><div class="kpi-delta neutral">in this store</div></div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>📈 Daily Revenue</span></div>
+            <div id="revenueChart"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>📦 Daily Orders</span></div>
+            <div id="ordersChart"></div>
+          </div>
+        </div>
+        <div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>🏆 Top Products by Revenue</span></div>
+            <div id="topProductsChart"></div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>🔄 Order Status Breakdown</span></div>
+            <div id="statusChart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUPONS PAGE -->
+    <div class="page" id="page-coupons">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="openCreateCoupon()">+ Create Coupon</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Active</th><th>Actions</th></tr></thead>
+          <tbody id="couponsBody"><tr><td colspan="8"><div class="empty" style="padding:40px;"><div class="empty-icon">🎟️</div><p>No coupons yet</p></div></td></tr></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ORDERS PAGE -->
@@ -358,6 +441,33 @@
   </div>
 </div>
 
+<!-- MODAL: Create Coupon -->
+<div class="modal-overlay" id="couponModal">
+  <div class="modal">
+    <h2>Create Coupon</h2>
+    <input type="hidden" id="couponEditId">
+    <div class="field"><label>Coupon Code *</label><input type="text" id="couponCode" placeholder="SAVE20" style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:0.05em;font-weight:700;"></div>
+    <div class="field-row">
+      <div class="field"><label>Discount Type *</label>
+        <select id="couponType">
+          <option value="percent">Percentage (%)</option>
+          <option value="flat">Flat Amount</option>
+        </select>
+      </div>
+      <div class="field"><label>Value *</label><input type="number" id="couponValue" placeholder="20" min="0" step="0.01"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Min Order Amount</label><input type="number" id="couponMinOrder" placeholder="0" min="0" step="0.01"></div>
+      <div class="field"><label>Max Uses (blank = unlimited)</label><input type="number" id="couponMaxUses" placeholder="100" min="1"></div>
+    </div>
+    <div class="field"><label>Expiry Date (optional)</label><input type="date" id="couponExpiry"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('couponModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">Create Coupon</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -408,23 +518,27 @@ function showPage(name) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
   document.getElementById('page-' + name).classList.add('active')
   document.querySelector(`[data-page="${name}"]`).classList.add('active')
-  const titles = { stores: 'My Stores', products: 'Products', categories: 'Categories', orders: 'Orders' }
-  document.getElementById('pageTitle').textContent = titles[name]
+  const titles = { stores: 'My Stores', products: 'Products', categories: 'Categories', orders: 'Orders', coupons: 'Coupons', analytics: 'Analytics' }
+  document.getElementById('pageTitle').textContent = titles[name] || name
   const actions = {
     stores: { label: '+ New Store', fn: 'openCreateStore()' },
     products: { label: '+ Add Product', fn: 'openCreateProduct()' },
     categories: { label: '', fn: '' },
-    orders: { label: '', fn: '' }
+    orders: { label: '', fn: '' },
+    coupons: { label: '', fn: '' },
+    analytics: { label: '', fn: '' }
   }
   const topBtn = document.getElementById('topbarAction')
-  topBtn.textContent = actions[name].label
-  topBtn.onclick = actions[name].fn ? new Function(actions[name].fn) : null
-  topBtn.style.display = actions[name].label ? 'flex' : 'none'
+  topBtn.textContent = actions[name]?.label || ''
+  topBtn.onclick = actions[name]?.fn ? new Function(actions[name].fn) : null
+  topBtn.style.display = actions[name]?.label ? 'flex' : 'none'
   const showSelector = name !== 'stores'
   document.getElementById('storeSelectorWrap').style.display = showSelector ? 'flex' : 'none'
   if (name === 'products') loadProducts()
   if (name === 'categories') loadCategories()
   if (name === 'orders') loadOrders()
+  if (name === 'coupons') loadCoupons()
+  if (name === 'analytics') loadAnalytics()
 }
 
 // ── Stores ────────────────────────────────────────────────────────────────────
@@ -847,6 +961,167 @@ async function saveOrder() {
     closeModal('orderModal')
     await loadOrders()
     toast('Order updated!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+let analyticsDays = 7
+
+function setAnalyticsDays(days, el) {
+  analyticsDays = days
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'))
+  el.classList.add('active')
+  loadAnalytics()
+}
+
+async function loadAnalytics() {
+  if (!currentStore) return
+  try {
+    const data = await apiFetch(`/stores/${currentStore._id}/analytics?days=${analyticsDays}`)
+    const currency = currentStore.currency === 'USD' ? '$' : currentStore.currency === 'EUR' ? '€' : '₹'
+
+    // KPIs
+    document.getElementById('kpiRevenue').textContent = currency + (data.total_revenue || 0).toFixed(0)
+    document.getElementById('kpiOrders').textContent = data.total_orders || 0
+    document.getElementById('kpiToday').textContent = data.today_orders || 0
+    document.getElementById('kpiProducts').textContent = data.product_count || 0
+
+    // Revenue delta vs yesterday
+    const revDelta = data.today_revenue - data.yesterday_revenue
+    const revEl = document.getElementById('kpiRevenueDelta')
+    revEl.textContent = (revDelta >= 0 ? '↑ ' : '↓ ') + currency + Math.abs(revDelta).toFixed(0) + ' vs yesterday'
+    revEl.className = 'kpi-delta ' + (revDelta > 0 ? 'up' : revDelta < 0 ? 'down' : 'neutral')
+
+    const ordDelta = data.today_orders - data.yesterday_orders
+    const ordEl = document.getElementById('kpiOrdersDelta')
+    ordEl.textContent = (ordDelta >= 0 ? '↑ ' : '↓ ') + Math.abs(ordDelta) + ' vs yesterday'
+    ordEl.className = 'kpi-delta ' + (ordDelta > 0 ? 'up' : ordDelta < 0 ? 'down' : 'neutral')
+
+    // Revenue bar chart
+    const maxRev = Math.max(...(data.daily_stats || []).map(d => d.revenue), 1)
+    document.getElementById('revenueChart').innerHTML = (data.daily_stats || []).map(d => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${d._id.slice(5)}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-fill" style="width:${Math.max((d.revenue/maxRev)*100,2)}%;background:var(--accent);"></div>
+        </div>
+        <div class="chart-bar-val">${currency}${d.revenue.toFixed(0)}</div>
+      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No data yet</p>'
+
+    // Orders bar chart
+    const maxOrd = Math.max(...(data.daily_stats || []).map(d => d.orders), 1)
+    document.getElementById('ordersChart').innerHTML = (data.daily_stats || []).map(d => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${d._id.slice(5)}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-fill" style="width:${Math.max((d.orders/maxOrd)*100,2)}%;background:#60a5fa;"></div>
+        </div>
+        <div class="chart-bar-val">${d.orders} orders</div>
+      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No data yet</p>'
+
+    // Top products
+    const maxProdRev = Math.max(...(data.top_products || []).map(p => p.revenue), 1)
+    document.getElementById('topProductsChart').innerHTML = (data.top_products || []).map(p => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label" style="width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.name}">${p.name.slice(0,12)}${p.name.length>12?'…':''}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-fill" style="width:${Math.max((p.revenue/maxProdRev)*100,2)}%;background:#34d399;"></div>
+        </div>
+        <div class="chart-bar-val">${currency}${p.revenue.toFixed(0)}</div>
+      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
+
+    // Status breakdown
+    const statusColors = { pending:'#fbbf24', confirmed:'#a78bfa', processing:'#60a5fa', shipped:'#38bdf8', delivered:'#34d399', cancelled:'#f87171' }
+    const totalStatusOrders = (data.status_breakdown || []).reduce((s, x) => s + x.count, 0) || 1
+    document.getElementById('statusChart').innerHTML = (data.status_breakdown || []).map(s => `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label"><span class="status-dot" style="background:${statusColors[s._id]||'#94a3b8'}"></span>${s._id}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-fill" style="width:${Math.max((s.count/totalStatusOrders)*100,2)}%;background:${statusColors[s._id]||'#94a3b8'};"></div>
+        </div>
+        <div class="chart-bar-val">${s.count}</div>
+      </div>`).join('') || '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
+
+  } catch (e) { toast('Analytics error: ' + e.message, 'error') }
+}
+
+// ── Coupons ───────────────────────────────────────────────────────────────────
+let allCoupons = []
+
+async function loadCoupons() {
+  if (!currentStore) return
+  allCoupons = await apiFetch(`/stores/${currentStore._id}/coupons`)
+  renderCoupons()
+}
+
+function renderCoupons() {
+  const body = document.getElementById('couponsBody')
+  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
+  if (!allCoupons.length) {
+    body.innerHTML = '<tr><td colspan="8"><div class="empty" style="padding:40px;"><div class="empty-icon">🎟️</div><p>No coupons yet. Create one to offer discounts.</p></div></td></tr>'
+    return
+  }
+  body.innerHTML = allCoupons.map(c => `<tr>
+    <td><span class="coupon-code">${c.code}</span></td>
+    <td style="color:var(--text2);">${c.type === 'percent' ? 'Percentage' : 'Flat'}</td>
+    <td><strong>${c.type === 'percent' ? c.value + '%' : currency + c.value}</strong></td>
+    <td style="color:var(--text2);">${c.min_order > 0 ? currency + c.min_order : '—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-size:12.5px;">${c.uses}${c.max_uses ? ' / ' + c.max_uses : ''}</td>
+    <td style="font-size:12.5px;color:var(--text3);">${c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'Never'}</td>
+    <td>
+      <label class="toggle-switch">
+        <input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCoupon('${c._id}',this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteCoupon('${c._id}','${c.code}')">🗑</button></td>
+  </tr>`).join('')
+}
+
+function openCreateCoupon() {
+  if (!currentStore) return toast('Select a store first', 'error')
+  document.getElementById('couponEditId').value = ''
+  document.getElementById('couponCode').value = ''
+  document.getElementById('couponType').value = 'percent'
+  document.getElementById('couponValue').value = ''
+  document.getElementById('couponMinOrder').value = ''
+  document.getElementById('couponMaxUses').value = ''
+  document.getElementById('couponExpiry').value = ''
+  openModal('couponModal')
+}
+
+async function saveCoupon() {
+  const body = {
+    code: document.getElementById('couponCode').value.trim(),
+    type: document.getElementById('couponType').value,
+    value: document.getElementById('couponValue').value,
+    min_order: document.getElementById('couponMinOrder').value || 0,
+    max_uses: document.getElementById('couponMaxUses').value || null,
+    expires_at: document.getElementById('couponExpiry').value || null
+  }
+  if (!body.code || !body.value) return toast('Code and value required', 'error')
+  try {
+    await apiFetch(`/stores/${currentStore._id}/coupons`, { method: 'POST', body: JSON.stringify(body) })
+    closeModal('couponModal')
+    await loadCoupons()
+    toast('Coupon created!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function toggleCoupon(id, active) {
+  try {
+    await apiFetch(`/stores/${currentStore._id}/coupons/${id}`, { method: 'PUT', body: JSON.stringify({ active }) })
+    toast(active ? 'Coupon activated' : 'Coupon deactivated', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function deleteCoupon(id, code) {
+  if (!confirm(`Delete coupon "${code}"?`)) return
+  try {
+    await apiFetch(`/stores/${currentStore._id}/coupons/${id}`, { method: 'DELETE', body: '{}' })
+    await loadCoupons()
+    toast('Coupon deleted')
   } catch (e) { toast(e.message, 'error') }
 }
 
