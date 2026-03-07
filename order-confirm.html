@@ -73,6 +73,7 @@ const orderNumber = params.get('order')
 const email = params.get('email')
 const currency = sessionStorage.getItem('ekart_currency') || '₹'
 const storeName = sessionStorage.getItem('ekart_store_name') || 'Store'
+const API = 'https://apiv2.aasaitech.in'
 
 const STATUS_STEPS = [
   { key: 'pending', label: 'Order Placed', desc: 'We received your order!' },
@@ -88,7 +89,7 @@ async function init() {
     return
   }
   try {
-    const url = `/shop/${slug}/orders/${orderNumber}${email ? '?email=' + encodeURIComponent(email) : ''}`
+    const url = `${API}/shop/${slug}/orders/${orderNumber}${email ? '?email=' + encodeURIComponent(email) : ''}`
     const order = await fetch(url).then(r => r.json())
     if (order.error) throw new Error(order.error)
     render(order)
