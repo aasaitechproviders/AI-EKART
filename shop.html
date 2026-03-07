@@ -147,6 +147,8 @@
 const slug = new URLSearchParams(location.search).get('store')
 if (!slug) { document.body.innerHTML = '<div style="text-align:center;padding:80px;font-family:sans-serif;"><h2>Store not found</h2><p>No store slug provided in URL.</p></div>' }
 
+const API = 'https://apiv2.aasaitech.in'
+
 let storeConfig = {}
 let currentCat = ''
 let currentPage = 1
@@ -155,7 +157,7 @@ let currency = '₹'
 
 async function init() {
   try {
-    storeConfig = await fetch(`/shop/${slug}/config`).then(r => r.json())
+    storeConfig = await fetch(`${API}/shop/${slug}/config`).then(r => r.json())
     if (storeConfig.error) throw new Error(storeConfig.error)
     document.title = storeConfig.name
     document.getElementById('storeName').textContent = storeConfig.name
@@ -186,7 +188,7 @@ async function init() {
 }
 
 async function loadCategories() {
-  const cats = await fetch(`/shop/${slug}/categories`).then(r => r.json())
+  const cats = await fetch(`${API}/shop/${slug}/categories`).then(r => r.json())
   const list = document.getElementById('catList')
   list.innerHTML = `<div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All</div>` +
     cats.map(c => `<div class="cat-item" data-cat="${c._id}" onclick="selectCat(this,'${c._id}')">${c.name}</div>`).join('')
@@ -200,7 +202,7 @@ async function loadProducts() {
   if (currentCat) params.set('category', currentCat)
   if (sort) params.set('sort', sort)
   try {
-    const data = await fetch(`/shop/${slug}/products?${params}`).then(r => r.json())
+    const data = await fetch(`${API}/shop/${slug}/products?${params}`).then(r => r.json())
     document.getElementById('resultsCount').textContent = `${data.total} product${data.total !== 1 ? 's' : ''} found`
     renderProducts(data.products)
     renderPagination(data.page, data.pages)
