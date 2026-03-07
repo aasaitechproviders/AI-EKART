@@ -180,6 +180,21 @@
   .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 3px; }
   .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
 
+  /* Drill-down panel */
+  .drilldown-panel { background: var(--surface); border: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin-top: 20px; animation: slideDown .25s ease; }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+  .drilldown-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .drilldown-title { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
+  .drilldown-title strong { color: var(--accent); margin-left: 6px; font-family: 'DM Mono', monospace; }
+  .drilldown-kpis { display: flex; gap: 20px; }
+  .dd-kpi { text-align: center; }
+  .dd-kpi span { display: block; font-size: 18px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); }
+  .dd-kpi small { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+  .drilldown-close { padding: 7px 14px; background: none; border: 1.5px solid var(--border2); border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--text3); font-family: 'Outfit', sans-serif; transition: all .15s; }
+  .drilldown-close:hover { border-color: var(--red); color: var(--red); }
+  .drilldown-charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .dd-pie-wrap { display: flex; align-items: center; gap: 14px; }
+  .dd-pie-wrap canvas { flex-shrink: 0; }
   /* Analytics */
   .analytics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
   .analytics-store-label { font-size: 13px; color: var(--text3); font-weight: 600; }
@@ -398,6 +413,39 @@
           <div class="status-donut-wrap">
             <canvas id="statusChart" width="180" height="180"></canvas>
             <div id="statusLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATE DRILL-DOWN PANEL -->
+      <div class="drilldown-panel" id="drilldownPanel" style="display:none;">
+        <div class="drilldown-header">
+          <div class="drilldown-title">
+            <span>🔎 Daily Breakdown —</span>
+            <strong id="drilldownDate"></strong>
+          </div>
+          <div class="drilldown-kpis">
+            <div class="dd-kpi"><span id="ddRevenue">—</span><small>Revenue</small></div>
+            <div class="dd-kpi"><span id="ddOrders">—</span><small>Orders</small></div>
+            <div class="dd-kpi"><span id="ddQty">—</span><small>Items Sold</small></div>
+          </div>
+          <button class="drilldown-close" onclick="closeDrilldown()">✕ Close</button>
+        </div>
+        <div class="drilldown-charts">
+          <div class="chart-wrap">
+            <div class="chart-title"><span>🕐 Hourly Orders & Revenue</span></div>
+            <canvas id="hourlyChart" height="110"></canvas>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>📦 Products Sold (Qty)</span></div>
+            <canvas id="ddProductsBarChart" height="110"></canvas>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title"><span>💰 Revenue by Product</span></div>
+            <div class="dd-pie-wrap">
+              <canvas id="ddPieChart" width="180" height="180"></canvas>
+              <div id="ddPieLegend"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1141,6 +1189,7 @@ function setAnalyticsDays(days, el) {
   analyticsDays = days
   document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'))
   el.classList.add('active')
+  closeDrilldown()
   loadAnalytics()
 }
 
@@ -1190,7 +1239,7 @@ async function loadAnalytics() {
     document.getElementById('chartRevTotal').textContent = cur + totalRev.toLocaleString('en-IN',{maximumFractionDigits:0})
     document.getElementById('chartOrdTotal').textContent = totalOrd + ' orders'
 
-    // ── Revenue Line Chart ──
+    // ── Revenue Line Chart (clickable) ──
     if (_chartRev) _chartRev.destroy()
     _chartRev = new Chart(document.getElementById('revenueChart'), {
       type: 'line',
@@ -1203,26 +1252,40 @@ async function loadAnalytics() {
           backgroundColor: accent + '18',
           borderWidth: 2.5,
           pointBackgroundColor: accent,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: accent,
           fill: true,
           tension: 0.4
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { display: false }, tooltip: {
-          callbacks: { label: ctx => ` ${cur}${ctx.parsed.y.toLocaleString('en-IN',{maximumFractionDigits:0})}` }
-        }},
+        cursor: 'pointer',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${cur}${ctx.parsed.y.toLocaleString('en-IN',{maximumFractionDigits:0})}`,
+              afterLabel: () => '  Click to drill down'
+            }
+          }
+        },
         scales: {
           x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
           y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8',
             callback: v => cur + (v>=1000?(v/1000).toFixed(1)+'k':v) } }
+        },
+        onClick: (evt, elements) => {
+          if (elements.length > 0) {
+            const idx = elements[0].index
+            loadDayDrilldown(filledDates[idx].date, cur)
+          }
         }
       }
     })
 
-    // ── Orders Bar Chart ──
+    // ── Orders Bar Chart (clickable) ──
     if (_chartOrd) _chartOrd.destroy()
     _chartOrd = new Chart(document.getElementById('ordersChart'), {
       type: 'bar',
@@ -1232,18 +1295,31 @@ async function loadAnalytics() {
           label: 'Orders',
           data: ordVals,
           backgroundColor: '#60a5fa',
+          hoverBackgroundColor: '#3b82f6',
           borderRadius: 6,
           borderSkipped: false
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { display: false }, tooltip: {
-          callbacks: { label: ctx => ` ${ctx.parsed.y} orders` }
-        }},
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y} orders`,
+              afterLabel: () => '  Click to drill down'
+            }
+          }
+        },
         scales: {
           x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
           y: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', stepSize: 1 } }
+        },
+        onClick: (evt, elements) => {
+          if (elements.length > 0) {
+            const idx = elements[0].index
+            loadDayDrilldown(filledDates[idx].date, cur)
+          }
         }
       }
     })
@@ -1290,6 +1366,128 @@ async function loadAnalytics() {
     }
 
   } catch(e) { toast('Analytics error: ' + e.message, 'error') }
+}
+
+
+// ── Day Drill-down ────────────────────────────────────────────────────────────
+let _ddHourly = null, _ddBar = null, _ddPie = null
+
+async function loadDayDrilldown(date, cur) {
+  if (!currentStore) return
+  // Highlight the panel
+  const panel = document.getElementById('drilldownPanel')
+  panel.style.display = 'block'
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  document.getElementById('drilldownDate').textContent = date
+  document.getElementById('ddRevenue').textContent = '...'
+  document.getElementById('ddOrders').textContent = '...'
+  document.getElementById('ddQty').textContent = '...'
+
+  try {
+    const data = await apiFetch(`/stores/${currentStore._id}/analytics/day?date=${date}`)
+    const currency = cur || (currentStore.currency==='USD'?'$':currentStore.currency==='EUR'?'€':'₹')
+
+    // KPIs
+    document.getElementById('ddRevenue').textContent = currency + (data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})
+    document.getElementById('ddOrders').textContent = data.total_orders||0
+    document.getElementById('ddQty').textContent = data.total_qty||0
+
+    // ── Hourly chart (dual axis: bars=orders, line=revenue) ──
+    const hours = Array.from({length:24},(_,i)=>i)
+    const hourlyOrders = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.orders||0)
+    const hourlyRevenue = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.revenue||0)
+    const hourLabels = hours.map(h => h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p')
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#6c63ff'
+
+    if (_ddHourly) _ddHourly.destroy()
+    _ddHourly = new Chart(document.getElementById('hourlyChart'), {
+      type: 'bar',
+      data: {
+        labels: hourLabels,
+        datasets: [
+          { type: 'bar', label: 'Orders', data: hourlyOrders, backgroundColor: '#60a5fa88', borderRadius: 4, borderSkipped: false, yAxisID: 'yOrd' },
+          { type: 'line', label: 'Revenue', data: hourlyRevenue, borderColor: accent, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: accent, tension: 0.4, yAxisID: 'yRev' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'Outfit', size: 12 }, boxWidth: 12 } },
+          tooltip: { callbacks: {
+            label: ctx => ctx.dataset.label==='Revenue' ? ` ${currency}${ctx.parsed.y.toFixed(0)}` : ` ${ctx.parsed.y} orders`
+          }}
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', maxTicksLimit: 12 } },
+          yOrd: { position: 'left', beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', stepSize: 1 } },
+          yRev: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8',
+            callback: v => currency + (v>=1000?(v/1000).toFixed(1)+'k':v) } }
+        }
+      }
+    })
+
+    // ── Products Sold Bar Chart ──
+    const prods = (data.products_sold||[]).slice(0,8)
+    const prodNames = prods.map(p => p.name.length>14?p.name.slice(0,13)+'…':p.name)
+    const prodQtys = prods.map(p => p.qty)
+    const barColors = ['#6c63ff','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#38bdf8','#fb923c']
+
+    if (_ddBar) _ddBar.destroy()
+    _ddBar = new Chart(document.getElementById('ddProductsBarChart'), {
+      type: 'bar',
+      data: {
+        labels: prodNames,
+        datasets: [{ label: 'Qty Sold', data: prodQtys, backgroundColor: barColors, borderRadius: 6, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x} units sold` } } },
+        scales: {
+          x: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', stepSize: 1 } },
+          y: { grid: { display: false }, ticks: { font: { family: 'Outfit', size: 11 }, color: '#64748b' } }
+        }
+      }
+    })
+
+    // ── Revenue Pie Chart ──
+    const pieProds = (data.products_sold||[]).slice(0,6)
+    if (_ddPie) _ddPie.destroy()
+    if (pieProds.length) {
+      _ddPie = new Chart(document.getElementById('ddPieChart'), {
+        type: 'doughnut',
+        data: {
+          labels: pieProds.map(p => p.name),
+          datasets: [{ data: pieProds.map(p => p.revenue), backgroundColor: barColors, borderWidth: 2, borderColor: '#fff', hoverOffset: 8 }]
+        },
+        options: {
+          responsive: false, cutout: '60%',
+          plugins: { legend: { display: false }, tooltip: { callbacks: {
+            label: ctx => ` ${currency}${ctx.parsed.toFixed(0)}`
+          }}}
+        }
+      })
+      document.getElementById('ddPieLegend').innerHTML = pieProds.map((p,i) => `
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:12px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${barColors[i]};flex-shrink:0;"></div>
+          <span style="flex:1;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">${p.name}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text3);">${currency}${p.revenue.toFixed(0)}</span>
+        </div>`).join('')
+    } else {
+      document.getElementById('ddPieChart').style.display = 'none'
+      document.getElementById('ddPieLegend').innerHTML = '<p style="color:var(--text3);font-size:13px;">No products sold</p>'
+    }
+
+    // Pulse the selected bar/point in main charts
+    _chartRev?.update(); _chartOrd?.update()
+
+  } catch(e) { toast('Drill-down error: ' + e.message, 'error') }
+}
+
+function closeDrilldown() {
+  document.getElementById('drilldownPanel').style.display = 'none'
+  if (_ddHourly) { _ddHourly.destroy(); _ddHourly = null }
+  if (_ddBar) { _ddBar.destroy(); _ddBar = null }
+  if (_ddPie) { _ddPie.destroy(); _ddPie = null }
 }
 
 // ── Coupons ───────────────────────────────────────────────────────────────────
