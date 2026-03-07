@@ -97,17 +97,18 @@ let selectedVariants = {}
 let quantity = 1
 let product = null
 let currency = sessionStorage.getItem('ekart_currency') || '₹'
+const API = 'https://apiv2.aasaitech.in'
 
 async function init() {
   try {
     // Load store config for branding
-    const config = await fetch(`/shop/${slug}/config`).then(r => r.json())
+    const config = await fetch(`${API}/shop/${slug}/config`).then(r => r.json())
     document.getElementById('storeName').textContent = '← ' + (config.name || 'Shop')
     if (config.brand_color) document.documentElement.style.setProperty('--accent', config.brand_color)
     if (config.currency === 'USD') currency = '$'
     else if (config.currency === 'EUR') currency = '€'
 
-    product = await fetch(`/shop/${slug}/products/${productId}`).then(r => r.json())
+    product = await fetch(`${API}/shop/${slug}/products/${productId}`).then(r => r.json())
     if (product.error) throw new Error(product.error)
     document.title = product.name + ' — ' + config.name
     if (product.category_name) document.getElementById('breadcrumb').innerHTML = `<a href="shop.html?store=${slug}">All</a> › ${product.category_name} › ${product.name}`
