@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --accent: #6c63ff; --bg: #f8f9fc; --surface: #ffffff; --border: #e8eaf0; --text: #1a1a2e; --text2: #64748b; --text3: #94a3b8; --green: #16a34a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header-inner { max-width: 1000px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; height: 64px; gap: 16px; }
+  .back-btn { font-size: 15px; font-weight: 600; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+  .page-title { font-size: 18px; font-weight: 800; }
+
+  .page-wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+  .layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+
+  /* CART ITEMS */
+  .cart-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .cart-header { padding: 18px 20px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--text2); display: flex; justify-content: space-between; }
+  .cart-item { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--border); align-items: center; }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-img { width: 72px; height: 72px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; overflow: hidden; }
+  .cart-img img { width: 100%; height: 100%; object-fit: cover; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-size: 14.5px; font-weight: 600; margin-bottom: 3px; }
+  .cart-item-variant { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+  .cart-item-price { font-size: 15px; font-weight: 800; color: var(--text); }
+  .cart-qty { display: flex; align-items: center; gap: 0; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .qty-btn { width: 32px; height: 32px; border: none; background: var(--bg); font-size: 16px; cursor: pointer; transition: background .15s; }
+  .qty-btn:hover { background: #ebebff; }
+  .qty-num { width: 36px; text-align: center; font-size: 14px; font-weight: 700; border: none; background: var(--surface); border-left: 1px solid var(--border); border-right: 1px solid var(--border); height: 32px; font-family: 'Outfit', sans-serif; }
+  .remove-btn { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; padding: 4px; margin-left: 8px; transition: color .15s; }
+  .remove-btn:hover { color: #ef4444; }
+
+  /* CHECKOUT PANEL */
+  .checkout-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; position: sticky; top: 20px; }
+  .checkout-panel h2 { font-size: 15px; font-weight: 700; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .order-summary-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--text2); margin-bottom: 8px; }
+  .order-total-row { display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; margin-top: 14px; padding-top: 14px; border-top: 2px solid var(--border); }
+  .cod-badge { display: flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 14px; margin: 16px 0; font-size: 13.5px; color: var(--green); font-weight: 600; }
+
+  /* FORM */
+  .form-section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .form-section h3 { font-size: 13.5px; font-weight: 700; color: var(--text2); margin-bottom: 12px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; }
+  .field input, .field select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 14px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; transition: border-color .15s; background: var(--bg); }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn-checkout { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; margin-top: 16px; transition: background .15s; }
+  .btn-checkout:hover:not(:disabled) { background: #7b74ff; }
+  .btn-checkout:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* EMPTY CART */
+  .empty-cart { text-align: center; padding: 80px 40px; }
+  .empty-cart .icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-cart h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .empty-cart p { color: var(--text2); margin-bottom: 24px; }
+  .btn-shop { display: inline-block; padding: 12px 24px; background: var(--accent); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; }
+
+  .error-msg { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+  .loading-overlay.show { display: flex; }
+  .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media(max-width:768px) { .layout { grid-template-columns: 1fr; } .checkout-panel { position: static; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="back-btn" id="shopLink" href="javascript:history.back()">← Continue Shopping</a>
+    <span class="page-title">Your Cart</span>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <div id="cartView"></div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+</div>
+
+<script>
+const slug = sessionStorage.getItem('ekart_store') || new URLSearchParams(location.search).get('store')
+const currency = sessionStorage.getItem('ekart_currency') || '₹'
+const storeName = sessionStorage.getItem('ekart_store_name') || 'Shop'
+
+if (slug) {
+  document.getElementById('shopLink').href = `shop.html?store=${slug}`
+}
+
+function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
+function saveCart(c) { localStorage.setItem('cart_' + slug, JSON.stringify(c)) }
+
+function render() {
+  const cart = getCart()
+  const view = document.getElementById('cartView')
+  if (!cart.length) {
+    view.innerHTML = `<div class="empty-cart"><div class="icon">🛒</div><h2>Your cart is empty</h2><p>Add some products to get started</p><a class="btn-shop" href="shop.html?store=${slug}">Browse Products</a></div>`
+    return
+  }
+  const subtotal = cart.reduce((s, x) => s + x.price * x.qty, 0)
+
+  view.innerHTML = `<div class="layout">
+    <div>
+      <div class="cart-section">
+        <div class="cart-header"><span>Items (${cart.reduce((s,x)=>s+x.qty,0)})</span><span>${currency}${subtotal.toFixed(2)}</span></div>
+        <div id="cartItems">${cart.map((item, i) => `
+          <div class="cart-item" id="item-${i}">
+            <div class="cart-img">${item.image ? `<img src="${item.image}" alt="">` : '📦'}</div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.name}</div>
+              ${item.variant ? `<div class="cart-item-variant">${item.variant}</div>` : ''}
+              <div class="cart-item-price">${currency}${(item.price * item.qty).toFixed(2)}</div>
+            </div>
+            <div class="cart-qty">
+              <button class="qty-btn" onclick="updateQty(${i},-1)">−</button>
+              <div class="qty-num">${item.qty}</div>
+              <button class="qty-btn" onclick="updateQty(${i},1)">+</button>
+            </div>
+            <button class="remove-btn" onclick="removeItem(${i})" title="Remove">✕</button>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="checkout-panel">
+        <h2>Order Summary</h2>
+        <div class="order-summary-row"><span>Subtotal (${cart.reduce((s,x)=>s+x.qty,0)} items)</span><span>${currency}${subtotal.toFixed(2)}</span></div>
+        <div class="order-summary-row"><span>Shipping</span><span style="color:var(--green);font-weight:600;">FREE</span></div>
+        <div class="order-total-row"><span>Total</span><span>${currency}${subtotal.toFixed(2)}</span></div>
+        <div class="cod-badge">💰 Payment: Cash on Delivery</div>
+
+        <!-- CHECKOUT FORM -->
+        <div class="form-section">
+          <h3>👤 Contact Details</h3>
+          <div class="field"><label>Full Name *</label><input type="text" id="custName" placeholder="John Doe"></div>
+          <div class="field-row">
+            <div class="field"><label>Email *</label><input type="email" id="custEmail" placeholder="john@email.com"></div>
+            <div class="field"><label>Phone *</label><input type="tel" id="custPhone" placeholder="+91 98765 43210"></div>
+          </div>
+
+          <h3 style="margin-top:16px;">📦 Shipping Address</h3>
+          <div class="field"><label>Address Line 1 *</label><input type="text" id="addrLine1" placeholder="123 Main Street, Apt 4B"></div>
+          <div class="field"><label>Address Line 2</label><input type="text" id="addrLine2" placeholder="Landmark, Area"></div>
+          <div class="field-row">
+            <div class="field"><label>City *</label><input type="text" id="addrCity" placeholder="Chennai"></div>
+            <div class="field"><label>State *</label><input type="text" id="addrState" placeholder="Tamil Nadu"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>PIN Code *</label><input type="text" id="addrPin" placeholder="600001"></div>
+            <div class="field"><label>Country</label><input type="text" id="addrCountry" value="India"></div>
+          </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+        <button class="btn-checkout" onclick="placeOrder()">✅ Place Order — ${currency}${subtotal.toFixed(2)}</button>
+        <p style="text-align:center;font-size:12px;color:var(--text3);margin-top:10px;">Pay in cash when your order arrives</p>
+      </div>
+    </div>
+  </div>`
+}
+
+function updateQty(i, delta) {
+  const cart = getCart()
+  cart[i].qty = Math.max(1, cart[i].qty + delta)
+  saveCart(cart); render()
+}
+function removeItem(i) {
+  const cart = getCart(); cart.splice(i, 1); saveCart(cart); render()
+}
+
+async function placeOrder() {
+  const name = document.getElementById('custName').value.trim()
+  const email = document.getElementById('custEmail').value.trim()
+  const phone = document.getElementById('custPhone').value.trim()
+  const line1 = document.getElementById('addrLine1').value.trim()
+  const city = document.getElementById('addrCity').value.trim()
+  const state = document.getElementById('addrState').value.trim()
+  const pincode = document.getElementById('addrPin').value.trim()
+  const line2 = document.getElementById('addrLine2').value.trim()
+  const country = document.getElementById('addrCountry').value.trim()
+  const errEl = document.getElementById('errorMsg')
+
+  if (!name || !email || !phone || !line1 || !city || !state || !pincode) {
+    errEl.textContent = 'Please fill in all required fields'; errEl.style.display = 'block'; return
+  }
+  errEl.style.display = 'none'
+
+  const cart = getCart()
+  const body = {
+    customer_name: name, customer_email: email, customer_phone: phone,
+    shipping_address: { line1, line2, city, state, pincode, country },
+    items: cart.map(x => ({ product_id: x.product_id, qty: x.qty, variant: x.variant || null }))
+  }
+
+  document.getElementById('loadingOverlay').classList.add('show')
+  document.querySelector('.btn-checkout').disabled = true
+
+  try {
+    const res = await fetch(`/shop/${slug}/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json()
+    if (!res.ok || !data.success) throw new Error(data.error || 'Order failed')
+    localStorage.removeItem('cart_' + slug)
+    location.href = `order-confirm.html?store=${slug}&order=${data.order_number}&email=${encodeURIComponent(email)}`
+  } catch (e) {
+    document.getElementById('loadingOverlay').classList.remove('show')
+    document.querySelector('.btn-checkout').disabled = false
+    errEl.textContent = e.message; errEl.style.display = 'block'
+  }
+}
+
+render()
+</script>
+</body>
+</html>
