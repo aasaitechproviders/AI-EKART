@@ -6,11 +6,11 @@
 <title>Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --accent: #6c63ff; --bg: #f8f9fc; --surface: #ffffff; --border: #e8eaf0; --text: #1a1a2e; --text2: #64748b; --text3: #94a3b8; --green: #16a34a; --surface2: #f1f5f9; }
+  :root { --accent: #6c63ff; --bg: #f8f9fc; --surface: #fff; --border: #e8eaf0; --text: #1a1a2e; --text2: #64748b; --text3: #94a3b8; --green: #16a34a; --surface2: #f1f5f9; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
-  /* HEADER */
+  /* ── HEADER ── */
   header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; }
   .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; gap: 16px; height: 64px; }
   .store-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); flex-shrink: 0; }
@@ -20,22 +20,20 @@
   .search-bar input { width: 100%; padding: 9px 16px 9px 40px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; background: var(--bg); transition: border-color .15s; }
   .search-bar input:focus { border-color: var(--accent); background: white; }
   .search-bar::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
-  .cart-btn { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: var(--accent); color: white; border-radius: 10px; text-decoration: none; font-size: 13.5px; font-weight: 700; position: relative; white-space: nowrap; transition: all .15s; }
+  .cart-btn { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: var(--accent); color: white; border-radius: 10px; text-decoration: none; font-size: 13.5px; font-weight: 700; white-space: nowrap; transition: all .15s; }
   .cart-btn:hover { background: #7c74ff; transform: translateY(-1px); }
   .cart-count { background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .cart-count.has-items { display: flex; }
 
-  /* HERO */
+  /* ── HERO ── */
   .hero-banner { width: 100%; padding: 52px 24px; text-align: center; color: white; position: relative; overflow: hidden; }
-  .hero-banner::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.15); pointer-events: none; }
+  .hero-banner::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.15); }
   .hero-content { position: relative; z-index: 1; }
   .hero-banner h1 { font-size: clamp(28px,5vw,52px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
   .hero-banner p { font-size: 16px; opacity: 0.9; max-width: 480px; margin: 0 auto; }
 
-  /* LAYOUT */
+  /* ── LAYOUT ── */
   .layout { max-width: 1200px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 220px 1fr; gap: 24px; }
-
-  /* FILTERS */
   .filters { position: sticky; top: 88px; align-self: start; }
   .filter-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
   .filter-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
@@ -44,54 +42,122 @@
   .cat-item.active { background: rgba(108,99,255,0.1); color: var(--accent); font-weight: 700; }
   .sort-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13.5px; font-family: 'Outfit', sans-serif; color: var(--text); outline: none; cursor: pointer; transition: border-color .15s; }
   .sort-select:focus { border-color: var(--accent); }
-  .price-range { display: flex; flex-direction: column; gap: 10px; }
-  .price-inputs { display: flex; gap: 8px; align-items: center; }
+  .price-inputs { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
   .price-inputs input { flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-family: 'DM Mono', monospace; outline: none; background: var(--bg); }
   .price-inputs input:focus { border-color: var(--accent); }
   .price-sep { color: var(--text3); font-size: 12px; }
-  .btn-filter { width: 100%; padding: 8px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background .15s; }
+  .btn-filter { width: 100%; padding: 8px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; margin-top: 10px; transition: background .15s; }
   .btn-filter:hover { background: #7c74ff; }
 
-  /* PRODUCTS */
   .results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .results-count { font-size: 13.5px; color: var(--text2); font-weight: 500; }
-  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
 
-  /* PRODUCT CARD */
-  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s; text-decoration: none; color: var(--text); display: block; position: relative; }
-  .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); border-color: rgba(108,99,255,0.3); }
-  .product-badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.03em; }
+  /* ── SHARED BADGE/BUTTON ── */
+  .product-badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
   .product-badge.sale { background: #ef4444; color: white; }
-  .product-badge.new { background: var(--accent); color: white; }
-  .product-badge.out { background: #94a3b8; color: white; }
-  .product-img { aspect-ratio: 1; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 48px; overflow: hidden; }
-  .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
-  .product-card:hover .product-img img { transform: scale(1.05); }
-  .product-info { padding: 14px; }
-  .product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
-  .product-name { font-size: 14.5px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .product-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .product-price { font-size: 17px; font-weight: 800; font-family: 'DM Mono', monospace; }
-  .product-compare { font-size: 12.5px; color: var(--text3); text-decoration: line-through; font-family: 'DM Mono', monospace; }
-  .product-discount-badge { font-size: 11px; font-weight: 800; color: var(--green); background: #dcfce7; padding: 2px 7px; border-radius: 5px; }
+  .out-badge { text-align: center; font-size: 12px; color: #ef4444; font-weight: 700; padding: 7px; background: #fef2f2; border-radius: 8px; }
   .btn-add { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 9px; background: var(--accent); color: white; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s; }
   .btn-add:hover { background: #7c74ff; }
-  .btn-add:active { transform: scale(0.97); }
   .btn-add.added { background: var(--green); }
-  .out-badge { text-align: center; font-size: 12px; color: #ef4444; font-weight: 700; padding: 7px; background: #fef2f2; border-radius: 8px; }
 
-  /* PAGINATION */
+  /* ════════════════════════════════════════
+     STYLE 1 — GRID (default)
+  ════════════════════════════════════════ */
+  .style-grid .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr)); gap: 18px; }
+  .style-grid .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s; text-decoration: none; color: var(--text); display: block; position: relative; }
+  .style-grid .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); border-color: rgba(108,99,255,0.3); }
+  .style-grid .product-img { aspect-ratio: 1; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 48px; overflow: hidden; }
+  .style-grid .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+  .style-grid .product-card:hover .product-img img { transform: scale(1.05); }
+  .style-grid .product-info { padding: 14px; }
+  .style-grid .product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .style-grid .product-name { font-size: 14.5px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .style-grid .product-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .style-grid .product-price { font-size: 17px; font-weight: 800; font-family: 'DM Mono', monospace; }
+  .style-grid .product-compare { font-size: 12.5px; color: var(--text3); text-decoration: line-through; font-family: 'DM Mono', monospace; }
+  .style-grid .product-discount { font-size: 11px; font-weight: 800; color: var(--green); background: #dcfce7; padding: 2px 7px; border-radius: 5px; }
+
+  /* ════════════════════════════════════════
+     STYLE 2 — LIST
+  ════════════════════════════════════════ */
+  .style-list .products-grid { display: flex; flex-direction: column; gap: 12px; }
+  .style-list .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; cursor: pointer; transition: box-shadow .2s, border-color .2s; text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 0; position: relative; }
+  .style-list .product-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-color: rgba(108,99,255,0.3); }
+  .style-list .product-img { width: 120px; height: 120px; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 36px; overflow: hidden; }
+  .style-list .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+  .style-list .product-card:hover .product-img img { transform: scale(1.05); }
+  .style-list .product-info { flex: 1; padding: 16px 20px; display: flex; align-items: center; gap: 20px; }
+  .style-list .product-info-left { flex: 1; min-width: 0; }
+  .style-list .product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .style-list .product-name { font-size: 15.5px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .style-list .product-desc { font-size: 13px; color: var(--text2); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+  .style-list .product-info-right { flex-shrink: 0; text-align: right; min-width: 140px; }
+  .style-list .product-price { font-size: 20px; font-weight: 800; font-family: 'DM Mono', monospace; display: block; margin-bottom: 4px; }
+  .style-list .product-compare { font-size: 13px; color: var(--text3); text-decoration: line-through; font-family: 'DM Mono', monospace; display: block; margin-bottom: 8px; }
+  .style-list .product-discount { font-size: 11px; font-weight: 800; color: var(--green); background: #dcfce7; padding: 2px 7px; border-radius: 5px; }
+  .style-list .btn-add { width: auto; padding: 9px 18px; white-space: nowrap; }
+
+  /* ════════════════════════════════════════
+     STYLE 3 — MINIMAL
+  ════════════════════════════════════════ */
+  .style-minimal .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 24px; }
+  .style-minimal .product-card { cursor: pointer; transition: transform .2s; text-decoration: none; color: var(--text); display: block; position: relative; background: none; border: none; }
+  .style-minimal .product-card:hover { transform: translateY(-4px); }
+  .style-minimal .product-img-wrap { position: relative; aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 48px; margin-bottom: 12px; }
+  .style-minimal .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .style-minimal .product-card:hover .product-img-wrap img { transform: scale(1.07); }
+  .style-minimal .product-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%); display: flex; align-items: flex-end; padding: 14px; opacity: 0; transition: opacity .25s; }
+  .style-minimal .product-card:hover .product-overlay { opacity: 1; }
+  .style-minimal .product-overlay .btn-add { background: white; color: var(--text); font-size: 13px; border-radius: 8px; padding: 8px 14px; width: auto; }
+  .style-minimal .product-overlay .btn-add:hover { background: var(--accent); color: white; }
+  .style-minimal .product-info { padding: 0; }
+  .style-minimal .product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .style-minimal .product-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+  .style-minimal .product-price-row { display: flex; align-items: center; gap: 8px; }
+  .style-minimal .product-price { font-size: 16px; font-weight: 800; font-family: 'DM Mono', monospace; }
+  .style-minimal .product-compare { font-size: 12.5px; color: var(--text3); text-decoration: line-through; font-family: 'DM Mono', monospace; }
+  .style-minimal .product-discount { font-size: 11px; font-weight: 800; color: var(--green); background: #dcfce7; padding: 2px 7px; border-radius: 5px; }
+
+  /* ════════════════════════════════════════
+     STYLE 4 — MAGAZINE
+  ════════════════════════════════════════ */
+  .style-magazine .products-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .style-magazine .product-card { text-decoration: none; color: var(--text); display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform .2s, box-shadow .2s; position: relative; }
+  .style-magazine .product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+  .style-magazine .product-card:first-child { grid-column: span 7; display: flex; flex-direction: column; }
+  .style-magazine .product-card:not(:first-child) { grid-column: span 5; }
+  .style-magazine .product-card:nth-child(3), .style-magazine .product-card:nth-child(4) { grid-column: span 3; }
+  .style-magazine .product-card:nth-child(n+5) { grid-column: span 4; }
+  .style-magazine .product-img { background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 56px; overflow: hidden; }
+  .style-magazine .product-card:first-child .product-img { flex: 1; min-height: 280px; }
+  .style-magazine .product-card:not(:first-child) .product-img { aspect-ratio: 4/3; }
+  .style-magazine .product-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+  .style-magazine .product-card:hover .product-img img { transform: scale(1.04); }
+  .style-magazine .product-info { padding: 16px; }
+  .style-magazine .product-card:first-child .product-info { padding: 20px 24px; }
+  .style-magazine .product-cat { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .style-magazine .product-name { font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+  .style-magazine .product-card:first-child .product-name { font-size: 20px; }
+  .style-magazine .product-card:not(:first-child) .product-name { font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .style-magazine .product-price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .style-magazine .product-price { font-weight: 800; font-family: 'DM Mono', monospace; }
+  .style-magazine .product-card:first-child .product-price { font-size: 22px; }
+  .style-magazine .product-card:not(:first-child) .product-price { font-size: 15px; }
+  .style-magazine .product-compare { font-size: 12.5px; color: var(--text3); text-decoration: line-through; font-family: 'DM Mono', monospace; }
+  .style-magazine .product-discount { font-size: 11px; font-weight: 800; color: var(--green); background: #dcfce7; padding: 2px 7px; border-radius: 5px; }
+
+  /* ── PAGINATION ── */
   .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
   .page-btn { padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text2); cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 13.5px; font-weight: 600; transition: all .15s; }
   .page-btn:hover, .page-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
   .page-btn:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
 
-  /* EMPTY */
+  /* ── EMPTY ── */
   .empty { text-align: center; padding: 80px 20px; color: var(--text3); grid-column: 1/-1; }
   .empty-icon { font-size: 56px; margin-bottom: 16px; }
   .empty h3 { font-size: 18px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
 
-  /* STICKY CART BAR */
+  /* ── STICKY CART BAR ── */
   .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--text); color: white; padding: 14px 24px; display: none; align-items: center; justify-content: space-between; z-index: 300; box-shadow: 0 -4px 24px rgba(0,0,0,0.2); }
   .cart-bar.show { display: flex; }
   .cart-bar-info { font-size: 14px; font-weight: 600; }
@@ -99,7 +165,7 @@
   .cart-bar-btn { padding: 10px 24px; background: var(--accent); color: white; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 700; transition: background .15s; }
   .cart-bar-btn:hover { background: #7c74ff; }
 
-  /* TOAST */
+  /* ── TOAST ── */
   .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: white; border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: all .3s; z-index: 400; white-space: nowrap; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -108,7 +174,14 @@
     .filters { position: static; }
     .header-inner { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 10px; }
     .search-bar { order: 3; max-width: 100%; width: 100%; margin: 0; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .style-grid .products-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+    .style-minimal .products-grid { grid-template-columns: repeat(2,1fr); gap: 14px; }
+    .style-list .product-img { width: 90px; height: 90px; }
+    .style-list .product-info { flex-direction: column; gap: 10px; }
+    .style-list .product-info-right { text-align: left; min-width: unset; }
+    .style-magazine .products-grid { grid-template-columns: 1fr 1fr; }
+    .style-magazine .product-card:first-child, .style-magazine .product-card:nth-child(n) { grid-column: span 2; }
+    .style-magazine .product-card:not(:first-child) { grid-column: span 1; }
   }
 </style>
 </head>
@@ -123,8 +196,7 @@
       <input type="text" id="searchInput" placeholder="Search products..." oninput="onSearch()">
     </div>
     <a href="cart.html" class="cart-btn" id="cartBtn">
-      🛒 Cart
-      <span class="cart-count" id="cartCount">0</span>
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
     </a>
   </div>
 </header>
@@ -136,18 +208,16 @@
   </div>
 </div>
 
-<div class="layout">
+<div class="layout" id="mainLayout">
   <div class="filters">
     <div class="filter-section">
       <div class="filter-title">Categories</div>
-      <div id="catList">
-        <div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All Products</div>
-      </div>
+      <div id="catList"><div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All Products</div></div>
     </div>
     <div class="filter-section">
       <div class="filter-title">Sort By</div>
       <select class="sort-select" id="sortSelect" onchange="loadProducts()">
-        <option value="">Newest First</option>
+        <option value="">Newest</option>
         <option value="price_asc">Price: Low → High</option>
         <option value="price_desc">Price: High → Low</option>
         <option value="name_asc">Name: A → Z</option>
@@ -160,22 +230,19 @@
         <span class="price-sep">—</span>
         <input type="number" id="priceMax" placeholder="Max" min="0">
       </div>
-      <button class="btn-filter" style="margin-top:10px;" onclick="loadProducts()">Apply</button>
+      <button class="btn-filter" onclick="loadProducts()">Apply</button>
     </div>
   </div>
 
-  <div class="products-section">
+  <div class="products-section" id="productsSection">
     <div class="results-bar">
-      <span class="results-count" id="resultsCount">Loading products...</span>
+      <span class="results-count" id="resultsCount">Loading...</span>
     </div>
-    <div class="products-grid" id="productsGrid">
-      ${[1,2,3,4,5,6].map(()=>`<div style="background:#f1f5f9;border-radius:16px;aspect-ratio:0.85;animation:pulse 1.5s infinite;"></div>`).join('')}
-    </div>
+    <div class="products-grid" id="productsGrid"></div>
     <div class="pagination" id="pagination"></div>
   </div>
 </div>
 
-<!-- STICKY CART BAR -->
 <div class="cart-bar" id="cartBar">
   <div class="cart-bar-info">
     <span id="cartBarQty"></span>
@@ -188,10 +255,11 @@
 
 <script>
 const slug = new URLSearchParams(location.search).get('store')
-if (!slug) { document.body.innerHTML = '<div style="text-align:center;padding:80px;font-family:sans-serif;"><h2>Store not found</h2><p>No store slug in URL.</p></div>' }
+if (!slug) document.body.innerHTML = '<div style="text-align:center;padding:80px;font-family:sans-serif;"><h2>Store not found</h2></div>'
 
 const API = 'https://apiv2.aasaitech.in'
 let storeConfig = {}
+let cardStyle = 'grid'
 let currentCat = ''
 let currentPage = 1
 let searchTimeout = null
@@ -201,13 +269,13 @@ async function init() {
   try {
     storeConfig = await fetch(`${API}/shop/${slug}/config`).then(r => r.json())
     if (storeConfig.error) throw new Error(storeConfig.error)
+
     document.title = storeConfig.name
     document.getElementById('storeName').textContent = storeConfig.name
     document.getElementById('heroTitle').textContent = storeConfig.name
     document.getElementById('heroTagline').textContent = storeConfig.tagline || storeConfig.description || 'Discover amazing products'
     if (storeConfig.logo_url) {
-      const img = document.createElement('img')
-      img.src = storeConfig.logo_url
+      const img = document.createElement('img'); img.src = storeConfig.logo_url
       document.querySelector('.store-logo').prepend(img)
     }
     if (storeConfig.brand_color) {
@@ -216,13 +284,20 @@ async function init() {
     }
     if (storeConfig.currency === 'USD') currency = '$'
     else if (storeConfig.currency === 'EUR') currency = '€'
+
+    // Apply card style from store config
+    cardStyle = storeConfig.card_style || 'grid'
+    document.getElementById('productsSection').className = `products-section style-${cardStyle}`
+    document.getElementById('mainLayout').className = `layout style-${cardStyle}`
+
     sessionStorage.setItem('ekart_store', slug)
     sessionStorage.setItem('ekart_currency', currency)
     sessionStorage.setItem('ekart_store_name', storeConfig.name)
+
     await loadCategories()
     await loadProducts()
     updateCartUI()
-  } catch (e) {
+  } catch(e) {
     document.body.innerHTML = `<div style="text-align:center;padding:80px;font-family:sans-serif;"><h2>Store not found</h2><p>${e.message}</p></div>`
   }
 }
@@ -230,7 +305,7 @@ async function init() {
 async function loadCategories() {
   const cats = await fetch(`${API}/shop/${slug}/categories`).then(r => r.json())
   const list = document.getElementById('catList')
-  list.innerHTML = `<div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All Products</div>` +
+  list.innerHTML = `<div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All</div>` +
     cats.map(c => `<div class="cat-item" data-cat="${c._id}" onclick="selectCat(this,'${c._id}')">${c.name}</div>`).join('')
 }
 
@@ -247,10 +322,10 @@ async function loadProducts() {
   if (maxPrice) params.set('max_price', maxPrice)
   try {
     const data = await fetch(`${API}/shop/${slug}/products?${params}`).then(r => r.json())
-    document.getElementById('resultsCount').textContent = `${data.total} product${data.total !== 1 ? 's' : ''} found`
+    document.getElementById('resultsCount').textContent = `${data.total} product${data.total!==1?'s':''} found`
     renderProducts(data.products)
     renderPagination(data.page, data.pages)
-  } catch (e) { console.error(e) }
+  } catch(e) { console.error(e) }
 }
 
 function renderProducts(products) {
@@ -259,98 +334,160 @@ function renderProducts(products) {
     grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`
     return
   }
-  grid.innerHTML = products.map(p => {
-    const img = p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '📦'
-    const discount = p.compare_at_price && p.compare_at_price > p.price
-      ? Math.round((1 - p.price / p.compare_at_price) * 100) : 0
-    const outOfStock = p.track_inventory && p.stock_qty <= 0
-    const badge = outOfStock ? `<div class="product-badge out">Out of Stock</div>`
-      : discount >= 10 ? `<div class="product-badge sale">−${discount}%</div>` : ''
-    return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
-      ${badge}
-      <div class="product-img">${img}</div>
-      <div class="product-info">
-        ${p.category_name ? `<div class="product-cat">${p.category_name}</div>` : ''}
-        <div class="product-name">${p.name}</div>
-        <div class="product-price-row">
-          <span class="product-price">${currency}${p.price.toFixed(2)}</span>
-          ${p.compare_at_price ? `<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
-          ${discount ? `<span class="product-discount-badge">${discount}% off</span>` : ''}
-        </div>
-        ${outOfStock
-          ? '<div class="out-badge">Out of Stock</div>'
-          : `<button class="btn-add" id="btn-${p._id}" onclick="event.preventDefault();addToCart('${p._id}','${p.name.replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 Add to Cart</button>`}
+  if (cardStyle === 'list') grid.innerHTML = products.map(p => renderListCard(p)).join('')
+  else if (cardStyle === 'minimal') grid.innerHTML = products.map(p => renderMinimalCard(p)).join('')
+  else if (cardStyle === 'magazine') grid.innerHTML = products.map((p,i) => renderMagazineCard(p,i)).join('')
+  else grid.innerHTML = products.map(p => renderGridCard(p)).join('')
+}
+
+function discountPct(p) {
+  return p.compare_at_price && p.compare_at_price > p.price
+    ? Math.round((1 - p.price/p.compare_at_price)*100) : 0
+}
+function isOOS(p) { return p.track_inventory && p.stock_qty <= 0 }
+
+function addBtn(p) {
+  if (isOOS(p)) return `<div class="out-badge">Out of Stock</div>`
+  return `<button class="btn-add" id="btn-${p._id}" onclick="event.preventDefault();addToCart('${p._id}','${p.name.replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 Add to Cart</button>`
+}
+
+// ── GRID ──
+function renderGridCard(p) {
+  const d = discountPct(p)
+  const img = p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '📦'
+  return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
+    ${d>=5?`<div class="product-badge sale">−${d}%</div>`:''}
+    <div class="product-img">${img}</div>
+    <div class="product-info">
+      ${p.category_name?`<div class="product-cat">${p.category_name}</div>`:''}
+      <div class="product-name">${p.name}</div>
+      <div class="product-price-row">
+        <span class="product-price">${currency}${p.price.toFixed(2)}</span>
+        ${p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+        ${d?`<span class="product-discount">${d}% off</span>`:''}
       </div>
-    </a>`
-  }).join('')
+      ${addBtn(p)}
+    </div>
+  </a>`
+}
+
+// ── LIST ──
+function renderListCard(p) {
+  const d = discountPct(p)
+  const img = p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '📦'
+  return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
+    ${d>=5?`<div class="product-badge sale">−${d}%</div>`:''}
+    <div class="product-img">${img}</div>
+    <div class="product-info">
+      <div class="product-info-left">
+        ${p.category_name?`<div class="product-cat">${p.category_name}</div>`:''}
+        <div class="product-name">${p.name}</div>
+        ${p.description?`<div class="product-desc">${p.description}</div>`:''}
+      </div>
+      <div class="product-info-right">
+        <span class="product-price">${currency}${p.price.toFixed(2)}</span>
+        ${p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+        ${d?`<span class="product-discount">${d}% off</span><br><br>`:''}
+        ${addBtn(p)}
+      </div>
+    </div>
+  </a>`
+}
+
+// ── MINIMAL ──
+function renderMinimalCard(p) {
+  const d = discountPct(p)
+  const img = p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '📦'
+  const oos = isOOS(p)
+  return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
+    <div class="product-img-wrap">
+      ${img}
+      ${!oos?`<div class="product-overlay"><button class="btn-add" onclick="event.preventDefault();addToCart('${p._id}','${p.name.replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 Add</button></div>`:''}
+      ${d>=5?`<div class="product-badge sale" style="top:10px;left:10px;">−${d}%</div>`:''}
+    </div>
+    <div class="product-info">
+      ${p.category_name?`<div class="product-cat">${p.category_name}</div>`:''}
+      <div class="product-name">${p.name}</div>
+      <div class="product-price-row">
+        <span class="product-price">${currency}${p.price.toFixed(2)}</span>
+        ${p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+        ${d?`<span class="product-discount">${d}% off</span>`:''}
+      </div>
+      ${oos?`<div class="out-badge" style="margin-top:8px;">Out of Stock</div>`:''}
+    </div>
+  </a>`
+}
+
+// ── MAGAZINE ──
+function renderMagazineCard(p, i) {
+  const d = discountPct(p)
+  const img = p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy">` : '📦'
+  return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
+    ${d>=5?`<div class="product-badge sale">−${d}%</div>`:''}
+    <div class="product-img">${img}</div>
+    <div class="product-info">
+      ${p.category_name?`<div class="product-cat">${p.category_name}</div>`:''}
+      <div class="product-name">${p.name}</div>
+      <div class="product-price-row">
+        <span class="product-price">${currency}${p.price.toFixed(2)}</span>
+        ${p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+        ${d?`<span class="product-discount">${d}% off</span>`:''}
+      </div>
+      ${addBtn(p)}
+    </div>
+  </a>`
 }
 
 function renderPagination(page, pages) {
   const el = document.getElementById('pagination')
   if (pages <= 1) { el.innerHTML = ''; return }
   let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>`
-  for (let i = 1; i <= pages; i++) {
-    if (pages <= 7 || i === 1 || i === pages || Math.abs(i-page) <= 2)
+  for (let i=1;i<=pages;i++) {
+    if (pages<=7||i===1||i===pages||Math.abs(i-page)<=2)
       html += `<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`
-    else if (Math.abs(i-page) === 3) html += '<span style="padding:8px;color:var(--text3);">…</span>'
+    else if (Math.abs(i-page)===3) html += '<span style="padding:8px;color:var(--text3);">…</span>'
   }
   html += `<button class="page-btn" onclick="goPage(${page+1})" ${page>=pages?'disabled':''}>Next →</button>`
   el.innerHTML = html
 }
 
-function goPage(p) { currentPage = p; loadProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+function goPage(p) { currentPage=p; loadProducts(); window.scrollTo({top:0,behavior:'smooth'}) }
+function selectCat(el,catId) { document.querySelectorAll('.cat-item').forEach(x=>x.classList.remove('active')); el.classList.add('active'); currentCat=catId; currentPage=1; loadProducts() }
+function onSearch() { clearTimeout(searchTimeout); searchTimeout=setTimeout(()=>{currentPage=1;loadProducts()},350) }
 
-function selectCat(el, catId) {
-  document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('active'))
-  el.classList.add('active')
-  currentCat = catId; currentPage = 1; loadProducts()
-}
+function getCart() { return JSON.parse(localStorage.getItem('cart_'+slug)||'[]') }
+function saveCart(c) { localStorage.setItem('cart_'+slug, JSON.stringify(c)) }
 
-function onSearch() {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => { currentPage = 1; loadProducts() }, 350)
-}
-
-// Cart
-function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
-function saveCart(c) { localStorage.setItem('cart_' + slug, JSON.stringify(c)) }
-
-function addToCart(id, name, price, image) {
-  const cart = getCart()
-  const existing = cart.find(x => x.product_id === id && !x.variant)
-  if (existing) existing.qty++
-  else cart.push({ product_id: id, name, price, image, qty: 1 })
-  saveCart(cart)
-  updateCartUI()
-  const btn = document.getElementById('btn-' + id)
-  if (btn) { btn.textContent = '✅ Added!'; btn.classList.add('added'); setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('added') }, 1200) }
+function addToCart(id,name,price,image) {
+  const cart=getCart()
+  const ex=cart.find(x=>x.product_id===id&&!x.variant)
+  if(ex) ex.qty++; else cart.push({product_id:id,name,price,image,qty:1})
+  saveCart(cart); updateCartUI()
+  const btn=document.getElementById('btn-'+id)
+  if(btn){btn.textContent='✅ Added!';btn.classList.add('added');setTimeout(()=>{btn.textContent='🛒 Add to Cart';btn.classList.remove('added')},1200)}
   toast('Added to cart! 🛒')
 }
 
 function updateCartUI() {
-  const cart = getCart()
-  const totalQty = cart.reduce((s,x) => s+x.qty, 0)
-  const totalAmt = cart.reduce((s,x) => s+x.price*x.qty, 0)
-  const el = document.getElementById('cartCount')
-  el.textContent = totalQty
-  el.className = 'cart-count' + (totalQty > 0 ? ' has-items' : '')
-  const bar = document.getElementById('cartBar')
-  if (totalQty > 0) {
+  const cart=getCart()
+  const qty=cart.reduce((s,x)=>s+x.qty,0)
+  const amt=cart.reduce((s,x)=>s+x.price*x.qty,0)
+  const el=document.getElementById('cartCount')
+  el.textContent=qty; el.className='cart-count'+(qty>0?' has-items':'')
+  const bar=document.getElementById('cartBar')
+  if(qty>0){
     bar.classList.add('show')
-    document.getElementById('cartBarQty').textContent = `${totalQty} item${totalQty!==1?'s':''} — `
-    document.getElementById('cartBarTotal').textContent = `${currency}${totalAmt.toFixed(2)}`
-  } else {
-    bar.classList.remove('show')
-  }
+    document.getElementById('cartBarQty').textContent=`${qty} item${qty!==1?'s':''} — `
+    document.getElementById('cartBarTotal').textContent=`${currency}${amt.toFixed(2)}`
+  } else bar.classList.remove('show')
 }
 
 function toast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2000)
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2000)
 }
 
-if (slug) init()
+if(slug) init()
 </script>
 </body>
 </html>
