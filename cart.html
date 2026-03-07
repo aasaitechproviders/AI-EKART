@@ -90,6 +90,7 @@
 const slug = sessionStorage.getItem('ekart_store') || new URLSearchParams(location.search).get('store')
 const currency = sessionStorage.getItem('ekart_currency') || '₹'
 const storeName = sessionStorage.getItem('ekart_store_name') || 'Shop'
+const API = 'https://apiv2.aasaitech.in'
 
 if (slug) {
   document.getElementById('shopLink').href = `shop.html?store=${slug}`
@@ -204,7 +205,7 @@ async function placeOrder() {
   document.querySelector('.btn-checkout').disabled = true
 
   try {
-    const res = await fetch(`/shop/${slug}/checkout`, {
+    const res = await fetch(`${API}/shop/${slug}/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
