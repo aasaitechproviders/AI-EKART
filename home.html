@@ -274,7 +274,11 @@
       </div>
       <div class="field"><label>Brand Color</label><input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;"></div>
     </div>
-    <div class="field"><label>Logo (paste base64 or URL)</label><input type="text" id="storeLogo" placeholder="data:image/... or https://..."></div>
+    <div class="field"><label>Store Logo</label>
+        <input type="file" id="storeLogoFile" accept="image/*" onchange="previewLogo(this)" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+        <div id="storeLogoPreview" style="margin-top:8px;display:none;"><img id="storeLogoImg" src="" style="height:60px;border-radius:8px;object-fit:contain;border:1px solid var(--border2);padding:4px;"></div>
+        <input type="hidden" id="storeLogoExisting">
+      </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveStore()">Save Store</button>
@@ -311,9 +315,11 @@
     </div>
     <div class="field"><label>Tags (comma separated)</label><input type="text" id="productTags" placeholder="electronics, wireless, audio"></div>
     <div class="field">
-      <label>Images (paste base64 or URLs, one per line)</label>
-      <textarea id="productImages" placeholder="data:image/... or https://example.com/image.jpg" style="min-height:70px;"></textarea>
-    </div>
+        <label>Product Images (up to 5)</label>
+        <input type="file" id="productImageFiles" accept="image/*" multiple onchange="previewProductImages(this)" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+        <div id="productImagesPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
+        <div id="existingImagesWrap" style="margin-top:6px;"></div>
+      </div>
     <div class="field">
       <label>Variants</label>
       <div id="variantsList"></div>
@@ -442,7 +448,7 @@ function renderStores() {
   }
   grid.innerHTML = allStores.map(s => {
     const bg = s.brand_color || '#6c63ff'
-    const logo = s.logo_base64 ? `<img src="${s.logo_base64}" style="height:48px;object-fit:contain;">` : s.name.slice(0, 2).toUpperCase()
+    const logo = s.logo_url ? `<img src="${s.logo_url}" style="height:48px;object-fit:contain;">` : s.name.slice(0, 2).toUpperCase()
     return `<div class="store-card">
       <div class="store-card-banner" style="background:linear-gradient(135deg,${bg}dd,${bg}88);">${logo}</div>
       <div class="store-card-body">
@@ -486,7 +492,9 @@ function openCreateStore() {
   document.getElementById('storeEmail').value = currentUser?.email || ''
   document.getElementById('storePhone').value = ''
   document.getElementById('storeBrandColor').value = '#6c63ff'
-  document.getElementById('storeLogo').value = ''
+  document.getElementById('storeLogoFile').value = ''
+  document.getElementById('storeLogoExisting').value = ''
+  document.getElementById('storeLogoPreview').style.display = 'none'
   openModal('storeModal')
 }
 
@@ -502,26 +510,43 @@ function openEditStore(id) {
   document.getElementById('storePhone').value = s.phone || ''
   document.getElementById('storeCurrency').value = s.currency || 'INR'
   document.getElementById('storeBrandColor').value = s.brand_color || '#6c63ff'
-  document.getElementById('storeLogo').value = s.logo_base64 || ''
+  document.getElementById('storeLogoFile').value = ''
+  document.getElementById('storeLogoExisting').value = s.logo_url || ''
+  if (s.logo_url) {
+    document.getElementById('storeLogoImg').src = s.logo_url
+    document.getElementById('storeLogoPreview').style.display = 'block'
+  } else {
+    document.getElementById('storeLogoPreview').style.display = 'none'
+  }
   openModal('storeModal')
 }
 
 async function saveStore() {
   const id = document.getElementById('storeEditId').value
-  const body = {
-    name: document.getElementById('storeName').value.trim(),
-    tagline: document.getElementById('storeTagline').value.trim(),
-    description: document.getElementById('storeDesc').value.trim(),
-    contact_email: document.getElementById('storeEmail').value.trim(),
-    phone: document.getElementById('storePhone').value.trim(),
-    currency: document.getElementById('storeCurrency').value,
-    brand_color: document.getElementById('storeBrandColor').value,
-    logo_base64: document.getElementById('storeLogo').value.trim() || null
-  }
-  if (!body.name) return toast('Store name is required', 'error')
+  const name = document.getElementById('storeName').value.trim()
+  if (!name) return toast('Store name is required', 'error')
+
+  const fd = new FormData()
+  fd.append('name', name)
+  fd.append('tagline', document.getElementById('storeTagline').value.trim())
+  fd.append('description', document.getElementById('storeDesc').value.trim())
+  fd.append('contact_email', document.getElementById('storeEmail').value.trim())
+  fd.append('phone', document.getElementById('storePhone').value.trim())
+  fd.append('currency', document.getElementById('storeCurrency').value)
+  fd.append('brand_color', document.getElementById('storeBrandColor').value)
+  // Attach logo file if selected, else keep existing URL
+  const logoFile = document.getElementById('storeLogoFile').files[0]
+  if (logoFile) fd.append('logo', logoFile)
+  else fd.append('logo_url', document.getElementById('storeLogoExisting').value || '')
+
   try {
-    if (id) await apiFetch(`/stores/${id}`, { method: 'PUT', body: JSON.stringify(body) })
-    else await apiFetch('/stores', { method: 'POST', body: JSON.stringify(body) })
+    const url = id ? `/stores/${id}` : '/stores'
+    const res = await fetch(API + url, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
     closeModal('storeModal')
     await loadStores()
     toast(id ? 'Store updated!' : 'Store created!', 'success')
@@ -616,7 +641,9 @@ function openCreateProduct() {
   document.getElementById('productSku').value = ''
   document.getElementById('productStock').value = ''
   document.getElementById('productTags').value = ''
-  document.getElementById('productImages').value = ''
+  document.getElementById('productImageFiles').value = ''
+  document.getElementById('productImagesPreview').innerHTML = ''
+  document.getElementById('existingImagesWrap').innerHTML = ''
   document.getElementById('productStatus').value = 'active'
   document.getElementById('variantsList').innerHTML = ''
   // Populate categories
@@ -637,7 +664,11 @@ function openEditProduct(id) {
   document.getElementById('productSku').value = p.sku || ''
   document.getElementById('productStock').value = p.stock_qty || ''
   document.getElementById('productTags').value = (p.tags || []).join(', ')
-  document.getElementById('productImages').value = (p.images || []).join('\n')
+  document.getElementById('productImageFiles').value = ''
+  document.getElementById('productImagesPreview').innerHTML = ''
+  document.getElementById('existingImagesWrap').innerHTML = (p.images||[]).map(img =>
+    `<img src="${img}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);">`
+  ).join('')
   document.getElementById('productStatus').value = p.status || 'active'
   const catId = p.category_id?.$oid || p.category_id || ''
   const sel = document.getElementById('productCategory')
@@ -650,31 +681,49 @@ function openEditProduct(id) {
 
 async function saveProduct() {
   const id = document.getElementById('productEditId').value
-  const images = document.getElementById('productImages').value.trim().split('\n').filter(Boolean)
+  const name = document.getElementById('productName').value.trim()
+  const price = document.getElementById('productPrice').value
+  if (!name || !price) return toast('Name and price required', 'error')
+
   const variantRows = document.querySelectorAll('.variant-row')
   const variants = Array.from(variantRows).map(row => ({
     label: row.querySelector('.var-label').value.trim(),
     options: row.querySelector('.var-options').value.trim()
   })).filter(v => v.label)
 
-  const body = {
-    name: document.getElementById('productName').value.trim(),
-    description: document.getElementById('productDesc').value.trim(),
-    price: document.getElementById('productPrice').value,
-    compare_at_price: document.getElementById('productCompare').value || null,
-    sku: document.getElementById('productSku').value.trim(),
-    stock_qty: document.getElementById('productStock').value || 0,
-    track_inventory: !!document.getElementById('productStock').value,
-    category_id: document.getElementById('productCategory').value || null,
-    tags: document.getElementById('productTags').value,
-    images: JSON.stringify(images),
-    status: document.getElementById('productStatus').value,
-    variants: JSON.stringify(variants)
+  const fd = new FormData()
+  fd.append('name', name)
+  fd.append('description', document.getElementById('productDesc').value.trim())
+  fd.append('price', price)
+  fd.append('compare_at_price', document.getElementById('productCompare').value || '')
+  fd.append('sku', document.getElementById('productSku').value.trim())
+  fd.append('stock_qty', document.getElementById('productStock').value || 0)
+  fd.append('track_inventory', !!document.getElementById('productStock').value)
+  fd.append('category_id', document.getElementById('productCategory').value || '')
+  fd.append('tags', document.getElementById('productTags').value)
+  fd.append('status', document.getElementById('productStatus').value)
+  fd.append('variants', JSON.stringify(variants))
+
+  // Attach new image files
+  const imageFiles = document.getElementById('productImageFiles').files
+  if (imageFiles.length > 0) {
+    Array.from(imageFiles).forEach(f => fd.append('images', f))
+  } else {
+    // Keep existing image URLs
+    const existingImgs = Array.from(document.querySelectorAll('#existingImagesWrap img')).map(i => i.src)
+    fd.append('images', JSON.stringify(existingImgs))
   }
-  if (!body.name || !body.price) return toast('Name and price required', 'error')
+
   try {
-    if (id) await apiFetch(`/stores/${currentStore._id}/products/${id}`, { method: 'PUT', body: JSON.stringify(body) })
-    else await apiFetch(`/stores/${currentStore._id}/products`, { method: 'POST', body: JSON.stringify(body) })
+    const url = id
+      ? `${API}/stores/${currentStore._id}/products/${id}`
+      : `${API}/stores/${currentStore._id}/products`
+    const res = await fetch(url, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
     closeModal('productModal')
     await loadProducts()
     toast(id ? 'Product updated!' : 'Product added!', 'success')
@@ -811,6 +860,32 @@ function toast(msg, type = 'success') {
   t.textContent = msg
   t.className = 'toast show ' + type
   setTimeout(() => t.classList.remove('show'), 3000)
+}
+
+
+function previewLogo(input) {
+  if (!input.files[0]) return
+  const reader = new FileReader()
+  reader.onload = e => {
+    document.getElementById('storeLogoImg').src = e.target.result
+    document.getElementById('storeLogoPreview').style.display = 'block'
+  }
+  reader.readAsDataURL(input.files[0])
+}
+
+function previewProductImages(input) {
+  const wrap = document.getElementById('productImagesPreview')
+  wrap.innerHTML = ''
+  Array.from(input.files).forEach(f => {
+    const reader = new FileReader()
+    reader.onload = e => {
+      const img = document.createElement('img')
+      img.src = e.target.result
+      img.style = 'width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);'
+      wrap.appendChild(img)
+    }
+    reader.readAsDataURL(f)
+  })
 }
 
 // Close modals on overlay click
