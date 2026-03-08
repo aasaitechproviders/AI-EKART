@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#080910">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Payments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+/* ── TABS ── */
+.tabs { display:flex; gap:4px; padding:0 28px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:58px; z-index:40; }
+.tab { padding:13px 18px; font-size:13.5px; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── SETUP ── */
+.setup-grid { display:grid; grid-template-columns:360px 1fr; gap:22px; align-items:start; }
+.setup-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; }
+.setup-card-title { font-size:15px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:9px; }
+.setup-card-sub { font-size:13px; color:var(--text2); margin-bottom:22px; line-height:1.6; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
+.form-input { width:100%; padding:11px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:border-color .2s; }
+.form-input:focus { border-color:var(--accent); }
+.form-input.secret { font-family:'DM Mono',monospace; letter-spacing:.08em; }
+.form-hint { font-size:11.5px; color:var(--text3); margin-top:5px; }
+.form-hint a { color:var(--accent); text-decoration:none; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:11px; margin-bottom:16px; }
+.toggle-label { font-size:14px; font-weight:600; }
+.toggle-sub { font-size:12px; color:var(--text2); margin-top:2px; }
+.toggle { position:relative; width:42px; height:24px; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:var(--surface3); border-radius:24px; cursor:pointer; transition:.25s; }
+.toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.25s; }
+.toggle input:checked + .toggle-slider { background:var(--accent); }
+.toggle input:checked + .toggle-slider:before { transform:translateX(18px); }
+.verify-btn { width:100%; padding:12px; background:rgba(108,99,255,.12); border:1px solid rgba(108,99,255,.3); color:var(--accent); border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; margin-bottom:12px; font-family:'Outfit',sans-serif; }
+.verify-btn:hover:not(:disabled) { background:rgba(108,99,255,.22); }
+.verify-status { padding:11px 14px; border-radius:9px; font-size:13px; font-weight:600; display:none; align-items:center; gap:8px; }
+.verify-status.ok  { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; display:flex; }
+.verify-status.err { background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; display:flex; }
+
+/* steps guide */
+.setup-steps { list-style:none; display:flex; flex-direction:column; gap:14px; }
+.step { display:flex; gap:14px; align-items:flex-start; }
+.step-num { width:26px; height:26px; border-radius:50%; background:rgba(108,99,255,.15); color:var(--accent); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.step-body h4 { font-size:13.5px; font-weight:700; margin-bottom:3px; }
+.step-body p { font-size:12.5px; color:var(--text2); line-height:1.6; }
+.step-body a { color:var(--accent); text-decoration:none; }
+.step-body code { background:var(--surface3); padding:1px 6px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11.5px; color:var(--accent2); }
+
+/* ── STATS ROW ── */
+.pay-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.pay-stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+.pay-stat-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-bottom:7px; }
+.pay-stat-value { font-size:26px; font-weight:900; font-family:'DM Mono',monospace; letter-spacing:-.04em; }
+.pay-stat-sub { font-size:11.5px; color:var(--text2); margin-top:4px; }
+
+/* ── TABLE ── */
+.table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+.table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); gap:12px; flex-wrap:wrap; }
+.table-title { font-size:14px; font-weight:700; }
+.search-input { padding:8px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:'Outfit',sans-serif; font-size:13px; outline:none; width:200px; transition:border-color .2s; }
+.search-input:focus { border-color:var(--accent); }
+table { width:100%; border-collapse:collapse; }
+th { padding:11px 16px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap; }
+td { padding:13px 16px; font-size:13.5px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,.02); }
+.mono { font-family:'DM Mono',monospace; font-size:12.5px; }
+.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.badge-green  { background:rgba(52,211,153,.12); color:#34d399; }
+.badge-red    { background:rgba(248,113,113,.12); color:#f87171; }
+.badge-yellow { background:rgba(251,191,36,.12); color:#fbbf24; }
+.badge-gray   { background:rgba(255,255,255,.07); color:var(--text2); }
+.btn-refund { padding:5px 11px; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.25); color:#f87171; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; }
+.btn-refund:hover { background:rgba(248,113,113,.2); }
+.btn-refund:disabled { opacity:.4; cursor:not-allowed; }
+.empty-state { padding:60px 20px; text-align:center; color:var(--text2); }
+.empty-state .empty-icon { font-size:40px; margin-bottom:12px; }
+.empty-state h3 { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.empty-state p { font-size:13px; }
+
+/* ── PAYMENT LINKS ── */
+.links-grid { display:grid; grid-template-columns:400px 1fr; gap:22px; align-items:start; }
+.link-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:8px; }
+.link-amount { font-size:22px; font-weight:900; font-family:'DM Mono',monospace; }
+.link-desc { font-size:13px; color:var(--text2); }
+.link-url { font-family:'DM Mono',monospace; font-size:11.5px; color:var(--accent); background:var(--surface2); padding:7px 10px; border-radius:7px; word-break:break-all; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.btn-copy { background:none; border:none; cursor:pointer; color:var(--accent); font-size:16px; flex-shrink:0; }
+.link-status-row { display:flex; align-items:center; justify-content:space-between; }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; width:100%; max-width:440px; }
+.modal-title { font-size:17px; font-weight:800; margin-bottom:6px; }
+.modal-sub { font-size:13px; color:var(--text2); margin-bottom:22px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+.btn-primary { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; display:flex; align-items:center; gap:7px; }
+.btn-primary:hover:not(:disabled) { opacity:.88; }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+.btn-ghost { padding:10px 18px; background:transparent; border:1px solid var(--border); border-radius:10px; color:var(--text2); font-size:14px; font-weight:600; cursor:pointer; font-family:'Outfit',sans-serif; }
+.btn-ghost:hover { border-color:var(--text); color:var(--text); }
+
+/* not configured overlay */
+.not-configured { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:50px 30px; text-align:center; }
+.not-configured .icon { font-size:44px; margin-bottom:16px; }
+.not-configured h3 { font-size:18px; font-weight:800; margin-bottom:8px; }
+.not-configured p { font-size:13.5px; color:var(--text2); margin-bottom:22px; }
+
+@keyframes spin { to{transform:rotate(360deg)} }
+.spinning { animation:spin .7s linear infinite; display:inline-block; }
+@media(max-width:900px) { .setup-grid,.links-grid{grid-template-columns:1fr} .pay-stats{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:600px) { .pay-stats{grid-template-columns:1fr} .tabs{padding:0 16px;overflow-x:auto} }
+</style>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+</head>
+<body>
+
+<!-- ── SKELETON ───────────────────────────────────────────────────────────── -->
+<div id="page-skeleton">
+  <div class="skel-sidebar">
+    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      </div>
+    </div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+  </div>
+  <div class="skel-main">
+    <div class="skel-topbar">
+      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
+      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
+    </div>
+    <div class="skel-body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+      </div>
+      <div class="skel" style="height:40px;border-radius:9px;margin-bottom:10px;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.8;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.6;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIDEBAR ────────────────────────────────────────────────────────────── -->
+<div class="sidebar" id="sidebar">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
+    <div style="min-width:0;">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Merchant</div>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
+    <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
+    <a class="nav-item active" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left"><span class="topbar-title">Payments</span></div>
+    <div class="topbar-right">
+      <div class="store-select-wrap" id="store-select-wrap">
+        <span class="store-select-label">Store</span>
+        <select class="store-selector" id="store-selector"></select>
+      </div>
+      <div id="topbar-actions"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB BAR ── -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('setup')">⚙️ Setup</div>
+    <div class="tab" onclick="switchTab('transactions')">📄 Transactions</div>
+    <div class="tab" onclick="switchTab('payouts')">💰 Payout Summary</div>
+    <div class="tab" onclick="switchTab('links')">🔗 Payment Links</div>
+  </div>
+
+  <!-- REAL CONTENT -->
+  <div id="page-content" class="content page-enter" style="display:none;">
+
+    <!-- ── TAB: SETUP ────────────────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-setup">
+      <div class="setup-grid">
+
+        <!-- Left: Form -->
+        <div>
+          <div class="setup-card">
+            <div class="setup-card-title">
+              <span style="font-size:22px;">💳</span> Razorpay Credentials
+            </div>
+            <div class="setup-card-sub">Enter your Razorpay API keys. Each store can have its own Razorpay account.</div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Enable Payments</div>
+                <div class="toggle-sub">Allow customers to pay on your storefront</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="pay-enabled" onchange="saveEnabled()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Key ID</label>
+              <input class="form-input mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off">
+              <div class="form-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (test mode)</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Key Secret</label>
+              <input class="form-input secret" id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password">
+              <div class="form-hint">Never shared with customers. Stored securely on the server.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Currency</label>
+              <select class="form-input" id="pay-currency">
+                <option value="INR">INR — Indian Rupee ₹</option>
+                <option value="USD">USD — US Dollar $</option>
+                <option value="EUR">EUR — Euro €</option>
+                <option value="GBP">GBP — British Pound £</option>
+                <option value="SGD">SGD — Singapore Dollar S$</option>
+                <option value="AED">AED — UAE Dirham</option>
+              </select>
+            </div>
+
+            <button class="verify-btn" id="btn-verify" onclick="verifyKeys()">🔍 Test Connection</button>
+            <div class="verify-status" id="verify-status"></div>
+
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="btn-primary" onclick="saveSettings()" id="btn-save" style="flex:1;">
+                💾 Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Setup guide -->
+        <div>
+          <div class="setup-card">
+            <div class="setup-card-title">📋 How to get your Razorpay keys</div>
+            <div class="setup-card-sub">Follow these steps to connect your Razorpay account</div>
+            <ol class="setup-steps">
+              <li class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <h4>Create a Razorpay account</h4>
+                  <p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank">dashboard.razorpay.com</a> and complete KYC verification for live payments.</p>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <h4>Get your API keys</h4>
+                  <p>Go to <strong>Settings → API Keys → Generate Key</strong>. Copy both the <code>Key ID</code> and <code>Key Secret</code>.</p>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <h4>Paste keys above</h4>
+                  <p>Use <code>rzp_test_</code> keys while testing. Switch to <code>rzp_live_</code> when going live.</p>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <h4>Set up Webhook (optional but recommended)</h4>
+                  <p>In Razorpay Dashboard → <strong>Settings → Webhooks</strong>, add:<br>
+                  <code>https://apiv2.aasaitech.in/webhooks/razorpay</code><br>
+                  Select events: <em>payment.captured, payment.failed, refund.processed</em></p>
+                </div>
+              </li>
+              <li class="step">
+                <div class="step-num">5</div>
+                <div class="step-body">
+                  <h4>Enable payments & save</h4>
+                  <p>Toggle <strong>Enable Payments</strong> on, click <strong>Test Connection</strong>, then <strong>Save Settings</strong>. Your storefront checkout is live!</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB: TRANSACTIONS ─────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-transactions">
+      <div id="transactions-not-configured" class="not-configured" style="display:none;">
+        <div class="icon">💳</div>
+        <h3>Razorpay not configured</h3>
+        <p>Set up your Razorpay credentials in the Setup tab to view transactions.</p>
+        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+      </div>
+      <div id="transactions-content">
+        <div class="pay-stats" id="txn-stats">
+          <div class="pay-stat"><div class="pay-stat-label">Total Collected</div><div class="pay-stat-value" id="stat-collected">—</div><div class="pay-stat-sub">Last 30 days</div></div>
+          <div class="pay-stat"><div class="pay-stat-label">Transactions</div><div class="pay-stat-value" id="stat-count">—</div><div class="pay-stat-sub">Total payments</div></div>
+          <div class="pay-stat"><div class="pay-stat-label">Refunded</div><div class="pay-stat-value" id="stat-refunded" style="color:var(--red)">—</div><div class="pay-stat-sub">Amount refunded</div></div>
+          <div class="pay-stat"><div class="pay-stat-label">Failed</div><div class="pay-stat-value" id="stat-failed" style="color:var(--yellow)">—</div><div class="pay-stat-sub">Failed payments</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span class="table-title">Payment History</span>
+            <input class="search-input" id="txn-search" placeholder="Search payment ID…" oninput="filterTxns()">
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Payment ID</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="txn-table-body">
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PAYOUT SUMMARY ───────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-payouts">
+      <div id="payouts-not-configured" class="not-configured" style="display:none;">
+        <div class="icon">💰</div>
+        <h3>Razorpay not configured</h3>
+        <p>Set up your Razorpay credentials in the Setup tab to view payout summary.</p>
+        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+      </div>
+      <div id="payouts-content">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+          <div class="setup-card" style="text-align:center;">
+            <div style="font-size:36px;margin-bottom:8px;">💰</div>
+            <div class="pay-stat-label" style="margin-bottom:6px;">Net Collected</div>
+            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;" id="payout-net">—</div>
+            <div class="pay-stat-sub" id="payout-currency">INR • Last 30 days</div>
+          </div>
+          <div class="setup-card" style="text-align:center;">
+            <div style="font-size:36px;margin-bottom:8px;">🔄</div>
+            <div class="pay-stat-label" style="margin-bottom:6px;">Total Refunded</div>
+            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;color:var(--red);" id="payout-refunded">—</div>
+            <div class="pay-stat-sub">Refunds issued</div>
+          </div>
+          <div class="setup-card" style="text-align:center;">
+            <div style="font-size:36px;margin-bottom:8px;">❌</div>
+            <div class="pay-stat-label" style="margin-bottom:6px;">Failed Payments</div>
+            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;color:var(--yellow);" id="payout-failed">—</div>
+            <div class="pay-stat-sub">Not collected</div>
+          </div>
+        </div>
+        <div class="setup-card">
+          <div class="setup-card-title" style="margin-bottom:16px;">📊 Payment Method Breakdown</div>
+          <div id="method-breakdown" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="color:var(--text2);font-size:13px;">Loading breakdown…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PAYMENT LINKS ────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-links">
+      <div id="links-not-configured" class="not-configured" style="display:none;">
+        <div class="icon">🔗</div>
+        <h3>Razorpay not configured</h3>
+        <p>Set up your Razorpay credentials in the Setup tab to generate payment links.</p>
+        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+      </div>
+      <div id="links-content">
+        <div class="links-grid">
+          <!-- Create form -->
+          <div>
+            <div class="setup-card">
+              <div class="setup-card-title" style="margin-bottom:16px;">🔗 Create Payment Link</div>
+              <div class="form-group">
+                <label class="form-label">Amount (₹)</label>
+                <input class="form-input mono" id="link-amount" type="number" min="1" placeholder="999">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <input class="form-input" id="link-desc" type="text" placeholder="e.g. Custom order for John">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Customer Name (optional)</label>
+                <input class="form-input" id="link-name" type="text" placeholder="John Doe">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Customer Email (optional)</label>
+                <input class="form-input" id="link-email" type="email" placeholder="john@example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Customer Phone (optional)</label>
+                <input class="form-input mono" id="link-phone" type="tel" placeholder="+91 98765 43210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expires in</label>
+                <select class="form-input" id="link-expiry">
+                  <option value="">Never</option>
+                  <option value="24">24 hours</option>
+                  <option value="48">48 hours</option>
+                  <option value="72">72 hours</option>
+                  <option value="168">7 days</option>
+                  <option value="720">30 days</option>
+                </select>
+              </div>
+              <button class="btn-primary" onclick="createPaymentLink()" id="btn-create-link" style="width:100%;">
+                ✨ Generate Payment Link
+              </button>
+            </div>
+          </div>
+          <!-- Links list -->
+          <div>
+            <div class="table-wrap">
+              <div class="table-header">
+                <span class="table-title">Recent Links</span>
+                <button class="btn-ghost" style="font-size:13px;padding:7px 14px;" onclick="loadLinks()">↻ Refresh</button>
+              </div>
+              <div id="links-list" style="padding:12px;">
+                <div style="color:var(--text2);font-size:13px;padding:20px;text-align:center;">Loading links…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end page-content -->
+</div><!-- end main-wrap -->
+
+<!-- ── REFUND MODAL ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-refund">
+  <div class="modal">
+    <div class="modal-title">💸 Issue Refund</div>
+    <div class="modal-sub" id="refund-modal-sub">Refunding payment <span id="refund-payment-id" class="mono"></span></div>
+    <div class="form-group">
+      <label class="form-label">Refund Amount (₹) — leave blank for full refund</label>
+      <input class="form-input mono" id="refund-amount" type="number" min="1" placeholder="Full refund">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-refund')">Cancel</button>
+      <button class="btn-primary" id="btn-confirm-refund" onclick="confirmRefund()" style="background:#f87171;">💸 Confirm Refund</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentStoreId = ''
+let paymentSettings = null
+let allTxns = []
+let refundTarget = null
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('payments', (id) => { currentStoreId = id; loadAll() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  await loadAll()
+})
+
+async function loadAll() {
+  await loadSettings()
+  // Load current active tab's data
+  const activeTab = document.querySelector('.tab.active')?.onclick?.toString().match(/'(\w+)'/)?.[1] || 'setup'
+}
+
+async function loadSettings() {
+  try {
+    const data = await apiFetch(`/stores/${currentStoreId}/payment-settings`).then(r => r.json())
+    paymentSettings = data
+    document.getElementById('pay-enabled').checked = data.enabled
+    document.getElementById('key-id').value = data.razorpay_key_id || ''
+    document.getElementById('key-secret').value = data.has_secret ? '••••••••••••••••••••' : ''
+    document.getElementById('pay-currency').value = data.currency || 'INR'
+  } catch(e) {
+    paymentSettings = null
+  }
+}
+
+async function saveEnabled() {
+  const enabled = document.getElementById('pay-enabled').checked
+  await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
+    method:'PUT', body: JSON.stringify({ enabled })
+  })
+  toast(enabled ? 'Payments enabled' : 'Payments disabled', enabled ? 'success' : 'info')
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('btn-save')
+  btn.disabled = true; btn.textContent = '⏳ Saving…'
+  try {
+    const keySecret = document.getElementById('key-secret').value
+    const body = {
+      razorpay_key_id:     document.getElementById('key-id').value.trim(),
+      currency:            document.getElementById('pay-currency').value,
+      enabled:             document.getElementById('pay-enabled').checked,
+    }
+    if (keySecret && !keySecret.startsWith('•')) body.razorpay_key_secret = keySecret.trim()
+    const r = await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
+      method:'PUT', body: JSON.stringify(body)
+    })
+    if (!r.ok) throw new Error((await r.json()).error)
+    toast('Settings saved', 'success')
+    await loadSettings()
+  } catch(e) {
+    toast(e.message || 'Failed to save', 'error')
+  } finally {
+    btn.disabled = false; btn.innerHTML = '💾 Save Settings'
+  }
+}
+
+async function verifyKeys() {
+  const btn = document.getElementById('btn-verify')
+  const status = document.getElementById('verify-status')
+  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Testing…'
+  status.className = 'verify-status'; status.style.display = 'none'
+
+  // Save first if keys have been changed
+  const keyId = document.getElementById('key-id').value.trim()
+  const keySecret = document.getElementById('key-secret').value
+  if (keyId && keySecret && !keySecret.startsWith('•')) {
+    await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
+      method:'PUT', body: JSON.stringify({ razorpay_key_id: keyId, razorpay_key_secret: keySecret })
+    })
+  }
+
+  try {
+    const r = await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`, { method:'POST' })
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error)
+    status.className = 'verify-status ok'; status.innerHTML = '✅ ' + d.message
+  } catch(e) {
+    status.className = 'verify-status err'; status.innerHTML = '❌ ' + (e.message || 'Verification failed')
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Test Connection'
+  }
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['setup','transactions','payouts','links'][i] === name))
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+  document.getElementById('tab-' + (name==='payouts'?'payouts':name)).classList.add('active')
+  if (name === 'transactions') loadTransactions()
+  if (name === 'payouts')      loadPayouts()
+  if (name === 'links')        loadLinks()
+}
+
+// ── TRANSACTIONS ──────────────────────────────────────────────────────────────
+async function loadTransactions() {
+  if (!paymentSettings?.razorpay_key_id) {
+    document.getElementById('transactions-not-configured').style.display = 'block'
+    document.getElementById('transactions-content').style.display = 'none'
+    return
+  }
+  document.getElementById('transactions-not-configured').style.display = 'none'
+  document.getElementById('transactions-content').style.display = 'block'
+
+  try {
+    const [txns, summary] = await Promise.all([
+      apiFetch(`/stores/${currentStoreId}/payments`).then(r => r.json()),
+      apiFetch(`/stores/${currentStoreId}/payments/summary`).then(r => r.json()),
+    ])
+    allTxns = txns.items || []
+    const cur = summary.currency || 'INR'
+    document.getElementById('stat-collected').textContent = formatAmount(summary.total_collected, cur)
+    document.getElementById('stat-count').textContent     = summary.total_transactions || 0
+    document.getElementById('stat-refunded').textContent  = formatAmount(summary.total_refunded, cur)
+    document.getElementById('stat-failed').textContent    = summary.failed_count || 0
+    renderTxns(allTxns)
+  } catch(e) {
+    document.getElementById('txn-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--red);">Error: ${e.message}</td></tr>`
+  }
+}
+
+function renderTxns(items) {
+  const tbody = document.getElementById('txn-table-body')
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">No transactions yet</td></tr>'
+    return
+  }
+  tbody.innerHTML = items.map(p => {
+    const amt = (p.amount / 100).toFixed(2)
+    const statusMap = { captured:'badge-green', refunded:'badge-yellow', failed:'badge-red' }
+    const badge = `<span class="badge ${statusMap[p.status] || 'badge-gray'}">${p.status}</span>`
+    const canRefund = p.status === 'captured'
+    return `<tr>
+      <td class="mono" style="font-size:12px;">${p.id}</td>
+      <td style="font-weight:700;font-family:'DM Mono',monospace;">₹${amt}</td>
+      <td><span style="text-transform:capitalize;">${p.method || '—'}</span></td>
+      <td style="color:var(--text2);font-size:13px;">${p.email || p.contact || '—'}</td>
+      <td>${badge}</td>
+      <td style="color:var(--text2);font-size:12.5px;">${new Date(p.created_at * 1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td>${canRefund ? `<button class="btn-refund" onclick="openRefund('${p.id}', ${p.amount})">Refund</button>` : '—'}</td>
+    </tr>`
+  }).join('')
+}
+
+function filterTxns() {
+  const q = document.getElementById('txn-search').value.toLowerCase()
+  renderTxns(q ? allTxns.filter(p => p.id.toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q)) : allTxns)
+}
+
+// ── PAYOUTS ───────────────────────────────────────────────────────────────────
+async function loadPayouts() {
+  if (!paymentSettings?.razorpay_key_id) {
+    document.getElementById('payouts-not-configured').style.display = 'block'
+    document.getElementById('payouts-content').style.display = 'none'
+    return
+  }
+  document.getElementById('payouts-not-configured').style.display = 'none'
+  document.getElementById('payouts-content').style.display = 'block'
+
+  try {
+    const [summary, txns] = await Promise.all([
+      apiFetch(`/stores/${currentStoreId}/payments/summary`).then(r=>r.json()),
+      apiFetch(`/stores/${currentStoreId}/payments`).then(r=>r.json()),
+    ])
+    const cur = summary.currency || 'INR'
+    document.getElementById('payout-net').textContent      = formatAmount(summary.total_collected, cur)
+    document.getElementById('payout-refunded').textContent = formatAmount(summary.total_refunded, cur)
+    document.getElementById('payout-failed').textContent   = summary.failed_count || 0
+    document.getElementById('payout-currency').textContent = `${cur} • Last 30 days`
+
+    // Method breakdown
+    const items = txns.items || []
+    const methods = {}
+    items.filter(p => p.status === 'captured').forEach(p => {
+      const m = p.method || 'other'
+      methods[m] = (methods[m] || 0) + p.amount / 100
+    })
+    const total = Object.values(methods).reduce((a,b) => a+b, 0) || 1
+    const icons = { upi:'📱', card:'💳', netbanking:'🏦', wallet:'👛', emi:'📅', other:'💰' }
+    document.getElementById('method-breakdown').innerHTML = Object.entries(methods).sort((a,b)=>b[1]-a[1]).map(([m, amt]) => {
+      const pct = Math.round((amt / total) * 100)
+      return `<div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;">
+          <span>${icons[m]||'💰'} <span style="text-transform:capitalize;">${m}</span></span>
+          <span style="font-family:'DM Mono',monospace;font-weight:700;">₹${amt.toFixed(2)} <span style="color:var(--text2);">(${pct}%)</span></span>
+        </div>
+        <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;"></div>
+        </div>
+      </div>`
+    }).join('') || '<div style="color:var(--text2);font-size:13px;">No captured payments yet</div>'
+  } catch(e) {
+    toast('Failed to load payout data: ' + e.message, 'error')
+  }
+}
+
+// ── PAYMENT LINKS ─────────────────────────────────────────────────────────────
+async function loadLinks() {
+  if (!paymentSettings?.razorpay_key_id) {
+    document.getElementById('links-not-configured').style.display = 'block'
+    document.getElementById('links-content').style.display = 'none'
+    return
+  }
+  document.getElementById('links-not-configured').style.display = 'none'
+  document.getElementById('links-content').style.display = 'block'
+
+  try {
+    const data = await apiFetch(`/stores/${currentStoreId}/payment-links`).then(r => r.json())
+    const items = data.items || []
+    const container = document.getElementById('links-list')
+    if (!items.length) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);"><div style="font-size:32px;margin-bottom:10px;">🔗</div><div>No payment links yet</div></div>'
+      return
+    }
+    container.innerHTML = items.map(l => {
+      const amt = (l.amount / 100).toFixed(2)
+      const statusMap = { created:'badge-yellow', paid:'badge-green', cancelled:'badge-red', expired:'badge-gray' }
+      return `<div class="link-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div>
+            <div class="link-amount">₹${amt}</div>
+            <div class="link-desc">${l.description || 'No description'}</div>
+          </div>
+          <span class="badge ${statusMap[l.status]||'badge-gray'}">${l.status}</span>
+        </div>
+        <div class="link-url">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.short_url || l.id}</span>
+          <button class="btn-copy" onclick="navigator.clipboard.writeText('${l.short_url}');toast('Link copied!','success')" title="Copy link">📋</button>
+        </div>
+        <div class="link-status-row">
+          <span style="font-size:12px;color:var(--text2);">${new Date(l.created_at * 1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+          ${l.customer?.name ? `<span style="font-size:12px;color:var(--text2);">👤 ${l.customer.name}</span>` : ''}
+        </div>
+      </div>`
+    }).join('')
+  } catch(e) {
+    toast('Failed to load links: ' + e.message, 'error')
+  }
+}
+
+async function createPaymentLink() {
+  const btn = document.getElementById('btn-create-link')
+  const amount = parseFloat(document.getElementById('link-amount').value)
+  const desc   = document.getElementById('link-desc').value.trim()
+  if (!amount || amount < 1) { toast('Enter a valid amount', 'error'); return }
+  if (!desc) { toast('Enter a description', 'error'); return }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Generating…'
+  try {
+    const body = {
+      amount, description: desc,
+      customer_name:  document.getElementById('link-name').value.trim(),
+      customer_email: document.getElementById('link-email').value.trim(),
+      customer_phone: document.getElementById('link-phone').value.trim(),
+      expire_hours:   parseInt(document.getElementById('link-expiry').value) || undefined,
+    }
+    const r = await apiFetch(`/stores/${currentStoreId}/payment-links`, { method:'POST', body: JSON.stringify(body) })
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error)
+    toast('Payment link created!', 'success')
+    // Copy link immediately
+    if (d.link?.short_url) {
+      navigator.clipboard.writeText(d.link.short_url).catch(()=>{})
+      toast('Link copied to clipboard!', 'success')
+    }
+    // Clear form
+    ;['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id => document.getElementById(id).value = '')
+    await loadLinks()
+  } catch(e) {
+    toast(e.message || 'Failed to create link', 'error')
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✨ Generate Payment Link'
+  }
+}
+
+// ── REFUNDS ───────────────────────────────────────────────────────────────────
+function openRefund(paymentId, amountPaise) {
+  refundTarget = { paymentId, maxAmount: amountPaise / 100 }
+  document.getElementById('refund-payment-id').textContent = paymentId
+  document.getElementById('refund-amount').placeholder = `Full refund (₹${(amountPaise/100).toFixed(2)})`
+  document.getElementById('refund-amount').value = ''
+  openModal('modal-refund')
+}
+
+async function confirmRefund() {
+  if (!refundTarget) return
+  const btn = document.getElementById('btn-confirm-refund')
+  const amount = parseFloat(document.getElementById('refund-amount').value) || undefined
+  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Processing…'
+  try {
+    const r = await apiFetch(`/stores/${currentStoreId}/payments/${refundTarget.paymentId}/refund`, {
+      method:'POST', body: JSON.stringify({ amount })
+    })
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error)
+    toast('Refund issued successfully', 'success')
+    closeModal('modal-refund')
+    await loadTransactions()
+  } catch(e) {
+    toast(e.message || 'Refund failed', 'error')
+  } finally {
+    btn.disabled = false; btn.innerHTML = '💸 Confirm Refund'
+  }
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function formatAmount(amount, currency) {
+  const symbols = { INR:'₹', USD:'$', EUR:'€', GBP:'£', SGD:'S$', AED:'AED ' }
+  return (symbols[currency] || '') + (amount || 0).toFixed(2)
+}
+</script>
+</body>
+</html>
