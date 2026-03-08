@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Categories</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .cats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 20px; }
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: border-color .15s, transform .15s;
+  }
+  .cat-card:hover { border-color: rgba(108,99,255,0.3); transform: translateY(-2px); }
+  .cat-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .cat-slug { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .cat-delete { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 6px; transition: all .15s; }
+  .cat-delete:hover { color: var(--red); background: rgba(248,113,113,0.1); }
+  .add-card {
+    background: none;
+    border: 1.5px dashed var(--border2);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: var(--text3); font-size: 13.5px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+  }
+  .add-card:hover { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,0.04); }
+  .add-row { display: flex; gap: 10px; margin-bottom: 8px; }
+  .add-row input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 14px; color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    outline: none; transition: border-color .15s;
+  }
+  .add-row input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<script>
+let allCategories = [], currentStoreId = ''
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('categories', (id) => { currentStoreId = id; loadCategories() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  if (currentStoreId) await loadCategories()
+  else renderEmpty()
+})
+
+async function loadCategories() {
+  if (!currentStoreId) return
+  document.getElementById('page-content').innerHTML = '<div class="spinner"></div>'
+  try {
+    allCategories = await apiFetch(`/stores/${currentStoreId}/categories`)
+    renderPage()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function renderPage() {
+  const content = document.getElementById('page-content')
+  content.innerHTML = `
+    <div class="section-card" style="padding:20px;">
+      <div class="section-card-header" style="padding:0 0 16px;border-bottom:1px solid var(--border);margin-bottom:0;">
+        <span class="section-card-title">Categories <span style="color:var(--text3);font-weight:400;">(${allCategories.length})</span></span>
+      </div>
+      <div style="padding-top:16px;">
+        <div class="add-row">
+          <input type="text" id="catNewName" placeholder="New category name..." onkeydown="if(event.key==='Enter')createCategory()">
+          <button class="btn btn-primary" onclick="createCategory()">+ Add</button>
+        </div>
+        <div class="field-hint" style="margin-bottom:16px;">Press Enter or click Add to create a category</div>
+      </div>
+    </div>
+    <div class="cats-grid" id="catsGrid"></div>`
+  renderCategories()
+}
+
+function renderCategories() {
+  const grid = document.getElementById('catsGrid'); if (!grid) return
+  if (!allCategories.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🗂️</div><h3>No categories yet</h3><p>Add categories to organize your products</p></div>`
+    return
+  }
+  grid.innerHTML = allCategories.map(c => `
+    <div class="cat-card">
+      <div>
+        <div class="cat-name">🗂️ ${c.name}</div>
+        <div class="cat-slug">${c.slug}</div>
+      </div>
+      <button class="cat-delete" onclick="deleteCategory('${c._id}','${c.name.replace(/'/g,"\\'")}')">✕</button>
+    </div>`).join('')
+}
+
+async function createCategory() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  const input = document.getElementById('catNewName')
+  const name = input.value.trim()
+  if (!name) return toast('Enter a category name', 'error')
+  try {
+    await apiFetch(`/stores/${currentStoreId}/categories`, { method: 'POST', body: JSON.stringify({ name }) })
+    input.value = ''
+    await loadCategories()
+    toast('Category added!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function deleteCategory(id, name) {
+  if (!confirm(`Delete category "${name}"?`)) return
+  try {
+    await apiFetch(`/stores/${currentStoreId}/categories/${id}`, { method: 'DELETE', body: '{}' })
+    await loadCategories()
+    toast('Category deleted')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function renderEmpty() {
+  document.getElementById('page-content').innerHTML = `<div class="empty-state"><div class="empty-icon">🗂️</div><h3>No store selected</h3><p>Select a store from the top bar</p></div>`
+}
+</script>
+</body>
+</html>
