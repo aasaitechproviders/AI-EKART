@@ -508,7 +508,7 @@ async function loadAll() {
 
 async function loadSettings() {
   try {
-    const data = await apiFetch(`/stores/${currentStoreId}/payment-settings`).then(r => r.json())
+    const data = await apiFetch(`/stores/${currentStoreId}/payment-settings`)
     paymentSettings = data
     document.getElementById('pay-enabled').checked = data.enabled
     document.getElementById('key-id').value = data.razorpay_key_id || ''
@@ -538,10 +538,9 @@ async function saveSettings() {
       enabled:             document.getElementById('pay-enabled').checked,
     }
     if (keySecret && !keySecret.startsWith('•')) body.razorpay_key_secret = keySecret.trim()
-    const r = await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
+    await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
       method:'PUT', body: JSON.stringify(body)
     })
-    if (!r.ok) throw new Error((await r.json()).error)
     toast('Settings saved', 'success')
     await loadSettings()
   } catch(e) {
@@ -567,12 +566,10 @@ async function verifyKeys() {
   }
 
   try {
-    const r = await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`, { method:'POST' })
-    const d = await r.json()
-    if (!r.ok) throw new Error(d.error)
-    status.className = 'verify-status ok'; status.innerHTML = '✅ ' + d.message
+    const d = await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`, { method:'POST' })
+    status.className = 'verify-status ok'; status.style.display = 'block'; status.innerHTML = '✅ ' + d.message
   } catch(e) {
-    status.className = 'verify-status err'; status.innerHTML = '❌ ' + (e.message || 'Verification failed')
+    status.className = 'verify-status err'; status.style.display = 'block'; status.innerHTML = '❌ ' + (e.message || 'Verification failed')
   } finally {
     btn.disabled = false; btn.textContent = '🔍 Test Connection'
   }
@@ -600,8 +597,8 @@ async function loadTransactions() {
 
   try {
     const [txns, summary] = await Promise.all([
-      apiFetch(`/stores/${currentStoreId}/payments`).then(r => r.json()),
-      apiFetch(`/stores/${currentStoreId}/payments/summary`).then(r => r.json()),
+      apiFetch(`/stores/${currentStoreId}/payments`),
+      apiFetch(`/stores/${currentStoreId}/payments/summary`),
     ])
     allTxns = txns.items || []
     const cur = summary.currency || 'INR'
@@ -655,8 +652,8 @@ async function loadPayouts() {
 
   try {
     const [summary, txns] = await Promise.all([
-      apiFetch(`/stores/${currentStoreId}/payments/summary`).then(r=>r.json()),
-      apiFetch(`/stores/${currentStoreId}/payments`).then(r=>r.json()),
+      apiFetch(`/stores/${currentStoreId}/payments/summary`),
+      apiFetch(`/stores/${currentStoreId}/payments`),
     ])
     const cur = summary.currency || 'INR'
     document.getElementById('payout-net').textContent      = formatAmount(summary.total_collected, cur)
@@ -701,7 +698,7 @@ async function loadLinks() {
   document.getElementById('links-content').style.display = 'block'
 
   try {
-    const data = await apiFetch(`/stores/${currentStoreId}/payment-links`).then(r => r.json())
+    const data = await apiFetch(`/stores/${currentStoreId}/payment-links`)
     const items = data.items || []
     const container = document.getElementById('links-list')
     if (!items.length) {
