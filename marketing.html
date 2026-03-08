@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Marketing</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .marketing-layout { display: grid; grid-template-columns: 280px 1fr; gap: 18px; align-items: start; }
+  .tool-list { display: flex; flex-direction: column; gap: 10px; }
+  .tool-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tool-card:hover { border-color: rgba(108,99,255,0.35); background: rgba(108,99,255,0.04); }
+  .tool-card.active { border-color: var(--accent); background: rgba(108,99,255,0.09); }
+  .tool-card-icon { font-size: 22px; margin-bottom: 8px; }
+  .tool-card-name { font-size: 14px; font-weight: 800; margin-bottom: 3px; }
+  .tool-card-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .tool-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .tool-panel-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tool-panel-header h2 { font-size: 16px; font-weight: 800; }
+  .tool-panel-body { padding: 22px; }
+  .result-block {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .result-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .result-block-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+  .result-copy-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all .15s;
+  }
+  .result-copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .result-content { font-size: 13.5px; color: var(--text2); line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+  .insta-hashtags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .hashtag { font-size: 12px; font-weight: 600; color: var(--accent2); background: rgba(108,99,255,0.1); border-radius: 5px; padding: 2px 8px; }
+  .tabs-row { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tab-btn { padding: 6px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: 1px solid var(--border2); background: none; color: var(--text3); font-family: 'Outfit', sans-serif; transition: all .15s; }
+  .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .platform-result { display: none; }
+  .platform-result.active { display: block; }
+  @media(max-width:768px) { .marketing-layout { grid-template-columns: 1fr; } .tool-list { flex-direction: row; flex-wrap: wrap; } .tool-card { min-width: 140px; flex: 1; } }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<script>
+let currentStoreId = '', currentTool = 'instagram', allProducts = []
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('marketing', (id) => { currentStoreId = id; loadProducts() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  if (currentStoreId) await loadProducts()
+  renderPage()
+})
+
+async function loadProducts() {
+  if (!currentStoreId) return
+  try { allProducts = await apiFetch(`/stores/${currentStoreId}/products`) } catch {}
+}
+
+function renderPage() {
+  const content = document.getElementById('page-content')
+  const productOptions = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
+  content.innerHTML = `
+    <div class="marketing-layout">
+      <div class="tool-list">
+        <div class="tool-card ${currentTool==='instagram'?'active':''}" onclick="switchTool('instagram')">
+          <div class="tool-card-icon">📸</div>
+          <div class="tool-card-name">Instagram Post</div>
+          <div class="tool-card-desc">Captions, hashtags, emojis</div>
+        </div>
+        <div class="tool-card ${currentTool==='whatsapp'?'active':''}" onclick="switchTool('whatsapp')">
+          <div class="tool-card-icon">💬</div>
+          <div class="tool-card-name">WhatsApp Message</div>
+          <div class="tool-card-desc">Promotional message for broadcasts</div>
+        </div>
+        <div class="tool-card ${currentTool==='email'?'active':''}" onclick="switchTool('email')">
+          <div class="tool-card-icon">📧</div>
+          <div class="tool-card-name">Email Campaign</div>
+          <div class="tool-card-desc">Subject line + full email body</div>
+        </div>
+        <div class="tool-card ${currentTool==='sms'?'active':''}" onclick="switchTool('sms')">
+          <div class="tool-card-icon">📱</div>
+          <div class="tool-card-name">SMS Blast</div>
+          <div class="tool-card-desc">160-char promo SMS</div>
+        </div>
+      </div>
+      <div class="tool-panel" id="toolPanel">
+        ${renderToolPanel(productOptions)}
+      </div>
+    </div>`
+}
+
+function renderToolPanel(productOptions) {
+  const toolConfig = {
+    instagram: { icon:'📸', name:'Instagram Post', help:'Generate engaging Instagram captions with hashtags for your products or store.' },
+    whatsapp: { icon:'💬', name:'WhatsApp Message', help:'Create broadcast messages for your customers to announce sales, offers, or new arrivals.' },
+    email: { icon:'📧', name:'Email Campaign', help:'Generate a full email campaign with subject line and body for your customers.' },
+    sms: { icon:'📱', name:'SMS Blast', help:'Short, punchy 160-character promotional SMS for your customers.' }
+  }
+  const t = toolConfig[currentTool]
+  return `
+    <div class="tool-panel-header">
+      <span style="font-size:22px;">${t.icon}</span>
+      <div><h2>${t.name}</h2><p style="font-size:12px;color:var(--text3);margin-top:2px;">${t.help}</p></div>
+    </div>
+    <div class="tool-panel-body">
+      <div class="field"><label>Campaign Goal *</label>
+        <input type="text" id="mktGoal" placeholder="e.g. Promote summer sale, Announce new product launch, Drive store traffic...">
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Product (Optional)</label>
+          <select id="mktProduct">
+            <option value="">General / All Products</option>
+            ${productOptions}
+          </select>
+        </div>
+        <div class="field"><label>Tone</label>
+          <select id="mktTone">
+            <option value="friendly">Friendly & Warm</option>
+            <option value="professional">Professional</option>
+            <option value="urgent">Urgent / FOMO</option>
+            <option value="playful">Playful & Fun</option>
+            <option value="luxurious">Premium & Luxurious</option>
+          </select>
+        </div>
+      </div>
+      ${currentTool === 'email' || currentTool === 'whatsapp' ? `
+      <div class="field"><label>Offer / Discount (Optional)</label>
+        <input type="text" id="mktOffer" placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal">
+      </div>` : ''}
+      <div class="field"><label>Store Name / Brand</label>
+        <input type="text" id="mktBrand" placeholder="Your store or brand name">
+      </div>
+      <button class="btn-ai" onclick="generateMarketing()" id="mktGenBtn" style="width:100%;justify-content:center;padding:11px;">
+        ✨ Generate ${currentTool === 'instagram' ? 'Post' : currentTool === 'email' ? 'Email' : currentTool === 'sms' ? 'SMS' : 'Message'}
+      </button>
+      <div id="mktResult" style="margin-top:18px;"></div>
+    </div>`
+}
+
+function switchTool(tool) {
+  currentTool = tool
+  document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'))
+  event.currentTarget.classList.add('active')
+  const productOptions = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
+  document.getElementById('toolPanel').innerHTML = renderToolPanel(productOptions)
+}
+
+async function generateMarketing() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  const goal = document.getElementById('mktGoal').value.trim()
+  if (!goal) return toast('Enter a campaign goal', 'error')
+  const btn = document.getElementById('mktGenBtn')
+  btn.disabled = true; btn.textContent = '⏳ Generating...'
+  document.getElementById('mktResult').innerHTML = ''
+  const productId = document.getElementById('mktProduct')?.value || ''
+  const product = allProducts.find(p => p._id === productId)
+  const tone = document.getElementById('mktTone').value
+  const offer = document.getElementById('mktOffer')?.value.trim() || ''
+  const brand = document.getElementById('mktBrand').value.trim()
+  try {
+    const r = await apiFetch('/ai/marketing-content', {
+      method: 'POST',
+      body: JSON.stringify({
+        platform: currentTool,
+        goal,
+        product: product ? { name: product.name, price: product.price, description: product.description } : null,
+        tone,
+        offer,
+        brand,
+        currency: 'INR'
+      })
+    })
+    renderMarketingResult(r.content)
+  } catch (e) { toast('Generation failed: ' + e.message, 'error') }
+  btn.disabled = false; btn.textContent = `✨ Generate ${currentTool === 'instagram' ? 'Post' : currentTool === 'email' ? 'Email' : currentTool === 'sms' ? 'SMS' : 'Message'}`
+}
+
+function renderMarketingResult(content) {
+  const res = document.getElementById('mktResult')
+  if (!content) { res.innerHTML = '<p style="color:var(--red);">No content generated</p>'; return }
+
+  if (currentTool === 'instagram') {
+    const hashtags = content.hashtags || []
+    res.innerHTML = `
+      <div class="result-block">
+        <div class="result-block-header">
+          <span class="result-block-title">📸 Caption</span>
+          <button class="result-copy-btn" onclick="copyText('instaCaption')">📋 Copy</button>
+        </div>
+        <div class="result-content" id="instaCaption">${content.caption || content.text || ''}</div>
+      </div>
+      ${hashtags.length ? `<div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">🏷️ Hashtags</span>
+          <button class="result-copy-btn" onclick="copyText('instaHashtags')">📋 Copy</button></div>
+        <div id="instaHashtags" style="display:none;">${hashtags.join(' ')}</div>
+        <div class="insta-hashtags">${hashtags.map(h=>`<span class="hashtag">${h.startsWith('#')?h:'#'+h}</span>`).join('')}</div>
+      </div>` : ''}
+      ${content.story_text ? `<div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">📱 Story Text</span>
+          <button class="result-copy-btn" onclick="copyText('storyText')">📋 Copy</button></div>
+        <div class="result-content" id="storyText">${content.story_text}</div>
+      </div>` : ''}`
+  } else if (currentTool === 'whatsapp') {
+    res.innerHTML = `
+      <div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">💬 Message</span>
+          <button class="result-copy-btn" onclick="copyText('waMsg')">📋 Copy</button></div>
+        <div class="result-content" id="waMsg">${content.message || content.text || ''}</div>
+      </div>
+      ${content.cta ? `<div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">🔗 Call-to-Action</span></div>
+        <div class="result-content">${content.cta}</div></div>` : ''}`
+  } else if (currentTool === 'email') {
+    res.innerHTML = `
+      <div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">📌 Subject Line</span>
+          <button class="result-copy-btn" onclick="copyText('emailSubject')">📋 Copy</button></div>
+        <div class="result-content" id="emailSubject" style="font-weight:700;font-size:15px;">${content.subject || ''}</div>
+      </div>
+      <div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">📧 Email Body</span>
+          <button class="result-copy-btn" onclick="copyText('emailBody')">📋 Copy</button></div>
+        <div class="result-content" id="emailBody">${content.body || content.text || ''}</div>
+      </div>
+      ${content.preheader ? `<div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">👁️ Preview Text</span></div>
+        <div class="result-content">${content.preheader}</div></div>` : ''}`
+  } else if (currentTool === 'sms') {
+    const msg = content.message || content.text || ''
+    const charCount = msg.length
+    res.innerHTML = `
+      <div class="result-block">
+        <div class="result-block-header"><span class="result-block-title">📱 SMS Message</span>
+          <button class="result-copy-btn" onclick="copyText('smsMsg')">📋 Copy</button></div>
+        <div class="result-content" id="smsMsg">${msg}</div>
+        <div style="margin-top:8px;font-size:11.5px;font-weight:700;color:${charCount>160?'var(--red)':'var(--green)'};">${charCount} / 160 chars ${charCount>160?'⚠️ Too long':charCount>140?'⚠️ Almost limit':'✓ Good'}</div>
+      </div>`
+  } else {
+    res.innerHTML = `<div class="result-block"><div class="result-block-header"><span class="result-block-title">Result</span>
+      <button class="result-copy-btn" onclick="copyText('genericResult')">📋 Copy</button></div>
+      <div class="result-content" id="genericResult">${typeof content === 'string' ? content : JSON.stringify(content, null, 2)}</div></div>`
+  }
+}
+
+function copyText(id) {
+  const el = document.getElementById(id); if (!el) return
+  navigator.clipboard.writeText(el.textContent).then(() => toast('Copied!', 'success'))
+}
+</script>
+</body>
+</html>
