@@ -39,8 +39,7 @@
   .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; color: var(--text2); margin-bottom: 8px; }
   .summary-row.discount { color: var(--green); font-weight: 600; }
   .summary-total { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 800; margin-top: 12px; padding-top: 14px; border-top: 2px solid var(--border); }
-  .cod-badge { display: flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 11px 14px; margin: 14px 0; font-size: 13px; color: var(--green); font-weight: 600; }
-  .coupon-wrap { margin: 4px 0 14px; }
+  .coupon-wrap { margin: 14px 0; }
   .coupon-label { font-size: 11.5px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
   .coupon-input-row { display: flex; gap: 8px; }
   .coupon-input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 13px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; outline: none; background: var(--bg); transition: border-color .15s; }
@@ -50,6 +49,21 @@
   .coupon-msg { font-size: 12.5px; margin-top: 7px; padding: 7px 12px; border-radius: 7px; display: none; }
   .coupon-msg.success { display: block; background: #f0fdf4; color: var(--green); border: 1px solid #bbf7d0; }
   .coupon-msg.error { display: block; background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+
+  /* ── Payment Method Selector ─────────────────────────── */
+  .payment-methods { margin: 14px 0; }
+  .payment-methods-label { font-size: 11.5px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .payment-options { display: flex; flex-direction: column; gap: 8px; }
+  .payment-option { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all .15s; background: var(--bg); }
+  .payment-option:hover { border-color: var(--accent); background: #f5f4ff; }
+  .payment-option.selected { border-color: var(--accent); background: #f0efff; }
+  .payment-option input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+  .payment-option-info { flex: 1; }
+  .payment-option-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .payment-option-desc { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
+  .payment-option-icon { font-size: 22px; }
+  .razorpay-badge { display: flex; align-items: center; gap: 6px; background: #eef9f4; border: 1px solid #c3e6d8; border-radius: 8px; padding: 7px 12px; margin-top: 6px; font-size: 11.5px; color: #15803d; font-weight: 600; }
+
   .form-section { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 18px; }
   .form-section-title { font-size: 12.5px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
   .field { margin-bottom: 11px; }
@@ -68,16 +82,18 @@
   .btn-shop { display: inline-block; padding: 12px 28px; background: var(--accent); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; transition: all .15s; }
   .btn-shop:hover { background: #7c74ff; }
   .error-msg { background: #fef2f2; border: 1px solid #fecaca; color: var(--red); padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
-  .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(2px); }
   .loading-overlay.show { display: flex; }
   .spinner-wrap { background: white; border-radius: 16px; padding: 28px 36px; text-align: center; }
   .spinner { width: 40px; height: 40px; border: 4px solid #e8eaf0; border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
   .spinner-wrap p { font-size: 14px; font-weight: 600; color: var(--text2); }
+  .spinner-wrap p span { display: block; font-size: 12px; color: var(--text3); margin-top: 4px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media(max-width:768px) { .layout { grid-template-columns: 1fr; } .checkout-panel { position: static; } .field-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
+
 <header>
   <div class="header-inner">
     <a class="back-btn" id="shopLink" href="javascript:history.back()">← Continue Shopping</a>
@@ -88,18 +104,40 @@
 <div class="page-wrap"><div id="cartView"></div></div>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner-wrap"><div class="spinner"></div><p>Placing your order...</p></div>
+  <div class="spinner-wrap">
+    <div class="spinner"></div>
+    <p id="loadingText">Placing your order...<span id="loadingSubtext"></span></p>
+  </div>
 </div>
 
+<!-- Razorpay SDK — loaded once on page load -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
-const slug = sessionStorage.getItem('ekart_store') || new URLSearchParams(location.search).get('store')
+const slug     = sessionStorage.getItem('ekart_store') || new URLSearchParams(location.search).get('store')
 const currency = sessionStorage.getItem('ekart_currency') || '₹'
-const API = 'https://apiv2.aasaitech.in'
-let appliedCoupon = null
+const API      = 'https://apiv2.aasaitech.in'
+
+let appliedCoupon   = null
+let paymentEnabled  = false   // set after fetching store config
+let selectedPayment = 'cod'   // 'cod' or 'razorpay'
 
 if (slug) document.getElementById('shopLink').href = `shop.html?store=${slug}`
+
 function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
 function saveCart(c) { localStorage.setItem('cart_' + slug, JSON.stringify(c)) }
+
+// Load store config to check if Razorpay is enabled
+async function loadStoreConfig() {
+  try {
+    const res  = await fetch(`${API}/shop/${slug}/config`)
+    const data = await res.json()
+    paymentEnabled = !!(data.payment_enabled)
+  } catch(e) {
+    paymentEnabled = false
+  }
+  render()
+}
 
 function render() {
   const cart = getCart()
@@ -108,10 +146,43 @@ function render() {
     view.innerHTML = `<div class="empty-cart"><div class="icon">🛒</div><h2>Your cart is empty</h2><p>Looks like you haven't added anything yet</p><a class="btn-shop" href="shop.html?store=${slug}">Browse Products</a></div>`
     return
   }
-  const subtotal = cart.reduce((s, x) => s + x.price * x.qty, 0)
-  const discount = appliedCoupon ? appliedCoupon.discount : 0
-  const total = Math.max(subtotal - discount, 0)
-  const totalQty = cart.reduce((s, x) => s + x.qty, 0)
+  const subtotal  = cart.reduce((s, x) => s + x.price * x.qty, 0)
+  const discount  = appliedCoupon ? appliedCoupon.discount : 0
+  const total     = Math.max(subtotal - discount, 0)
+  const totalQty  = cart.reduce((s, x) => s + x.qty, 0)
+
+  // Payment method selector — only show Razorpay option if enabled
+  const paymentSelector = paymentEnabled ? `
+    <div class="payment-methods">
+      <div class="payment-methods-label">Payment Method</div>
+      <div class="payment-options">
+        <label class="payment-option ${selectedPayment==='razorpay'?'selected':''}" onclick="selectPayment('razorpay')">
+          <input type="radio" name="paymethod" value="razorpay" ${selectedPayment==='razorpay'?'checked':''}>
+          <span class="payment-option-icon">💳</span>
+          <div class="payment-option-info">
+            <div class="payment-option-title">Pay Online</div>
+            <div class="payment-option-desc">UPI, Cards, Netbanking, Wallets</div>
+          </div>
+        </label>
+        <label class="payment-option ${selectedPayment==='cod'?'selected':''}" onclick="selectPayment('cod')">
+          <input type="radio" name="paymethod" value="cod" ${selectedPayment==='cod'?'checked':''}>
+          <span class="payment-option-icon">💵</span>
+          <div class="payment-option-info">
+            <div class="payment-option-title">Cash on Delivery</div>
+            <div class="payment-option-desc">Pay when your order arrives</div>
+          </div>
+        </label>
+      </div>
+      ${selectedPayment==='razorpay' ? `<div class="razorpay-badge">⚡ Powered by Razorpay — 100% secure payments</div>` : ''}
+    </div>` : `<div style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 14px;margin:14px 0;font-size:13px;color:var(--green);font-weight:600;">💰 Cash on Delivery</div>`
+
+  const btnLabel = selectedPayment === 'razorpay'
+    ? `💳 Pay ${currency}${total.toFixed(2)} Online`
+    : `✅ Place Order — ${currency}${total.toFixed(2)}`
+
+  const secureNote = selectedPayment === 'razorpay'
+    ? '🔒 Secured by Razorpay — UPI, Cards, Netbanking'
+    : '🔒 Pay in cash when your order arrives'
 
   view.innerHTML = `<div class="layout">
     <div>
@@ -119,10 +190,10 @@ function render() {
         <div class="cart-header"><span>${totalQty} item${totalQty!==1?'s':''}</span><span style="font-family:'DM Mono',monospace;">${currency}${subtotal.toFixed(2)}</span></div>
         ${cart.map((item,i) => `
         <div class="cart-item">
-          <div class="cart-img">${item.image?`<img src="${item.image}" alt="">` :'📦'}</div>
+          <div class="cart-img">${item.image ? `<img src="${item.image}" alt="">` : '📦'}</div>
           <div class="cart-item-info">
             <div class="cart-item-name">${item.name}</div>
-            ${item.variant?`<div class="cart-item-variant">📌 ${item.variant}</div>`:''}
+            ${item.variant ? `<div class="cart-item-variant">📌 ${item.variant}</div>` : ''}
             <div class="cart-item-price">${currency}${(item.price*item.qty).toFixed(2)}</div>
             <div class="cart-item-unit">${currency}${item.price.toFixed(2)} each</div>
           </div>
@@ -140,17 +211,20 @@ function render() {
         <div class="panel-title">Order Summary</div>
         <div class="summary-row"><span>Subtotal (${totalQty} items)</span><span>${currency}${subtotal.toFixed(2)}</span></div>
         <div class="summary-row"><span>Shipping</span><span style="color:var(--green);font-weight:600;">FREE</span></div>
-        ${appliedCoupon?`<div class="summary-row discount"><span>🎟 Coupon (${appliedCoupon.code})</span><span>−${currency}${discount.toFixed(2)}</span></div>`:''}
+        ${appliedCoupon ? `<div class="summary-row discount"><span>🎟 Coupon (${appliedCoupon.code})</span><span>−${currency}${discount.toFixed(2)}</span></div>` : ''}
         <div class="summary-total"><span>Total</span><span>${currency}${total.toFixed(2)}</span></div>
-        <div class="cod-badge">💰 Cash on Delivery</div>
+
+        ${paymentSelector}
+
         <div class="coupon-wrap">
           <div class="coupon-label">Have a coupon?</div>
           <div class="coupon-input-row">
-            <input class="coupon-input" type="text" id="couponInput" placeholder="ENTER CODE" value="${appliedCoupon?appliedCoupon.code:''}">
-            <button class="btn-apply" onclick="${appliedCoupon?'removeCoupon()':'applyCoupon()'}">${appliedCoupon?'✕ Remove':'Apply'}</button>
+            <input class="coupon-input" type="text" id="couponInput" placeholder="ENTER CODE" value="${appliedCoupon ? appliedCoupon.code : ''}">
+            <button class="btn-apply" onclick="${appliedCoupon ? 'removeCoupon()' : 'applyCoupon()'}">${appliedCoupon ? '✕ Remove' : 'Apply'}</button>
           </div>
           <div class="coupon-msg" id="couponMsg"></div>
         </div>
+
         <div class="form-section">
           <div class="form-section-title">👤 Contact Details</div>
           <div class="field"><label>Full Name *</label><input type="text" id="custName" placeholder="John Doe"></div>
@@ -170,75 +244,235 @@ function render() {
             <div class="field"><label>Country</label><input type="text" id="addrCountry" value="India"></div>
           </div>
         </div>
+
         <div class="error-msg" id="errorMsg"></div>
-        <button class="btn-checkout" onclick="placeOrder()">✅ Place Order — ${currency}${total.toFixed(2)}</button>
-        <p class="secure-note">🔒 Pay in cash when your order arrives</p>
+        <button class="btn-checkout" id="checkoutBtn" onclick="handleCheckout()">${btnLabel}</button>
+        <p class="secure-note">${secureNote}</p>
       </div>
     </div>
   </div>`
 }
 
-function updateQty(i,delta){const c=getCart();c[i].qty=Math.max(1,c[i].qty+delta);saveCart(c);render()}
-function removeItem(i){const c=getCart();c.splice(i,1);saveCart(c);render()}
+function selectPayment(method) {
+  selectedPayment = method
+  render()
+  // Restore any filled-in form values after re-render
+}
 
+function updateQty(i, delta) { const c=getCart(); c[i].qty=Math.max(1,c[i].qty+delta); saveCart(c); render() }
+function removeItem(i) { const c=getCart(); c.splice(i,1); saveCart(c); render() }
+
+// ── Coupon ────────────────────────────────────────────────────────────────────
 async function applyCoupon() {
   const code = document.getElementById('couponInput').value.trim()
   if (!code) return
-  const cart = getCart()
-  const subtotal = cart.reduce((s,x)=>s+x.price*x.qty,0)
-  const msgEl = document.getElementById('couponMsg')
+  const cart     = getCart()
+  const subtotal = cart.reduce((s,x) => s+x.price*x.qty, 0)
+  const msgEl    = document.getElementById('couponMsg')
   try {
-    const res = await fetch(`${API}/shop/${slug}/coupons/validate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,subtotal})})
+    const res  = await fetch(`${API}/shop/${slug}/coupons/validate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, subtotal })
+    })
     const data = await res.json()
-    if (!res.ok) throw new Error(data.error||'Invalid coupon')
+    if (!res.ok) throw new Error(data.error || 'Invalid coupon')
     appliedCoupon = { code: data.code, discount: data.discount }
     render()
     const m = document.getElementById('couponMsg')
-    m.className='coupon-msg success'; m.style.display='block'
-    m.textContent=`✅ ${data.type==='percent'?data.value+'% off':currency+data.value+' off'} applied! You save ${currency}${data.discount.toFixed(2)}`
+    m.className = 'coupon-msg success'
+    m.textContent = `✅ ${data.type==='percent' ? data.value+'% off' : currency+data.value+' off'} applied! You save ${currency}${data.discount.toFixed(2)}`
   } catch(e) {
-    msgEl.className='coupon-msg error'; msgEl.style.display='block'
-    msgEl.textContent='❌ '+e.message
+    msgEl.className = 'coupon-msg error'
+    msgEl.textContent = '❌ ' + e.message
   }
 }
 
-function removeCoupon(){appliedCoupon=null;render()}
+function removeCoupon() { appliedCoupon = null; render() }
 
-async function placeOrder() {
-  const name=document.getElementById('custName').value.trim()
-  const email=document.getElementById('custEmail').value.trim()
-  const phone=document.getElementById('custPhone').value.trim()
-  const line1=document.getElementById('addrLine1').value.trim()
-  const city=document.getElementById('addrCity').value.trim()
-  const state=document.getElementById('addrState').value.trim()
-  const pincode=document.getElementById('addrPin').value.trim()
-  const line2=document.getElementById('addrLine2').value.trim()
-  const country=document.getElementById('addrCountry').value.trim()
-  const errEl=document.getElementById('errorMsg')
-  if (!name||!email||!phone||!line1||!city||!state||!pincode){
-    errEl.textContent='Please fill in all required fields';errEl.style.display='block';errEl.scrollIntoView({behavior:'smooth',block:'center'});return
+// ── Form validation (shared) ──────────────────────────────────────────────────
+function getFormData() {
+  return {
+    name:    document.getElementById('custName')?.value.trim()   || '',
+    email:   document.getElementById('custEmail')?.value.trim()  || '',
+    phone:   document.getElementById('custPhone')?.value.trim()  || '',
+    line1:   document.getElementById('addrLine1')?.value.trim()  || '',
+    line2:   document.getElementById('addrLine2')?.value.trim()  || '',
+    city:    document.getElementById('addrCity')?.value.trim()   || '',
+    state:   document.getElementById('addrState')?.value.trim()  || '',
+    pincode: document.getElementById('addrPin')?.value.trim()    || '',
+    country: document.getElementById('addrCountry')?.value.trim() || 'India',
   }
-  errEl.style.display='none'
-  const cart=getCart()
-  const body={customer_name:name,customer_email:email,customer_phone:phone,
-    shipping_address:{line1,line2,city,state,pincode,country},
-    items:cart.map(x=>({product_id:x.product_id,qty:x.qty,variant:x.variant||null})),
-    coupon_code:appliedCoupon?appliedCoupon.code:null}
-  document.getElementById('loadingOverlay').classList.add('show')
-  document.querySelector('.btn-checkout').disabled=true
+}
+
+function validateForm(f) {
+  if (!f.name || !f.email || !f.phone || !f.line1 || !f.city || !f.state || !f.pincode) {
+    return 'Please fill in all required fields'
+  }
+  if (!/\S+@\S+\.\S+/.test(f.email)) return 'Please enter a valid email address'
+  if (!/^\d{6}$/.test(f.pincode))    return 'PIN code must be 6 digits'
+  return null
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg')
+  if (!el) return
+  el.textContent = msg; el.style.display = 'block'
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+function setLoading(show, text = 'Placing your order...', subtext = '') {
+  document.getElementById('loadingOverlay').classList.toggle('show', show)
+  document.getElementById('loadingText').innerHTML = text + (subtext ? `<span>${subtext}</span>` : '')
+  const btn = document.getElementById('checkoutBtn')
+  if (btn) btn.disabled = show
+}
+
+// ── Main checkout dispatcher ──────────────────────────────────────────────────
+function handleCheckout() {
+  const errEl = document.getElementById('errorMsg')
+  if (errEl) errEl.style.display = 'none'
+  if (selectedPayment === 'razorpay') {
+    payWithRazorpay()
+  } else {
+    placeOrderCOD()
+  }
+}
+
+// ── COD checkout (unchanged logic) ───────────────────────────────────────────
+async function placeOrderCOD() {
+  const f = getFormData()
+  const err = validateForm(f)
+  if (err) { showError(err); return }
+
+  const cart = getCart()
+  const body = {
+    customer_name:    f.name,
+    customer_email:   f.email,
+    customer_phone:   f.phone,
+    shipping_address: { line1: f.line1, line2: f.line2, city: f.city, state: f.state, pincode: f.pincode, country: f.country },
+    items:            cart.map(x => ({ product_id: x.product_id, qty: x.qty, variant: x.variant || null })),
+    coupon_code:      appliedCoupon ? appliedCoupon.code : null
+  }
+
+  setLoading(true, 'Placing your order...', 'This will just take a moment')
   try {
-    const res=await fetch(`${API}/shop/${slug}/checkout`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-    const data=await res.json()
-    if (!res.ok||!data.success) throw new Error(data.error||'Order failed')
-    localStorage.removeItem('cart_'+slug)
-    location.href=`order-confirm.html?store=${slug}&order=${data.order_number}&email=${encodeURIComponent(email)}`
+    const res  = await fetch(`${API}/shop/${slug}/checkout`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    })
+    const data = await res.json()
+    if (!res.ok || !data.success) throw new Error(data.error || 'Order failed')
+    localStorage.removeItem('cart_' + slug)
+    location.href = `order-confirm.html?store=${slug}&order=${data.order_number}&email=${encodeURIComponent(f.email)}`
   } catch(e) {
-    document.getElementById('loadingOverlay').classList.remove('show')
-    document.querySelector('.btn-checkout').disabled=false
-    errEl.textContent=e.message;errEl.style.display='block'
+    setLoading(false)
+    showError(e.message)
   }
 }
-render()
+
+// ── Razorpay checkout ─────────────────────────────────────────────────────────
+async function payWithRazorpay() {
+  const f = getFormData()
+  const err = validateForm(f)
+  if (err) { showError(err); return }
+
+  const cart = getCart()
+
+  setLoading(true, 'Preparing payment...', 'Setting up secure checkout')
+
+  let orderData
+  try {
+    // Step 1 — create order on backend (secret never touches browser)
+    const res = await fetch(`${API}/shop/${slug}/create-order`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name:    f.name,
+        customer_email:   f.email,
+        customer_phone:   f.phone,
+        shipping_address: { line1: f.line1, line2: f.line2, city: f.city, state: f.state, pincode: f.pincode, country: f.country },
+        items:            cart.map(x => ({ product_id: x.product_id, qty: x.qty, variant: x.variant || null })),
+        coupon_code:      appliedCoupon ? appliedCoupon.code : null
+      })
+    })
+    orderData = await res.json()
+    if (!res.ok) throw new Error(orderData.error || 'Failed to create order')
+  } catch(e) {
+    setLoading(false)
+    showError(e.message)
+    return
+  }
+
+  // Step 2 — hide loading, open Razorpay modal
+  setLoading(false)
+
+  const options = {
+    key:          orderData.razorpay_key_id,
+    amount:       orderData.amount,           // in paise
+    currency:     orderData.currency || 'INR',
+    name:         orderData.store_name || 'eKart Store',
+    description:  `Order #${orderData.order_number}`,
+    order_id:     orderData.razorpay_order_id,
+    prefill: {
+      name:    f.name,
+      email:   f.email,
+      contact: f.phone,
+    },
+    notes: {
+      order_number: orderData.order_number,
+      shipping:     `${f.line1}, ${f.city} - ${f.pincode}`
+    },
+    theme: { color: '#6c63ff' },
+
+    // ── Payment SUCCESS ───────────────────────────────────────────────
+    handler: async function(response) {
+      setLoading(true, 'Verifying payment...', 'Please do not close this page')
+      try {
+        const verifyRes = await fetch(`${API}/shop/${slug}/verify-payment`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            order_number:        orderData.order_number
+          })
+        })
+        const verifyData = await verifyRes.json()
+        if (!verifyRes.ok) throw new Error(verifyData.error || 'Payment verification failed')
+
+        // Payment verified — clear cart and redirect
+        localStorage.removeItem('cart_' + slug)
+        location.href = `order-confirm.html?store=${slug}&order=${orderData.order_number}&email=${encodeURIComponent(f.email)}&paid=1`
+      } catch(e) {
+        setLoading(false)
+        showError('Payment received but verification failed. Please contact support with order #' + orderData.order_number)
+      }
+    },
+
+    // ── Payment MODAL DISMISSED ───────────────────────────────────────
+    modal: {
+      ondismiss: function() {
+        setLoading(false)
+        showError('Payment cancelled. Your cart is still saved — try again when ready.')
+      }
+    }
+  }
+
+  try {
+    const rzp = new Razorpay(options)
+    rzp.on('payment.failed', function(response) {
+      setLoading(false)
+      showError(`Payment failed: ${response.error.description}. Please try again.`)
+    })
+    rzp.open()
+  } catch(e) {
+    setLoading(false)
+    showError('Could not open payment window. Please refresh and try again.')
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadStoreConfig()  // fetches config then calls render()
 </script>
 </body>
 </html>
