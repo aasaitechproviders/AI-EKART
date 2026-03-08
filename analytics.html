@@ -336,7 +336,9 @@ async function loadInsights() {
   panel.style.display = 'none'
   try {
     const analytics = await apiFetch(`/stores/${currentStoreId}/analytics?days=30`)
-    const r = await apiFetch('/ai/sales-insights', { method: 'POST', body: JSON.stringify({ analytics, store_name: 'Store', currency: 'INR' }) })
+    const storesList = await apiFetch('/stores')
+    const currentStore = storesList.find(s => s._id === currentStoreId)
+    const r = await apiFetch('/ai/sales-insights', { method: 'POST', body: JSON.stringify({ analytics, store_name: currentStore?.name || 'Store', currency: currentStore?.currency || 'INR' }) })
     const d = r.insights
     const pc = p => p==='high'?'ph':p==='medium'?'pm':'pl'
     panel.innerHTML = `
