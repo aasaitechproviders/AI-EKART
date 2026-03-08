@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Coupons</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .coupon-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 700;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    padding: 3px 10px; border-radius: 6px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .coupon-code:hover { border-color: var(--accent); color: var(--accent2); }
+  .toggle-switch { position: relative; display: inline-block; width: 38px; height: 21px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 21px; transition: .3s; }
+  .toggle-slider:before { position: absolute; content: ""; height: 13px; width: 13px; left: 3px; bottom: 3px; background: var(--text3); border-radius: 50%; transition: .3s; }
+  input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
+  input:checked + .toggle-slider:before { transform: translateX(17px); background: white; }
+  .coupon-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .coupon-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .coupon-stat-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; }
+  .coupon-stat-value { font-size: 22px; font-weight: 900; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<!-- COUPON MODAL -->
+<div class="modal-overlay" id="couponModal">
+  <div class="modal">
+    <h2>Create Coupon</h2>
+    <div class="field">
+      <label>Coupon Code *</label>
+      <input type="text" id="couponCode" placeholder="SAVE20"
+        style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:0.06em;font-weight:700;">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Discount Type *</label>
+        <select id="couponType">
+          <option value="percent">Percentage (%)</option>
+          <option value="flat">Flat Amount</option>
+        </select>
+      </div>
+      <div class="field"><label>Value *</label><input type="number" id="couponValue" placeholder="20" min="0" step="0.01"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Min Order Amount</label><input type="number" id="couponMinOrder" placeholder="0" min="0"></div>
+      <div class="field"><label>Max Uses (blank = unlimited)</label><input type="number" id="couponMaxUses" placeholder="100" min="1"></div>
+    </div>
+    <div class="field"><label>Expiry Date (optional)</label><input type="date" id="couponExpiry"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('couponModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">Create Coupon</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allCoupons = [], currentStoreId = '', storeCurrency = 'INR'
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('coupons', (id) => { currentStoreId = id; loadCoupons() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateCoupon()">+ Create Coupon</button>`)
+  if (currentStoreId) await loadCoupons()
+  else renderEmpty()
+})
+
+async function loadCoupons() {
+  if (!currentStoreId) return
+  document.getElementById('page-content').innerHTML = '<div class="spinner"></div>'
+  try {
+    allCoupons = await apiFetch(`/stores/${currentStoreId}/coupons`)
+    renderPage()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function renderPage() {
+  const active = allCoupons.filter(c => c.active).length
+  const totalUses = allCoupons.reduce((s,c) => s + (c.uses||0), 0)
+  document.getElementById('page-content').innerHTML = `
+    <div class="coupon-stats">
+      <div class="coupon-stat"><div class="coupon-stat-label">Total Coupons</div><div class="coupon-stat-value">${allCoupons.length}</div></div>
+      <div class="coupon-stat"><div class="coupon-stat-label">Active</div><div class="coupon-stat-value" style="color:var(--green);">${active}</div></div>
+      <div class="coupon-stat"><div class="coupon-stat-label">Total Uses</div><div class="coupon-stat-value" style="color:var(--accent2);">${totalUses}</div></div>
+    </div>
+    <div class="section-card">
+      <table>
+        <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Active</th><th>Actions</th></tr></thead>
+        <tbody id="couponsBody"></tbody>
+      </table>
+    </div>`
+  renderCoupons()
+}
+
+function renderCoupons() {
+  const body = document.getElementById('couponsBody'); if (!body) return
+  const cur = storeCurrency === 'USD' ? '$' : storeCurrency === 'EUR' ? '€' : '₹'
+  if (!allCoupons.length) {
+    body.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🎟️</div><h3>No coupons yet</h3><p>Create a coupon to offer discounts</p></div></td></tr>`
+    return
+  }
+  body.innerHTML = allCoupons.map(c => `<tr>
+    <td><span class="coupon-code" onclick="copyCode('${c.code}')" title="Click to copy">${c.code}</span></td>
+    <td style="color:var(--text2);">${c.type === 'percent' ? 'Percentage' : 'Flat'}</td>
+    <td><strong style="font-family:'DM Mono',monospace;">${c.type === 'percent' ? c.value+'%' : cur+c.value}</strong></td>
+    <td style="color:var(--text2);font-family:'DM Mono',monospace;">${c.min_order > 0 ? cur+c.min_order : '—'}</td>
+    <td style="font-family:'DM Mono',monospace;">${c.uses}${c.max_uses?' / '+c.max_uses:''}</td>
+    <td style="font-size:12px;color:var(--text3);">${c.expires_at ? new Date(c.expires_at).toLocaleDateString('en-IN') : 'Never'}</td>
+    <td><label class="toggle-switch">
+      <input type="checkbox" ${c.active?'checked':''} onchange="toggleCoupon('${c._id}',this.checked)">
+      <span class="toggle-slider"></span>
+    </label></td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteCoupon('${c._id}','${c.code}')">🗑</button></td>
+  </tr>`).join('')
+}
+
+function openCreateCoupon() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  ;['couponCode','couponValue','couponMinOrder','couponMaxUses','couponExpiry'].forEach(id => document.getElementById(id).value = '')
+  document.getElementById('couponType').value = 'percent'
+  openModal('couponModal')
+}
+
+async function saveCoupon() {
+  const body = {
+    code: document.getElementById('couponCode').value.trim(),
+    type: document.getElementById('couponType').value,
+    value: document.getElementById('couponValue').value,
+    min_order: document.getElementById('couponMinOrder').value || 0,
+    max_uses: document.getElementById('couponMaxUses').value || null,
+    expires_at: document.getElementById('couponExpiry').value || null
+  }
+  if (!body.code || !body.value) return toast('Code and value required', 'error')
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons`, { method: 'POST', body: JSON.stringify(body) })
+    closeModal('couponModal')
+    await loadCoupons()
+    toast('Coupon created!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function toggleCoupon(id, active) {
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method: 'PUT', body: JSON.stringify({ active }) })
+    toast(active ? 'Coupon activated' : 'Coupon deactivated', 'success')
+  } catch (e) { toast(e.message, 'error'); await loadCoupons() }
+}
+
+async function deleteCoupon(id, code) {
+  if (!confirm(`Delete coupon "${code}"?`)) return
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method: 'DELETE', body: '{}' })
+    await loadCoupons()
+    toast('Coupon deleted')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => toast(`Copied "${code}"!`, 'info'))
+}
+
+function renderEmpty() {
+  document.getElementById('page-content').innerHTML = `<div class="empty-state"><div class="empty-icon">🎟️</div><h3>No store selected</h3><p>Select a store from the top bar</p></div>`
+}
+</script>
+</body>
+</html>
