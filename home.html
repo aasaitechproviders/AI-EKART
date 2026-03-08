@@ -3,698 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>eKart — Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>eKart — My Stores</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
 <style>
-  :root { --accent: #6c63ff; --bg: #0a0b14; --surface: #12141f; --surface2: #1a1c2b; --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14); --text: #f1f5f9; --text2: #94a3b8; --text3: #475569; --green: #34d399; --red: #f87171; --yellow: #fbbf24; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
-
-  /* Sidebar */
-  .sidebar { width: 240px; min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; position: sticky; top: 0; flex-shrink: 0; }
-  .sidebar-logo { padding: 0 24px 24px; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; border-bottom: 1px solid var(--border); }
-  .sidebar-logo span { color: var(--accent); }
-  .sidebar-user { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .sidebar-user img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
-  .sidebar-user-info { overflow: hidden; }
-  .sidebar-user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sidebar-user-email { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .nav-section { padding: 16px 12px 8px; }
-  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); padding: 0 12px; margin-bottom: 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; text-decoration: none; }
-  .nav-item:hover, .nav-item.active { background: rgba(108,99,255,0.12); color: var(--text); }
-  .nav-item.active { color: var(--accent); }
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-  .sidebar-bottom { margin-top: auto; padding: 16px 24px; }
-  .btn-logout { width: 100%; padding: 8px; background: none; border: 1px solid var(--border2); border-radius: 8px; color: var(--text3); font-size: 12.5px; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s; }
-  .btn-logout:hover { border-color: var(--red); color: var(--red); }
-
-  /* Main */
-  .main { flex: 1; min-height: 100vh; overflow-x: hidden; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 100; }
-  .topbar-title { font-size: 17px; font-weight: 700; }
-  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Outfit', sans-serif; transition: all .15s; text-decoration: none; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #7b74ff; }
-  .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
-  .btn-secondary:hover { color: var(--text); border-color: var(--border2); background: rgba(255,255,255,0.06); }
-  .btn-danger { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
-  .btn-danger:hover { background: rgba(248,113,113,0.2); }
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
-
-  .content { padding: 32px; }
-
-  /* Page visibility */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* Stats row */
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .stat-label { font-size: 11.5px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-  .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
-  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
-
-  /* Store cards */
-  .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-  .store-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .2s, transform .2s; }
-  .store-card-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; border-top: 1px solid var(--border); margin-top: 12px; }
-  .store-stat { padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); }
-  .store-stat:last-child { border-right: none; }
-  .store-stat-val { font-size: 15px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); line-height: 1; margin-bottom: 3px; }
-  .store-stat-val.loading { color: var(--border2); animation: pulse 1.2s infinite; }
-  .store-stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
-  .store-stat.today-stat .store-stat-val { color: var(--accent); }
-  .store-stat.revenue-stat .store-stat-val { color: var(--green); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  .store-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .store-card-banner { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: white; letter-spacing: -0.03em; }
-  .store-card-body { padding: 18px; }
-  .store-card-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .store-card-slug { font-size: 11.5px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 12px; }
-  .store-meta { display: flex; gap: 12px; margin-bottom: 14px; }
-  .meta-badge { font-size: 11px; background: var(--surface2); border: 1px solid var(--border2); padding: 3px 9px; border-radius: 6px; color: var(--text3); }
-  .store-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
-  .store-status.published { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
-  .store-status.draft { background: rgba(148,163,184,0.1); color: var(--text3); border: 1px solid var(--border); }
-  .store-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-
-  /* Table */
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 20px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  thead tr { background: var(--surface2); }
-  th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); }
-  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-  .product-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: var(--surface2); }
-  .product-thumb-placeholder { width: 40px; height: 40px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-
-  /* Status badges */
-  .status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
-  .status.active, .status.delivered { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
-  .status.draft, .status.pending { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
-  .status.confirmed, .status.processing { background: rgba(108,99,255,0.1); color: #a78bfa; border: 1px solid rgba(108,99,255,0.2); }
-  .status.shipped { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
-  .status.cancelled, .status.archived { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
-
-  /* Modals */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 32px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
-  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
-  .field input, .field textarea, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 9px; padding: 10px 14px; font-size: 14px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; transition: border-color .15s; }
-  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
-  .field textarea { resize: vertical; min-height: 80px; }
-  .field select option { background: #1a1c2b; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* Topbar store selector */
-  .store-selector { display: flex; align-items: center; gap: 10px; }
-  .store-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; cursor: pointer; }
-
-  /* Empty state */
-  .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
-  .empty-icon { font-size: 48px; margin-bottom: 16px; }
-  .empty h3 { font-size: 16px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
-  .empty p { font-size: 13.5px; line-height: 1.6; margin-bottom: 20px; }
-
-  /* Search + filter bar */
-  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .search-input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border2); border-radius: 9px; padding: 8px 14px; font-size: 13.5px; color: var(--text); font-family: 'Outfit', sans-serif; outline: none; }
-  .search-input:focus { border-color: var(--accent); }
-
-  /* Category chip list */
-  .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .cat-chip { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border2); font-size: 12.5px; color: var(--text2); }
-  .cat-chip button { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
-
-  /* Toast */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 14px 20px; font-size: 13.5px; display: none; z-index: 2000; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-  .toast.show { display: block; }
-  .toast.success { border-color: rgba(52,211,153,0.4); color: var(--green); }
-  .toast.error { border-color: rgba(248,113,113,0.4); color: var(--red); }
-
-  /* Product image preview */
-  .img-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-  .img-preview img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border2); }
-
-  /* Variants */
-  .variant-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .variant-row input { flex: 1; }
-  .variant-row button { background: none; border: 1px solid var(--border2); border-radius: 6px; color: var(--red); padding: 5px 8px; cursor: pointer; font-size: 14px; }
-
-  /* Card Style Picker */
-  .card-style-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 4px; }
-  .card-style-opt { border: 2px solid var(--border); border-radius: 12px; padding: 10px 8px 8px; cursor: pointer; text-align: center; transition: all .15s; }
-  .card-style-opt:hover { border-color: var(--accent); background: rgba(108,99,255,0.04); }
-  .card-style-opt.active { border-color: var(--accent); background: rgba(108,99,255,0.08); }
-  .card-style-opt span { font-size: 11.5px; font-weight: 700; color: var(--text2); display: block; margin-top: 6px; }
-  .card-style-opt.active span { color: var(--accent); }
-  .card-style-preview { height: 52px; display: flex; align-items: center; justify-content: center; }
-  /* Grid preview */
-  .cspr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 44px; }
-  .cspr-grid div { background: var(--border2); border-radius: 3px; height: 18px; }
-  .card-style-opt.active .cspr-grid div { background: var(--accent); opacity: 0.5; }
-  /* List preview */
-  .cspr-list { display: flex; gap: 4px; align-items: center; width: 52px; margin-bottom: 3px; }
-  .cspr-list-img { width: 18px; height: 18px; background: var(--border2); border-radius: 3px; flex-shrink: 0; }
-  .cspr-list-lines { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .cspr-list-lines span { display: block; height: 4px; background: var(--border2); border-radius: 2px; }
-  .cspr-list-lines span:first-child { width: 90%; }
-  .cspr-list-lines span:last-child { width: 55%; }
-  .card-style-opt.active .cspr-list-img, .card-style-opt.active .cspr-list-lines span { background: var(--accent); opacity: 0.5; }
-  /* Minimal preview */
-  .cspr-minimal { position: relative; width: 44px; height: 44px; border-radius: 5px; overflow: hidden; }
-  .cspr-min-img { position: absolute; inset: 0; background: var(--border2); }
-  .cspr-min-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: rgba(0,0,0,0.25); }
-  .card-style-opt.active .cspr-min-img { background: var(--accent); opacity: 0.4; }
-  /* Magazine preview */
-  .cspr-magazine { display: flex; gap: 3px; width: 52px; height: 44px; }
-  .cspr-mag-big { flex: 2; background: var(--border2); border-radius: 3px; }
-  .cspr-mag-small { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 3px; }
-  .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
-
-  /* Drill-down panel */
-  .drilldown-panel { background: var(--surface); border: 2px solid var(--accent); border-radius: 16px; padding: 20px; margin-top: 20px; animation: slideDown .25s ease; }
-  @keyframes slideDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
-  .drilldown-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
-  .drilldown-title { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
-  .drilldown-title strong { color: var(--accent); margin-left: 6px; font-family: 'DM Mono', monospace; }
-  .drilldown-kpis { display: flex; gap: 20px; }
-  .dd-kpi { text-align: center; }
-  .dd-kpi span { display: block; font-size: 18px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); }
-  .dd-kpi small { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
-  .drilldown-close { padding: 7px 14px; background: none; border: 1.5px solid var(--border2); border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--text3); font-family: 'Outfit', sans-serif; transition: all .15s; }
-  .drilldown-close:hover { border-color: var(--red); color: var(--red); }
-  .drilldown-charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .dd-pie-wrap { display: flex; align-items: center; gap: 14px; }
-  .dd-pie-wrap canvas { flex-shrink: 0; }
-  /* Analytics */
-  .analytics-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .analytics-store-label { font-size: 13px; color: var(--text3); font-weight: 600; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; transition: box-shadow .15s; }
-  .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-  .kpi-card.kpi-accent { border-color: rgba(108,99,255,0.3); background: linear-gradient(135deg,rgba(108,99,255,0.05),rgba(108,99,255,0.02)); }
-  .kpi-icon { font-size: 28px; flex-shrink: 0; }
-  .kpi-body { flex: 1; min-width: 0; }
-  .kpi-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
-  .kpi-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
-  .kpi-delta { font-size: 12px; margin-top: 3px; font-weight: 600; }
-  .kpi-delta.up { color: var(--green); }
-  .kpi-delta.down { color: var(--red); }
-  .kpi-delta.neutral { color: var(--text3); }
-  /* Chart layouts */
-  .charts-main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .charts-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-  .chart-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
-  .chart-total { font-size: 12px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; }
-  /* Top products bars */
-  .tp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .tp-rank { font-size: 11px; font-weight: 800; color: var(--text3); width: 18px; text-align: center; flex-shrink: 0; }
-  .tp-img { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; overflow: hidden; }
-  .tp-img img { width: 100%; height: 100%; object-fit: cover; }
-  .tp-name { flex: 1; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tp-bar-wrap { width: 80px; background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; flex-shrink: 0; }
-  .tp-bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .6s ease; }
-  .tp-val { font-size: 12px; font-weight: 700; color: var(--text2); font-family: 'DM Mono', monospace; width: 64px; text-align: right; flex-shrink: 0; }
-  /* Status donut */
-  .status-donut-wrap { display: flex; align-items: center; gap: 20px; }
-  .status-donut-wrap canvas { flex-shrink: 0; }
-  .status-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .status-leg-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .status-leg-name { flex: 1; color: var(--text2); text-transform: capitalize; font-weight: 600; }
-  .status-leg-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3); }
-  /* Coupon table */
-  .coupon-code { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border2); padding: 3px 10px; border-radius: 6px; letter-spacing: 0.05em; }
-  .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-  .toggle-switch input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: 22px; transition: .3s; }
-  .toggle-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: var(--text3); border-radius: 50%; transition: .3s; }
-  input:checked + .toggle-slider { background: var(--accent); border-color: var(--accent); }
-  input:checked + .toggle-slider:before { transform: translateX(18px); background: white; }
-  /* Day selector */
-  .day-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
-  .day-tab { padding: 5px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text3); transition: all .15s; }
-  .day-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  /* AI Features */
-  .ai-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: linear-gradient(135deg,#6c63ff,#a78bfa); color: white; border: none; border-radius: 8px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: 'Outfit',sans-serif; transition: all .2s; white-space: nowrap; }
-  .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(108,99,255,0.4); }
-  .ai-btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
-  .ai-btn-sm { padding: 5px 10px; font-size: 11.5px; }
-  .ai-result-box { background: linear-gradient(135deg,rgba(108,99,255,0.06),rgba(167,139,250,0.04)); border: 1px solid rgba(108,99,255,0.25); border-radius: 14px; padding: 18px; margin-top: 14px; }
-  .ai-result-box h4 { font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-  .ai-field-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-  .ai-field-label { font-size: 11.5px; font-weight: 700; color: var(--text3); width: 80px; flex-shrink: 0; padding-top: 2px; }
-  .ai-field-val { font-size: 13.5px; color: var(--text); flex: 1; line-height: 1.5; }
-  .ai-tag { display: inline-block; padding: 3px 9px; background: rgba(108,99,255,0.12); color: var(--accent); border-radius: 6px; font-size: 11.5px; font-weight: 600; margin: 2px; }
-  .ai-highlight { padding: 5px 0 5px 12px; border-left: 3px solid var(--accent); color: var(--text2); font-size: 13.5px; margin-bottom: 6px; line-height: 1.5; }
-  .ai-apply-btn { padding: 6px 14px; background: var(--accent); color: white; border: none; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Outfit',sans-serif; margin-top: 10px; }
-  /* Marketing page */
-  .marketing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  .marketing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-  .marketing-card-title { font-size: 13.5px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-  .marketing-content-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 13.5px; color: var(--text2); line-height: 1.6; min-height: 80px; white-space: pre-wrap; }
-  .copy-btn { padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 7px; font-size: 11.5px; font-weight: 600; cursor: pointer; color: var(--text2); font-family: 'Outfit',sans-serif; transition: all .15s; margin-top: 8px; }
-  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-  /* Insights */
-  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
-  .insight-title { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .insight-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; color: var(--text2); line-height: 1.5; }
-  .insight-item:last-child { border-bottom: none; }
-  .priority-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.06em; }
-  .priority-high { background: rgba(248,113,113,0.15); color: var(--red); }
-  .priority-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
-  .priority-low { background: rgba(52,211,153,0.15); color: var(--green); }
-  /* AI Assistant page */
-  .ai-assistant-wrap { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 180px); }
-  .ai-assistant-sidebar { display: flex; flex-direction: column; gap: 14px; }
-  .ai-tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; cursor: pointer; transition: all .15s; }
-  .ai-tool-card:hover, .ai-tool-card.active { border-color: var(--accent); background: rgba(108,99,255,0.06); }
-  .ai-tool-icon { font-size: 24px; margin-bottom: 8px; }
-  .ai-tool-name { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-  .ai-tool-desc { font-size: 12px; color: var(--text3); line-height: 1.4; }
-  .ai-tool-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; overflow-y: auto; }
-  /* Chatbot */
-  .chatbot-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: linear-gradient(135deg,#6c63ff,#a78bfa); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(108,99,255,0.5); z-index: 500; transition: transform .2s; }
-  .chatbot-fab:hover { transform: scale(1.1); }
-  .chatbot-window { position: fixed; bottom: 92px; right: 24px; width: 360px; height: 520px; background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); z-index: 500; display: flex; flex-direction: column; overflow: hidden; transition: all .3s; }
-  .chatbot-window.hidden { opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95); }
-  .chatbot-header { padding: 16px 18px; background: linear-gradient(135deg,#6c63ff,#a78bfa); color: white; display: flex; align-items: center; gap: 10px; }
-  .chatbot-header-info h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-  .chatbot-header-info p { font-size: 11.5px; opacity: 0.8; }
-  .chatbot-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-  .chat-msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; }
-  .chat-msg.bot { background: var(--surface2); color: var(--text); border-radius: 4px 14px 14px 14px; align-self: flex-start; }
-  .chat-msg.user { background: var(--accent); color: white; border-radius: 14px 4px 14px 14px; align-self: flex-end; }
-  .chatbot-input-row { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-  .chatbot-input { flex: 1; padding: 9px 14px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); font-family: 'Outfit',sans-serif; font-size: 13.5px; outline: none; }
-  .chatbot-send { padding: 9px 16px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; transition: background .15s; }
-  .chatbot-send:hover { background: #7c74ff; }
-
-  @media(max-width:768px) {
-    .sidebar { display: none; }
-    .stats-row { grid-template-columns: repeat(2,1fr); }
+  /* ── STORE CARDS ── */
+  .stores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 18px; }
+  .store-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
   }
+  .store-card:hover { border-color: rgba(108,99,255,0.35); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
+  .store-banner {
+    height: 76px;
+    display: flex; align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .store-banner-logo { height: 48px; width: 48px; border-radius: 12px; object-fit: contain; background: rgba(255,255,255,0.15); padding: 4px; }
+  .store-banner-initials { font-size: 26px; font-weight: 900; color: white; letter-spacing: -0.04em; }
+  .store-card-body { padding: 16px 18px; }
+  .store-name { font-size: 15px; font-weight: 800; margin-bottom: 3px; }
+  .store-slug { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+  .store-badges { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; }
+  .store-kpis {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    border-top: 1px solid var(--border);
+    margin: 0 -18px 14px;
+  }
+  .store-kpi { padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); }
+  .store-kpi:last-child { border-right: none; }
+  .store-kpi-val { font-size: 14px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--text); line-height: 1; margin-bottom: 3px; }
+  .store-kpi-val.loading { color: var(--border2); animation: shimmer 1.2s infinite; }
+  @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.3} }
+  .store-kpi-val.rev { color: var(--green); }
+  .store-kpi-val.today { color: var(--accent2); }
+  .store-kpi-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+  .store-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+
+  /* ── DASH STATS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .stat-icon { font-size: 26px; }
+  .stat-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 900; letter-spacing: -0.04em; font-family: 'DM Mono', monospace; }
+
+  /* Card style picker */
+  .card-style-picker { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 4px; }
+  .card-style-opt { border: 2px solid var(--border); border-radius: 10px; padding: 10px 6px 8px; cursor: pointer; text-align: center; transition: all .15s; }
+  .card-style-opt:hover, .card-style-opt.active { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .card-style-opt span { font-size: 11px; font-weight: 700; color: var(--text3); display: block; margin-top: 6px; }
+  .card-style-opt.active span { color: var(--accent2); }
+  .card-style-preview { height: 44px; display: flex; align-items: center; justify-content: center; }
+  .cspr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 40px; }
+  .cspr-grid div { background: var(--border2); border-radius: 2px; height: 16px; }
+  .card-style-opt.active .cspr-grid div { background: var(--accent); opacity: 0.5; }
+  .cspr-list { display: flex; gap: 4px; align-items: center; width: 50px; margin-bottom: 3px; }
+  .cspr-list-img { width: 16px; height: 16px; background: var(--border2); border-radius: 2px; flex-shrink: 0; }
+  .cspr-list-lines { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .cspr-list-lines span { display: block; height: 3px; background: var(--border2); border-radius: 2px; }
+  .card-style-opt.active .cspr-list-img, .card-style-opt.active .cspr-list-lines span { background: var(--accent); opacity: 0.5; }
+  .cspr-minimal { position: relative; width: 40px; height: 40px; border-radius: 5px; overflow: hidden; }
+  .cspr-min-img { position: absolute; inset: 0; background: var(--border2); }
+  .cspr-min-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: rgba(0,0,0,0.3); }
+  .card-style-opt.active .cspr-min-img { background: var(--accent); opacity: 0.4; }
+  .cspr-magazine { display: flex; gap: 3px; width: 48px; height: 40px; }
+  .cspr-mag-big { flex: 2; background: var(--border2); border-radius: 2px; }
+  .cspr-mag-small { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 2px; }
+  .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
 </style>
 </head>
 <body>
+<div id="nav-mount"></div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="sidebar-logo">e<span>K</span>art</div>
-  <div class="sidebar-user">
-    <img id="userAvatar" src="" alt="">
-    <div class="sidebar-user-info">
-      <div class="sidebar-user-name" id="userName">Loading...</div>
-      <div class="sidebar-user-email" id="userEmail"></div>
-    </div>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Merchant</div>
-    <a class="nav-item active" data-page="stores" onclick="showPage('stores')"><span class="icon">🏪</span> My Stores</a>
-    <a class="nav-item" data-page="products" onclick="showPage('products')"><span class="icon">📦</span> Products</a>
-    <a class="nav-item" data-page="categories" onclick="showPage('categories')"><span class="icon">🗂️</span> Categories</a>
-    <a class="nav-item" data-page="orders" onclick="showPage('orders')"><span class="icon">📋</span> Orders</a>
-    <a class="nav-item" data-page="coupons" onclick="showPage('coupons')"><span class="icon">🎟️</span> Coupons</a>
-    <a class="nav-item" data-page="analytics" onclick="showPage('analytics')"><span class="icon">📊</span> Analytics</a>
-    <a class="nav-item" data-page="marketing" onclick="showPage('marketing')"><span class="icon">📣</span> Marketing</a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">AI Tools</div>
-    <a class="nav-item" data-page="ai-assistant" onclick="showPage('ai-assistant')"><span class="icon">🤖</span> AI Assistant</a>
-  </div>
-  <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="pageTitle">My Stores</div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="store-selector" id="storeSelectorWrap" style="display:none;">
-        <span style="font-size:12px;color:var(--text3);">Store:</span>
-        <select class="store-select" id="storeSelector" onchange="onStoreChange()"></select>
-      </div>
-      <button class="btn btn-primary" id="topbarAction" onclick="openCreateStore()">+ New Store</button>
-    </div>
-  </div>
-
-  <div class="content">
-
-    <!-- STORES PAGE -->
-    <div class="page active" id="page-stores">
-      <div class="stats-row" id="dashStats" style="display:none;">
-        <div class="stat-card"><div class="stat-label">Total Stores</div><div class="stat-value" id="statStores">0</div></div>
-        <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="statOrders">0</div></div>
-        <div class="stat-card"><div class="stat-label">Today's Orders</div><div class="stat-value" id="statToday">0</div></div>
-        <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="statRevenue">₹0</div></div>
-      </div>
-      <div class="stores-grid" id="storesGrid">
-        <div class="empty"><div class="empty-icon">🏪</div><h3>No stores yet</h3><p>Create your first store to start selling</p></div>
-      </div>
-    </div>
-
-    <!-- PRODUCTS PAGE -->
-    <div class="page" id="page-products">
-      <div class="toolbar">
-        <input class="search-input" id="productSearch" placeholder="🔍 Search products..." oninput="filterProducts()">
-        <select class="store-select" id="productCatFilter" onchange="filterProducts()" style="width:160px;">
-          <option value="">All Categories</option>
-        </select>
-        <select class="store-select" id="productStatusFilter" onchange="filterProducts()" style="width:140px;">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="productsBody"><tr><td colspan="6"><div class="empty" style="padding:40px;"><div class="empty-icon">📦</div><p>Select a store and add products</p></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- CATEGORIES PAGE -->
-    <div class="page" id="page-categories">
-      <div class="toolbar">
-        <input class="search-input" id="catNewName" placeholder="New category name..." style="max-width:280px;">
-        <button class="btn btn-primary" onclick="createCategory()">+ Add Category</button>
-      </div>
-      <div class="cat-chips" id="catChips"><p style="color:var(--text3);font-size:13px;">No categories yet.</p></div>
-    </div>
-
-    <!-- ANALYTICS PAGE -->
-    <div class="page" id="page-analytics">
-      <div class="analytics-header">
-        <div class="day-tabs">
-          <div class="day-tab active" onclick="setAnalyticsDays(7,this)">7 Days</div>
-          <div class="day-tab" onclick="setAnalyticsDays(14,this)">14 Days</div>
-          <div class="day-tab" onclick="setAnalyticsDays(30,this)">30 Days</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="analytics-store-label" id="analyticsStoreLabel"></div>
-          <button class="ai-btn ai-btn-sm" onclick="loadAIInsights()" id="aiInsightsBtn">🧠 AI Insights</button>
-        </div>
-      </div>
-      <div id="aiInsightsPanel" style="display:none;margin-bottom:20px;"></div>
-
-      <!-- KPI CARDS -->
-      <div class="kpi-grid">
-        <div class="kpi-card kpi-accent">
-          <div class="kpi-icon">💰</div>
-          <div class="kpi-body">
-            <div class="kpi-label">Total Revenue</div>
-            <div class="kpi-value" id="kpiRevenue">—</div>
-            <div class="kpi-delta neutral" id="kpiRevenueDelta">vs yesterday</div>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon">📦</div>
-          <div class="kpi-body">
-            <div class="kpi-label">Total Orders</div>
-            <div class="kpi-value" id="kpiOrders">—</div>
-            <div class="kpi-delta neutral" id="kpiOrdersDelta">vs yesterday</div>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon">🕐</div>
-          <div class="kpi-body">
-            <div class="kpi-label">Today's Orders</div>
-            <div class="kpi-value" id="kpiToday">—</div>
-            <div class="kpi-delta neutral" id="kpiTodayDelta"></div>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon">🛍️</div>
-          <div class="kpi-body">
-            <div class="kpi-label">Active Products</div>
-            <div class="kpi-value" id="kpiProducts">—</div>
-            <div class="kpi-delta neutral">in this store</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MAIN CHARTS ROW -->
-      <div class="charts-main-row">
-        <div class="chart-wrap chart-large">
-          <div class="chart-title">
-            <span>📈 Daily Revenue</span>
-            <span class="chart-total" id="chartRevTotal"></span>
-          </div>
-          <canvas id="revenueChart" height="100"></canvas>
-        </div>
-        <div class="chart-wrap chart-medium">
-          <div class="chart-title">
-            <span>📦 Daily Orders</span>
-            <span class="chart-total" id="chartOrdTotal"></span>
-          </div>
-          <canvas id="ordersChart" height="100"></canvas>
-        </div>
-      </div>
-
-      <!-- BOTTOM CHARTS ROW -->
-      <div class="charts-bottom-row">
-        <div class="chart-wrap">
-          <div class="chart-title"><span>🏆 Top Products by Revenue</span></div>
-          <div id="topProductsChart"></div>
-        </div>
-        <div class="chart-wrap">
-          <div class="chart-title"><span>🔄 Order Status</span></div>
-          <div class="status-donut-wrap">
-            <canvas id="statusChart" width="180" height="180"></canvas>
-            <div id="statusLegend"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DATE DRILL-DOWN PANEL -->
-      <div class="drilldown-panel" id="drilldownPanel" style="display:none;">
-        <div class="drilldown-header">
-          <div class="drilldown-title">
-            <span>🔎 Daily Breakdown —</span>
-            <strong id="drilldownDate"></strong>
-          </div>
-          <div class="drilldown-kpis">
-            <div class="dd-kpi"><span id="ddRevenue">—</span><small>Revenue</small></div>
-            <div class="dd-kpi"><span id="ddOrders">—</span><small>Orders</small></div>
-            <div class="dd-kpi"><span id="ddQty">—</span><small>Items Sold</small></div>
-          </div>
-          <button class="drilldown-close" onclick="closeDrilldown()">✕ Close</button>
-        </div>
-        <div class="drilldown-charts">
-          <div class="chart-wrap">
-            <div class="chart-title"><span>🕐 Hourly Orders & Revenue</span></div>
-            <canvas id="hourlyChart" height="110"></canvas>
-          </div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>📦 Products Sold (Qty)</span></div>
-            <canvas id="ddProductsBarChart" height="110"></canvas>
-          </div>
-          <div class="chart-wrap">
-            <div class="chart-title"><span>💰 Revenue by Product</span></div>
-            <div class="dd-pie-wrap">
-              <canvas id="ddPieChart" width="180" height="180"></canvas>
-              <div id="ddPieLegend"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MARKETING PAGE -->
-    <div class="page" id="page-marketing">
-      <div class="toolbar" style="flex-wrap:wrap;gap:12px;">
-        <div class="field" style="flex:1;min-width:200px;margin:0;">
-          <input class="search-input" id="mktProduct" placeholder="Product name (optional)" style="width:100%;">
-        </div>
-        <div class="field" style="flex:1;min-width:200px;margin:0;">
-          <input class="search-input" id="mktDesc" placeholder="Product description (optional)" style="width:100%;">
-        </div>
-        <div class="field" style="flex:0;margin:0;">
-          <input class="search-input" id="mktPrice" placeholder="Price" style="width:100px;">
-        </div>
-        <div class="field" style="flex:0;margin:0;">
-          <select class="store-select" id="mktTone" style="width:140px;">
-            <option value="friendly and exciting">😊 Friendly</option>
-            <option value="professional">💼 Professional</option>
-            <option value="urgent and bold">🔥 Urgent</option>
-            <option value="fun and playful">🎉 Playful</option>
-          </select>
-        </div>
-        <button class="ai-btn" onclick="generateMarketing()" id="mktGenBtn">✨ Generate All</button>
-      </div>
-      <div id="mktLoading" style="display:none;text-align:center;padding:40px;color:var(--text3);">✨ Generating marketing content...</div>
-      <div class="marketing-grid" id="mktResults" style="display:none;">
-        <div class="marketing-card">
-          <div class="marketing-card-title">📸 Instagram</div>
-          <div class="marketing-content-box" id="mktInstagram"></div>
-          <div style="margin-top:8px;">
-            <div style="font-size:11.5px;color:var(--text3);margin-bottom:6px;font-weight:600;">HASHTAGS</div>
-            <div id="mktHashtags" style="line-height:2;"></div>
-          </div>
-          <button class="copy-btn" onclick="copyText('mktInstagram')">📋 Copy Caption</button>
-        </div>
-        <div class="marketing-card">
-          <div class="marketing-card-title">💬 WhatsApp Broadcast</div>
-          <div class="marketing-content-box" id="mktWhatsapp"></div>
-          <button class="copy-btn" onclick="copyText('mktWhatsapp')">📋 Copy Message</button>
-        </div>
-        <div class="marketing-card">
-          <div class="marketing-card-title">📧 Email Campaign</div>
-          <div style="font-size:11.5px;color:var(--text3);font-weight:700;margin-bottom:4px;">SUBJECT</div>
-          <div class="marketing-content-box" id="mktEmailSubject" style="min-height:auto;margin-bottom:10px;"></div>
-          <div style="font-size:11.5px;color:var(--text3);font-weight:700;margin-bottom:4px;">BODY</div>
-          <div class="marketing-content-box" id="mktEmailBody"></div>
-          <button class="copy-btn" onclick="copyEmailFull()">📋 Copy Full Email</button>
-        </div>
-        <div class="marketing-card">
-          <div class="marketing-card-title">📱 SMS</div>
-          <div class="marketing-content-box" id="mktSms" style="min-height:60px;"></div>
-          <button class="copy-btn" onclick="copyText('mktSms')">📋 Copy SMS</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI ASSISTANT PAGE -->
-    <div class="page" id="page-ai-assistant">
-      <div class="ai-assistant-wrap">
-        <div class="ai-assistant-sidebar">
-          <div class="ai-tool-card active" id="aitool-setup" onclick="selectAiTool('setup',this)">
-            <div class="ai-tool-icon">🏪</div>
-            <div class="ai-tool-name">Store Setup</div>
-            <div class="ai-tool-desc">Get AI suggestions for store name, categories & description</div>
-          </div>
-          <div class="ai-tool-card" id="aitool-product" onclick="selectAiTool('product',this)">
-            <div class="ai-tool-icon">📦</div>
-            <div class="ai-tool-name">Product Content</div>
-            <div class="ai-tool-desc">Generate titles, descriptions, tags for any product</div>
-          </div>
-          <div class="ai-tool-card" id="aitool-marketing" onclick="selectAiTool('marketing',this)">
-            <div class="ai-tool-icon">📣</div>
-            <div class="ai-tool-name">Marketing</div>
-            <div class="ai-tool-desc">Create Instagram, WhatsApp & email content</div>
-          </div>
-          <div class="ai-tool-card" id="aitool-insights" onclick="selectAiTool('insights',this)">
-            <div class="ai-tool-icon">📊</div>
-            <div class="ai-tool-name">Sales Insights</div>
-            <div class="ai-tool-desc">Analyze your store performance with AI</div>
-          </div>
-        </div>
-        <div class="ai-tool-panel" id="aiToolPanel">
-          <!-- Store Setup Tool -->
-          <div id="aitoolpanel-setup">
-            <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">🏪 AI Store Setup</h3>
-            <p style="font-size:13.5px;color:var(--text3);margin-bottom:18px;">Tell us what you sell and we'll suggest everything you need to set up your store.</p>
-            <div class="field"><label>What type of store are you creating? *</label><input type="text" id="setupStoreType" placeholder="e.g. Clothing boutique, Electronics store, Homemade food..."></div>
-            <div class="field"><label>What products will you sell?</label><input type="text" id="setupProducts" placeholder="e.g. Women's ethnic wear, Laptops and accessories..."></div>
-            <div class="field"><label>Who is your target audience?</label><input type="text" id="setupAudience" placeholder="e.g. Young women 18-35, Working professionals..."></div>
-            <button class="ai-btn" onclick="runStoreSetup()" id="setupBtn">✨ Generate Store Ideas</button>
-            <div id="setupResult" style="margin-top:16px;"></div>
-          </div>
-          <!-- Product Content Tool -->
-          <div id="aitoolpanel-product" style="display:none;">
-            <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">📦 AI Product Content</h3>
-            <p style="font-size:13.5px;color:var(--text3);margin-bottom:18px;">Generate complete product content in one click.</p>
-            <div class="field"><label>Product Name *</label><input type="text" id="asstProductName" placeholder="e.g. Wireless Noise Cancelling Headphones"></div>
-            <div class="field"><label>Category</label><input type="text" id="asstProductCat" placeholder="e.g. Electronics, Clothing..."></div>
-            <div class="field"><label>Existing description (optional — to improve)</label><textarea id="asstProductDesc" placeholder="Paste existing description to improve it..."></textarea></div>
-            <button class="ai-btn" onclick="runProductContent()" id="asstProductBtn">✨ Generate Content</button>
-            <div id="asstProductResult" style="margin-top:16px;"></div>
-          </div>
-          <!-- Marketing Tool -->
-          <div id="aitoolpanel-marketing" style="display:none;">
-            <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">📣 AI Marketing Content</h3>
-            <p style="font-size:13.5px;color:var(--text3);margin-bottom:18px;">Create marketing content for all platforms instantly.</p>
-            <div class="field"><label>Product / Offer Name</label><input type="text" id="asstMktProduct" placeholder="e.g. Summer Sale on Kurtas"></div>
-            <div class="field"><label>Description</label><textarea id="asstMktDesc" placeholder="What's special about this product or offer?"></textarea></div>
-            <div class="field-row">
-              <div class="field"><label>Price</label><input type="text" id="asstMktPrice" placeholder="999"></div>
-              <div class="field"><label>Tone</label>
-                <select id="asstMktTone">
-                  <option value="friendly and exciting">😊 Friendly</option>
-                  <option value="professional">💼 Professional</option>
-                  <option value="urgent and bold">🔥 Urgent</option>
-                  <option value="fun and playful">🎉 Playful</option>
-                </select>
-              </div>
-            </div>
-            <button class="ai-btn" onclick="runAsstMarketing()" id="asstMktBtn">✨ Generate All Platforms</button>
-            <div id="asstMktResult" style="margin-top:16px;"></div>
-          </div>
-          <!-- Insights Tool -->
-          <div id="aitoolpanel-insights" style="display:none;">
-            <h3 style="font-size:16px;font-weight:800;margin-bottom:6px;">📊 AI Sales Insights</h3>
-            <p style="font-size:13.5px;color:var(--text3);margin-bottom:18px;">Get AI-powered analysis of your store's performance.</p>
-            <p style="font-size:13px;color:var(--text3);margin-bottom:16px;">Select a store from the top bar, then click below to analyze.</p>
-            <button class="ai-btn" onclick="loadAIInsights(true)" id="asstInsightsBtn">🧠 Analyze My Store</button>
-            <div id="asstInsightsResult" style="margin-top:16px;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- COUPONS PAGE -->
-    <div class="page" id="page-coupons">
-      <div class="toolbar">
-        <button class="btn btn-primary" onclick="openCreateCoupon()">+ Create Coupon</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Active</th><th>Actions</th></tr></thead>
-          <tbody id="couponsBody"><tr><td colspan="8"><div class="empty" style="padding:40px;"><div class="empty-icon">🎟️</div><p>No coupons yet</p></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ORDERS PAGE -->
-    <div class="page" id="page-orders">
-      <div class="toolbar">
-        <input class="search-input" id="orderSearch" placeholder="🔍 Search orders, customers..." oninput="filterOrders()" style="max-width:320px;">
-        <select class="store-select" id="orderStatusFilter" onchange="filterOrders()" style="width:160px;">
-          <option value="">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-          <tbody id="ordersBody"><tr><td colspan="7"><div class="empty" style="padding:40px;"><div class="empty-icon">📋</div><p>No orders yet</p></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL: Create/Edit Store -->
+<!-- CREATE/EDIT STORE MODAL -->
 <div class="modal-overlay" id="storeModal">
-  <div class="modal">
+  <div class="modal" style="max-width:560px;">
     <h2 id="storeModalTitle">Create New Store</h2>
     <input type="hidden" id="storeEditId">
     <div class="field"><label>Store Name *</label><input type="text" id="storeName" placeholder="My Awesome Store"></div>
     <div class="field"><label>Tagline</label><input type="text" id="storeTagline" placeholder="The best deals online"></div>
     <div class="field"><label>Description</label><textarea id="storeDesc" placeholder="What does your store sell?"></textarea></div>
     <div class="field-row">
-      <div class="field"><label>Contact Email</label><input type="email" id="storeEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Contact Email</label><input type="email" id="storeEmail"></div>
       <div class="field"><label>Phone</label><input type="text" id="storePhone" placeholder="+91 98765 43210"></div>
     </div>
     <div class="field-row">
@@ -705,44 +106,44 @@
           <option value="EUR">EUR (€)</option>
         </select>
       </div>
-      <div class="field"><label>Brand Color</label><input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;"></div>
+      <div class="field"><label>Brand Color</label>
+        <input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;">
+      </div>
     </div>
     <div class="field">
       <label>Product Card Style</label>
       <div class="card-style-picker" id="cardStylePicker">
         <div class="card-style-opt active" data-style="grid" onclick="selectCardStyle('grid',this)">
-          <div class="card-style-preview">
-            <div class="cspr-grid"><div></div><div></div><div></div><div></div></div>
-          </div>
+          <div class="card-style-preview"><div class="cspr-grid"><div></div><div></div><div></div><div></div></div></div>
           <span>Grid</span>
         </div>
         <div class="card-style-opt" data-style="list" onclick="selectCardStyle('list',this)">
           <div class="card-style-preview">
-            <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span><span></span></div></div>
-            <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div>
+            <div><div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div>
+            <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div></div>
           </div>
           <span>List</span>
         </div>
         <div class="card-style-opt" data-style="minimal" onclick="selectCardStyle('minimal',this)">
-          <div class="card-style-preview">
-            <div class="cspr-minimal"><div class="cspr-min-img"></div><div class="cspr-min-overlay"></div></div>
-          </div>
+          <div class="card-style-preview"><div class="cspr-minimal"><div class="cspr-min-img"></div><div class="cspr-min-overlay"></div></div></div>
           <span>Minimal</span>
         </div>
         <div class="card-style-opt" data-style="magazine" onclick="selectCardStyle('magazine',this)">
-          <div class="card-style-preview">
-            <div class="cspr-magazine"><div class="cspr-mag-big"></div><div class="cspr-mag-small"><div></div><div></div></div></div>
-          </div>
+          <div class="card-style-preview"><div class="cspr-magazine"><div class="cspr-mag-big"></div><div class="cspr-mag-small"><div></div><div></div></div></div></div>
           <span>Magazine</span>
         </div>
       </div>
       <input type="hidden" id="storeCardStyle" value="grid">
     </div>
-    <div class="field"><label>Store Logo</label>
-        <input type="file" id="storeLogoFile" accept="image/*" onchange="previewLogo(this)" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
-        <div id="storeLogoPreview" style="margin-top:8px;display:none;"><img id="storeLogoImg" src="" style="height:60px;border-radius:8px;object-fit:contain;border:1px solid var(--border2);padding:4px;"></div>
-        <input type="hidden" id="storeLogoExisting">
+    <div class="field">
+      <label>Store Logo</label>
+      <input type="file" id="storeLogoFile" accept="image/*" onchange="previewLogo(this)"
+        style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+      <div id="storeLogoPreview" style="margin-top:8px;display:none;">
+        <img id="storeLogoImg" src="" style="height:52px;border-radius:8px;object-fit:contain;border:1px solid var(--border2);padding:4px;">
       </div>
+      <input type="hidden" id="storeLogoExisting">
+    </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveStore()">Save Store</button>
@@ -750,268 +151,105 @@
   </div>
 </div>
 
-<!-- MODAL: Create/Edit Product -->
-<div class="modal-overlay" id="productModal">
-  <div class="modal">
-    <h2 id="productModalTitle">Add Product</h2>
-    <input type="hidden" id="productEditId">
-    <div class="field" style="display:flex;align-items:flex-end;gap:10px;">
-      <div style="flex:1;"><label>Product Name *</label><input type="text" id="productName" placeholder="Wireless Headphones"></div>
-      <button class="ai-btn ai-btn-sm" onclick="aiGenerateProduct()" id="aiGenBtn" style="margin-bottom:0;flex-shrink:0;">✨ AI Generate</button>
-    </div>
-    <div id="aiProductResult" style="display:none;"></div>
-    <div class="field"><label>Description</label><textarea id="productDesc" placeholder="Describe your product..."></textarea></div>
-    <div class="field-row">
-      <div class="field"><label>Price *</label><input type="number" id="productPrice" placeholder="999" step="0.01" min="0"></div>
-      <div class="field"><label>Compare at Price</label><input type="number" id="productCompare" placeholder="1499" step="0.01" min="0"></div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label>SKU</label><input type="text" id="productSku" placeholder="SKU-001"></div>
-      <div class="field"><label>Category</label>
-        <select id="productCategory"><option value="">No Category</option></select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label>Stock Qty</label><input type="number" id="productStock" placeholder="100" min="0"></div>
-      <div class="field"><label>Status</label>
-        <select id="productStatus">
-          <option value="active">Active</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
-      </div>
-    </div>
-    <div class="field"><label>Tags (comma separated)</label><input type="text" id="productTags" placeholder="electronics, wireless, audio"></div>
-    <div class="field">
-        <label>Product Images (up to 5)</label>
-        <input type="file" id="productImageFiles" accept="image/*" multiple onchange="previewProductImages(this)" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
-        <div id="productImagesPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"></div>
-        <div id="existingImagesWrap" style="margin-top:6px;"></div>
-      </div>
-    <div class="field">
-      <label>Variants</label>
-      <div id="variantsList"></div>
-      <button class="btn btn-secondary btn-sm" onclick="addVariantRow()" style="margin-top:6px;">+ Add Variant</button>
-      <p style="font-size:11.5px;color:var(--text3);margin-top:4px;">e.g. "Size: S, M, L" or "Color: Red, Blue"</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Update Order -->
-<div class="modal-overlay" id="orderModal">
-  <div class="modal">
-    <h2>Update Order</h2>
-    <input type="hidden" id="orderEditId">
-    <div id="orderDetailView" style="margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:10px;font-size:13.5px;line-height:1.8;"></div>
-    <div class="field"><label>Status</label>
-      <select id="orderStatus">
-        <option value="pending">Pending</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="processing">Processing</option>
-        <option value="shipped">Shipped</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-    </div>
-    <div class="field"><label>Tracking Number</label><input type="text" id="orderTracking" placeholder="AWB12345678"></div>
-    <div class="field"><label>Internal Notes</label><textarea id="orderNotes" placeholder="Any notes about this order..."></textarea></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveOrder()">Update Order</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Create Coupon -->
-<div class="modal-overlay" id="couponModal">
-  <div class="modal">
-    <h2>Create Coupon</h2>
-    <input type="hidden" id="couponEditId">
-    <div class="field"><label>Coupon Code *</label><input type="text" id="couponCode" placeholder="SAVE20" style="text-transform:uppercase;font-family:'DM Mono',monospace;letter-spacing:0.05em;font-weight:700;"></div>
-    <div class="field-row">
-      <div class="field"><label>Discount Type *</label>
-        <select id="couponType">
-          <option value="percent">Percentage (%)</option>
-          <option value="flat">Flat Amount</option>
-        </select>
-      </div>
-      <div class="field"><label>Value *</label><input type="number" id="couponValue" placeholder="20" min="0" step="0.01"></div>
-    </div>
-    <div class="field-row">
-      <div class="field"><label>Min Order Amount</label><input type="number" id="couponMinOrder" placeholder="0" min="0" step="0.01"></div>
-      <div class="field"><label>Max Uses (blank = unlimited)</label><input type="number" id="couponMaxUses" placeholder="100" min="1"></div>
-    </div>
-    <div class="field"><label>Expiry Date (optional)</label><input type="date" id="couponExpiry"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('couponModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveCoupon()">Create Coupon</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
 <script>
-const API = 'https://apiv2.aasaitech.in'
-let token = ''
-let currentUser = null
-let currentStore = null
-let allStores = []
-let allProducts = []
-let allOrders = []
-let allCategories = []
-let catMap = {}
+let currentUser = null, allStores = []
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  const p = new URLSearchParams(location.search)
-  if (p.get('token')) {
-    localStorage.setItem('ekart_token', p.get('token'))
-    history.replaceState({}, '', '/home.html')
-  }
-  token = localStorage.getItem('ekart_token')
-  if (!token) return location.replace('/')
-  try {
-    const r = await apiFetch('/auth/me')
-    currentUser = r
-    document.getElementById('userName').textContent = r.name
-    document.getElementById('userEmail').textContent = r.email
-    document.getElementById('storeEmail').value = r.email || ''
-    if (r.avatar) document.getElementById('userAvatar').src = r.avatar
-    await loadStores()
-    await loadDashboard()
-  } catch { location.replace('/') }
+  const nav = await renderNav('stores')
+  if (!nav) return
+  currentUser = nav.user
+  document.getElementById('storeEmail').value = currentUser.email || ''
+  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>`)
+  await loadAll()
 })
 
-async function apiFetch(path, opts = {}) {
-  const res = await fetch(API + path, {
-    ...opts,
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(opts.headers || {}) }
-  })
-  if (!res.ok) { const e = await res.json().catch(() => ({ error: 'Error' })); throw new Error(e.error || 'Request failed') }
-  return res.json()
+async function loadAll() {
+  await Promise.all([loadStores(), loadDashStats()])
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
-  document.getElementById('page-' + name).classList.add('active')
-  document.querySelector(`[data-page="${name}"]`).classList.add('active')
-  const titles = { stores: 'My Stores', products: 'Products', categories: 'Categories', orders: 'Orders', coupons: 'Coupons', analytics: 'Analytics', marketing: '📣 Marketing', 'ai-assistant': '🤖 AI Assistant' }
-  document.getElementById('pageTitle').textContent = titles[name] || name
-  const actions = {
-    stores: { label: '+ New Store', fn: 'openCreateStore()' },
-    products: { label: '+ Add Product', fn: 'openCreateProduct()' },
-    categories: { label: '', fn: '' },
-    orders: { label: '', fn: '' },
-    coupons: { label: '', fn: '' },
-    analytics: { label: '', fn: '' },
-    marketing: { label: '', fn: '' },
-    'ai-assistant': { label: '', fn: '' }
-  }
-  const topBtn = document.getElementById('topbarAction')
-  topBtn.textContent = actions[name]?.label || ''
-  topBtn.onclick = actions[name]?.fn ? new Function(actions[name].fn) : null
-  topBtn.style.display = actions[name]?.label ? 'flex' : 'none'
-  const showSelector = name !== 'stores'
-  document.getElementById('storeSelectorWrap').style.display = showSelector ? 'flex' : 'none'
-  if (name === 'products') loadProducts()
-  if (name === 'categories') loadCategories()
-  if (name === 'orders') loadOrders()
-  if (name === 'coupons') loadCoupons()
-  if (name === 'analytics') loadAnalytics()
-  if (name === 'marketing') initMarketing()
-  if (name === 'ai-assistant') initAiAssistant()
-}
-
-// ── Stores ────────────────────────────────────────────────────────────────────
 async function loadStores() {
   allStores = await apiFetch('/stores')
   renderStores()
-  // Update store selector
-  const sel = document.getElementById('storeSelector')
-  sel.innerHTML = allStores.map(s => `<option value="${s._id}">${s.name}</option>`).join('')
-  if (allStores.length) {
-    currentStore = allStores[0]
-    sel.value = currentStore._id
-  }
-  // Fetch analytics for each store in parallel (non-blocking)
-  allStores.forEach(s => loadStoreCardStats(s))
+  allStores.forEach(s => loadStoreKPIs(s))
 }
 
-async function loadStoreCardStats(s) {
+async function loadDashStats() {
   try {
-    const cur = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
+    const d = await apiFetch('/dashboard')
+    const statsHtml = `
+      <div class="stats-row">
+        <div class="stat-card"><span class="stat-icon">🏪</span><div><div class="stat-label">Total Stores</div><div class="stat-value">${d.stores_count}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">📦</span><div><div class="stat-label">Total Orders</div><div class="stat-value">${d.total_orders}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">🕐</span><div><div class="stat-label">Today's Orders</div><div class="stat-value">${d.today_orders}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">💰</span><div><div class="stat-label">Total Revenue</div><div class="stat-value">₹${(d.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div></div>
+      </div>`
+    document.getElementById('page-content').insertAdjacentHTML('afterbegin', statsHtml)
+  } catch {}
+}
+
+async function loadStoreKPIs(s) {
+  try {
     const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
-    const revEl = document.getElementById(`stat-rev-${s._id}`)
-    const ordEl = document.getElementById(`stat-ord-${s._id}`)
-    const todEl = document.getElementById(`stat-today-${s._id}`)
-    if (!revEl) return
+    const cur = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
     const rev = data.total_revenue || 0
-    revEl.textContent = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L'
-      : rev >= 1000 ? cur + (rev/1000).toFixed(1)+'k'
-      : cur + rev.toFixed(0)
-    ordEl.textContent = (data.total_orders || 0).toLocaleString()
-    todEl.textContent = data.today_orders || 0
-    ;[revEl, ordEl, todEl].forEach(el => el.classList.remove('loading'))
-  } catch(e) {
-    const revEl = document.getElementById(`stat-rev-${s._id}`)
-    if (revEl) { revEl.textContent = '—'; revEl.classList.remove('loading') }
-  }
+    const revStr = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L' : rev >= 1000 ? cur + (rev/1000).toFixed(1)+'k' : cur + rev.toFixed(0)
+    const revEl = document.getElementById(`kpi-rev-${s._id}`)
+    const ordEl = document.getElementById(`kpi-ord-${s._id}`)
+    const todEl = document.getElementById(`kpi-today-${s._id}`)
+    if (revEl) { revEl.textContent = revStr; revEl.classList.remove('loading'); revEl.classList.add('rev') }
+    if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
+    if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
+  } catch {}
 }
 
 function renderStores() {
-  const grid = document.getElementById('storesGrid')
+  const container = document.getElementById('page-content')
+  const existing = container.querySelector('.stores-grid')
+  if (existing) existing.remove()
+
   if (!allStores.length) {
-    grid.innerHTML = `<div class="empty"><div class="empty-icon">🏪</div><h3>No stores yet</h3><p>Create your first store to start selling</p><button class="btn btn-primary" onclick="openCreateStore()">+ Create Store</button></div>`
+    container.insertAdjacentHTML('beforeend', `
+      <div class="empty-state">
+        <div class="empty-icon">🏪</div>
+        <h3>No stores yet</h3>
+        <p>Create your first store to start selling</p>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="openCreateStore()">+ Create Store</button>
+      </div>`)
     return
   }
+
+  const grid = document.createElement('div')
+  grid.className = 'stores-grid'
   grid.innerHTML = allStores.map(s => {
     const bg = s.brand_color || '#6c63ff'
-    const logo = s.logo_url ? `<img src="${s.logo_url}" style="height:48px;object-fit:contain;">` : s.name.slice(0, 2).toUpperCase()
+    const logo = s.logo_url
+      ? `<img class="store-banner-logo" src="${s.logo_url}" alt="">`
+      : `<span class="store-banner-initials">${s.name.slice(0,2).toUpperCase()}</span>`
     return `<div class="store-card">
-      <div class="store-card-banner" style="background:linear-gradient(135deg,${bg}dd,${bg}88);">${logo}</div>
+      <div class="store-banner" style="background:linear-gradient(135deg,${bg}ee,${bg}88);">${logo}</div>
       <div class="store-card-body">
-        <div class="store-card-name">${s.name}</div>
-        <div class="store-card-slug">/${s.slug}</div>
-        <div class="store-meta">
-          <span class="meta-badge">📦 ${s.product_count || 0} products</span>
-          <span class="meta-badge">📋 ${s.order_count || 0} orders</span>
+        <div class="store-name">${s.name}</div>
+        <div class="store-slug">/${s.slug}</div>
+        <div class="store-badges">
+          <span class="badge ${s.published ? 'badge-green' : 'badge-gray'}">${s.published ? '● Live' : '○ Draft'}</span>
+          <span class="badge badge-gray">📦 ${s.product_count || 0}</span>
+          <span class="badge badge-gray">📋 ${s.order_count || 0}</span>
         </div>
-        <span class="store-status ${s.published ? 'published' : 'draft'}">
-          ${s.published ? '● Live' : '○ Draft'}
-        </span>
-        <div class="store-card-stats" id="stats-${s._id}">
-          <div class="store-stat revenue-stat"><div class="store-stat-val loading" id="stat-rev-${s._id}">—</div><div class="store-stat-label">Revenue</div></div>
-          <div class="store-stat"><div class="store-stat-val loading" id="stat-ord-${s._id}">—</div><div class="store-stat-label">Orders</div></div>
-          <div class="store-stat today-stat"><div class="store-stat-val loading" id="stat-today-${s._id}">—</div><div class="store-stat-label">Today</div></div>
+        <div class="store-kpis" style="padding: 0 18px;">
+          <div class="store-kpi"><div class="store-kpi-val loading" id="kpi-rev-${s._id}">—</div><div class="store-kpi-label">Revenue</div></div>
+          <div class="store-kpi"><div class="store-kpi-val loading" id="kpi-ord-${s._id}">—</div><div class="store-kpi-label">Orders</div></div>
+          <div class="store-kpi"><div class="store-kpi-val loading" id="kpi-today-${s._id}">—</div><div class="store-kpi-label">Today</div></div>
         </div>
-        <div class="store-actions" style="margin-top:12px;">
+        <div class="store-actions">
           ${s.published ? `<a href="${s.published_url}" target="_blank" class="btn btn-secondary btn-sm">🌐 View</a>` : ''}
           <button class="btn btn-secondary btn-sm" onclick="publishStore('${s._id}')">🚀 ${s.published ? 'Republish' : 'Publish'}</button>
           <button class="btn btn-secondary btn-sm" onclick="openEditStore('${s._id}')">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteStore('${s._id}','${s.name}')">🗑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteStore('${s._id}','${s.name.replace(/'/g,"\\'")}')">🗑</button>
         </div>
       </div>
     </div>`
   }).join('')
-}
-
-async function loadDashboard() {
-  try {
-    const d = await apiFetch('/dashboard')
-    document.getElementById('dashStats').style.display = 'grid'
-    document.getElementById('statStores').textContent = d.stores_count
-    document.getElementById('statOrders').textContent = d.total_orders
-    document.getElementById('statToday').textContent = d.today_orders
-    document.getElementById('statRevenue').textContent = '₹' + (d.total_revenue || 0).toFixed(0)
-  } catch {}
+  container.appendChild(grid)
 }
 
 function openCreateStore() {
@@ -1031,8 +269,7 @@ function openCreateStore() {
 }
 
 function openEditStore(id) {
-  const s = allStores.find(x => x._id === id)
-  if (!s) return
+  const s = allStores.find(x => x._id === id); if (!s) return
   document.getElementById('storeModalTitle').textContent = 'Edit Store'
   document.getElementById('storeEditId').value = id
   document.getElementById('storeName').value = s.name
@@ -1042,16 +279,14 @@ function openEditStore(id) {
   document.getElementById('storePhone').value = s.phone || ''
   document.getElementById('storeCurrency').value = s.currency || 'INR'
   document.getElementById('storeBrandColor').value = s.brand_color || '#6c63ff'
-  document.getElementById('storeLogoFile').value = ''
-  document.getElementById('storeLogoExisting').value = s.logo_url || ''
   const cs = s.card_style || 'grid'
   selectCardStyle(cs, document.querySelector(`[data-style="${cs}"]`))
+  document.getElementById('storeLogoFile').value = ''
+  document.getElementById('storeLogoExisting').value = s.logo_url || ''
   if (s.logo_url) {
     document.getElementById('storeLogoImg').src = s.logo_url
     document.getElementById('storeLogoPreview').style.display = 'block'
-  } else {
-    document.getElementById('storeLogoPreview').style.display = 'none'
-  }
+  } else document.getElementById('storeLogoPreview').style.display = 'none'
   openModal('storeModal')
 }
 
@@ -1059,7 +294,6 @@ async function saveStore() {
   const id = document.getElementById('storeEditId').value
   const name = document.getElementById('storeName').value.trim()
   if (!name) return toast('Store name is required', 'error')
-
   const fd = new FormData()
   fd.append('name', name)
   fd.append('tagline', document.getElementById('storeTagline').value.trim())
@@ -1069,16 +303,14 @@ async function saveStore() {
   fd.append('currency', document.getElementById('storeCurrency').value)
   fd.append('brand_color', document.getElementById('storeBrandColor').value)
   fd.append('card_style', document.getElementById('storeCardStyle').value || 'grid')
-  // Attach logo file if selected, else keep existing URL
   const logoFile = document.getElementById('storeLogoFile').files[0]
   if (logoFile) fd.append('logo', logoFile)
   else fd.append('logo_url', document.getElementById('storeLogoExisting').value || '')
-
   try {
     const url = id ? `/stores/${id}` : '/stores'
     const res = await fetch(API + url, {
       method: id ? 'PUT' : 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
+      headers: { 'Authorization': 'Bearer ' + getToken() },
       body: fd
     })
     if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
@@ -1091,724 +323,19 @@ async function saveStore() {
 async function publishStore(id) {
   try {
     const r = await apiFetch(`/stores/${id}/publish`, { method: 'POST', body: '{}' })
-    await loadStores()
-    toast('Store is live! URL copied to clipboard.')
+    toast('Store published! URL copied.')
     navigator.clipboard.writeText(r.url).catch(() => {})
+    await loadStores()
   } catch (e) { toast(e.message, 'error') }
 }
 
 async function deleteStore(id, name) {
-  if (!confirm(`Delete "${name}" and all its products & orders? This cannot be undone.`)) return
+  if (!confirm(`Delete "${name}" and all its data? This cannot be undone.`)) return
   try {
     await apiFetch(`/stores/${id}`, { method: 'DELETE', body: '{}' })
     await loadStores()
     toast('Store deleted')
   } catch (e) { toast(e.message, 'error') }
-}
-
-function onStoreChange() {
-  const id = document.getElementById('storeSelector').value
-  currentStore = allStores.find(s => s._id === id)
-  const page = document.querySelector('.page.active').id.replace('page-', '')
-  if (page === 'products') loadProducts()
-  if (page === 'categories') loadCategories()
-  if (page === 'orders') loadOrders()
-}
-
-// ── Products ──────────────────────────────────────────────────────────────────
-async function loadProducts() {
-  if (!currentStore) return
-  try {
-    allProducts = await apiFetch(`/stores/${currentStore._id}/products`)
-    // Also load categories for filter
-    allCategories = await apiFetch(`/stores/${currentStore._id}/categories`)
-    catMap = {}; allCategories.forEach(c => catMap[c._id] = c.name)
-    const catFilter = document.getElementById('productCatFilter')
-    catFilter.innerHTML = '<option value="">All Categories</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
-    const catSel = document.getElementById('productCategory')
-    catSel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
-    renderProducts(allProducts)
-  } catch (e) { toast(e.message, 'error') }
-}
-
-function filterProducts() {
-  const q = document.getElementById('productSearch').value.toLowerCase()
-  const cat = document.getElementById('productCatFilter').value
-  const status = document.getElementById('productStatusFilter').value
-  let filtered = allProducts
-  if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q))
-  if (cat) filtered = filtered.filter(p => p.category_id === cat || (p.category_id && p.category_id.$oid === cat))
-  if (status) filtered = filtered.filter(p => p.status === status)
-  renderProducts(filtered)
-}
-
-function renderProducts(products) {
-  const body = document.getElementById('productsBody')
-  if (!products.length) { body.innerHTML = '<tr><td colspan="6"><div class="empty" style="padding:40px;"><div class="empty-icon">📦</div><p>No products found</p></div></td></tr>'; return }
-  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
-  body.innerHTML = products.map(p => {
-    const thumb = p.images?.[0] ? `<img class="product-thumb" src="${p.images[0]}" alt="">` : `<div class="product-thumb-placeholder">📦</div>`
-    const catName = p.category_id ? (catMap[p.category_id] || catMap[p.category_id?.$oid] || '—') : '—'
-    return `<tr>
-      <td><div style="display:flex;align-items:center;gap:10px;">${thumb}<div><div style="font-weight:600;font-size:13.5px;">${p.name}</div><div style="font-size:11.5px;color:var(--text3);">${p.sku || '—'}</div></div></div></td>
-      <td style="color:var(--text2);font-size:13px;">${catName}</td>
-      <td><strong>${currency}${p.price.toFixed(2)}</strong>${p.compare_at_price ? `<br><s style="font-size:11px;color:var(--text3);">${currency}${p.compare_at_price.toFixed(2)}</s>` : ''}</td>
-      <td style="color:var(--text2);">${p.track_inventory ? p.stock_qty : '∞'}</td>
-      <td><span class="status ${p.status}">${p.status}</span></td>
-      <td>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-secondary btn-sm" onclick="openEditProduct('${p._id}')">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p._id}','${p.name.replace(/'/g,"\\'")}')">🗑</button>
-        </div>
-      </td>
-    </tr>`
-  }).join('')
-}
-
-function openCreateProduct() {
-  if (!currentStore) return toast('Select a store first', 'error')
-  document.getElementById('productModalTitle').textContent = 'Add Product'
-  document.getElementById('productEditId').value = ''
-  document.getElementById('productName').value = ''
-  document.getElementById('productDesc').value = ''
-  document.getElementById('productPrice').value = ''
-  document.getElementById('productCompare').value = ''
-  document.getElementById('productSku').value = ''
-  document.getElementById('productStock').value = ''
-  document.getElementById('productTags').value = ''
-  document.getElementById('productImageFiles').value = ''
-  document.getElementById('productImagesPreview').innerHTML = ''
-  document.getElementById('existingImagesWrap').innerHTML = ''
-  document.getElementById('productStatus').value = 'active'
-  document.getElementById('variantsList').innerHTML = ''
-  // Populate categories
-  const sel = document.getElementById('productCategory')
-  sel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
-  openModal('productModal')
-}
-
-function openEditProduct(id) {
-  const p = allProducts.find(x => x._id === id)
-  if (!p) return
-  document.getElementById('productModalTitle').textContent = 'Edit Product'
-  document.getElementById('productEditId').value = id
-  document.getElementById('productName').value = p.name
-  document.getElementById('productDesc').value = p.description || ''
-  document.getElementById('productPrice').value = p.price
-  document.getElementById('productCompare').value = p.compare_at_price || ''
-  document.getElementById('productSku').value = p.sku || ''
-  document.getElementById('productStock').value = p.stock_qty || ''
-  document.getElementById('productTags').value = (p.tags || []).join(', ')
-  document.getElementById('productImageFiles').value = ''
-  document.getElementById('productImagesPreview').innerHTML = ''
-  document.getElementById('existingImagesWrap').innerHTML = (p.images||[]).map(img =>
-    `<img src="${img}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);">`
-  ).join('')
-  document.getElementById('productStatus').value = p.status || 'active'
-  const catId = p.category_id?.$oid || p.category_id || ''
-  const sel = document.getElementById('productCategory')
-  sel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}" ${c._id === catId ? 'selected' : ''}>${c.name}</option>`).join('')
-  // Variants
-  document.getElementById('variantsList').innerHTML = ''
-  ;(p.variants || []).forEach(v => addVariantRow(v.label, v.options))
-  openModal('productModal')
-}
-
-async function saveProduct() {
-  const id = document.getElementById('productEditId').value
-  const name = document.getElementById('productName').value.trim()
-  const price = document.getElementById('productPrice').value
-  if (!name || !price) return toast('Name and price required', 'error')
-
-  const variantRows = document.querySelectorAll('.variant-row')
-  const variants = Array.from(variantRows).map(row => ({
-    label: row.querySelector('.var-label').value.trim(),
-    options: row.querySelector('.var-options').value.trim()
-  })).filter(v => v.label)
-
-  const fd = new FormData()
-  fd.append('name', name)
-  fd.append('description', document.getElementById('productDesc').value.trim())
-  fd.append('price', price)
-  fd.append('compare_at_price', document.getElementById('productCompare').value || '')
-  fd.append('sku', document.getElementById('productSku').value.trim())
-  fd.append('stock_qty', document.getElementById('productStock').value || 0)
-  fd.append('track_inventory', !!document.getElementById('productStock').value)
-  fd.append('category_id', document.getElementById('productCategory').value || '')
-  fd.append('tags', document.getElementById('productTags').value)
-  fd.append('status', document.getElementById('productStatus').value)
-  fd.append('variants', JSON.stringify(variants))
-
-  // Attach new image files
-  const imageFiles = document.getElementById('productImageFiles').files
-  if (imageFiles.length > 0) {
-    Array.from(imageFiles).forEach(f => fd.append('images', f))
-  } else {
-    // Keep existing image URLs
-    const existingImgs = Array.from(document.querySelectorAll('#existingImagesWrap img')).map(i => i.src)
-    fd.append('images', JSON.stringify(existingImgs))
-  }
-
-  try {
-    const url = id
-      ? `${API}/stores/${currentStore._id}/products/${id}`
-      : `${API}/stores/${currentStore._id}/products`
-    const res = await fetch(url, {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Authorization': 'Bearer ' + token },
-      body: fd
-    })
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
-    closeModal('productModal')
-    await loadProducts()
-    toast(id ? 'Product updated!' : 'Product added!', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function deleteProduct(id, name) {
-  if (!confirm(`Delete "${name}"?`)) return
-  try {
-    await apiFetch(`/stores/${currentStore._id}/products/${id}`, { method: 'DELETE', body: '{}' })
-    await loadProducts()
-    toast('Product deleted')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-function addVariantRow(label = '', options = '') {
-  const div = document.createElement('div')
-  div.className = 'variant-row'
-  div.innerHTML = `<input class="var-label" type="text" placeholder="Label (e.g. Size)" value="${label}" style="flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
-  <input class="var-options" type="text" placeholder="Options (e.g. S, M, L)" value="${options}" style="flex:2;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
-  <button onclick="this.parentElement.remove()">✕</button>`
-  document.getElementById('variantsList').appendChild(div)
-}
-
-// ── Categories ────────────────────────────────────────────────────────────────
-async function loadCategories() {
-  if (!currentStore) return
-  allCategories = await apiFetch(`/stores/${currentStore._id}/categories`)
-  catMap = {}; allCategories.forEach(c => catMap[c._id] = c.name)
-  renderCategories()
-}
-
-function renderCategories() {
-  const container = document.getElementById('catChips')
-  if (!allCategories.length) { container.innerHTML = '<p style="color:var(--text3);font-size:13px;">No categories yet. Add one above.</p>'; return }
-  container.innerHTML = allCategories.map(c => `
-    <div class="cat-chip">
-      <span>🗂 ${c.name}</span>
-      <button onclick="deleteCategory('${c._id}','${c.name.replace(/'/g,"\\'")}')">✕</button>
-    </div>`).join('')
-}
-
-async function createCategory() {
-  if (!currentStore) return toast('Select a store first', 'error')
-  const name = document.getElementById('catNewName').value.trim()
-  if (!name) return toast('Enter a category name', 'error')
-  try {
-    await apiFetch(`/stores/${currentStore._id}/categories`, { method: 'POST', body: JSON.stringify({ name }) })
-    document.getElementById('catNewName').value = ''
-    await loadCategories()
-    toast('Category added!', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function deleteCategory(id, name) {
-  if (!confirm(`Delete category "${name}"?`)) return
-  try {
-    await apiFetch(`/stores/${currentStore._id}/categories/${id}`, { method: 'DELETE', body: '{}' })
-    await loadCategories()
-    toast('Category deleted')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-// ── Orders ────────────────────────────────────────────────────────────────────
-async function loadOrders() {
-  if (!currentStore) return
-  allOrders = await apiFetch(`/stores/${currentStore._id}/orders`)
-  renderOrders(allOrders)
-}
-
-function filterOrders() {
-  const q = document.getElementById('orderSearch').value.toLowerCase()
-  const status = document.getElementById('orderStatusFilter').value
-  let filtered = allOrders
-  if (q) filtered = filtered.filter(o => o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q) || o.customer_email.toLowerCase().includes(q))
-  if (status) filtered = filtered.filter(o => o.status === status)
-  renderOrders(filtered)
-}
-
-function renderOrders(orders) {
-  const body = document.getElementById('ordersBody')
-  if (!orders.length) { body.innerHTML = '<tr><td colspan="7"><div class="empty" style="padding:40px;"><div class="empty-icon">📋</div><p>No orders found</p></div></td></tr>'; return }
-  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
-  body.innerHTML = orders.map(o => `<tr>
-    <td><strong style="font-family:'DM Mono',monospace;font-size:12.5px;">${o.order_number}</strong></td>
-    <td><div style="font-weight:600;font-size:13px;">${o.customer_name}</div><div style="font-size:11.5px;color:var(--text3);">${o.customer_email}</div></td>
-    <td style="font-size:13px;color:var(--text2);">${o.items?.length || 0} item(s)</td>
-    <td><strong>${currency}${o.total?.toFixed(2)}</strong><br><span style="font-size:11px;color:var(--text3);">COD</span></td>
-    <td><span class="status ${o.status}">${o.status}</span></td>
-    <td style="font-size:12px;color:var(--text3);">${new Date(o.created_at).toLocaleDateString()}</td>
-    <td><button class="btn btn-secondary btn-sm" onclick="openOrderEdit('${o._id}')">✏️ Update</button></td>
-  </tr>`).join('')
-}
-
-function openOrderEdit(id) {
-  const o = allOrders.find(x => x._id === id)
-  if (!o) return
-  document.getElementById('orderEditId').value = id
-  document.getElementById('orderStatus').value = o.status
-  document.getElementById('orderTracking').value = o.tracking_number || ''
-  document.getElementById('orderNotes').value = o.notes || ''
-  const currency = currentStore?.currency === 'USD' ? '$' : '₹'
-  document.getElementById('orderDetailView').innerHTML = `
-    <strong>#${o.order_number}</strong> — ${o.customer_name} (${o.customer_email})<br>
-    Phone: ${o.customer_phone || '—'}<br>
-    Address: ${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}<br>
-    Items: ${(o.items || []).map(i => `${i.name} x${i.qty} @ ${currency}${i.price}`).join(', ')}<br>
-    <strong>Total: ${currency}${o.total?.toFixed(2)}</strong>`
-  openModal('orderModal')
-}
-
-async function saveOrder() {
-  const id = document.getElementById('orderEditId').value
-  const body = {
-    status: document.getElementById('orderStatus').value,
-    tracking_number: document.getElementById('orderTracking').value.trim(),
-    notes: document.getElementById('orderNotes').value.trim()
-  }
-  try {
-    await apiFetch(`/stores/${currentStore._id}/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) })
-    closeModal('orderModal')
-    await loadOrders()
-    toast('Order updated!', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-
-// ── Analytics ─────────────────────────────────────────────────────────────────
-let analyticsDays = 7
-
-function setAnalyticsDays(days, el) {
-  analyticsDays = days
-  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'))
-  el.classList.add('active')
-  closeDrilldown()
-  loadAnalytics()
-}
-
-// Chart instances — destroy before recreating
-let _chartRev = null, _chartOrd = null, _chartStatus = null
-
-async function loadAnalytics() {
-  if (!currentStore) return
-  document.getElementById('analyticsStoreLabel').textContent = currentStore.name
-  try {
-    const data = await apiFetch(`/stores/${currentStore._id}/analytics?days=${analyticsDays}`)
-    const cur = currentStore.currency === 'USD' ? '$' : currentStore.currency === 'EUR' ? '€' : '₹'
-
-    // ── KPIs ──
-    document.getElementById('kpiRevenue').textContent = cur + (data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})
-    document.getElementById('kpiOrders').textContent = (data.total_orders||0).toLocaleString()
-    document.getElementById('kpiToday').textContent = data.today_orders||0
-    document.getElementById('kpiProducts').textContent = data.product_count||0
-
-    const revDelta = (data.today_revenue||0) - (data.yesterday_revenue||0)
-    const revEl = document.getElementById('kpiRevenueDelta')
-    revEl.textContent = (revDelta>=0?'↑ ':'↓ ') + cur + Math.abs(revDelta).toFixed(0) + ' vs yesterday'
-    revEl.className = 'kpi-delta ' + (revDelta>0?'up':revDelta<0?'down':'neutral')
-
-    const ordDelta = (data.today_orders||0) - (data.yesterday_orders||0)
-    const ordEl = document.getElementById('kpiOrdersDelta')
-    ordEl.textContent = (ordDelta>=0?'↑ ':'↓ ') + Math.abs(ordDelta) + ' vs yesterday'
-    ordEl.className = 'kpi-delta ' + (ordDelta>0?'up':ordDelta<0?'down':'neutral')
-
-    // ── Fill missing dates ──
-    const stats = data.daily_stats || []
-    const filledDates = []
-    const today = new Date()
-    for (let i = analyticsDays-1; i >= 0; i--) {
-      const d = new Date(today); d.setDate(d.getDate()-i)
-      const key = d.toISOString().slice(0,10)
-      const found = stats.find(s => s._id === key)
-      filledDates.push({ date: key, label: key.slice(5), revenue: found?.revenue||0, orders: found?.orders||0 })
-    }
-
-    const labels = filledDates.map(d => d.label)
-    const revVals = filledDates.map(d => d.revenue)
-    const ordVals = filledDates.map(d => d.orders)
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#6c63ff'
-    const totalRev = revVals.reduce((a,b)=>a+b,0)
-    const totalOrd = ordVals.reduce((a,b)=>a+b,0)
-    document.getElementById('chartRevTotal').textContent = cur + totalRev.toLocaleString('en-IN',{maximumFractionDigits:0})
-    document.getElementById('chartOrdTotal').textContent = totalOrd + ' orders'
-
-    // ── Revenue Line Chart (clickable) ──
-    if (_chartRev) _chartRev.destroy()
-    _chartRev = new Chart(document.getElementById('revenueChart'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Revenue',
-          data: revVals,
-          borderColor: accent,
-          backgroundColor: accent + '18',
-          borderWidth: 2.5,
-          pointBackgroundColor: accent,
-          pointRadius: 5,
-          pointHoverRadius: 8,
-          pointHoverBackgroundColor: accent,
-          fill: true,
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        cursor: 'pointer',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ${cur}${ctx.parsed.y.toLocaleString('en-IN',{maximumFractionDigits:0})}`,
-              afterLabel: () => '  Click to drill down'
-            }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
-          y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8',
-            callback: v => cur + (v>=1000?(v/1000).toFixed(1)+'k':v) } }
-        },
-        onClick: (evt, elements) => {
-          if (elements.length > 0) {
-            const idx = elements[0].index
-            loadDayDrilldown(filledDates[idx].date, cur)
-          }
-        }
-      }
-    })
-
-    // ── Orders Bar Chart (clickable) ──
-    if (_chartOrd) _chartOrd.destroy()
-    _chartOrd = new Chart(document.getElementById('ordersChart'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Orders',
-          data: ordVals,
-          backgroundColor: '#60a5fa',
-          hoverBackgroundColor: '#3b82f6',
-          borderRadius: 6,
-          borderSkipped: false
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ${ctx.parsed.y} orders`,
-              afterLabel: () => '  Click to drill down'
-            }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', maxTicksLimit: 7 } },
-          y: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#94a3b8', stepSize: 1 } }
-        },
-        onClick: (evt, elements) => {
-          if (elements.length > 0) {
-            const idx = elements[0].index
-            loadDayDrilldown(filledDates[idx].date, cur)
-          }
-        }
-      }
-    })
-
-    // ── Top Products ──
-    const topProds = data.top_products || []
-    const maxProdRev = Math.max(...topProds.map(p=>p.revenue), 1)
-    document.getElementById('topProductsChart').innerHTML = topProds.length
-      ? topProds.map((p,i) => `
-        <div class="tp-row">
-          <div class="tp-rank">#${i+1}</div>
-          <div class="tp-img">${p.image?`<img src="${p.image}" alt="">`:'📦'}</div>
-          <div class="tp-name" title="${p.name}">${p.name}</div>
-          <div class="tp-bar-wrap"><div class="tp-bar-fill" style="width:${Math.max((p.revenue/maxProdRev)*100,4)}%"></div></div>
-          <div class="tp-val">${cur}${p.revenue.toFixed(0)}</div>
-        </div>`).join('')
-      : '<p style="color:var(--text3);font-size:13px;padding:20px 0;">No orders yet</p>'
-
-    // ── Status Donut Chart ──
-    const statusColors = { pending:'#fbbf24', confirmed:'#a78bfa', processing:'#60a5fa', shipped:'#38bdf8', delivered:'#34d399', cancelled:'#f87171' }
-    const breakdown = data.status_breakdown || []
-    if (_chartStatus) _chartStatus.destroy()
-    if (breakdown.length) {
-      _chartStatus = new Chart(document.getElementById('statusChart'), {
-        type: 'doughnut',
-        data: {
-          labels: breakdown.map(s=>s._id),
-          datasets: [{ data: breakdown.map(s=>s.count), backgroundColor: breakdown.map(s=>statusColors[s._id]||'#94a3b8'), borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
-        },
-        options: {
-          responsive: false, cutout: '65%',
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } } }
-        }
-      })
-      document.getElementById('statusLegend').innerHTML = breakdown.map(s => `
-        <div class="status-leg-row">
-          <div class="status-dot" style="background:${statusColors[s._id]||'#94a3b8'}"></div>
-          <span class="status-leg-name">${s._id}</span>
-          <span class="status-leg-val">${s.count}</span>
-        </div>`).join('')
-    } else {
-      document.getElementById('statusChart').style.display = 'none'
-      document.getElementById('statusLegend').innerHTML = '<p style="color:var(--text3);font-size:13px;">No orders yet</p>'
-    }
-
-  } catch(e) { toast('Analytics error: ' + e.message, 'error') }
-}
-
-
-// ── Day Drill-down ────────────────────────────────────────────────────────────
-let _ddHourly = null, _ddBar = null, _ddPie = null
-
-async function loadDayDrilldown(date, cur) {
-  if (!currentStore) return
-  // Highlight the panel
-  const panel = document.getElementById('drilldownPanel')
-  panel.style.display = 'block'
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  document.getElementById('drilldownDate').textContent = date
-  document.getElementById('ddRevenue').textContent = '...'
-  document.getElementById('ddOrders').textContent = '...'
-  document.getElementById('ddQty').textContent = '...'
-
-  try {
-    const data = await apiFetch(`/stores/${currentStore._id}/analytics/day?date=${date}`)
-    const currency = cur || (currentStore.currency==='USD'?'$':currentStore.currency==='EUR'?'€':'₹')
-
-    // KPIs
-    document.getElementById('ddRevenue').textContent = currency + (data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})
-    document.getElementById('ddOrders').textContent = data.total_orders||0
-    document.getElementById('ddQty').textContent = data.total_qty||0
-
-    // ── Hourly chart (dual axis: bars=orders, line=revenue) ──
-    const hours = Array.from({length:24},(_,i)=>i)
-    const hourlyOrders = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.orders||0)
-    const hourlyRevenue = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.revenue||0)
-    const hourLabels = hours.map(h => h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p')
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#6c63ff'
-
-    if (_ddHourly) _ddHourly.destroy()
-    _ddHourly = new Chart(document.getElementById('hourlyChart'), {
-      type: 'bar',
-      data: {
-        labels: hourLabels,
-        datasets: [
-          { type: 'bar', label: 'Orders', data: hourlyOrders, backgroundColor: '#60a5fa88', borderRadius: 4, borderSkipped: false, yAxisID: 'yOrd' },
-          { type: 'line', label: 'Revenue', data: hourlyRevenue, borderColor: accent, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, pointBackgroundColor: accent, tension: 0.4, yAxisID: 'yRev' }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: {
-          legend: { position: 'top', labels: { font: { family: 'Outfit', size: 12 }, boxWidth: 12 } },
-          tooltip: { callbacks: {
-            label: ctx => ctx.dataset.label==='Revenue' ? ` ${currency}${ctx.parsed.y.toFixed(0)}` : ` ${ctx.parsed.y} orders`
-          }}
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', maxTicksLimit: 12 } },
-          yOrd: { position: 'left', beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', stepSize: 1 } },
-          yRev: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8',
-            callback: v => currency + (v>=1000?(v/1000).toFixed(1)+'k':v) } }
-        }
-      }
-    })
-
-    // ── Products Sold Bar Chart ──
-    const prods = (data.products_sold||[]).slice(0,8)
-    const prodNames = prods.map(p => p.name.length>14?p.name.slice(0,13)+'…':p.name)
-    const prodQtys = prods.map(p => p.qty)
-    const barColors = ['#6c63ff','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#38bdf8','#fb923c']
-
-    if (_ddBar) _ddBar.destroy()
-    _ddBar = new Chart(document.getElementById('ddProductsBarChart'), {
-      type: 'bar',
-      data: {
-        labels: prodNames,
-        datasets: [{ label: 'Qty Sold', data: prodQtys, backgroundColor: barColors, borderRadius: 6, borderSkipped: false }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x} units sold` } } },
-        scales: {
-          x: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#94a3b8', stepSize: 1 } },
-          y: { grid: { display: false }, ticks: { font: { family: 'Outfit', size: 11 }, color: '#64748b' } }
-        }
-      }
-    })
-
-    // ── Revenue Pie Chart ──
-    const pieProds = (data.products_sold||[]).slice(0,6)
-    if (_ddPie) _ddPie.destroy()
-    if (pieProds.length) {
-      _ddPie = new Chart(document.getElementById('ddPieChart'), {
-        type: 'doughnut',
-        data: {
-          labels: pieProds.map(p => p.name),
-          datasets: [{ data: pieProds.map(p => p.revenue), backgroundColor: barColors, borderWidth: 2, borderColor: '#fff', hoverOffset: 8 }]
-        },
-        options: {
-          responsive: false, cutout: '60%',
-          plugins: { legend: { display: false }, tooltip: { callbacks: {
-            label: ctx => ` ${currency}${ctx.parsed.toFixed(0)}`
-          }}}
-        }
-      })
-      document.getElementById('ddPieLegend').innerHTML = pieProds.map((p,i) => `
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:12px;">
-          <div style="width:10px;height:10px;border-radius:50%;background:${barColors[i]};flex-shrink:0;"></div>
-          <span style="flex:1;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">${p.name}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text3);">${currency}${p.revenue.toFixed(0)}</span>
-        </div>`).join('')
-    } else {
-      document.getElementById('ddPieChart').style.display = 'none'
-      document.getElementById('ddPieLegend').innerHTML = '<p style="color:var(--text3);font-size:13px;">No products sold</p>'
-    }
-
-    // Pulse the selected bar/point in main charts
-    _chartRev?.update(); _chartOrd?.update()
-
-  } catch(e) { toast('Drill-down error: ' + e.message, 'error') }
-}
-
-function closeDrilldown() {
-  document.getElementById('drilldownPanel').style.display = 'none'
-  if (_ddHourly) { _ddHourly.destroy(); _ddHourly = null }
-  if (_ddBar) { _ddBar.destroy(); _ddBar = null }
-  if (_ddPie) { _ddPie.destroy(); _ddPie = null }
-}
-
-// ── Coupons ───────────────────────────────────────────────────────────────────
-let allCoupons = []
-
-async function loadCoupons() {
-  if (!currentStore) return
-  allCoupons = await apiFetch(`/stores/${currentStore._id}/coupons`)
-  renderCoupons()
-}
-
-function renderCoupons() {
-  const body = document.getElementById('couponsBody')
-  const currency = currentStore?.currency === 'USD' ? '$' : currentStore?.currency === 'EUR' ? '€' : '₹'
-  if (!allCoupons.length) {
-    body.innerHTML = '<tr><td colspan="8"><div class="empty" style="padding:40px;"><div class="empty-icon">🎟️</div><p>No coupons yet. Create one to offer discounts.</p></div></td></tr>'
-    return
-  }
-  body.innerHTML = allCoupons.map(c => `<tr>
-    <td><span class="coupon-code">${c.code}</span></td>
-    <td style="color:var(--text2);">${c.type === 'percent' ? 'Percentage' : 'Flat'}</td>
-    <td><strong>${c.type === 'percent' ? c.value + '%' : currency + c.value}</strong></td>
-    <td style="color:var(--text2);">${c.min_order > 0 ? currency + c.min_order : '—'}</td>
-    <td style="font-family:'DM Mono',monospace;font-size:12.5px;">${c.uses}${c.max_uses ? ' / ' + c.max_uses : ''}</td>
-    <td style="font-size:12.5px;color:var(--text3);">${c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'Never'}</td>
-    <td>
-      <label class="toggle-switch">
-        <input type="checkbox" ${c.active ? 'checked' : ''} onchange="toggleCoupon('${c._id}',this.checked)">
-        <span class="toggle-slider"></span>
-      </label>
-    </td>
-    <td><button class="btn btn-danger btn-sm" onclick="deleteCoupon('${c._id}','${c.code}')">🗑</button></td>
-  </tr>`).join('')
-}
-
-function openCreateCoupon() {
-  if (!currentStore) return toast('Select a store first', 'error')
-  document.getElementById('couponEditId').value = ''
-  document.getElementById('couponCode').value = ''
-  document.getElementById('couponType').value = 'percent'
-  document.getElementById('couponValue').value = ''
-  document.getElementById('couponMinOrder').value = ''
-  document.getElementById('couponMaxUses').value = ''
-  document.getElementById('couponExpiry').value = ''
-  openModal('couponModal')
-}
-
-async function saveCoupon() {
-  const body = {
-    code: document.getElementById('couponCode').value.trim(),
-    type: document.getElementById('couponType').value,
-    value: document.getElementById('couponValue').value,
-    min_order: document.getElementById('couponMinOrder').value || 0,
-    max_uses: document.getElementById('couponMaxUses').value || null,
-    expires_at: document.getElementById('couponExpiry').value || null
-  }
-  if (!body.code || !body.value) return toast('Code and value required', 'error')
-  try {
-    await apiFetch(`/stores/${currentStore._id}/coupons`, { method: 'POST', body: JSON.stringify(body) })
-    closeModal('couponModal')
-    await loadCoupons()
-    toast('Coupon created!', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function toggleCoupon(id, active) {
-  try {
-    await apiFetch(`/stores/${currentStore._id}/coupons/${id}`, { method: 'PUT', body: JSON.stringify({ active }) })
-    toast(active ? 'Coupon activated' : 'Coupon deactivated', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function deleteCoupon(id, code) {
-  if (!confirm(`Delete coupon "${code}"?`)) return
-  try {
-    await apiFetch(`/stores/${currentStore._id}/coupons/${id}`, { method: 'DELETE', body: '{}' })
-    await loadCoupons()
-    toast('Coupon deleted')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add('open') }
-function closeModal(id) { document.getElementById(id).classList.remove('open') }
-function logout() { localStorage.removeItem('ekart_token'); location.replace('/') }
-
-function toast(msg, type = 'success') {
-  const t = document.getElementById('toast')
-  t.textContent = msg
-  t.className = 'toast show ' + type
-  setTimeout(() => t.classList.remove('show'), 3000)
-}
-
-
-function previewLogo(input) {
-  if (!input.files[0]) return
-  const reader = new FileReader()
-  reader.onload = e => {
-    document.getElementById('storeLogoImg').src = e.target.result
-    document.getElementById('storeLogoPreview').style.display = 'block'
-  }
-  reader.readAsDataURL(input.files[0])
-}
-
-function previewProductImages(input) {
-  const wrap = document.getElementById('productImagesPreview')
-  wrap.innerHTML = ''
-  Array.from(input.files).forEach(f => {
-    const reader = new FileReader()
-    reader.onload = e => {
-      const img = document.createElement('img')
-      img.src = e.target.result
-      img.style = 'width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);'
-      wrap.appendChild(img)
-    }
-    reader.readAsDataURL(f)
-  })
 }
 
 function selectCardStyle(style, el) {
@@ -1817,330 +344,12 @@ function selectCardStyle(style, el) {
   document.getElementById('storeCardStyle').value = style
 }
 
-// Close modals on overlay click
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open') })
-})
-
-
-// ══════════════════════════════════════════════════════════════════════
-// AI FUNCTIONS
-// ══════════════════════════════════════════════════════════════════════
-
-// ── AI Product Content Generator (inside product modal) ───────────────
-async function aiGenerateProduct() {
-  const name = document.getElementById('productName').value.trim()
-  if (!name) { showToast('Enter a product name first', 'error'); return }
-  const btn = document.getElementById('aiGenBtn')
-  btn.disabled = true; btn.textContent = '⏳ Generating...'
-  const resultBox = document.getElementById('aiProductResult')
-  resultBox.style.display = 'none'
-  try {
-    const storeName = currentStore?.name || ''
-    const cat = document.getElementById('productCategory')?.options[document.getElementById('productCategory')?.selectedIndex]?.text || ''
-    const r = await apiFetch('/ai/generate-product-content', {
-      method: 'POST',
-      body: JSON.stringify({ product_name: name, category: cat, store_type: storeName, currency: currentStore?.currency || 'INR' })
-    })
-    const d = r.content
-    resultBox.innerHTML = `
-      <div class="ai-result-box">
-        <h4>✨ AI Generated Content</h4>
-        <div class="ai-field-row">
-          <span class="ai-field-label">Title</span>
-          <span class="ai-field-val" style="font-weight:600;">${d.title}</span>
-        </div>
-        <div class="ai-field-row" style="align-items:flex-start;">
-          <span class="ai-field-label">Description</span>
-          <span class="ai-field-val">${d.description}</span>
-        </div>
-        <div style="margin:10px 0;">
-          <div style="font-size:11.5px;color:var(--text3);font-weight:700;margin-bottom:6px;">HIGHLIGHTS</div>
-          ${(d.highlights||[]).map(h=>`<div class="ai-highlight">${h}</div>`).join('')}
-        </div>
-        <div class="ai-field-row">
-          <span class="ai-field-label">SEO</span>
-          <span class="ai-field-val" style="font-size:12.5px;color:var(--text3);">${d.seo_description}</span>
-        </div>
-        <div style="margin:10px 0;">
-          ${(d.tags||[]).map(t=>`<span class="ai-tag">${t}</span>`).join('')}
-        </div>
-        <button class="ai-apply-btn" onclick="applyAIProductContent(${JSON.stringify(d).replace(/"/g,'&quot;')})">✅ Apply to Form</button>
-      </div>`
-    resultBox.style.display = 'block'
-  } catch(e) {
-    showToast('AI generation failed: ' + e.message, 'error')
-  }
-  btn.disabled = false; btn.textContent = '✨ AI Generate'
+function previewLogo(input) {
+  if (!input.files[0]) return
+  const r = new FileReader()
+  r.onload = e => { document.getElementById('storeLogoImg').src = e.target.result; document.getElementById('storeLogoPreview').style.display = 'block' }
+  r.readAsDataURL(input.files[0])
 }
-
-function applyAIProductContent(d) {
-  if (d.title) document.getElementById('productName').value = d.title
-  if (d.description) document.getElementById('productDesc').value = d.description
-  const tagsEl = document.getElementById('productTags')
-  if (d.tags && tagsEl) tagsEl.value = d.tags.join(', ')
-  document.getElementById('aiProductResult').style.display = 'none'
-  showToast('AI content applied!', 'success')
-}
-
-// ── AI Sales Insights (from analytics page) ───────────────────────────
-async function loadAIInsights(fromAssistant = false) {
-  if (!currentStore) { showToast('Select a store first', 'error'); return }
-  const btn = fromAssistant ? document.getElementById('asstInsightsBtn') : document.getElementById('aiInsightsBtn')
-  const panel = fromAssistant ? document.getElementById('asstInsightsResult') : document.getElementById('aiInsightsPanel')
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Analyzing...' }
-  if (panel) panel.style.display = 'none'
-  try {
-    const analytics = await apiFetch(`/stores/${currentStore._id}/analytics?days=30`)
-    const r = await apiFetch('/ai/sales-insights', {
-      method: 'POST',
-      body: JSON.stringify({ analytics, store_name: currentStore.name, currency: currentStore.currency || 'INR' })
-    })
-    const d = r.insights
-    const priorityClass = p => p === 'high' ? 'priority-high' : p === 'medium' ? 'priority-medium' : 'priority-low'
-    panel.innerHTML = `
-      <div class="insight-card">
-        <div class="insight-title">📊 Performance Summary</div>
-        <p style="font-size:13.5px;color:var(--text2);line-height:1.7;margin:0;">${d.summary}</p>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-        <div class="insight-card">
-          <div class="insight-title">✅ What's Working</div>
-          ${(d.wins||[]).map(w=>`<div class="insight-item"><span>🟢</span><span>${w}</span></div>`).join('')}
-        </div>
-        <div class="insight-card">
-          <div class="insight-title">🔧 Improvements</div>
-          ${(d.improvements||[]).map(i=>`<div class="insight-item"><span>🔸</span><span>${i}</span></div>`).join('')}
-        </div>
-      </div>
-      <div class="insight-card">
-        <div class="insight-title">🎯 Action Items</div>
-        ${(d.actions||[]).map(a=>`
-          <div class="insight-item">
-            <span class="priority-badge ${priorityClass(a.priority)}">${a.priority}</span>
-            <div><div style="font-weight:600;color:var(--text);font-size:13.5px;margin-bottom:2px;">${a.action}</div><div style="font-size:12.5px;color:var(--text3);">${a.reason}</div></div>
-          </div>`).join('')}
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div class="insight-card">
-          <div class="insight-title">🏷️ Discount Suggestion</div>
-          <p style="font-size:13.5px;color:var(--text2);line-height:1.6;margin:0;">${d.discount_suggestion}</p>
-        </div>
-        <div class="insight-card">
-          <div class="insight-title">📈 Trending</div>
-          <p style="font-size:13.5px;color:var(--text2);line-height:1.6;margin:0;">${d.trending}</p>
-        </div>
-      </div>`
-    panel.style.display = 'block'
-  } catch(e) {
-    panel.innerHTML = `<div style="color:var(--red);font-size:13.5px;padding:12px;">AI insights failed: ${e.message}</div>`
-    panel.style.display = 'block'
-  }
-  if (btn) { btn.disabled = false; btn.textContent = fromAssistant ? '🧠 Analyze My Store' : '🧠 AI Insights' }
-}
-
-// ── Marketing Page ────────────────────────────────────────────────────
-function initMarketing() {
-  if (!currentStore) return
-  document.getElementById('mktResults').style.display = 'none'
-}
-
-async function generateMarketing() {
-  if (!currentStore) { showToast('Select a store first', 'error'); return }
-  const btn = document.getElementById('mktGenBtn')
-  btn.disabled = true; btn.textContent = '⏳ Generating...'
-  document.getElementById('mktLoading').style.display = 'block'
-  document.getElementById('mktResults').style.display = 'none'
-  try {
-    const r = await apiFetch('/ai/marketing-content', {
-      method: 'POST',
-      body: JSON.stringify({
-        store_name: currentStore.name,
-        product_name: document.getElementById('mktProduct').value.trim(),
-        product_description: document.getElementById('mktDesc').value.trim(),
-        price: document.getElementById('mktPrice').value.trim(),
-        tone: document.getElementById('mktTone').value,
-        currency: currentStore.currency || 'INR',
-        platform: 'all'
-      })
-    })
-    const d = r.content
-    document.getElementById('mktInstagram').textContent = d.instagram?.caption || ''
-    document.getElementById('mktHashtags').innerHTML = (d.instagram?.hashtags||[]).map(h=>`<span class="ai-tag">#${h.replace(/^#/,'')}</span>`).join('')
-    document.getElementById('mktWhatsapp').textContent = d.whatsapp?.message || ''
-    document.getElementById('mktEmailSubject').textContent = d.email?.subject || ''
-    document.getElementById('mktEmailBody').textContent = d.email?.body || ''
-    document.getElementById('mktSms').textContent = d.sms || ''
-    document.getElementById('mktResults').style.display = 'grid'
-    showToast('Marketing content generated!', 'success')
-  } catch(e) {
-    showToast('Marketing generation failed: ' + e.message, 'error')
-  }
-  document.getElementById('mktLoading').style.display = 'none'
-  btn.disabled = false; btn.textContent = '✨ Generate All'
-}
-
-function copyText(elId) {
-  const txt = document.getElementById(elId).textContent
-  navigator.clipboard.writeText(txt).then(() => showToast('Copied!', 'success'))
-}
-
-function copyEmailFull() {
-  const subj = document.getElementById('mktEmailSubject').textContent
-  const body = document.getElementById('mktEmailBody').textContent
-  navigator.clipboard.writeText(`Subject: ${subj}\n\n${body}`).then(() => showToast('Email copied!', 'success'))
-}
-
-// ── AI Assistant Page ─────────────────────────────────────────────────
-function initAiAssistant() {}
-
-function selectAiTool(tool, el) {
-  document.querySelectorAll('.ai-tool-card').forEach(c => c.classList.remove('active'))
-  el.classList.add('active')
-  document.querySelectorAll('[id^="aitoolpanel-"]').forEach(p => p.style.display = 'none')
-  document.getElementById('aitoolpanel-' + tool).style.display = 'block'
-}
-
-async function runStoreSetup() {
-  const storeType = document.getElementById('setupStoreType').value.trim()
-  if (!storeType) { showToast('Enter store type first', 'error'); return }
-  const btn = document.getElementById('setupBtn')
-  btn.disabled = true; btn.textContent = '⏳ Generating...'
-  try {
-    const r = await apiFetch('/ai/store-setup', {
-      method: 'POST',
-      body: JSON.stringify({
-        store_type: storeType,
-        products_description: document.getElementById('setupProducts').value.trim(),
-        target_audience: document.getElementById('setupAudience').value.trim()
-      })
-    })
-    const d = r.setup
-    document.getElementById('setupResult').innerHTML = `
-      <div class="ai-result-box">
-        <h4>✨ AI Store Suggestions</h4>
-        <div class="ai-field-row"><span class="ai-field-label" style="width:110px;">Store Names</span>
-          <div>${(d.store_name_suggestions||[]).map(n=>`<div class="ai-highlight">${n}</div>`).join('')}</div>
-        </div>
-        <div class="ai-field-row"><span class="ai-field-label" style="width:110px;">Taglines</span>
-          <div>${(d.tagline_suggestions||[]).map(t=>`<div class="ai-highlight" style="font-style:italic;">"${t}"</div>`).join('')}</div>
-        </div>
-        <div class="ai-field-row"><span class="ai-field-label" style="width:110px;">Description</span>
-          <span class="ai-field-val">${d.description}</span>
-        </div>
-        <div class="ai-field-row"><span class="ai-field-label" style="width:110px;">Categories</span>
-          <div>${(d.categories||[]).map(c=>`<span class="ai-tag">${c}</span>`).join('')}</div>
-        </div>
-        <div class="ai-field-row"><span class="ai-field-label" style="width:110px;">Brand Color</span>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:24px;height:24px;border-radius:6px;background:${d.brand_color_suggestion};border:1px solid var(--border2);"></div>
-            <span class="ai-field-val" style="font-family:monospace;">${d.brand_color_suggestion}</span>
-          </div>
-        </div>
-        <div style="margin-top:12px;">
-          <div style="font-size:11.5px;color:var(--text3);font-weight:700;margin-bottom:8px;">💡 TIPS</div>
-          ${(d.tips||[]).map(t=>`<div class="ai-highlight">${t}</div>`).join('')}
-        </div>
-      </div>`
-  } catch(e) {
-    showToast('Store setup failed: ' + e.message, 'error')
-  }
-  btn.disabled = false; btn.textContent = '✨ Generate Store Ideas'
-}
-
-async function runProductContent() {
-  const name = document.getElementById('asstProductName').value.trim()
-  if (!name) { showToast('Enter product name first', 'error'); return }
-  const btn = document.getElementById('asstProductBtn')
-  btn.disabled = true; btn.textContent = '⏳ Generating...'
-  try {
-    const r = await apiFetch('/ai/generate-product-content', {
-      method: 'POST',
-      body: JSON.stringify({
-        product_name: name,
-        category: document.getElementById('asstProductCat').value.trim(),
-        existing_description: document.getElementById('asstProductDesc').value.trim(),
-        currency: currentStore?.currency || 'INR'
-      })
-    })
-    const d = r.content
-    document.getElementById('asstProductResult').innerHTML = `
-      <div class="ai-result-box">
-        <h4>✨ Generated Product Content</h4>
-        <div class="ai-field-row"><span class="ai-field-label">Title</span>
-          <div style="flex:1;display:flex;align-items:center;gap:8px;">
-            <span class="ai-field-val" style="font-weight:600;">${d.title}</span>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('${d.title.replace(/'/g,"\\'")}').then(()=>showToast('Copied!','success'))">📋</button>
-          </div>
-        </div>
-        <div class="ai-field-row" style="align-items:flex-start;"><span class="ai-field-label">Description</span>
-          <div style="flex:1;">
-            <div class="ai-field-val">${d.description}</div>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent).then(()=>showToast('Copied!','success'))">📋 Copy</button>
-          </div>
-        </div>
-        <div style="margin:10px 0;">
-          <div style="font-size:11.5px;color:var(--text3);font-weight:700;margin-bottom:6px;">HIGHLIGHTS</div>
-          ${(d.highlights||[]).map(h=>`<div class="ai-highlight">${h}</div>`).join('')}
-        </div>
-        <div class="ai-field-row"><span class="ai-field-label">SEO</span>
-          <span class="ai-field-val" style="font-size:12.5px;color:var(--text3);">${d.seo_description}</span>
-        </div>
-        <div style="margin-top:10px;">${(d.tags||[]).map(t=>`<span class="ai-tag">${t}</span>`).join('')}</div>
-      </div>`
-  } catch(e) {
-    showToast('Product content failed: ' + e.message, 'error')
-  }
-  btn.disabled = false; btn.textContent = '✨ Generate Content'
-}
-
-async function runAsstMarketing() {
-  if (!currentStore) { showToast('Select a store from top bar first', 'error'); return }
-  const btn = document.getElementById('asstMktBtn')
-  btn.disabled = true; btn.textContent = '⏳ Generating...'
-  try {
-    const r = await apiFetch('/ai/marketing-content', {
-      method: 'POST',
-      body: JSON.stringify({
-        store_name: currentStore.name,
-        product_name: document.getElementById('asstMktProduct').value.trim(),
-        product_description: document.getElementById('asstMktDesc').value.trim(),
-        price: document.getElementById('asstMktPrice').value.trim(),
-        tone: document.getElementById('asstMktTone').value,
-        currency: currentStore?.currency || 'INR',
-        platform: 'all'
-      })
-    })
-    const d = r.content
-    document.getElementById('asstMktResult').innerHTML = `
-      <div class="ai-result-box">
-        <h4>✨ Marketing Content</h4>
-        ${renderMktSection('📸 Instagram', d.instagram?.caption || '', d.instagram?.hashtags || [])}
-        ${renderMktSection('💬 WhatsApp', d.whatsapp?.message || '', [])}
-        ${renderMktSection('📧 Email Subject', d.email?.subject || '', [])}
-        ${renderMktSection('📧 Email Body', d.email?.body || '', [])}
-        ${renderMktSection('📱 SMS', d.sms || '', [])}
-      </div>`
-    showToast('Marketing content ready!', 'success')
-  } catch(e) {
-    showToast('Marketing content failed: ' + e.message, 'error')
-  }
-  btn.disabled = false; btn.textContent = '✨ Generate All Platforms'
-}
-
-function renderMktSection(title, text, hashtags) {
-  const escaped = text.replace(/</g,'&lt;').replace(/>/g,'&gt;')
-  const id = 'mktasst_' + Math.random().toString(36).slice(2,6)
-  return `
-    <div style="margin-bottom:14px;">
-      <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px;">${title}</div>
-      <div class="marketing-content-box" id="${id}" style="min-height:50px;">${escaped}</div>
-      ${hashtags.length ? `<div style="margin-top:6px;">${hashtags.map(h=>`<span class="ai-tag">#${h.replace(/^#/,'')}</span>`).join('')}</div>` : ''}
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('${id}').textContent).then(()=>showToast('Copied!','success'))">📋 Copy</button>
-    </div>`
-}
-
-
 </script>
 </body>
 </html>
