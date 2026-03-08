@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .day-tabs { display: flex; gap: 6px; }
+  .day-tab { padding: 5px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border2); background: none; color: var(--text3); font-family: 'Outfit', sans-serif; transition: all .15s; }
+  .day-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; }
+  .kpi-card.accent { border-color: rgba(108,99,255,0.25); background: linear-gradient(135deg,rgba(108,99,255,0.05),rgba(108,99,255,0.02)); }
+  .kpi-icon { font-size: 26px; flex-shrink: 0; }
+  .kpi-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 900; font-family: 'DM Mono', monospace; letter-spacing: -0.03em; }
+  .kpi-delta { font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+  .kpi-delta.up { color: var(--green); }
+  .kpi-delta.down { color: var(--red); }
+  .kpi-delta.neutral { color: var(--text3); }
+  .charts-main { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .charts-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .chart-title { font-size: 12.5px; font-weight: 700; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+  .chart-total { font-size: 12px; font-weight: 700; color: var(--accent2); font-family: 'DM Mono', monospace; }
+  .tp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .tp-rank { font-size: 10.5px; font-weight: 800; color: var(--text3); width: 16px; text-align: center; }
+  .tp-img { width: 30px; height: 30px; border-radius: 6px; object-fit: cover; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; }
+  .tp-img img { width: 100%; height: 100%; object-fit: cover; }
+  .tp-name { flex: 1; font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tp-bar-wrap { width: 70px; height: 5px; background: var(--surface2); border-radius: 3px; flex-shrink: 0; overflow: hidden; }
+  .tp-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .6s; }
+  .tp-val { font-size: 11.5px; font-weight: 700; color: var(--text2); font-family: 'DM Mono', monospace; width: 60px; text-align: right; }
+  .status-donut-wrap { display: flex; align-items: center; gap: 16px; }
+  .status-donut-wrap canvas { flex-shrink: 0; }
+  .status-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .status-leg-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .status-leg-name { flex: 1; color: var(--text2); font-weight: 600; text-transform: capitalize; }
+  .status-leg-val { font-family: 'DM Mono', monospace; font-size: 11.5px; color: var(--text3); }
+  /* Drill-down */
+  .drilldown { background: var(--surface); border: 2px solid var(--accent); border-radius: 16px; padding: 18px; margin-bottom: 14px; animation: slideDown .25s ease; }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .drilldown-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+  .drilldown-title { font-size: 14px; font-weight: 800; flex: 1; }
+  .drilldown-title strong { color: var(--accent2); font-family: 'DM Mono', monospace; }
+  .drilldown-kpis { display: flex; gap: 18px; }
+  .dd-kpi { text-align: center; }
+  .dd-kpi span { display: block; font-size: 16px; font-weight: 900; font-family: 'DM Mono', monospace; }
+  .dd-kpi small { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); }
+  .drilldown-charts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .ai-insights-panel { margin-bottom: 20px; }
+  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .insight-title { font-size: 12.5px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .insight-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .insight-item:last-child { border-bottom: none; }
+  .priority-badge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 5px; flex-shrink: 0; text-transform: uppercase; }
+  .ph { background: rgba(248,113,113,.15); color: var(--red); }
+  .pm { background: rgba(251,191,36,.15); color: var(--yellow); }
+  .pl { background: rgba(52,211,153,.15); color: var(--green); }
+  @media(max-width:900px) { .charts-main,.charts-bottom,.drilldown-charts { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<script>
+let currentStoreId = '', analyticsDays = 7
+let _chartRev = null, _chartOrd = null, _chartStatus = null, _ddHourly = null, _ddBar = null, _ddPie = null
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('analytics', (id) => { currentStoreId = id; loadAnalytics() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  renderShell()
+  if (currentStoreId) await loadAnalytics()
+})
+
+function renderShell() {
+  document.getElementById('page-content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div class="day-tabs">
+        <button class="day-tab active" onclick="setDays(7,this)">7 Days</button>
+        <button class="day-tab" onclick="setDays(14,this)">14 Days</button>
+        <button class="day-tab" onclick="setDays(30,this)">30 Days</button>
+      </div>
+      <button class="btn-ai btn-ai-sm" onclick="loadInsights()" id="insightsBtn">🧠 AI Insights</button>
+    </div>
+    <div id="insightsPanel" style="display:none;" class="ai-insights-panel"></div>
+    <div class="kpi-grid" id="kpiGrid">
+      ${['💰 Revenue','📦 Orders','🕐 Today','🛍️ Products'].map(k=>`
+        <div class="kpi-card"><span class="kpi-icon">${k.split(' ')[0]}</span>
+        <div><div class="kpi-label">${k.slice(2)}</div><div class="kpi-value" style="color:var(--text3);">—</div></div></div>`).join('')}
+    </div>
+    <div class="charts-main">
+      <div class="chart-card">
+        <div class="chart-title"><span>📈 Daily Revenue</span><span class="chart-total" id="revTotal"></span></div>
+        <canvas id="revenueChart" height="100"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>📦 Daily Orders</span><span class="chart-total" id="ordTotal"></span></div>
+        <canvas id="ordersChart" height="100"></canvas>
+      </div>
+    </div>
+    <div class="charts-bottom">
+      <div class="chart-card">
+        <div class="chart-title"><span>🏆 Top Products</span></div>
+        <div id="topProdsChart"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>🔄 Order Status</span></div>
+        <div class="status-donut-wrap">
+          <canvas id="statusChart" width="160" height="160"></canvas>
+          <div id="statusLegend"></div>
+        </div>
+      </div>
+    </div>
+    <div id="drilldownPanel" style="display:none;"></div>`
+}
+
+function setDays(d, el) {
+  analyticsDays = d
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'))
+  el.classList.add('active')
+  closeDrilldown()
+  loadAnalytics()
+}
+
+async function loadAnalytics() {
+  if (!currentStoreId) return
+  try {
+    const data = await apiFetch(`/stores/${currentStoreId}/analytics?days=${analyticsDays}`)
+    const cur = '₹'
+    // KPIs
+    const kpis = document.querySelectorAll('.kpi-card')
+    const revDelta = (data.today_revenue||0) - (data.yesterday_revenue||0)
+    const ordDelta = (data.today_orders||0) - (data.yesterday_orders||0)
+    if (kpis[0]) kpis[0].innerHTML = `<span class="kpi-icon">💰</span><div>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">${cur}${(data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</div>
+      <div class="kpi-delta ${revDelta>0?'up':revDelta<0?'down':'neutral'}">${revDelta>=0?'↑':'↓'} ${cur}${Math.abs(revDelta).toFixed(0)} vs yesterday</div>
+    </div>`
+    if (kpis[1]) kpis[1].innerHTML = `<span class="kpi-icon">📦</span><div>
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value">${(data.total_orders||0).toLocaleString()}</div>
+      <div class="kpi-delta ${ordDelta>0?'up':ordDelta<0?'down':'neutral'}">${ordDelta>=0?'↑':'↓'} ${Math.abs(ordDelta)} vs yesterday</div>
+    </div>`
+    if (kpis[2]) kpis[2].innerHTML = `<span class="kpi-icon">🕐</span><div><div class="kpi-label">Today's Orders</div><div class="kpi-value">${data.today_orders||0}</div></div>`
+    if (kpis[3]) kpis[3].innerHTML = `<span class="kpi-icon">🛍️</span><div><div class="kpi-label">Active Products</div><div class="kpi-value">${data.product_count||0}</div></div>`
+
+    // Fill dates
+    const filled = []
+    const today = new Date()
+    for (let i = analyticsDays-1; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate()-i)
+      const key = d.toISOString().slice(0,10)
+      const found = (data.daily_stats||[]).find(s => s._id === key)
+      filled.push({ date: key, label: key.slice(5), revenue: found?.revenue||0, orders: found?.orders||0 })
+    }
+    const labels = filled.map(d => d.label)
+    const revVals = filled.map(d => d.revenue)
+    const ordVals = filled.map(d => d.orders)
+    const totalRev = revVals.reduce((a,b)=>a+b,0)
+    const totalOrd = ordVals.reduce((a,b)=>a+b,0)
+    document.getElementById('revTotal').textContent = cur + totalRev.toLocaleString('en-IN',{maximumFractionDigits:0})
+    document.getElementById('ordTotal').textContent = totalOrd + ' orders'
+
+    const gridColor = 'rgba(255,255,255,0.05)'
+    const tickColor = '#4a5568'
+    const accent = '#6c63ff'
+
+    // Revenue Chart
+    if (_chartRev) _chartRev.destroy()
+    _chartRev = new Chart(document.getElementById('revenueChart'), {
+      type: 'line',
+      data: { labels, datasets: [{ data: revVals, borderColor: accent, backgroundColor: accent+'18', borderWidth: 2.5, pointBackgroundColor: accent, pointRadius: 4, pointHoverRadius: 7, fill: true, tension: 0.4 }] },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${cur}${ctx.parsed.y.toLocaleString('en-IN',{maximumFractionDigits:0})}`, afterLabel: () => '  Click to drill down' } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { font: { family: 'DM Mono', size: 10 }, color: tickColor, maxTicksLimit: 7 } },
+          y: { grid: { color: gridColor }, ticks: { font: { family: 'DM Mono', size: 10 }, color: tickColor, callback: v => cur+(v>=1000?(v/1000).toFixed(1)+'k':v) } }
+        },
+        onClick: (evt, els) => { if (els.length) loadDayDrilldown(filled[els[0].index].date, cur) }
+      }
+    })
+
+    // Orders Chart
+    if (_chartOrd) _chartOrd.destroy()
+    _chartOrd = new Chart(document.getElementById('ordersChart'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: ordVals, backgroundColor: '#60a5fa', hoverBackgroundColor: '#3b82f6', borderRadius: 5, borderSkipped: false }] },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} orders`, afterLabel: () => '  Click to drill down' } } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { font: { family: 'DM Mono', size: 10 }, color: tickColor, maxTicksLimit: 7 } },
+          y: { grid: { color: gridColor }, beginAtZero: true, ticks: { font: { family: 'DM Mono', size: 10 }, color: tickColor, stepSize: 1 } }
+        },
+        onClick: (evt, els) => { if (els.length) loadDayDrilldown(filled[els[0].index].date, cur) }
+      }
+    })
+
+    // Top Products
+    const topProds = data.top_products || []
+    const maxRev = Math.max(...topProds.map(p=>p.revenue), 1)
+    document.getElementById('topProdsChart').innerHTML = topProds.length
+      ? topProds.map((p,i) => `<div class="tp-row">
+          <div class="tp-rank">#${i+1}</div>
+          <div class="tp-img">${p.image?`<img src="${p.image}" alt="">` : '📦'}</div>
+          <div class="tp-name" title="${p.name}">${p.name}</div>
+          <div class="tp-bar-wrap"><div class="tp-bar-fill" style="width:${Math.max((p.revenue/maxRev)*100,4)}%"></div></div>
+          <div class="tp-val">${cur}${p.revenue.toFixed(0)}</div>
+        </div>`).join('')
+      : '<p style="color:var(--text3);font-size:13px;padding:16px 0;">No orders yet</p>'
+
+    // Status Donut
+    const statusColors = { pending:'#fbbf24', confirmed:'#a78bfa', processing:'#60a5fa', shipped:'#38bdf8', delivered:'#34d399', cancelled:'#f87171' }
+    const breakdown = data.status_breakdown || []
+    if (_chartStatus) _chartStatus.destroy()
+    if (breakdown.length) {
+      _chartStatus = new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: { labels: breakdown.map(s=>s._id), datasets: [{ data: breakdown.map(s=>s.count), backgroundColor: breakdown.map(s=>statusColors[s._id]||'#94a3b8'), borderWidth: 0, hoverOffset: 5 }] },
+        options: { responsive: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } } } }
+      })
+      document.getElementById('statusLegend').innerHTML = breakdown.map(s => `<div class="status-leg-row">
+        <div class="status-dot" style="background:${statusColors[s._id]||'#94a3b8'}"></div>
+        <span class="status-leg-name">${s._id}</span>
+        <span class="status-leg-val">${s.count}</span>
+      </div>`).join('')
+    }
+  } catch (e) { toast('Analytics error: ' + e.message, 'error') }
+}
+
+async function loadDayDrilldown(date, cur = '₹') {
+  if (!currentStoreId) return
+  const panel = document.getElementById('drilldownPanel')
+  panel.style.display = 'block'
+  panel.innerHTML = `<div class="drilldown"><div style="text-align:center;padding:20px;color:var(--text3);">Loading ${date}...</div></div>`
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  try {
+    const data = await apiFetch(`/stores/${currentStoreId}/analytics/day?date=${date}`)
+    const barColors = ['#6c63ff','#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#38bdf8','#fb923c']
+
+    panel.innerHTML = `<div class="drilldown">
+      <div class="drilldown-header">
+        <div class="drilldown-title">🔎 Breakdown — <strong>${date}</strong></div>
+        <div class="drilldown-kpis">
+          <div class="dd-kpi"><span>${cur}${(data.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</span><small>Revenue</small></div>
+          <div class="dd-kpi"><span>${data.total_orders||0}</span><small>Orders</small></div>
+          <div class="dd-kpi"><span>${data.total_qty||0}</span><small>Items Sold</small></div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="closeDrilldown()">✕ Close</button>
+      </div>
+      <div class="drilldown-charts">
+        <div class="chart-card"><div class="chart-title"><span>🕐 Hourly</span></div><canvas id="ddHourly" height="120"></canvas></div>
+        <div class="chart-card"><div class="chart-title"><span>📦 Products Sold</span></div><canvas id="ddBar" height="120"></canvas></div>
+        <div class="chart-card"><div class="chart-title"><span>💰 Revenue Split</span></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <canvas id="ddPie" width="150" height="150"></canvas>
+            <div id="ddPieLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>`
+
+    const hours = Array.from({length:24},(_,i)=>i)
+    const hOrders = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.orders||0)
+    const hRev = hours.map(h => (data.hourly_stats||[]).find(x=>x._id===h)?.revenue||0)
+    const hourLabels = hours.map(h => h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p')
+    const gridColor = 'rgba(255,255,255,0.05)'
+    const tickColor = '#4a5568'
+    const accent = '#6c63ff'
+
+    if (_ddHourly) _ddHourly.destroy()
+    _ddHourly = new Chart(document.getElementById('ddHourly'), {
+      type: 'bar',
+      data: { labels: hourLabels, datasets: [
+        { type: 'bar', label: 'Orders', data: hOrders, backgroundColor: '#60a5fa88', borderRadius: 3, borderSkipped: false, yAxisID: 'yO' },
+        { type: 'line', label: 'Revenue', data: hRev, borderColor: accent, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, tension: 0.4, yAxisID: 'yR' }
+      ]},
+      options: { responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { position:'top', labels: { font: { family:'Outfit', size:11 }, boxWidth: 10 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label==='Revenue' ? ` ${cur}${ctx.parsed.y.toFixed(0)}` : ` ${ctx.parsed.y} orders` } } },
+        scales: {
+          x: { grid:{color:gridColor}, ticks:{font:{family:'DM Mono',size:9},color:tickColor,maxTicksLimit:12} },
+          yO: { position:'left', beginAtZero:true, grid:{color:gridColor}, ticks:{font:{family:'DM Mono',size:9},color:tickColor,stepSize:1} },
+          yR: { position:'right', beginAtZero:true, grid:{display:false}, ticks:{font:{family:'DM Mono',size:9},color:tickColor,callback:v=>cur+(v>=1000?(v/1000).toFixed(1)+'k':v)} }
+        }
+      }
+    })
+
+    const prods = (data.products_sold||[]).slice(0,8)
+    if (_ddBar) _ddBar.destroy()
+    _ddBar = new Chart(document.getElementById('ddBar'), {
+      type: 'bar',
+      data: { labels: prods.map(p=>p.name.length>12?p.name.slice(0,11)+'…':p.name), datasets: [{ label:'Qty', data: prods.map(p=>p.qty), backgroundColor: barColors, borderRadius: 5, borderSkipped: false }] },
+      options: { responsive:true, maintainAspectRatio:true, indexAxis:'y',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x} units`}}},
+        scales:{ x:{grid:{color:gridColor},beginAtZero:true,ticks:{font:{family:'DM Mono',size:9},color:tickColor,stepSize:1}}, y:{grid:{display:false},ticks:{font:{family:'Outfit',size:10},color:'#8892a4'}} }
+      }
+    })
+
+    const pieProds = (data.products_sold||[]).slice(0,6)
+    if (_ddPie) _ddPie.destroy()
+    if (pieProds.length) {
+      _ddPie = new Chart(document.getElementById('ddPie'), {
+        type: 'doughnut',
+        data: { labels: pieProds.map(p=>p.name), datasets: [{ data: pieProds.map(p=>p.revenue), backgroundColor: barColors, borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive:false, cutout:'58%', plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${cur}${ctx.parsed.toFixed(0)}`}}} }
+      })
+      document.getElementById('ddPieLegend').innerHTML = pieProds.map((p,i) => `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11.5px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${barColors[i]};flex-shrink:0;"></div>
+        <span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.name}">${p.name}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);">${cur}${p.revenue.toFixed(0)}</span>
+      </div>`).join('')
+    }
+  } catch (e) { toast('Drill-down error: ' + e.message, 'error') }
+}
+
+function closeDrilldown() {
+  document.getElementById('drilldownPanel').style.display = 'none'
+  if (_ddHourly) { _ddHourly.destroy(); _ddHourly = null }
+  if (_ddBar) { _ddBar.destroy(); _ddBar = null }
+  if (_ddPie) { _ddPie.destroy(); _ddPie = null }
+}
+
+async function loadInsights() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  const btn = document.getElementById('insightsBtn')
+  const panel = document.getElementById('insightsPanel')
+  btn.disabled = true; btn.textContent = '⏳ Analyzing...'
+  panel.style.display = 'none'
+  try {
+    const analytics = await apiFetch(`/stores/${currentStoreId}/analytics?days=30`)
+    const r = await apiFetch('/ai/sales-insights', { method: 'POST', body: JSON.stringify({ analytics, store_name: 'Store', currency: 'INR' }) })
+    const d = r.insights
+    const pc = p => p==='high'?'ph':p==='medium'?'pm':'pl'
+    panel.innerHTML = `
+      <div class="insight-card"><div class="insight-title">📊 Summary</div><p style="font-size:13.5px;color:var(--text2);line-height:1.7;">${d.summary}</p></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="insight-card"><div class="insight-title">✅ Working</div>${(d.wins||[]).map(w=>`<div class="insight-item"><span>🟢</span><span>${w}</span></div>`).join('')}</div>
+        <div class="insight-card"><div class="insight-title">🔧 Improve</div>${(d.improvements||[]).map(i=>`<div class="insight-item"><span>🔸</span><span>${i}</span></div>`).join('')}</div>
+      </div>
+      <div class="insight-card"><div class="insight-title">🎯 Actions</div>${(d.actions||[]).map(a=>`
+        <div class="insight-item">
+          <span class="priority-badge ${pc(a.priority)}">${a.priority}</span>
+          <div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">${a.action}</div><div style="font-size:12px;color:var(--text3);">${a.reason}</div></div>
+        </div>`).join('')}</div>`
+    panel.style.display = 'block'
+  } catch (e) { toast('Insights failed: ' + e.message, 'error') }
+  btn.disabled = false; btn.textContent = '🧠 AI Insights'
+}
+</script>
+</body>
+</html>
