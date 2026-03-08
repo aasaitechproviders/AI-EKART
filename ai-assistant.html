@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — AI Assistant</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .ai-layout { display: grid; grid-template-columns: 260px 1fr; gap: 18px; align-items: start; }
+  .ai-tool-list { display: flex; flex-direction: column; gap: 10px; }
+  .ai-tool-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ai-tool-card:hover { border-color: rgba(108,99,255,0.35); }
+  .ai-tool-card.active { border-color: var(--accent); background: rgba(108,99,255,0.09); }
+  .ai-tool-card-icon { font-size: 22px; margin-bottom: 6px; }
+  .ai-tool-card-name { font-size: 14px; font-weight: 800; }
+  .ai-tool-card-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .ai-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 400px;
+  }
+  .ai-panel-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, rgba(108,99,255,0.06), rgba(108,99,255,0.02));
+  }
+  .ai-panel-header h2 { font-size: 16px; font-weight: 800; }
+  .ai-panel-header p { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
+  .ai-panel-body { padding: 22px; }
+  .ai-result {
+    background: linear-gradient(135deg, rgba(108,99,255,0.06), rgba(167,139,250,0.03));
+    border: 1px solid rgba(108,99,255,0.18);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 18px;
+  }
+  .ai-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .ai-result-title { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); }
+  .ai-result-copy {
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all .15s;
+  }
+  .ai-result-copy:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .ai-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .ai-kv { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ai-kv:last-child { border-bottom: none; }
+  .ai-kv label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); display: block; margin-bottom: 4px; }
+  .ai-kv p { font-size: 13.5px; color: var(--text); line-height: 1.6; }
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tag-pill { background: rgba(108,99,255,0.1); color: var(--accent2); border: 1px solid rgba(108,99,255,0.2); border-radius: 5px; padding: 2px 9px; font-size: 12px; font-weight: 600; }
+  .highlight-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .highlight-item:last-child { border-bottom: none; }
+  .highlight-bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+  .price-tag { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 700; color: var(--green); }
+  .setup-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .setup-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .setup-section h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent2); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .setup-cat { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border-radius: 7px; padding: 5px 10px; margin: 4px; font-size: 12.5px; font-weight: 600; }
+  .insights-summary { font-size: 14px; color: var(--text2); line-height: 1.8; margin-bottom: 16px; padding: 14px; background: var(--surface2); border-radius: 10px; }
+  .insight-action { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .insight-action:last-child { border-bottom: none; }
+  .priority-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  @media(max-width:768px) { .ai-layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<script>
+let currentTool = 'setup', currentStoreId = '', allProducts = [], allCategories = []
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('ai-assistant', (id) => { currentStoreId = id; loadStoreData() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  if (currentStoreId) await loadStoreData()
+  renderPage()
+})
+
+async function loadStoreData() {
+  if (!currentStoreId) return
+  try {
+    ;[allProducts, allCategories] = await Promise.all([
+      apiFetch(`/stores/${currentStoreId}/products`),
+      apiFetch(`/stores/${currentStoreId}/categories`)
+    ])
+  } catch {}
+}
+
+const TOOLS = {
+  setup: {
+    icon: '🏗️',
+    name: 'Store Setup',
+    desc: 'Get AI suggestions for store name, categories & description',
+    renderForm: () => `
+      <div class="field"><label>What type of store are you creating? *</label>
+        <input type="text" id="aiStoreType" placeholder="e.g. Clothing boutique, Electronics store, Homemade food..."></div>
+      <div class="field"><label>What products will you sell?</label>
+        <input type="text" id="aiStoreProducts" placeholder="e.g. Women's ethnic wear, Laptops and accessories..."></div>
+      <div class="field"><label>Who is your target audience?</label>
+        <input type="text" id="aiStoreAudience" placeholder="e.g. Young women 18-35, Working professionals..."></div>
+      <button class="btn-ai" onclick="runSetup()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">✨ Generate Store Ideas</button>`
+  },
+  product: {
+    icon: '📦',
+    name: 'Product Content',
+    desc: 'Generate titles, descriptions, tags for any product',
+    renderForm: () => {
+      const opts = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
+      return `
+        <div class="field"><label>Product Name *</label>
+          <input type="text" id="aiProdName" placeholder="e.g. Wireless Noise Cancelling Headphones">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Category</label>
+            <select id="aiProdCat">
+              <option value="">Select category</option>
+              ${allCategories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>Price (₹)</label>
+            <input type="number" id="aiProdPrice" placeholder="999">
+          </div>
+        </div>
+        <div class="field"><label>Key Features (Optional)</label>
+          <textarea id="aiProdFeatures" style="height:70px;" placeholder="e.g. 30hr battery, Bluetooth 5.0, Foldable design..."></textarea>
+        </div>
+        <button class="btn-ai" onclick="runProductContent()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">✨ Generate Content</button>`
+    }
+  },
+  insights: {
+    icon: '📊',
+    name: 'Sales Insights',
+    desc: 'Analyze your store performance with AI',
+    renderForm: () => `
+      <div class="field"><label>Analysis Period</label>
+        <select id="aiInsightsDays">
+          <option value="7">Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30" selected>Last 30 days</option>
+        </select>
+      </div>
+      <div class="field"><label>Focus Area</label>
+        <select id="aiInsightsFocus">
+          <option value="general">General Performance</option>
+          <option value="products">Product Performance</option>
+          <option value="customers">Customer Behavior</option>
+          <option value="growth">Growth Opportunities</option>
+        </select>
+      </div>
+      <button class="btn-ai" onclick="runInsights()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">🧠 Analyze My Store</button>
+      ${!currentStoreId ? '<p style="color:var(--red);font-size:12.5px;margin-top:10px;">⚠️ Select a store first</p>' : ''}`
+  }
+}
+
+function renderPage() {
+  const content = document.getElementById('page-content')
+  content.innerHTML = `
+    <div class="ai-layout">
+      <div class="ai-tool-list">
+        ${Object.entries(TOOLS).map(([key, t]) => `
+          <div class="ai-tool-card ${currentTool===key?'active':''}" onclick="switchTool('${key}')">
+            <div class="ai-tool-card-icon">${t.icon}</div>
+            <div class="ai-tool-card-name">${t.name}</div>
+            <div class="ai-tool-card-desc">${t.desc}</div>
+          </div>`).join('')}
+      </div>
+      <div class="ai-panel" id="aiPanel">
+        ${renderPanel()}
+      </div>
+    </div>`
+}
+
+function renderPanel() {
+  const t = TOOLS[currentTool]
+  return `
+    <div class="ai-panel-header">
+      <span style="font-size:26px;">${t.icon}</span>
+      <div><h2>${t.name}</h2><p>${t.desc}</p></div>
+    </div>
+    <div class="ai-panel-body">
+      ${t.renderForm()}
+      <div id="aiResult" style="margin-top:4px;"></div>
+    </div>`
+}
+
+function switchTool(tool) {
+  currentTool = tool
+  document.querySelectorAll('.ai-tool-card').forEach(c => c.classList.remove('active'))
+  event.currentTarget.classList.add('active')
+  document.getElementById('aiPanel').innerHTML = renderPanel()
+}
+
+async function runSetup() {
+  const storeType = document.getElementById('aiStoreType').value.trim()
+  if (!storeType) return toast('Enter your store type', 'error')
+  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Thinking...'
+  document.getElementById('aiResult').innerHTML = ''
+  try {
+    const r = await apiFetch('/ai/store-setup', {
+      method: 'POST',
+      body: JSON.stringify({
+        store_type: storeType,
+        products: document.getElementById('aiStoreProducts').value.trim(),
+        audience: document.getElementById('aiStoreAudience').value.trim()
+      })
+    })
+    const d = r.suggestions
+    document.getElementById('aiResult').innerHTML = `
+      <div class="ai-result">
+        <div class="ai-result-header"><span class="ai-result-title">✨ Store Suggestions</span></div>
+        <div class="setup-section">
+          <h3>🏪 Store Names</h3>
+          <div class="tag-cloud">${(d.store_names||[]).map(n=>`<span class="tag-pill">${n}</span>`).join('')}</div>
+        </div>
+        <div class="setup-section">
+          <h3>📝 Description</h3>
+          <p style="font-size:13.5px;color:var(--text2);line-height:1.7;">${d.description||''}</p>
+        </div>
+        <div class="setup-section">
+          <h3>🗂️ Suggested Categories</h3>
+          <div style="margin-top:6px;">${(d.categories||[]).map(c=>`<span class="setup-cat">📦 ${c}</span>`).join('')}</div>
+        </div>
+        ${d.tagline ? `<div class="setup-section"><h3>💬 Tagline</h3><p style="font-size:14px;font-style:italic;color:var(--text2);">"${d.tagline}"</p></div>` : ''}
+        ${d.tips ? `<div class="setup-section"><h3>💡 Tips</h3>${d.tips.map(t=>`<div class="highlight-item"><div class="highlight-bullet"></div>${t}</div>`).join('')}</div>` : ''}
+      </div>`
+  } catch (e) { toast('AI error: ' + e.message, 'error') }
+  btn.disabled = false; btn.textContent = '✨ Generate Store Ideas'
+}
+
+async function runProductContent() {
+  const name = document.getElementById('aiProdName').value.trim()
+  if (!name) return toast('Enter a product name', 'error')
+  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Writing...'
+  document.getElementById('aiResult').innerHTML = ''
+  try {
+    const r = await apiFetch('/ai/generate-product-content', {
+      method: 'POST',
+      body: JSON.stringify({
+        product_name: name,
+        category: document.getElementById('aiProdCat').value,
+        price: document.getElementById('aiProdPrice').value,
+        features: document.getElementById('aiProdFeatures').value.trim(),
+        currency: 'INR'
+      })
+    })
+    const d = r.content
+    document.getElementById('aiResult').innerHTML = `
+      <div class="ai-result">
+        <div class="ai-result-header">
+          <span class="ai-result-title">✨ Generated Content</span>
+          <button class="ai-result-copy" onclick="copyAllProductContent()">📋 Copy All</button>
+        </div>
+        <div class="ai-kv"><label>Title</label><p id="aiProdTitle" style="font-weight:700;font-size:15px;">${d.title||name}</p></div>
+        <div class="ai-kv"><label>Description</label><p id="aiProdDesc">${d.description||''}</p></div>
+        ${d.highlights ? `<div class="ai-kv"><label>Highlights</label>${(d.highlights||[]).map(h=>`<div class="highlight-item"><div class="highlight-bullet"></div>${h}</div>`).join('')}</div>` : ''}
+        ${d.suggested_price ? `<div class="ai-kv"><label>Suggested Price</label><div class="price-tag">₹${d.suggested_price}</div></div>` : ''}
+        <div class="ai-kv"><label>Tags</label><div class="tag-cloud">${(d.tags||[]).map(t=>`<span class="tag-pill">${t}</span>`).join('')}</div>
+          <div id="aiTagsHidden" style="display:none;">${(d.tags||[]).join(', ')}</div>
+        </div>
+        ${d.seo_title ? `<div class="ai-kv"><label>SEO Title</label><p id="aiSeoTitle" style="color:var(--blue);">${d.seo_title}</p></div>` : ''}
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="applyToNewProduct()">📦 Create Product</button>
+        </div>
+      </div>`
+  } catch (e) { toast('AI error: ' + e.message, 'error') }
+  btn.disabled = false; btn.textContent = '✨ Generate Content'
+}
+
+async function runInsights() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Analyzing...'
+  document.getElementById('aiResult').innerHTML = ''
+  try {
+    const days = document.getElementById('aiInsightsDays').value
+    const focus = document.getElementById('aiInsightsFocus').value
+    const analytics = await apiFetch(`/stores/${currentStoreId}/analytics?days=${days}`)
+    const r = await apiFetch('/ai/sales-insights', {
+      method: 'POST',
+      body: JSON.stringify({ analytics, focus, store_name: 'Store', currency: 'INR' })
+    })
+    const d = r.insights
+    const prioColor = p => p==='high'?'var(--red)':p==='medium'?'var(--yellow)':'var(--green)'
+    document.getElementById('aiResult').innerHTML = `
+      <div class="ai-result">
+        <div class="ai-result-header"><span class="ai-result-title">🧠 AI Insights</span></div>
+        <div class="insights-summary">${d.summary||''}</div>
+        ${d.wins?.length ? `<div class="setup-section"><h3>✅ What's Working</h3>
+          ${d.wins.map(w=>`<div class="highlight-item"><div class="highlight-bullet" style="background:var(--green);"></div>${w}</div>`).join('')}
+        </div>` : ''}
+        ${d.improvements?.length ? `<div class="setup-section"><h3>🔧 Areas to Improve</h3>
+          ${d.improvements.map(i=>`<div class="highlight-item"><div class="highlight-bullet" style="background:var(--yellow);"></div>${i}</div>`).join('')}
+        </div>` : ''}
+        ${d.actions?.length ? `<div class="setup-section"><h3>🎯 Recommended Actions</h3>
+          ${d.actions.map(a=>`<div class="insight-action">
+            <div class="priority-dot" style="background:${prioColor(a.priority)};"></div>
+            <div>
+              <div style="font-weight:700;font-size:13.5px;margin-bottom:3px;">${a.action}</div>
+              <div style="font-size:12px;color:var(--text3);">${a.reason}</div>
+            </div>
+          </div>`).join('')}
+        </div>` : ''}
+      </div>`
+  } catch (e) { toast('Insights error: ' + e.message, 'error') }
+  btn.disabled = false; btn.textContent = '🧠 Analyze My Store'
+}
+
+function copyAllProductContent() {
+  const title = document.getElementById('aiProdTitle')?.textContent || ''
+  const desc = document.getElementById('aiProdDesc')?.textContent || ''
+  const tags = document.getElementById('aiTagsHidden')?.textContent || ''
+  navigator.clipboard.writeText(`Title: ${title}\n\nDescription: ${desc}\n\nTags: ${tags}`)
+    .then(() => toast('Copied!', 'success'))
+}
+
+function applyToNewProduct() {
+  const title = document.getElementById('aiProdTitle')?.textContent || ''
+  const desc = document.getElementById('aiProdDesc')?.textContent || ''
+  const tags = document.getElementById('aiTagsHidden')?.textContent || ''
+  sessionStorage.setItem('ai_product_prefill', JSON.stringify({ title, desc, tags }))
+  location.href = 'products.html'
+}
+</script>
+</body>
+</html>
