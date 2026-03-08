@@ -223,17 +223,17 @@ async function runSetup() {
       method: 'POST',
       body: JSON.stringify({
         store_type: storeType,
-        products: document.getElementById('aiStoreProducts').value.trim(),
-        audience: document.getElementById('aiStoreAudience').value.trim()
+        products_description: document.getElementById('aiStoreProducts').value.trim(),
+        target_audience: document.getElementById('aiStoreAudience').value.trim()
       })
     })
-    const d = r.suggestions
+    const d = r.setup
     document.getElementById('aiResult').innerHTML = `
       <div class="ai-result">
         <div class="ai-result-header"><span class="ai-result-title">✨ Store Suggestions</span></div>
         <div class="setup-section">
           <h3>🏪 Store Names</h3>
-          <div class="tag-cloud">${(d.store_names||[]).map(n=>`<span class="tag-pill">${n}</span>`).join('')}</div>
+          <div class="tag-cloud">${(d.store_name_suggestions||d.store_names||[]).map(n=>`<span class="tag-pill">${n}</span>`).join('')}</div>
         </div>
         <div class="setup-section">
           <h3>📝 Description</h3>
