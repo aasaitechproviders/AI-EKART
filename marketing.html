@@ -190,19 +190,29 @@ async function generateMarketing() {
   const offer = document.getElementById('mktOffer')?.value.trim() || ''
   const brand = document.getElementById('mktBrand').value.trim()
   try {
+    const stores = await apiFetch('/stores')
+    const store = stores.find(s => s._id === currentStoreId)
     const r = await apiFetch('/ai/marketing-content', {
       method: 'POST',
       body: JSON.stringify({
+        store_name: brand || store?.name || 'My Store',
+        product_name: product ? product.name : goal,
+        product_description: product ? (product.description || '') + (offer ? ' Offer: ' + offer : '') : (offer || goal),
         platform: currentTool,
-        goal,
-        product: product ? { name: product.name, price: product.price, description: product.description } : null,
         tone,
-        offer,
-        brand,
-        currency: 'INR'
+        currency: 'INR',
+        price: product ? product.price : ''
       })
     })
-    renderMarketingResult(r.content)
+    // Server returns all platforms in one go: { instagram:{caption,hashtags}, whatsapp:{message}, email:{subject,body,cta}, sms:"" }
+    const allContent = r.content
+    let platformContent
+    if (currentTool === 'instagram')  platformContent = allContent.instagram || allContent
+    else if (currentTool === 'whatsapp') platformContent = allContent.whatsapp || allContent
+    else if (currentTool === 'email') platformContent = allContent.email || allContent
+    else if (currentTool === 'sms')   platformContent = { message: allContent.sms || allContent.message || '' }
+    else platformContent = allContent
+    renderMarketingResult(platformContent)
   } catch (e) { toast('Generation failed: ' + e.message, 'error') }
   btn.disabled = false; btn.textContent = `✨ Generate ${currentTool === 'instagram' ? 'Post' : currentTool === 'email' ? 'Email' : currentTool === 'sms' ? 'SMS' : 'Message'}`
 }
