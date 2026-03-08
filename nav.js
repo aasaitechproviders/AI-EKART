@@ -363,6 +363,73 @@ const NAV_CSS = `
     .content { padding: 16px; }
     .field-row { grid-template-columns: 1fr; }
   }
+
+  /* ── SKELETON ── */
+  @keyframes shimmer-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .skel {
+    background: var(--surface2);
+    border-radius: 7px;
+    position: relative;
+    overflow: hidden;
+  }
+  .skel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+    animation: shimmer-slide 1.4s infinite;
+  }
+  .skel-sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    padding: 22px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+  }
+  .skel-logo { height: 28px; width: 80px; }
+  .skel-user-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .skel-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; }
+  .skel-user-text { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .skel-label { height: 8px; width: 50px; margin-bottom: 8px; margin-top: 6px; }
+  .skel-nav-item { height: 34px; border-radius: 9px; }
+  .skel-main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-height: 100vh;
+  }
+  .skel-topbar {
+    height: 58px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    gap: 12px;
+  }
+  .skel-topbar-title { height: 16px; width: 120px; }
+  .skel-topbar-pill { height: 32px; width: 160px; border-radius: 8px; margin-left: auto; }
+  .skel-content { padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; }
+  .skel-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .skel-card { height: 80px; border-radius: 14px; }
+  .skel-table-head { height: 40px; border-radius: 8px; }
+  .skel-table-row { height: 56px; border-radius: 8px; }
+  /* Fade out when real content is ready */
+  .skel-wrapper {
+    transition: opacity 0.2s ease;
+  }
+  .skel-wrapper.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
   </style>
 `
 
@@ -373,7 +440,63 @@ async function renderNav(activePage, onStoreChange) {
   // Inject CSS
   document.head.insertAdjacentHTML('beforeend', NAV_CSS)
 
-  // Load user + stores
+  // ── STEP 1: Render skeleton IMMEDIATELY (no API wait) ──────────────────────
+  const skeletonNavItems = NAV_ITEMS.map(item => {
+    if (item.section === 'merchant' && item.id === 'stores') return `
+      <div style="height:8px;width:50px;" class="skel skel-label"></div>
+      <div class="skel skel-nav-item" style="background:${activePage===item.id?'rgba(108,99,255,0.14)':''}"></div>`
+    if (item.section === 'ai' && item.id === 'ai-assistant') return `
+      <div style="height:8px;width:50px;" class="skel skel-label"></div>
+      <div class="skel skel-nav-item" style="background:${activePage===item.id?'rgba(108,99,255,0.14)':''}"></div>`
+    return `<div class="skel skel-nav-item" style="background:${activePage===item.id?'rgba(108,99,255,0.14)':''}"></div>`
+  }).join('')
+
+  const pageTitle = NAV_ITEMS.find(i => i.id === activePage)?.label || 'Dashboard'
+  const showStoreSelector = activePage !== 'stores'
+
+  mountEl.innerHTML = `
+    <div class="skel-wrapper" id="skelWrapper">
+      <div class="skel-sidebar">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+          <div class="skel skel-logo"></div>
+        </div>
+        <div class="skel-user-row">
+          <div class="skel skel-avatar"></div>
+          <div class="skel-user-text">
+            <div class="skel" style="height:11px;width:90px;border-radius:5px;"></div>
+            <div class="skel" style="height:9px;width:120px;border-radius:5px;"></div>
+          </div>
+        </div>
+        ${skeletonNavItems}
+        <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border);">
+          <div class="skel" style="height:34px;border-radius:8px;"></div>
+        </div>
+      </div>
+      <div class="skel-main">
+        <div class="skel-topbar">
+          <div class="skel skel-topbar-title"></div>
+          ${showStoreSelector ? '<div class="skel skel-topbar-pill"></div>' : ''}
+        </div>
+        <div class="skel-content">
+          <div class="skel-row">
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+            <div class="skel skel-card"></div>
+          </div>
+          <div class="skel skel-table-head"></div>
+          <div class="skel skel-table-row"></div>
+          <div class="skel skel-table-row"></div>
+          <div class="skel skel-table-row"></div>
+          <div class="skel skel-table-row" style="opacity:.6;"></div>
+          <div class="skel skel-table-row" style="opacity:.35;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="realContent" style="display:none;"></div>
+  `
+
+  // ── STEP 2: Fetch data in background ──────────────────────────────────────
   const token = getToken()
   if (!token) { location.replace('/'); return }
   let user = null, stores = []
@@ -422,7 +545,8 @@ async function renderNav(activePage, onStoreChange) {
   const pageTitle = NAV_ITEMS.find(i => i.id === activePage)?.label || 'Dashboard'
   const showStoreSelector = activePage !== 'stores'
 
-  mountEl.innerHTML = `
+  // ── STEP 3: Build real HTML and swap out skeleton ─────────────────────────
+  const realHTML = `
     <div class="sidebar" id="sidebar">
       <a class="sidebar-logo" href="home.html">
         e<span class="logo-k">K</span>art
@@ -460,6 +584,21 @@ async function renderNav(activePage, onStoreChange) {
       </div>
     </div>
   `
+
+  // Fade skeleton out, show real layout
+  const skelWrapper = document.getElementById('skelWrapper')
+  const realContent = document.getElementById('realContent')
+
+  realContent.innerHTML = realHTML
+  realContent.style.display = 'contents'
+
+  // Short delay so browser paints real content before we hide skeleton
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      skelWrapper.classList.add('fade-out')
+      setTimeout(() => skelWrapper.remove(), 200)
+    })
+  })
 
   // Store change handler
   window.handleStoreChange = (id) => {
