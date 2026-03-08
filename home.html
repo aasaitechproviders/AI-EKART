@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — My Stores</title>
+<script>
+  // ── Capture token from URL BEFORE anything else loads ──
+  // Backend redirects to /home.html?token=JWT after Google OAuth
+  ;(function() {
+    const p = new URLSearchParams(window.location.search)
+    const t = p.get('token')
+    if (t) {
+      localStorage.setItem('ekart_token', t)
+      // Remove token from URL so it's not visible or bookmarkable
+      window.history.replaceState({}, '', '/home.html')
+    }
+  })()
+</script>
 <script src="api.js"></script>
 <script src="nav.js"></script>
 <style>
