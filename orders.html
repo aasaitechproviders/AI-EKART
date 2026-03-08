@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Orders</title>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+<style>
+  .order-detail-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 2; margin-bottom: 18px; color: var(--text2); }
+  .order-detail-box strong { color: var(--text); }
+  .order-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .order-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .order-stat-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; }
+  .order-stat-value { font-size: 22px; font-weight: 900; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+
+<!-- ORDER MODAL -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <h2>Update Order</h2>
+    <input type="hidden" id="orderEditId">
+    <div class="order-detail-box" id="orderDetailView"></div>
+    <div class="field"><label>Status</label>
+      <select id="orderStatus">
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="processing">Processing</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="field"><label>Tracking Number</label><input type="text" id="orderTracking" placeholder="AWB12345678"></div>
+    <div class="field"><label>Internal Notes</label><textarea id="orderNotes" placeholder="Any notes about this order..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Update Order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allOrders = [], currentStoreId = ''
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('orders', (id) => { currentStoreId = id; loadOrders() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  if (currentStoreId) await loadOrders()
+  else renderEmpty()
+})
+
+async function loadOrders() {
+  if (!currentStoreId) return
+  document.getElementById('page-content').innerHTML = '<div class="spinner"></div>'
+  try {
+    allOrders = await apiFetch(`/stores/${currentStoreId}/orders`)
+    renderPage()
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function renderPage() {
+  const pending = allOrders.filter(o => o.status === 'pending').length
+  const shipped = allOrders.filter(o => o.status === 'shipped').length
+  const delivered = allOrders.filter(o => o.status === 'delivered').length
+  const revenue = allOrders.filter(o => o.status !== 'cancelled').reduce((s,o) => s + (o.total||0), 0)
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="order-stats">
+      <div class="order-stat"><div class="order-stat-label">Total Orders</div><div class="order-stat-value">${allOrders.length}</div></div>
+      <div class="order-stat"><div class="order-stat-label">Pending</div><div class="order-stat-value" style="color:var(--yellow);">${pending}</div></div>
+      <div class="order-stat"><div class="order-stat-label">Delivered</div><div class="order-stat-value" style="color:var(--green);">${delivered}</div></div>
+      <div class="order-stat"><div class="order-stat-label">Revenue</div><div class="order-stat-value" style="color:var(--accent2);">₹${(revenue/1000).toFixed(1)}k</div></div>
+    </div>
+    <div class="toolbar">
+      <input class="search-field" id="orderSearch" placeholder="Search orders, customers..." oninput="filterOrders()" style="max-width:320px;">
+      <select class="filter-select" id="orderStatusFilter" onchange="filterOrders()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="processing">Processing</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="section-card">
+      <table>
+        <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>`
+  renderOrders(allOrders)
+}
+
+function filterOrders() {
+  const q = document.getElementById('orderSearch')?.value.toLowerCase() || ''
+  const status = document.getElementById('orderStatusFilter')?.value || ''
+  let f = allOrders
+  if (q) f = f.filter(o => o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q) || o.customer_email.toLowerCase().includes(q))
+  if (status) f = f.filter(o => o.status === status)
+  renderOrders(f)
+}
+
+function renderOrders(orders) {
+  const body = document.getElementById('ordersBody'); if (!body) return
+  if (!orders.length) {
+    body.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><h3>No orders found</h3></div></td></tr>`
+    return
+  }
+  body.innerHTML = orders.map(o => `<tr>
+    <td><strong style="font-family:'DM Mono',monospace;font-size:12px;">${o.order_number}</strong></td>
+    <td><div style="font-weight:700;font-size:13px;">${o.customer_name}</div>
+      <div style="font-size:11px;color:var(--text3);">${o.customer_email}</div></td>
+    <td style="color:var(--text2);font-size:12.5px;">${o.items?.length||0} item(s)</td>
+    <td><strong style="font-family:'DM Mono',monospace;">₹${o.total?.toFixed(2)}</strong><br>
+      <span style="font-size:10.5px;color:var(--text3);">COD</span></td>
+    <td>${statusBadge(o.status)}</td>
+    <td style="font-size:12px;color:var(--text3);">${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openOrderEdit('${o._id}')">✏️ Update</button></td>
+  </tr>`).join('')
+}
+
+function openOrderEdit(id) {
+  const o = allOrders.find(x => x._id === id); if (!o) return
+  document.getElementById('orderEditId').value = id
+  document.getElementById('orderStatus').value = o.status
+  document.getElementById('orderTracking').value = o.tracking_number || ''
+  document.getElementById('orderNotes').value = o.notes || ''
+  document.getElementById('orderDetailView').innerHTML = `
+    <strong>#${o.order_number}</strong> — ${o.customer_name} (${o.customer_email})<br>
+    Phone: ${o.customer_phone||'—'}<br>
+    Ship to: ${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}<br>
+    Items: ${(o.items||[]).map(i=>`${i.name} ×${i.qty} @ ₹${i.price}`).join(', ')}<br>
+    <strong style="font-size:14px;">Total: ₹${o.total?.toFixed(2)}</strong>`
+  openModal('orderModal')
+}
+
+async function saveOrder() {
+  const id = document.getElementById('orderEditId').value
+  const body = {
+    status: document.getElementById('orderStatus').value,
+    tracking_number: document.getElementById('orderTracking').value.trim(),
+    notes: document.getElementById('orderNotes').value.trim()
+  }
+  try {
+    await apiFetch(`/stores/${currentStoreId}/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+    closeModal('orderModal')
+    await loadOrders()
+    toast('Order updated!', 'success')
+  } catch (e) { toast(e.message, 'error') }
+}
+
+function renderEmpty() {
+  document.getElementById('page-content').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><h3>No store selected</h3><p>Select a store from the top bar</p></div>`
+}
+</script>
+</body>
+</html>
