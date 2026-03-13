@@ -1,999 +1,1168 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#080910">
+<html lang="en" style="background:#09090f">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — Website Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="nav.css">
-<style>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-/* ── Builder Layout ── */
-.builder-wrap {
-  display: flex;
-  height: calc(100vh - 58px);
-  overflow: hidden;
-}
-
-/* Left Panel: Sections + Settings */
-.builder-left {
-  width: 280px;
-  min-width: 280px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.builder-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-}
-.builder-tab {
-  flex: 1;
-  padding: 11px 8px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text3);
-  cursor: pointer;
-  text-align: center;
-  border-bottom: 2px solid transparent;
-  transition: all .15s;
-  letter-spacing: .02em;
-}
-.builder-tab.active {
-  color: var(--accent2);
-  border-bottom-color: var(--accent);
-  background: rgba(108,99,255,.04);
-}
-.builder-tab:hover:not(.active) { color: var(--text2); }
-
-.builder-panel {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px;
-}
-.builder-panel::-webkit-scrollbar { width: 4px; }
-.builder-panel::-webkit-scrollbar-track { background: transparent; }
-.builder-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Themes Grid */
-.themes-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.theme-card {
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all .2s;
-  position: relative;
-}
-.theme-card:hover { border-color: rgba(108,99,255,.4); transform: translateY(-1px); }
-.theme-card.active { border-color: var(--accent); }
-.theme-card.active::after {
-  content: '✓';
-  position: absolute;
-  top: 6px; right: 6px;
-  width: 18px; height: 18px;
-  background: var(--accent);
-  border-radius: 50%;
-  font-size: 10px;
-  display: grid; place-items: center;
-  color: white;
-  font-weight: 700;
-}
-.theme-preview {
-  height: 80px;
-  position: relative;
-  overflow: hidden;
-}
-.theme-label {
-  padding: 7px 9px;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--text2);
-  background: var(--surface2);
-  border-top: 1px solid var(--border);
-}
-
-/* Browse themes CTA inside themes tab */
-.browse-themes-cta {
-  margin-top: 14px;
-  padding: 12px 14px;
-  background: rgba(108,99,255,.06);
-  border: 1px dashed rgba(108,99,255,.3);
-  border-radius: 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-}
-.browse-themes-cta:hover {
-  background: rgba(108,99,255,.1);
-  border-color: rgba(108,99,255,.5);
-}
-.browse-themes-cta-icon { font-size: 22px; margin-bottom: 6px; }
-.browse-themes-cta-title {
-  font-size: 12.5px; font-weight: 800;
-  color: var(--accent2); margin-bottom: 3px;
-}
-.browse-themes-cta-sub {
-  font-size: 11px; color: var(--text3); font-weight: 600;
-}
-
-/* Sections panel */
-.section-list { display: flex; flex-direction: column; gap: 6px; }
-.section-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 9px 11px;
-  cursor: grab;
-  transition: all .15s;
-  user-select: none;
-}
-.section-item:hover { border-color: var(--border2); background: var(--surface3); }
-.section-item.dragging { opacity: 0.4; }
-.section-item.drag-over { border-color: var(--accent); background: rgba(108,99,255,.06); }
-.section-drag-handle { color: var(--text3); font-size: 13px; cursor: grab; }
-.section-icon { font-size: 15px; }
-.section-item-label { font-size: 12.5px; font-weight: 600; color: var(--text2); flex: 1; }
-.section-toggle {
-  width: 28px; height: 16px;
-  background: var(--border2);
-  border-radius: 8px;
-  position: relative;
-  cursor: pointer;
-  transition: background .15s;
-  flex-shrink: 0;
-  border: none;
-}
-.section-toggle.on { background: var(--accent); }
-.section-toggle::after {
-  content: '';
-  position: absolute;
-  width: 12px; height: 12px;
-  background: white;
-  border-radius: 50%;
-  top: 2px; left: 2px;
-  transition: left .15s;
-}
-.section-toggle.on::after { left: 14px; }
-.section-edit-btn {
-  background: none; border: none;
-  color: var(--text3); cursor: pointer;
-  font-size: 12px; padding: 2px 4px;
-  border-radius: 4px;
-  transition: color .1s;
-}
-.section-edit-btn:hover { color: var(--accent2); }
-
-/* Add Section */
-.add-section-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-}
-.add-section-btn {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 5px; padding: 10px 6px;
-  background: var(--bg);
-  border: 1px dashed var(--border2);
-  border-radius: 9px;
-  cursor: pointer;
-  transition: all .15s;
-  font-family: 'Outfit', sans-serif;
-}
-.add-section-btn:hover { border-color: var(--accent); background: rgba(108,99,255,.05); }
-.add-section-btn span { font-size: 20px; }
-.add-section-btn small { font-size: 10.5px; font-weight: 600; color: var(--text3); }
-
-/* Settings panel */
-.settings-group { margin-bottom: 18px; }
-.settings-group-label {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 10px;
-  padding: 0 2px;
-}
-.setting-row { margin-bottom: 10px; }
-.setting-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text2);
-  margin-bottom: 5px;
-  display: block;
-}
-.setting-input {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 8px 11px;
-  font-size: 12.5px;
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  outline: none;
-  transition: border-color .15s;
-}
-.setting-input:focus { border-color: var(--accent); }
-.setting-color-row {
-  display: flex; gap: 6px; align-items: center;
-}
-.setting-color {
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border2);
-  cursor: pointer;
-  padding: 3px;
-  background: var(--bg);
-}
-.color-swatch-row {
-  display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;
-}
-.color-swatch {
-  width: 22px; height: 22px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform .1s;
-}
-.color-swatch:hover { transform: scale(1.15); }
-.color-swatch.active { border-color: white; }
-
-.font-picker {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.font-opt {
-  padding: 8px 10px;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: center;
-  transition: all .15s;
-  font-size: 12px;
-  color: var(--text2);
-}
-.font-opt:hover, .font-opt.active { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,.06); }
-
-/* Center: Preview */
-.builder-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: #13141f;
-  overflow: hidden;
-}
-
-.preview-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  gap: 12px;
-}
-.preview-url-bar {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 6px 12px;
-  max-width: 420px;
-}
-.preview-url-icon { font-size: 12px; color: var(--green); }
-.preview-url-text { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.preview-device-btns { display: flex; gap: 4px; }
-.device-btn {
-  padding: 6px 10px;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 14px;
-  transition: all .15s;
-}
-.device-btn.active { background: rgba(108,99,255,.12); border-color: rgba(108,99,255,.3); color: var(--accent2); }
-.device-btn:hover:not(.active) { color: var(--text2); border-color: var(--border2); }
-
-.preview-frame-wrap {
-  flex: 1;
-  overflow: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 20px;
-}
-.preview-frame-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
-.preview-frame-wrap::-webkit-scrollbar-track { background: transparent; }
-.preview-frame-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-.preview-device-shell {
-  transition: all .3s ease;
-  flex-shrink: 0;
-}
-.preview-device-shell.desktop { width: 100%; max-width: 1100px; }
-.preview-device-shell.tablet {
-  width: 768px;
-  border: 12px solid #1a1c2e;
-  border-radius: 18px;
-  box-shadow: 0 0 0 1px var(--border), 0 30px 60px rgba(0,0,0,.6);
-}
-.preview-device-shell.mobile {
-  width: 375px;
-  border: 10px solid #1a1c2e;
-  border-radius: 36px;
-  box-shadow: 0 0 0 1px var(--border), 0 30px 60px rgba(0,0,0,.6);
-}
-
-#preview-iframe {
-  width: 100%;
-  border: none;
-  display: block;
-  border-radius: 4px;
-  transition: height .2s;
-}
-.preview-device-shell.tablet #preview-iframe,
-.preview-device-shell.mobile #preview-iframe {
-  border-radius: 8px;
-}
-
-/* Right Panel: Section editor */
-.builder-right {
-  width: 260px;
-  min-width: 260px;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.builder-right-header {
-  padding: 14px 14px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.builder-right-title {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--text2);
-  letter-spacing: .03em;
-}
-.builder-right-close {
-  background: none; border: none; color: var(--text3);
-  cursor: pointer; font-size: 16px; padding: 2px;
-  border-radius: 4px; transition: color .1s;
-}
-.builder-right-close:hover { color: var(--text); }
-.builder-right-panel { flex: 1; overflow-y: auto; padding: 14px; }
-.builder-right-panel::-webkit-scrollbar { width: 4px; }
-.builder-right-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Action bar */
-.builder-action-bar {
-  padding: 12px 14px;
-  border-top: 1px solid var(--border);
-  display: flex; gap: 8px;
-  flex-shrink: 0;
-}
-
-/* Section labels */
-.panel-section-sep {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin: 14px 0 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Theme preview mini canvases */
-/* THEME: Modern (dark) */
-.tp-modern { background: #0f0f14; }
-.tp-modern-nav { height: 12px; background: #1a1a25; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
-.tp-modern-nav-dot { width: 20px; height: 4px; background: #6c63ff; border-radius: 2px; }
-.tp-modern-nav-links { display: flex; gap: 3px; margin-left: auto; }
-.tp-modern-nav-links span { width: 16px; height: 3px; background: #2a2a38; border-radius: 1px; }
-.tp-modern-hero { height: 34px; background: linear-gradient(135deg,rgba(108,99,255,.25),transparent); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
-.tp-modern-h { width: 50px; height: 5px; background: rgba(255,255,255,.6); border-radius: 2px; }
-.tp-modern-sub { width: 36px; height: 3px; background: rgba(255,255,255,.25); border-radius: 1px; }
-.tp-modern-btn { width: 28px; height: 5px; background: #6c63ff; border-radius: 2px; margin-top: 2px; }
-.tp-modern-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
-.tp-modern-grid-card { height: 14px; background: #1a1a25; border-radius: 3px; }
-
-/* THEME: Minimal (white) */
-.tp-minimal { background: #fafafa; }
-.tp-minimal-nav { height: 12px; background: white; border-bottom: 1px solid #eee; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
-.tp-minimal-nav-dot { width: 16px; height: 3px; background: #111; border-radius: 1px; }
-.tp-minimal-hero { height: 34px; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; }
-.tp-minimal-h { width: 44px; height: 5px; background: #222; border-radius: 1px; }
-.tp-minimal-sub { width: 32px; height: 2px; background: #aaa; border-radius: 1px; }
-.tp-minimal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
-.tp-minimal-card { height: 16px; background: #f0f0f0; border-radius: 2px; }
-
-/* THEME: Bold */
-.tp-bold { background: #ff4d00; }
-.tp-bold-nav { height: 12px; background: #ff4d00; display: flex; align-items: center; padding: 0 6px; }
-.tp-bold-logo { width: 18px; height: 4px; background: white; border-radius: 1px; }
-.tp-bold-hero { height: 36px; background: linear-gradient(135deg,#ff4d00,#ff8c42); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
-.tp-bold-h { width: 48px; height: 7px; background: white; border-radius: 2px; }
-.tp-bold-sub { width: 34px; height: 3px; background: rgba(255,255,255,.5); border-radius: 1px; }
-.tp-bold-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 4px 5px; }
-.tp-bold-card { height: 16px; background: #ff6a1a; border-radius: 3px; }
-
-/* THEME: Luxury */
-.tp-luxury { background: #0d0b09; }
-.tp-luxury-nav { height: 12px; background: #0d0b09; border-bottom: 1px solid #2a2318; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
-.tp-luxury-logo { width: 22px; height: 3px; background: #c9a84c; border-radius: 0; }
-.tp-luxury-hero { height: 36px; background: linear-gradient(180deg,#1a1510,#0d0b09); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
-.tp-luxury-h { width: 40px; height: 5px; background: #c9a84c; border-radius: 0; }
-.tp-luxury-sub { width: 30px; height: 2px; background: #5a4a2e; border-radius: 0; }
-.tp-luxury-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; padding: 4px 5px; }
-.tp-luxury-card { height: 14px; background: #1a1510; border: 1px solid #2a2318; border-radius: 0; }
-
-/* THEME: Pastel */
-.tp-pastel { background: #fef6f0; }
-.tp-pastel-nav { height: 12px; background: #fff; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
-.tp-pastel-logo { width: 18px; height: 4px; background: #e8847a; border-radius: 4px; }
-.tp-pastel-hero { height: 34px; background: linear-gradient(135deg,#fde8e0,#fef0fa); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
-.tp-pastel-h { width: 44px; height: 5px; background: #d47a8f; border-radius: 4px; }
-.tp-pastel-sub { width: 32px; height: 3px; background: #eab5c0; border-radius: 2px; }
-.tp-pastel-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
-.tp-pastel-card { height: 14px; background: #fde8e0; border-radius: 4px; }
-
-/* THEME: Tech */
-.tp-tech { background: #020d1a; }
-.tp-tech-nav { height: 12px; background: #020d1a; border-bottom: 1px solid #0a3a5a; display: flex; align-items: center; padding: 0 6px; }
-.tp-tech-logo { width: 18px; height: 4px; background: #00d4ff; border-radius: 1px; }
-.tp-tech-hero { height: 36px; background: linear-gradient(135deg,rgba(0,212,255,.1),transparent); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
-.tp-tech-h { width: 44px; height: 5px; background: #00d4ff; border-radius: 1px; }
-.tp-tech-sub { width: 32px; height: 2px; background: #0a3a5a; border-radius: 1px; }
-.tp-tech-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
-.tp-tech-card { height: 14px; background: #0a1a2a; border: 1px solid #0a3a5a; border-radius: 2px; }
-
-/* Publish bar */
-.publish-bar {
-  display: flex; align-items: center; gap: 10px;
-}
-.publish-status {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11.5px; font-weight: 600; color: var(--text3);
-}
-.publish-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: lpulse 2s infinite;
-}
-
-/* Edit section form */
-.edit-field { margin-bottom: 12px; }
-.edit-label { font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 5px; display: block; }
-.edit-input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border2);
-  border-radius: 8px; padding: 8px 11px; font-size: 12.5px;
-  color: var(--text); font-family: 'Outfit', sans-serif;
-  outline: none; transition: border-color .15s;
-}
-.edit-input:focus { border-color: var(--accent); }
-.edit-textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
-.edit-range { width: 100%; accent-color: var(--accent); margin-top: 4px; }
-
-/* Unsaved badge */
-.unsaved-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(251,191,36,.1);
-  border: 1px solid rgba(251,191,36,.25);
-  color: #fbbf24;
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0;
-  transition: opacity .3s;
-}
-.unsaved-badge.show { opacity: 1; }
-
-/* Loading skeleton */
-.skel { background: linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%); background-size: 200% 100%; animation: skel-shimmer 1.4s infinite; border-radius: 6px; }
-@keyframes skel-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-.skel-sidebar { display:flex;height:100vh;width:100%; }
-.skel-sidebar-inner { width:220px;min-width:220px;padding:20px 14px; }
-.skel-main { flex:1;padding:20px; }
-.skel-topbar { height:58px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:12px; }
-
-/* Toast already in nav.css but we ensure it's above builder */
-.toast-container { z-index: 9999; }
-
-/* Store select */
-.store-select-wrap {
-  display: flex; align-items: center; gap: 6px;
-}
-.store-select-label {
-  font-size: 11px; font-weight: 700; color: var(--text3);
-}
-.store-selector {
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 8px; padding: 6px 10px;
-  font-size: 12.5px; font-weight: 600; color: var(--text2);
-  font-family: 'Outfit', sans-serif; outline: none; cursor: pointer;
-}
-.store-selector:focus { border-color: var(--accent); }
-
-</style>
+<!-- Token extraction (must run before anything else) -->
 <script>
-;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/website-builder.html')}})()</script>
+;(function(){
+  var p=new URLSearchParams(location.search), t=p.get('token');
+  if(t){ localStorage.setItem('ekart_token',t); history.replaceState({},'','/website-builder.html'); }
+})();
+</script>
+<!-- api.js provides apiFetch() with auth headers + base URL handling -->
 <script src="api.js"></script>
-<script src="nav.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:        #09090f;
+  --surface:   #0e0e17;
+  --surface2:  #13131e;
+  --surface3:  #181826;
+  --border:    rgba(255,255,255,.06);
+  --border2:   rgba(255,255,255,.10);
+  --border3:   rgba(255,255,255,.16);
+  --accent:    #5b5cf6;
+  --accent2:   #818cf8;
+  --green:     #22c55e;
+  --amber:     #f59e0b;
+  --red:       #ef4444;
+  --text:      #f1f5f9;
+  --text2:     #94a3b8;
+  --text3:     #475569;
+  --panel-w:   280px;
+  --topbar-h:  52px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════════ */
+#topbar {
+  height:var(--topbar-h);
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  gap:8px;
+  flex-shrink:0;
+  z-index:200;
+  position:relative;
+}
+.tb-logo {
+  font-family:'Outfit',sans-serif;
+  font-size:18px;
+  font-weight:900;
+  color:var(--text);
+  letter-spacing:-.04em;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  padding-right:12px;
+  border-right:1px solid var(--border2);
+  margin-right:4px;
+  flex-shrink:0;
+}
+.tb-logo em { color:var(--accent2); font-style:normal; }
+
+.tb-store-pill {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:5px 10px 5px 8px;
+  cursor:pointer;
+  transition:all .15s;
+  min-width:0;
+  flex-shrink:0;
+}
+.tb-store-pill:hover { border-color:var(--accent); }
+.tb-store-dot {
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--green);
+  flex-shrink:0;
+  box-shadow:0 0 6px rgba(34,197,94,.6);
+}
+.tb-store-name {
+  font-size:13px; font-weight:700;
+  color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:130px;
+}
+.tb-store-chevron { color:var(--text3); font-size:10px; flex-shrink:0; }
+
+.tb-page-label {
+  font-size:12px; font-weight:600; color:var(--text3);
+  display:flex; align-items:center; gap:5px;
+}
+.tb-page-label::before { content:'/'; color:var(--border3); }
+
+.tb-spacer { flex:1; }
+
+.tb-unsaved {
+  display:flex; align-items:center; gap:6px;
+  font-size:11.5px; font-weight:600; color:var(--amber);
+  background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.2);
+  padding:4px 10px; border-radius:6px;
+  opacity:0; transition:opacity .3s;
+  white-space:nowrap;
+}
+.tb-unsaved.show { opacity:1; }
+
+.tb-device-group {
+  display:flex;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px; overflow:hidden;
+  flex-shrink:0;
+}
+.tb-device-btn {
+  padding:6px 10px; border:none; background:none;
+  color:var(--text3); cursor:pointer; font-size:14px;
+  transition:all .15s; line-height:1;
+}
+.tb-device-btn.active { background:var(--surface3); color:var(--accent2); }
+
+.tb-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 13px; border-radius:8px;
+  font-size:12.5px; font-weight:700;
+  cursor:pointer; border:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .15s; white-space:nowrap; flex-shrink:0;
+}
+.tb-btn-ghost {
+  background:transparent; color:var(--text2);
+  border:1px solid var(--border2);
+}
+.tb-btn-ghost:hover { border-color:var(--border3); color:var(--text); }
+.tb-btn-accent {
+  background:rgba(91,92,246,.12);
+  color:var(--accent2);
+  border:1px solid rgba(91,92,246,.3);
+}
+.tb-btn-accent:hover { background:rgba(91,92,246,.2); border-color:rgba(91,92,246,.5); }
+.tb-btn-primary { background:var(--accent); color:white; }
+.tb-btn-primary:hover { background:#4f4de0; box-shadow:0 4px 16px rgba(91,92,246,.4); }
+.tb-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+
+/* ── Store Dropdown ── */
+.store-dropdown {
+  position:absolute;
+  top:calc(var(--topbar-h) + 4px);
+  left:86px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  padding:6px; z-index:600;
+  min-width:200px;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+  display:none;
+}
+.store-dropdown.open { display:block; }
+.store-dropdown-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:7px;
+  cursor:pointer; transition:background .12s;
+  font-size:13px; font-weight:600; color:var(--text2);
+}
+.store-dropdown-item:hover { background:var(--surface3); color:var(--text); }
+.store-dropdown-item.active { color:var(--accent2); }
+.store-dropdown-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--green); flex-shrink:0;
+}
+.store-dropdown-sep {
+  border:none; border-top:1px solid var(--border);
+  margin:4px 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILDER LAYOUT
+═══════════════════════════════════════════════════════ */
+#builder-wrap {
+  display:flex; flex:1; overflow:hidden;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEFT PANEL
+═══════════════════════════════════════════════════════ */
+#left-panel {
+  width:var(--panel-w); min-width:var(--panel-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.panel-tabs {
+  display:flex; border-bottom:1px solid var(--border);
+  flex-shrink:0; background:var(--surface);
+}
+.panel-tab {
+  flex:1; padding:12px 4px;
+  font-size:11.5px; font-weight:700;
+  letter-spacing:.02em; color:var(--text3);
+  cursor:pointer; text-align:center;
+  border-bottom:2px solid transparent;
+  transition:all .15s; user-select:none;
+}
+.panel-tab.active {
+  color:var(--accent2);
+  border-bottom-color:var(--accent);
+  background:rgba(91,92,246,.04);
+}
+.panel-tab:hover:not(.active) { color:var(--text2); }
+
+.panel-body {
+  flex:1; overflow-y:auto; overflow-x:hidden;
+}
+.panel-body::-webkit-scrollbar { width:3px; }
+.panel-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* ── Group labels ── */
+.panel-group-label {
+  font-size:10px; font-weight:800;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text3); padding:10px 4px 6px;
+  display:block;
+}
+
+/* ── Section Rows ── */
+.sections-panel { padding:12px; }
+.section-row {
+  display:flex; align-items:center; gap:7px;
+  padding:8px 9px; border-radius:8px;
+  cursor:pointer; transition:all .15s;
+  margin-bottom:2px;
+  border:1.5px solid transparent;
+}
+.section-row:hover { background:var(--surface2); }
+.section-row.active {
+  background:rgba(91,92,246,.08);
+  border-color:rgba(91,92,246,.25);
+}
+.section-drag {
+  color:var(--text3); font-size:12px;
+  cursor:grab; padding:2px;
+  opacity:0; transition:opacity .15s; flex-shrink:0;
+}
+.section-row:hover .section-drag { opacity:1; }
+.section-icon-wrap {
+  width:28px; height:28px; border-radius:6px;
+  background:var(--surface3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; flex-shrink:0; transition:background .15s;
+}
+.section-row.active .section-icon-wrap { background:rgba(91,92,246,.18); }
+.section-row-label {
+  font-size:12.5px; font-weight:600; color:var(--text2);
+  flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.section-row.active .section-row-label { color:var(--text); }
+.section-actions {
+  display:flex; align-items:center; gap:3px;
+  opacity:0; transition:opacity .15s; flex-shrink:0;
+}
+.section-row:hover .section-actions,
+.section-row.active .section-actions { opacity:1; }
+.section-action-btn {
+  width:22px; height:22px; border-radius:5px;
+  border:none; background:var(--surface3);
+  color:var(--text3); cursor:pointer;
+  font-size:11px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .12s;
+}
+.section-action-btn:hover { background:var(--border2); color:var(--text); }
+.section-action-btn.danger:hover { background:rgba(239,68,68,.15); color:var(--red); }
+.section-toggle {
+  width:28px; height:16px; border-radius:8px;
+  background:var(--border2); border:none;
+  cursor:pointer; position:relative;
+  transition:background .15s; flex-shrink:0;
+}
+.section-toggle.on { background:var(--accent); }
+.section-toggle::after {
+  content:''; position:absolute;
+  width:11px; height:11px;
+  background:white; border-radius:50%;
+  top:2.5px; left:2.5px;
+  transition:left .15s;
+}
+.section-toggle.on::after { left:14.5px; }
+
+.add-section-row {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:8px;
+  border:1.5px dashed var(--border2);
+  cursor:pointer; transition:all .15s;
+  color:var(--text3); font-size:13px; font-weight:600;
+  margin-top:6px;
+}
+.add-section-row:hover {
+  border-color:var(--accent); color:var(--accent2);
+  background:rgba(91,92,246,.04);
+}
+
+/* ── Editor Panel (replaces sections list) ── */
+.editor-panel { display:flex; flex-direction:column; height:100%; }
+.editor-panel-header {
+  padding:12px 12px 10px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:9px;
+  flex-shrink:0;
+}
+.editor-back-btn {
+  width:28px; height:28px; border-radius:7px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  color:var(--text2); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; transition:all .12s; flex-shrink:0;
+}
+.editor-back-btn:hover { border-color:var(--border3); color:var(--text); }
+.editor-panel-title { font-size:13px; font-weight:800; color:var(--text); flex:1; }
+.editor-fields { flex:1; overflow-y:auto; padding:12px; }
+.editor-fields::-webkit-scrollbar { width:3px; }
+.editor-fields::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.field-group { margin-bottom:18px; }
+.field-group-label {
+  font-size:10px; font-weight:800;
+  letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text3); margin-bottom:10px;
+  padding-bottom:6px; border-bottom:1px solid var(--border);
+  display:block;
+}
+.field-row { margin-bottom:11px; }
+.field-label {
+  font-size:11.5px; font-weight:700; color:var(--text2);
+  margin-bottom:5px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.field-hint { font-size:10px; font-weight:500; color:var(--text3); }
+.field-input {
+  width:100%;
+  background:var(--surface2);
+  border:1.5px solid var(--border2);
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:12.5px; color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  outline:none; transition:border-color .15s;
+  resize:vertical;
+}
+.field-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,92,246,.1); }
+.field-input::placeholder { color:var(--text3); }
+.field-textarea { min-height:68px; line-height:1.5; }
+.field-color-row { display:flex; gap:8px; align-items:center; }
+.field-color-swatch {
+  width:36px; height:36px;
+  border-radius:8px;
+  border:1.5px solid var(--border2);
+  cursor:pointer; flex-shrink:0;
+  overflow:hidden; padding:2px;
+  background:var(--surface2);
+}
+.field-color-swatch input[type=color] {
+  width:100%; height:100%;
+  border:none; cursor:pointer;
+  background:none; outline:none; border-radius:5px;
+}
+.field-select {
+  width:100%;
+  background:var(--surface2);
+  border:1.5px solid var(--border2);
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:12.5px; color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  outline:none; cursor:pointer;
+  transition:border-color .15s;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 10px center;
+  padding-right:28px;
+}
+.field-select:focus { border-color:var(--accent); }
+.field-select option { background:var(--surface2); }
+.field-range-wrap { display:flex; align-items:center; gap:10px; }
+.field-range { flex:1; accent-color:var(--accent); height:4px; cursor:pointer; }
+.field-range-val {
+  font-size:12px; font-weight:700; color:var(--text2);
+  min-width:32px; text-align:right;
+  font-family:'DM Mono',monospace;
+}
+.color-palette { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
+.color-dot {
+  width:20px; height:20px; border-radius:5px;
+  cursor:pointer; border:2px solid transparent; transition:transform .12s;
+}
+.color-dot:hover { transform:scale(1.15); }
+.color-dot.active { border-color:white; box-shadow:0 0 0 2px var(--accent); }
+.font-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.font-opt {
+  padding:8px 10px;
+  background:var(--surface2);
+  border:1.5px solid var(--border2);
+  border-radius:8px; cursor:pointer;
+  font-size:12px; color:var(--text2);
+  text-align:center; transition:all .12s; font-weight:600;
+}
+.font-opt.active,.font-opt:hover {
+  border-color:var(--accent); color:var(--accent2);
+  background:rgba(91,92,246,.06);
+}
+.editor-footer {
+  padding:10px 12px;
+  border-top:1px solid var(--border);
+  display:flex; gap:8px; flex-shrink:0;
+}
+.ef-btn {
+  flex:1; padding:9px; border-radius:8px;
+  font-size:12.5px; font-weight:700; cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .15s; border:none;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.ef-btn-ghost {
+  background:var(--surface2); color:var(--text2);
+  border:1.5px solid var(--border2);
+}
+.ef-btn-ghost:hover { color:var(--text); border-color:var(--border3); }
+.ef-btn-primary { background:var(--accent); color:white; }
+.ef-btn-primary:hover { background:#4f4de0; }
+
+/* ── Themes Panel ── */
+.themes-panel { padding:12px; }
+.theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.theme-card {
+  border:2px solid var(--border);
+  border-radius:10px; overflow:hidden;
+  cursor:pointer; transition:all .2s; position:relative;
+}
+.theme-card:hover { border-color:rgba(91,92,246,.4); transform:translateY(-1px); }
+.theme-card.active {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(91,92,246,.15);
+}
+.theme-check {
+  position:absolute; top:6px; right:6px;
+  width:18px; height:18px; background:var(--accent);
+  border-radius:50%; display:none;
+  align-items:center; justify-content:center;
+  font-size:10px; color:white; font-weight:700; z-index:2;
+}
+.theme-card.active .theme-check { display:flex; }
+.theme-preview { height:72px; overflow:hidden; position:relative; }
+.theme-name {
+  padding:6px 8px; font-size:11px; font-weight:700;
+  color:var(--text2); background:var(--surface2);
+  border-top:1px solid var(--border);
+}
+.themes-browse-cta {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:10px; padding:12px;
+  background:rgba(91,92,246,.06);
+  border:1.5px dashed rgba(91,92,246,.3);
+  border-radius:10px; cursor:pointer;
+  font-size:13px; font-weight:700; color:var(--accent2);
+  transition:all .15s; text-align:center;
+  flex-direction:column;
+}
+.themes-browse-cta:hover { background:rgba(91,92,246,.1); border-color:rgba(91,92,246,.5); }
+.themes-browse-cta-sub { font-size:11px; color:var(--text3); font-weight:600; margin-top:2px; }
+
+/* ── Settings Panel ── */
+.settings-panel { padding:14px; }
+
+/* ═══════════════════════════════════════════════════════
+   CENTER PREVIEW
+═══════════════════════════════════════════════════════ */
+#center-panel {
+  flex:1; display:flex; flex-direction:column;
+  background:#111118; overflow:hidden; position:relative;
+}
+.preview-bar {
+  height:40px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center;
+  padding:0 14px; gap:10px; flex-shrink:0;
+}
+.preview-url {
+  flex:1;
+  display:flex; align-items:center; gap:8px;
+  background:var(--bg);
+  border:1px solid var(--border2);
+  border-radius:7px;
+  padding:5px 12px;
+  max-width:460px; margin:0 auto;
+}
+.preview-url-lock { font-size:11px; color:var(--green); }
+.preview-url-text {
+  font-size:12px;
+  font-family:'DM Mono',monospace;
+  color:var(--text3);
+  overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; flex:1;
+}
+.preview-refresh {
+  background:none; border:none; color:var(--text3);
+  font-size:13px; cursor:pointer; padding:2px 5px;
+  border-radius:4px; transition:all .12s; margin-left:auto;
+}
+.preview-refresh:hover { color:var(--text); background:var(--surface2); }
+.preview-canvas {
+  flex:1; overflow:auto;
+  display:flex; align-items:flex-start; justify-content:center;
+  padding:20px;
+}
+.preview-canvas::-webkit-scrollbar { width:5px; height:5px; }
+.preview-canvas::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+.device-shell {
+  background:white; border-radius:4px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  transition:all .3s ease; flex-shrink:0;
+}
+.device-shell.desktop { width:100%; max-width:1100px; }
+.device-shell.tablet {
+  width:768px; border-radius:14px;
+  border:10px solid #1a1c2e;
+  box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7);
+}
+.device-shell.mobile {
+  width:375px; border-radius:32px;
+  border:10px solid #1a1c2e;
+  box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7);
+}
+.device-shell iframe { display:block; width:100%; border:none; }
+
+/* ═══════════════════════════════════════════════════════
+   ADD SECTION DRAWER (slides up from bottom)
+═══════════════════════════════════════════════════════ */
+.add-section-drawer {
+  position:fixed;
+  bottom:0;
+  left:var(--panel-w);
+  right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border2);
+  padding:18px 24px 24px;
+  z-index:300;
+  transform:translateY(100%);
+  transition:transform .25s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 -20px 60px rgba(0,0,0,.5);
+}
+.add-section-drawer.open { transform:translateY(0); }
+.add-section-drawer-header {
+  display:flex; align-items:center;
+  justify-content:space-between; margin-bottom:14px;
+}
+.add-section-drawer-title { font-size:15px; font-weight:800; color:var(--text); }
+.add-section-drawer-close {
+  width:28px; height:28px; border-radius:7px;
+  border:1px solid var(--border2);
+  background:var(--surface2); color:var(--text2);
+  cursor:pointer; font-size:14px;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .12s;
+}
+.add-section-drawer-close:hover { border-color:var(--border3); color:var(--text); }
+.add-section-types {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+  gap:9px;
+}
+.add-section-type {
+  display:flex; flex-direction:column;
+  align-items:center; gap:7px;
+  padding:14px 10px;
+  background:var(--surface2);
+  border:1.5px solid var(--border2);
+  border-radius:10px; cursor:pointer;
+  transition:all .15s; text-align:center;
+}
+.add-section-type:hover {
+  border-color:var(--accent);
+  background:rgba(91,92,246,.06);
+  transform:translateY(-2px);
+}
+.add-section-type-icon { font-size:22px; }
+.add-section-type-name { font-size:12px; font-weight:700; color:var(--text2); }
+
+/* ═══════════════════════════════════════════════════════
+   THEME MINI PREVIEWS (CSS Art)
+═══════════════════════════════════════════════════════ */
+.tp-modern{background:#0f0f14;height:72px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
+.tp-m-nav{height:10px;background:#1a1a25;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px}
+.tp-m-logo{width:16px;height:3px;background:#6c63ff;border-radius:1px}
+.tp-m-links{margin-left:auto;display:flex;gap:2px}
+.tp-m-links span{width:12px;height:2px;background:#333;border-radius:1px}
+.tp-m-hero{flex:1;background:linear-gradient(135deg,rgba(108,99,255,.2),transparent);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-m-h{width:48px;height:5px;background:rgba(255,255,255,.7);border-radius:1px}
+.tp-m-sub{width:34px;height:3px;background:rgba(255,255,255,.25);border-radius:1px}
+.tp-m-btn{width:24px;height:5px;background:#6c63ff;border-radius:1px;margin-top:2px}
+.tp-m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tp-m-card{height:10px;background:#1a1a25;border-radius:2px}
+
+.tp-minimal{background:#fafafa;height:72px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
+.tp-mn-nav{height:10px;background:white;border-bottom:1px solid #eee;display:flex;align-items:center;padding:0 4px}
+.tp-mn-logo{width:14px;height:3px;background:#111;border-radius:1px}
+.tp-mn-hero{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-mn-h{width:42px;height:4px;background:#222;border-radius:1px}
+.tp-mn-sub{width:30px;height:2px;background:#aaa;border-radius:1px}
+.tp-mn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tp-mn-card{height:10px;background:#f0f0f0;border-radius:2px}
+
+.tp-bold{background:#ff4d00;height:72px}
+.tp-bo-nav{height:12px;background:#e03d00;display:flex;align-items:center;padding:0 5px}
+.tp-bo-logo{width:16px;height:4px;background:white;border-radius:1px}
+.tp-bo-hero{height:36px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-bo-h{width:45px;height:6px;background:white;border-radius:1px}
+.tp-bo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 4px 4px}
+.tp-bo-card{height:10px;background:rgba(0,0,0,.15);border-radius:2px}
+
+.tp-luxury{background:#0d0b09;height:72px}
+.tp-lx-nav{height:12px;background:#0d0b09;border-bottom:1px solid #2a2318;display:flex;align-items:center;justify-content:center}
+.tp-lx-logo{width:20px;height:2px;background:#c9a84c}
+.tp-lx-hero{height:32px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-lx-h{width:36px;height:4px;background:#c9a84c}
+.tp-lx-sub{width:26px;height:2px;background:#5a4a2e}
+.tp-lx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
+.tp-lx-card{height:10px;background:#1a1510;border:1px solid #2a2318}
+
+.tp-pastel{background:#fef6f0;height:72px}
+.tp-ps-nav{height:10px;background:#fff;display:flex;align-items:center;padding:0 5px}
+.tp-ps-logo{width:16px;height:3px;background:#e8847a;border-radius:4px}
+.tp-ps-hero{height:32px;background:linear-gradient(135deg,#fde8e0,#fef0fa);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-ps-h{width:38px;height:4px;background:#d47a8f;border-radius:4px}
+.tp-ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
+.tp-ps-card{height:14px;background:#fde8e0;border-radius:4px}
+
+.tp-tech{background:#020d1a;height:72px}
+.tp-tc-nav{height:10px;background:#020d1a;border-bottom:1px solid #0a3a5a;display:flex;align-items:center;padding:0 5px}
+.tp-tc-logo{width:16px;height:3px;background:#00d4ff;border-radius:1px}
+.tp-tc-hero{height:32px;background:linear-gradient(135deg,rgba(0,212,255,.1),transparent);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-tc-h{width:38px;height:4px;background:#00d4ff;border-radius:1px}
+.tp-tc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
+.tp-tc-card{height:10px;background:#0a1a2a;border:1px solid #0a3a5a;border-radius:1px}
+
+/* ═══════════════════════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════════════════════ */
+#loading-overlay {
+  position:fixed; inset:0; background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:16px; z-index:9999;
+  transition:opacity .4s;
+}
+#loading-overlay.hidden { opacity:0; pointer-events:none; }
+.loading-logo {
+  font-family:'Outfit',sans-serif;
+  font-size:28px; font-weight:900; color:var(--text); letter-spacing:-.04em;
+}
+.loading-logo em { color:var(--accent2); font-style:normal; }
+.loading-bar {
+  width:180px; height:3px;
+  background:var(--surface2); border-radius:2px; overflow:hidden;
+}
+.loading-bar-fill {
+  height:100%; width:0;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:2px; transition:width .4s ease;
+}
+.loading-text { font-size:12.5px; color:var(--text3); font-weight:600; }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+#toast-container {
+  position:fixed; bottom:24px; right:24px;
+  z-index:9999; display:flex; flex-direction:column;
+  gap:8px; align-items:flex-end;
+}
+.toast {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 15px; border-radius:10px;
+  background:var(--surface2); border:1px solid var(--border2);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  transform:translateX(80px); opacity:0;
+  transition:all .3s cubic-bezier(.2,.8,.2,1);
+  max-width:300px;
+}
+.toast.show { transform:translateX(0); opacity:1; }
+.toast.success { border-color:rgba(34,197,94,.3); }
+.toast.error   { border-color:rgba(239,68,68,.3); }
+.toast-icon { font-size:16px; flex-shrink:0; }
+.toast-text { font-size:12.5px; font-weight:700; color:var(--text); }
+
+/* Drag states */
+.section-row.dragging { opacity:.3; }
+.section-row.drag-over { border-color:var(--accent)!important; background:rgba(91,92,246,.06)!important; }
+</style>
 </head>
 <body>
 
-<!-- Skeleton -->
-<div id="page-skeleton">
-  <div class="skel-sidebar">
-    <div class="skel-sidebar-inner">
-      <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-      <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-        <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-          <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-          <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
-        </div>
-      </div>
-      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;opacity:.6;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;opacity:.3;"></div>
-    </div>
-    <div class="skel-main">
-      <div class="skel-topbar">
-        <div class="skel" style="height:16px;width:120px;border-radius:5px;"></div>
-      </div>
-      <div style="display:flex;height:calc(100vh - 58px);">
-        <div style="width:280px;background:var(--surface);border-right:1px solid var(--border);padding:14px;">
-          <div class="skel" style="height:36px;border-radius:8px;margin-bottom:12px;"></div>
-          <div class="skel" style="height:100px;border-radius:10px;margin-bottom:10px;"></div>
-          <div class="skel" style="height:100px;border-radius:10px;opacity:.6;"></div>
-        </div>
-        <div style="flex:1;background:#13141f;display:flex;align-items:center;justify-content:center;">
-          <div class="skel" style="width:700px;height:500px;border-radius:12px;opacity:.3;"></div>
-        </div>
-        <div style="width:260px;background:var(--surface);border-left:1px solid var(--border);padding:14px;">
-          <div class="skel" style="height:22px;border-radius:6px;margin-bottom:12px;"></div>
-          <div class="skel" style="height:40px;border-radius:8px;margin-bottom:8px;"></div>
-          <div class="skel" style="height:40px;border-radius:8px;margin-bottom:8px;opacity:.6;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- ── Loading Overlay ── -->
+<div id="loading-overlay">
+  <div class="loading-logo">e<em>K</em>art</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loading-fill"></div></div>
+  <div class="loading-text" id="loading-text">Loading your store…</div>
 </div>
 
-<!-- Real sidebar -->
-<div class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
-  <div class="sidebar-user">
-    <div class="sidebar-avatar" id="nav-avatar">…</div>
-    <div style="min-width:0;">
-      <div class="sidebar-user-name" id="nav-user-name">…</div>
-      <div class="sidebar-user-email" id="nav-user-email">…</div>
-    </div>
+<!-- ── Topbar ── -->
+<div id="topbar">
+  <a class="tb-logo" href="home.html">e<em>K</em>art</a>
+
+  <!-- Store switcher pill -->
+  <div class="tb-store-pill" onclick="toggleStoreDropdown()" id="store-pill">
+    <div class="tb-store-dot"></div>
+    <div class="tb-store-name" id="store-name-display">Loading…</div>
+    <div class="tb-store-chevron">▾</div>
   </div>
-  <div class="nav-section"><div class="nav-section-label">Merchant</div>
-    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
-    <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
-    <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-    <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
-    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
-    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-    <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span>Inventory</a>
+
+  <!-- Store dropdown (portal, absolute positioned) -->
+  <div class="store-dropdown" id="store-dropdown"></div>
+
+  <span class="tb-page-label">Website Builder</span>
+  <div class="tb-spacer"></div>
+
+  <!-- Unsaved badge -->
+  <div class="tb-unsaved" id="unsaved-indicator"><span>●</span> Unsaved changes</div>
+
+  <!-- Device switcher -->
+  <div class="tb-device-group">
+    <button class="tb-device-btn active" onclick="setDevice('desktop',this)" title="Desktop">🖥</button>
+    <button class="tb-device-btn" onclick="setDevice('tablet',this)"  title="Tablet">▭</button>
+    <button class="tb-device-btn" onclick="setDevice('mobile',this)"  title="Mobile">📱</button>
   </div>
-  <div class="nav-section"><div class="nav-section-label">Storefront</div>
-    <a class="nav-item active" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-  </div>
-  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
-    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
-  </div>
-  <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
-  </div>
+
+  <!-- Browse Themes (restored from doc1) -->
+  <button class="tb-btn tb-btn-accent" onclick="window.location='themes-store.html'">
+    🎭 Browse Themes
+  </button>
+
+  <!-- Live Preview -->
+  <button class="tb-btn tb-btn-ghost" onclick="previewLive()">↗ Preview</button>
+
+  <!-- Save -->
+  <button class="tb-btn tb-btn-primary" id="save-btn" onclick="saveAndPublish()">
+    💾 Save &amp; Publish
+  </button>
 </div>
 
-<div class="main-wrap">
-  <div class="topbar">
-    <div class="topbar-left">
-      <span class="topbar-title">🎨 Website Builder</span>
-      <span class="unsaved-badge" id="unsaved-badge">● Unsaved changes</span>
+<!-- ── Builder Wrap ── -->
+<div id="builder-wrap">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="switchLeftTab('sections',this)">Sections</div>
+      <div class="panel-tab" onclick="switchLeftTab('themes',this)">Themes</div>
+      <div class="panel-tab" onclick="switchLeftTab('settings',this)">Settings</div>
     </div>
 
-    <!-- ── TOPBAR RIGHT: Browse Themes + Preview + Save ── -->
-    <div class="topbar-right" id="topbar-actions">
-      <div class="publish-bar">
-        <div class="store-select-wrap">
-          <span class="store-select-label">Store</span>
-          <select class="store-selector" id="store-selector"></select>
-        </div>
-        <div class="publish-status" id="publish-status">
-          <div class="publish-dot"></div>
-          <span>Live</span>
-        </div>
+    <!-- SECTIONS TAB -->
+    <div class="panel-body" id="tab-sections">
+      <div class="sections-panel" id="sections-list-wrap"></div>
+    </div>
 
-        <!-- ✅ NEW: Browse Themes button — links to themes-store.html -->
-        <button class="btn btn-secondary btn-sm" onclick="window.location='themes-store.html'">
-          🎭 Browse Themes
-        </button>
+    <!-- THEMES TAB -->
+    <div class="panel-body" id="tab-themes" style="display:none;">
+      <div class="themes-panel">
+        <span class="panel-group-label">Quick Apply</span>
+        <div class="theme-grid" id="themes-grid"></div>
+        <!-- Browse Theme Store CTA (restored from doc1) -->
+        <div class="themes-browse-cta" onclick="window.location='themes-store.html'">
+          <div style="font-size:22px;">🎭</div>
+          <div style="font-size:13px;font-weight:800;">Browse Theme Store</div>
+          <div class="themes-browse-cta-sub">24+ professional themes available</div>
+        </div>
+      </div>
+    </div>
 
-        <button class="btn btn-secondary btn-sm" onclick="previewInNewTab()">🔗 Preview</button>
-        <button class="btn btn-primary" id="save-btn" onclick="saveTheme()">💾 Save & Publish</button>
+    <!-- SETTINGS TAB -->
+    <div class="panel-body" id="tab-settings" style="display:none;">
+      <div class="settings-panel" id="settings-panel-content"></div>
+    </div>
+  </div>
+
+  <!-- CENTER: PREVIEW -->
+  <div id="center-panel">
+    <div class="preview-bar">
+      <div class="preview-url">
+        <span class="preview-url-lock">🔒</span>
+        <span class="preview-url-text" id="preview-url-text">ekart.aasaitech.in/your-store</span>
+      </div>
+      <button class="preview-refresh" onclick="renderPreview()" title="Refresh">↺ Refresh</button>
+    </div>
+    <div class="preview-canvas">
+      <div class="device-shell desktop" id="device-shell">
+        <iframe id="preview-iframe" height="720" scrolling="yes"></iframe>
       </div>
     </div>
   </div>
 
-  <!-- Builder body (hidden until loaded) -->
-  <div id="page-content" style="display:none; padding:0;">
-    <div class="builder-wrap">
-
-      <!-- LEFT: Sections & Themes & Settings -->
-      <div class="builder-left">
-        <div class="builder-tabs">
-          <div class="builder-tab active" onclick="switchTab('themes',this)">🎨 Themes</div>
-          <div class="builder-tab" onclick="switchTab('sections',this)">📐 Sections</div>
-          <div class="builder-tab" onclick="switchTab('settings',this)">⚙️ Settings</div>
-        </div>
-
-        <!-- THEMES tab -->
-        <div class="builder-panel" id="tab-themes">
-          <div class="panel-section-sep">Quick Apply</div>
-          <div class="themes-grid" id="themes-grid">
-            <!-- injected by JS -->
-          </div>
-
-          <!-- ✅ NEW: Browse Themes CTA card inside the themes panel -->
-          <div class="browse-themes-cta" onclick="window.location='themes-store.html'">
-            <div class="browse-themes-cta-icon">🎭</div>
-            <div class="browse-themes-cta-title">Browse Theme Store</div>
-            <div class="browse-themes-cta-sub">24+ professional themes available</div>
-          </div>
-        </div>
-
-        <!-- SECTIONS tab -->
-        <div class="builder-panel" id="tab-sections" style="display:none;">
-          <div class="panel-section-sep">Page Sections (drag to reorder)</div>
-          <div class="section-list" id="section-list">
-            <!-- injected by JS -->
-          </div>
-          <div class="panel-section-sep" style="margin-top:16px;">Add Section</div>
-          <div class="add-section-grid" id="add-section-grid">
-            <!-- injected by JS -->
-          </div>
-        </div>
-
-        <!-- SETTINGS tab -->
-        <div class="builder-panel" id="tab-settings" style="display:none;">
-          <div class="settings-group">
-            <div class="settings-group-label">Brand Colors</div>
-            <div class="setting-row">
-              <span class="setting-label">Primary Color</span>
-              <div class="setting-color-row">
-                <input type="color" class="setting-color" id="set-primary-color" oninput="onColorChange('primaryColor',this.value)">
-                <input class="setting-input" style="flex:1;" id="set-primary-color-hex" oninput="onHexInput('primaryColor',this.value)" placeholder="#6c63ff">
-              </div>
-              <div class="color-swatch-row" id="primary-swatches"></div>
-            </div>
-            <div class="setting-row">
-              <span class="setting-label">Background Color</span>
-              <div class="setting-color-row">
-                <input type="color" class="setting-color" id="set-bg-color" oninput="onColorChange('bgColor',this.value)">
-                <input class="setting-input" style="flex:1;" id="set-bg-color-hex" oninput="onHexInput('bgColor',this.value)" placeholder="#ffffff">
-              </div>
-            </div>
-            <div class="setting-row">
-              <span class="setting-label">Text Color</span>
-              <div class="setting-color-row">
-                <input type="color" class="setting-color" id="set-text-color" oninput="onColorChange('textColor',this.value)">
-                <input class="setting-input" style="flex:1;" id="set-text-color-hex" oninput="onHexInput('textColor',this.value)" placeholder="#111111">
-              </div>
-            </div>
-          </div>
-          <div class="settings-group">
-            <div class="settings-group-label">Typography</div>
-            <div class="font-picker" id="font-picker"></div>
-          </div>
-          <div class="settings-group">
-            <div class="settings-group-label">Layout</div>
-            <div class="setting-row">
-              <span class="setting-label">Product Columns</span>
-              <select class="setting-input" id="set-cols" onchange="onSettingChange('cols',this.value)">
-                <option value="2">2 Columns</option>
-                <option value="3" selected>3 Columns</option>
-                <option value="4">4 Columns</option>
-              </select>
-            </div>
-            <div class="setting-row">
-              <span class="setting-label">Border Radius</span>
-              <input type="range" class="edit-range" id="set-radius" min="0" max="24" value="12" oninput="onSettingChange('radius', this.value + 'px'); document.getElementById('set-radius-val').textContent=this.value+'px'">
-              <span id="set-radius-val" style="font-size:11px;color:var(--text3);">12px</span>
-            </div>
-            <div class="setting-row">
-              <span class="setting-label">Button Style</span>
-              <select class="setting-input" id="set-btn-style" onchange="onSettingChange('btnStyle',this.value)">
-                <option value="rounded">Rounded</option>
-                <option value="pill">Pill</option>
-                <option value="square">Square</option>
-              </select>
-            </div>
-          </div>
-          <div class="settings-group">
-            <div class="settings-group-label">Store Info</div>
-            <div class="setting-row">
-              <span class="setting-label">Announcement Bar</span>
-              <input class="setting-input" id="set-announcement" placeholder="Free shipping on orders over ₹999!" oninput="onSettingChange('announcement',this.value)">
-            </div>
-            <div class="setting-row">
-              <span class="setting-label">Footer Text</span>
-              <input class="setting-input" id="set-footer" placeholder="© 2025 My Store" oninput="onSettingChange('footerText',this.value)">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CENTER: Preview -->
-      <div class="builder-center">
-        <div class="preview-toolbar">
-          <div class="preview-url-bar">
-            <span class="preview-url-icon">🔒</span>
-            <span class="preview-url-text" id="preview-url">ekart.aasaitech.in/your-store</span>
-          </div>
-          <div class="preview-device-btns">
-            <button class="device-btn active" title="Desktop" onclick="setDevice('desktop',this)">🖥️</button>
-            <button class="device-btn" title="Tablet" onclick="setDevice('tablet',this)">📱</button>
-            <button class="device-btn" title="Mobile" onclick="setDevice('mobile',this)">📲</button>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="refreshPreview()" title="Refresh preview">↺ Refresh</button>
-        </div>
-        <div class="preview-frame-wrap">
-          <div class="preview-device-shell desktop" id="device-shell">
-            <iframe id="preview-iframe" src="about:blank" height="700" scrolling="yes"></iframe>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: Section Editor -->
-      <div class="builder-right" id="builder-right">
-        <div class="builder-right-header">
-          <span class="builder-right-title" id="right-panel-title">Section Editor</span>
-          <button class="builder-right-close" onclick="closeRightPanel()">✕</button>
-        </div>
-        <div class="builder-right-panel" id="right-panel-content">
-          <div style="text-align:center;padding:40px 20px;color:var(--text3);">
-            <div style="font-size:32px;margin-bottom:10px;">👆</div>
-            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">Select a section to edit</div>
-            <div style="font-size:12px;line-height:1.6;">Click the ✏️ button on any section in the Sections tab to customize it.</div>
-          </div>
-        </div>
-        <div class="builder-action-bar">
-          <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="resetSection()">↺ Reset</button>
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="applySection()">✓ Apply</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
 </div>
 
-<div id="store-select-wrap" style="display:none;"></div>
+<!-- ── Add Section Drawer ── -->
+<div class="add-section-drawer" id="add-section-drawer">
+  <div class="add-section-drawer-header">
+    <span class="add-section-drawer-title">Add Section</span>
+    <button class="add-section-drawer-close" onclick="closeAddDrawer()">✕</button>
+  </div>
+  <div class="add-section-types" id="add-section-types"></div>
+</div>
+
+<!-- ── Toast Container ── -->
+<div id="toast-container"></div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────────
-let currentUser = null
-let allStores = []
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let currentUser    = null
+let allStores      = []
 let currentStoreId = null
-let currentDevice = 'desktop'
-let activeTab = 'themes'
-let editingSection = null
-let hasUnsavedChanges = false
+let currentDevice  = 'desktop'
+let activeLeftTab  = 'sections'
+let activeSectionId = null
+let hasUnsaved     = false
 
-const THEMES = [
-  {
-    id: 'modern', label: 'Modern Dark',
-    settings: {
-      primaryColor: '#6c63ff', bgColor: '#0f0f14', textColor: '#f0f2ff',
-      cardBg: '#1a1a25', navBg: '#1a1a25', accentText: '#a78bfa',
-      font: 'Outfit', cols: '3', radius: '12px', btnStyle: 'rounded',
-      announcement: '✨ Free shipping on orders over ₹999!',
-      footerText: '© 2025 My Store. All rights reserved.'
-    },
-    previewHTML: `<div class="tp-modern">
-      <div class="tp-modern-nav"><div class="tp-modern-nav-dot"></div><div class="tp-modern-nav-links"><span></span><span></span><span></span></div></div>
-      <div class="tp-modern-hero"><div class="tp-modern-h"></div><div class="tp-modern-sub"></div><div class="tp-modern-btn"></div></div>
-      <div class="tp-modern-grid"><div class="tp-modern-grid-card"></div><div class="tp-modern-grid-card"></div><div class="tp-modern-grid-card"></div></div>
-    </div>`
-  },
-  {
-    id: 'minimal', label: 'Clean Minimal',
-    settings: {
-      primaryColor: '#111111', bgColor: '#ffffff', textColor: '#111111',
-      cardBg: '#f5f5f5', navBg: '#ffffff', accentText: '#555555',
-      font: 'DM Serif Display', cols: '3', radius: '4px', btnStyle: 'square',
-      announcement: 'Free shipping on all orders above ₹999',
-      footerText: '© 2025 My Store'
-    },
-    previewHTML: `<div class="tp-minimal">
-      <div class="tp-minimal-nav"><div class="tp-minimal-nav-dot"></div></div>
-      <div class="tp-minimal-hero"><div class="tp-minimal-h"></div><div class="tp-minimal-sub"></div></div>
-      <div class="tp-minimal-grid"><div class="tp-minimal-card"></div><div class="tp-minimal-card"></div><div class="tp-minimal-card"></div></div>
-    </div>`
-  },
-  {
-    id: 'bold', label: 'Bold & Vibrant',
-    settings: {
-      primaryColor: '#ff4d00', bgColor: '#fff5f0', textColor: '#1a0a00',
-      cardBg: '#fff', navBg: '#ff4d00', accentText: '#ff4d00',
-      font: 'Syne', cols: '2', radius: '8px', btnStyle: 'pill',
-      announcement: '🔥 MEGA SALE — Up to 70% off today only!',
-      footerText: '© 2025 My Store. Made with ❤️'
-    },
-    previewHTML: `<div class="tp-bold">
-      <div class="tp-bold-nav"><div class="tp-bold-logo"></div></div>
-      <div class="tp-bold-hero"><div class="tp-bold-h"></div><div class="tp-bold-sub"></div></div>
-      <div class="tp-bold-grid"><div class="tp-bold-card"></div><div class="tp-bold-card"></div></div>
-    </div>`
-  },
-  {
-    id: 'luxury', label: 'Luxury',
-    settings: {
-      primaryColor: '#c9a84c', bgColor: '#0d0b09', textColor: '#e8d5b0',
-      cardBg: '#1a1510', navBg: '#0d0b09', accentText: '#c9a84c',
-      font: 'Cormorant Garamond', cols: '3', radius: '0px', btnStyle: 'square',
-      announcement: 'Complimentary shipping on all orders',
-      footerText: '© 2025 My Store. Luxury redefined.'
-    },
-    previewHTML: `<div class="tp-luxury">
-      <div class="tp-luxury-nav"><div class="tp-luxury-logo"></div></div>
-      <div class="tp-luxury-hero"><div class="tp-luxury-h"></div><div class="tp-luxury-sub"></div></div>
-      <div class="tp-luxury-grid"><div class="tp-luxury-card"></div><div class="tp-luxury-card"></div><div class="tp-luxury-card"></div></div>
-    </div>`
-  },
-  {
-    id: 'pastel', label: 'Soft Pastel',
-    settings: {
-      primaryColor: '#e8847a', bgColor: '#fef6f0', textColor: '#3d2a28',
-      cardBg: '#fff', navBg: '#fff', accentText: '#d47a8f',
-      font: 'Nunito', cols: '3', radius: '20px', btnStyle: 'pill',
-      announcement: '💝 Free gift with orders over ₹1499!',
-      footerText: '© 2025 My Store. With love.'
-    },
-    previewHTML: `<div class="tp-pastel">
-      <div class="tp-pastel-nav"><div class="tp-pastel-logo"></div></div>
-      <div class="tp-pastel-hero"><div class="tp-pastel-h"></div><div class="tp-pastel-sub"></div></div>
-      <div class="tp-pastel-grid"><div class="tp-pastel-card"></div><div class="tp-pastel-card"></div><div class="tp-pastel-card"></div></div>
-    </div>`
-  },
-  {
-    id: 'tech', label: 'Tech & Neon',
-    settings: {
-      primaryColor: '#00d4ff', bgColor: '#020d1a', textColor: '#e0f7ff',
-      cardBg: '#0a1a2a', navBg: '#020d1a', accentText: '#00d4ff',
-      font: 'Space Grotesk', cols: '3', radius: '6px', btnStyle: 'square',
-      announcement: '⚡ Lightning deals — Limited stock!',
-      footerText: '© 2025 My Store. Built for the future.'
-    },
-    previewHTML: `<div class="tp-tech">
-      <div class="tp-tech-nav"><div class="tp-tech-logo"></div></div>
-      <div class="tp-tech-hero"><div class="tp-tech-h"></div><div class="tp-tech-sub"></div></div>
-      <div class="tp-tech-grid"><div class="tp-tech-card"></div><div class="tp-tech-card"></div><div class="tp-tech-card"></div></div>
-    </div>`
-  }
-]
+let themeData = {
+  themeId: 'modern',
+  primaryColor: '#5b5cf6',
+  bgColor: '#09090f',
+  textColor: '#f1f5f9',
+  cardBg: '#13131e',
+  navBg: '#0e0e17',
+  font: 'Outfit',
+  cols: '3',
+  radius: '12px',
+  btnStyle: 'rounded',
+  announcementText: '✨ Free shipping on orders over ₹999!',
+  footerText: '© 2025 eKart Store. All rights reserved.'
+}
 
-const FONTS = ['Outfit', 'DM Serif Display', 'Syne', 'Cormorant Garamond', 'Nunito', 'Space Grotesk']
+let sections = []
+
+/* ════════════════════════════════════════════════════
+   SECTION DEFINITIONS
+════════════════════════════════════════════════════ */
+const SECTION_DEFS = {
+  announcement: { icon:'📢', label:'Announcement Bar', fields:[
+    { key:'text',      label:'Message',         type:'text',  placeholder:'Free shipping on orders over ₹999!' },
+    { key:'bgColor',   label:'Background Color', type:'color' },
+    { key:'textColor', label:'Text Color',       type:'color' },
+  ]},
+  navbar: { icon:'🔝', label:'Navigation Bar', fields:[
+    { key:'logoText',   label:'Logo Text',   type:'text',   placeholder:'My Store' },
+    { key:'showSearch', label:'Show Search', type:'select', opts:['yes','no'] },
+    { key:'showCart',   label:'Show Cart',   type:'select', opts:['yes','no'] },
+  ]},
+  hero: { icon:'🖼️', label:'Hero Banner', fields:[
+    { key:'heading',    label:'Main Heading', type:'text',     placeholder:'Welcome to our Store' },
+    { key:'subheading', label:'Sub-heading',  type:'textarea', placeholder:'Discover amazing products' },
+    { key:'ctaText',    label:'Button Text',  type:'text',     placeholder:'Shop Now' },
+    { key:'ctaLink',    label:'Button URL',   type:'text',     placeholder:'#products' },
+    { key:'bgColor',    label:'Background',   type:'color' },
+    { key:'textAlign',  label:'Alignment',    type:'select',   opts:['center','left','right'] },
+  ]},
+  featured: { icon:'⭐', label:'Featured Products', fields:[
+    { key:'title',   label:'Section Title',    type:'text',   placeholder:'Featured Products' },
+    { key:'count',   label:'Products to Show', type:'number', placeholder:'8', min:1, max:24 },
+    { key:'columns', label:'Columns',          type:'select', opts:['2','3','4'] },
+  ]},
+  categories: { icon:'🗂️', label:'Category Grid', fields:[
+    { key:'title',   label:'Section Title', type:'text',   placeholder:'Browse by Category' },
+    { key:'columns', label:'Columns',       type:'select', opts:['2','3','4','6'] },
+  ]},
+  banner: { icon:'📣', label:'Promo Banner', fields:[
+    { key:'heading', label:'Heading',    type:'text',     placeholder:'Limited Time Offer' },
+    { key:'subtext', label:'Sub Text',   type:'textarea', placeholder:'Get 20% off your first order' },
+    { key:'ctaText', label:'Button',     type:'text',     placeholder:'Claim Offer' },
+    { key:'bgColor', label:'Background', type:'color' },
+  ]},
+  testimonials: { icon:'💬', label:'Testimonials', fields:[
+    { key:'title',   label:'Section Title', type:'text',   placeholder:'What Customers Say' },
+    { key:'columns', label:'Columns',       type:'select', opts:['1','2','3'] },
+  ]},
+  newsletter: { icon:'📧', label:'Newsletter Signup', fields:[
+    { key:'heading', label:'Heading',     type:'text',     placeholder:'Stay in the loop' },
+    { key:'subtext', label:'Sub Text',    type:'textarea', placeholder:'Get deals in your inbox' },
+    { key:'btnText', label:'Button Text', type:'text',     placeholder:'Subscribe' },
+  ]},
+  footer: { icon:'📄', label:'Footer', fields:[
+    { key:'footerText', label:'Copyright Text',    type:'text',   placeholder:'© 2025 My Store' },
+    { key:'showSocial', label:'Show Social Links', type:'select', opts:['yes','no'] },
+  ]},
+  video: { icon:'🎬', label:'Video Section', fields:[
+    { key:'heading',  label:'Heading',   type:'text', placeholder:'Our Story' },
+    { key:'videoUrl', label:'Video URL', type:'text', placeholder:'https://youtube.com/...' },
+  ]},
+  countdown: { icon:'⏳', label:'Countdown Timer', fields:[
+    { key:'heading', label:'Heading',        type:'text', placeholder:'Deal Ends In' },
+    { key:'endDate', label:'End Date/Time',  type:'text', placeholder:'2025-12-31' },
+  ]},
+  gallery: { icon:'🖼️', label:'Image Gallery', fields:[
+    { key:'title',   label:'Title',   type:'text',   placeholder:'Our Gallery' },
+    { key:'columns', label:'Columns', type:'select', opts:['2','3','4'] },
+  ]},
+  trustbadges: { icon:'🛡️', label:'Trust Badges', fields:[
+    { key:'badge1', label:'Badge 1', type:'text', placeholder:'Free Shipping' },
+    { key:'badge2', label:'Badge 2', type:'text', placeholder:'Secure Payment' },
+    { key:'badge3', label:'Badge 3', type:'text', placeholder:'Easy Returns' },
+    { key:'badge4', label:'Badge 4', type:'text', placeholder:'24/7 Support' },
+  ]},
+  faq: { icon:'❓', label:'FAQ Section', fields:[
+    { key:'title', label:'Title',      type:'text',     placeholder:'Frequently Asked Questions' },
+    { key:'q1',    label:'Question 1', type:'text',     placeholder:'How long is shipping?' },
+    { key:'a1',    label:'Answer 1',   type:'textarea', placeholder:'Typically 3-7 business days.' },
+    { key:'q2',    label:'Question 2', type:'text',     placeholder:'What is your return policy?' },
+    { key:'a2',    label:'Answer 2',   type:'textarea', placeholder:'30 days hassle-free returns.' },
+  ]},
+}
 
 const DEFAULT_SECTIONS = [
-  { id: 'announcement', icon: '📢', label: 'Announcement Bar', enabled: true, data: {} },
-  { id: 'navbar', icon: '🔝', label: 'Navigation', enabled: true, data: {} },
-  { id: 'hero', icon: '🖼️', label: 'Hero Banner', enabled: true, data: { heading: 'Welcome to our Store', subheading: 'Discover amazing products at great prices', ctaText: 'Shop Now', ctaLink: '#products', showImage: true } },
-  { id: 'featured', icon: '⭐', label: 'Featured Products', enabled: true, data: { title: 'Featured Products', count: 8 } },
-  { id: 'categories', icon: '🗂️', label: 'Categories', enabled: true, data: { title: 'Browse Categories' } },
-  { id: 'banner', icon: '📣', label: 'Promo Banner', enabled: false, data: { heading: 'Special Offer', subtext: 'Get 20% off your first order', ctaText: 'Claim Offer', bgColor: '' } },
-  { id: 'testimonials', icon: '💬', label: 'Testimonials', enabled: false, data: { title: 'What Our Customers Say' } },
-  { id: 'newsletter', icon: '📧', label: 'Newsletter', enabled: true, data: { heading: 'Stay in the loop', subtext: 'Get exclusive deals and offers straight to your inbox.' } },
-  { id: 'footer', icon: '📄', label: 'Footer', enabled: true, data: {} }
+  { id:'sec_announcement', type:'announcement', enabled:true,  data:{ text:'✨ Free shipping on all orders above ₹999!', bgColor:'#5b5cf6', textColor:'#ffffff' } },
+  { id:'sec_navbar',       type:'navbar',       enabled:true,  data:{ logoText:'My Store', showSearch:'yes', showCart:'yes' } },
+  { id:'sec_hero',         type:'hero',         enabled:true,  data:{ heading:'Welcome to our Store', subheading:'Discover amazing products at the best prices. Fast delivery across India.', ctaText:'Shop Now', ctaLink:'#products', bgColor:'', textAlign:'center' } },
+  { id:'sec_featured',     type:'featured',     enabled:true,  data:{ title:'Featured Products', count:'8', columns:'3' } },
+  { id:'sec_categories',   type:'categories',   enabled:true,  data:{ title:'Browse by Category', columns:'4' } },
+  { id:'sec_banner',       type:'banner',       enabled:false, data:{ heading:'Limited Time Offer', subtext:'Get 20% off your first order. Use code WELCOME20', ctaText:'Claim Offer', bgColor:'' } },
+  { id:'sec_testimonials', type:'testimonials', enabled:false, data:{ title:'What Customers Say', columns:'3' } },
+  { id:'sec_newsletter',   type:'newsletter',   enabled:true,  data:{ heading:'Stay in the loop', subtext:'Get exclusive deals and offers straight to your inbox.', btnText:'Subscribe' } },
+  { id:'sec_footer',       type:'footer',       enabled:true,  data:{ footerText:'© 2025 My Store. All rights reserved.', showSocial:'yes' } },
 ]
 
-let themeSettings = {}
-let sections = []
-let selectedThemeId = 'modern'
+const THEMES = [
+  { id:'modern',  name:'Modern Dark',   previewHTML:`<div class="tp-modern"><div class="tp-m-nav"><div class="tp-m-logo"></div><div class="tp-m-links"><span></span><span></span></div></div><div class="tp-m-hero"><div class="tp-m-h"></div><div class="tp-m-sub"></div><div class="tp-m-btn"></div></div><div class="tp-m-grid"><div class="tp-m-card"></div><div class="tp-m-card"></div><div class="tp-m-card"></div></div></div>`,
+    settings:{ primaryColor:'#5b5cf6', bgColor:'#09090f', textColor:'#f1f5f9', cardBg:'#13131e', navBg:'#0e0e17', font:'Outfit', cols:'3', radius:'12px', btnStyle:'rounded', announcementText:'✨ Free shipping on orders over ₹999!', footerText:'© 2025 My Store. All rights reserved.' } },
+  { id:'minimal', name:'Clean Minimal', previewHTML:`<div class="tp-minimal"><div class="tp-mn-nav"><div class="tp-mn-logo"></div></div><div class="tp-mn-hero"><div class="tp-mn-h"></div><div class="tp-mn-sub"></div></div><div class="tp-mn-grid"><div class="tp-mn-card"></div><div class="tp-mn-card"></div><div class="tp-mn-card"></div></div></div>`,
+    settings:{ primaryColor:'#111111', bgColor:'#ffffff', textColor:'#111111', cardBg:'#f5f5f5', navBg:'#ffffff', font:'DM Serif Display', cols:'3', radius:'4px', btnStyle:'square', announcementText:'Free shipping on all orders above ₹999', footerText:'© 2025 My Store' } },
+  { id:'bold',    name:'Bold & Vibrant', previewHTML:`<div class="tp-bold"><div class="tp-bo-nav"><div class="tp-bo-logo"></div></div><div class="tp-bo-hero"><div class="tp-bo-h"></div></div><div class="tp-bo-grid"><div class="tp-bo-card"></div><div class="tp-bo-card"></div></div></div>`,
+    settings:{ primaryColor:'#ff4d00', bgColor:'#fff5f0', textColor:'#1a0a00', cardBg:'#ffffff', navBg:'#ff4d00', font:'Syne', cols:'2', radius:'8px', btnStyle:'pill', announcementText:'🔥 MEGA SALE — Up to 70% off today only!', footerText:'© 2025 My Store. Made with ❤️' } },
+  { id:'luxury',  name:'Luxury',         previewHTML:`<div class="tp-luxury"><div class="tp-lx-nav"><div class="tp-lx-logo"></div></div><div class="tp-lx-hero"><div class="tp-lx-h"></div><div class="tp-lx-sub"></div></div><div class="tp-lx-grid"><div class="tp-lx-card"></div><div class="tp-lx-card"></div><div class="tp-lx-card"></div></div></div>`,
+    settings:{ primaryColor:'#c9a84c', bgColor:'#0d0b09', textColor:'#e8d5b0', cardBg:'#1a1510', navBg:'#0d0b09', font:'Cormorant Garamond', cols:'3', radius:'0px', btnStyle:'square', announcementText:'Complimentary shipping on all orders', footerText:'© 2025 My Store. Luxury redefined.' } },
+  { id:'pastel',  name:'Soft Pastel',    previewHTML:`<div class="tp-pastel"><div class="tp-ps-nav"><div class="tp-ps-logo"></div></div><div class="tp-ps-hero"><div class="tp-ps-h"></div></div><div class="tp-ps-grid"><div class="tp-ps-card"></div><div class="tp-ps-card"></div><div class="tp-ps-card"></div></div></div>`,
+    settings:{ primaryColor:'#e8847a', bgColor:'#fef6f0', textColor:'#3d2a28', cardBg:'#fff', navBg:'#fff', font:'Nunito', cols:'3', radius:'20px', btnStyle:'pill', announcementText:'💝 Free gift with orders over ₹1499!', footerText:'© 2025 My Store. With love.' } },
+  { id:'tech',    name:'Tech & Neon',    previewHTML:`<div class="tp-tech"><div class="tp-tc-nav"><div class="tp-tc-logo"></div></div><div class="tp-tc-hero"><div class="tp-tc-h"></div></div><div class="tp-tc-grid"><div class="tp-tc-card"></div><div class="tp-tc-card"></div><div class="tp-tc-card"></div></div></div>`,
+    settings:{ primaryColor:'#00d4ff', bgColor:'#020d1a', textColor:'#e0f7ff', cardBg:'#0a1a2a', navBg:'#020d1a', font:'Space Grotesk', cols:'3', radius:'6px', btnStyle:'square', announcementText:'⚡ Lightning deals — Limited stock!', footerText:'© 2025 My Store. Built for the future.' } },
+]
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+const ADD_SECTION_TYPES = [
+  { type:'video',        icon:'🎬', name:'Video' },
+  { type:'countdown',    icon:'⏳', name:'Countdown' },
+  { type:'gallery',      icon:'🖼️', name:'Gallery' },
+  { type:'trustbadges',  icon:'🛡️', name:'Trust Badges' },
+  { type:'faq',          icon:'❓', name:'FAQ' },
+  { type:'banner',       icon:'📣', name:'Promo Banner' },
+  { type:'testimonials', icon:'💬', name:'Testimonials' },
+]
+
+const COLOR_PALETTE = ['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#8b5cf6','#f97316','#c9a84c','#111111']
+const FONTS = ['Outfit','DM Serif Display','Syne','Cormorant Garamond','Nunito','Space Grotesk','Plus Jakarta Sans','Playfair Display']
+
+/* ════════════════════════════════════════════════════
+   LOADING
+════════════════════════════════════════════════════ */
+function setLoading(text, pct) {
+  const fill = document.getElementById('loading-fill')
+  const txt  = document.getElementById('loading-text')
+  if (fill) fill.style.width = pct + '%'
+  if (txt)  txt.textContent  = text
+}
+function hideLoading() {
+  setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 400)
+}
+
+/* ════════════════════════════════════════════════════
+   INIT  — uses apiFetch from api.js
+════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('builder', onStoreSwitch)
-  if (!nav) return
-  currentUser = nav.user
-  allStores = nav.stores
-  currentStoreId = nav.currentStoreId
+  setLoading('Authenticating…', 15)
 
-  updatePreviewUrl()
-  initThemesGrid()
-  initSectionsPanel()
-  initSettingsPanel()
-  await loadThemeForStore(currentStoreId)
+  // ── Try real auth; fall back to demo ──
+  let authOk = false
+  const hasToken = !!localStorage.getItem('ekart_token')
+
+  if (hasToken) {
+    try {
+      setLoading('Loading user…', 30)
+      currentUser = await apiFetch('/auth/me')
+      authOk = true
+    } catch(e) {
+      console.warn('Auth check failed, demo mode:', e.message)
+    }
+  }
+
+  if (authOk) {
+    try {
+      setLoading('Fetching stores…', 55)
+      const storeList = await apiFetch('/stores')
+      allStores = Array.isArray(storeList) ? storeList : (storeList?.stores || [])
+    } catch(e) {
+      console.warn('Store fetch failed:', e.message)
+      allStores = []
+    }
+
+    currentStoreId = localStorage.getItem('ekart_store_id')
+    if (!currentStoreId || !allStores.find(s => s._id === currentStoreId)) {
+      currentStoreId = allStores[0]?._id || null
+    }
+    if (currentStoreId) localStorage.setItem('ekart_store_id', currentStoreId)
+  } else {
+    // Demo mode
+    allStores = [{ _id:'demo', name:'Demo Store', slug:'demo-store' }]
+    currentStoreId = 'demo'
+    if (!hasToken) toast('No auth token — running in preview mode', 'error')
+  }
+
+  setLoading('Building UI…', 75)
+  renderStorePill()
+  renderStoreDropdown()
+  renderThemesGrid()
+  renderSettingsPanel()
+  renderAddSectionTypes()
+
+  setLoading('Loading theme…', 90)
+  if (authOk && currentStoreId && currentStoreId !== 'demo') {
+    await loadThemeForStore(currentStoreId)
+  } else {
+    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+    renderSectionsList()
+    renderPreview()
+    markThemeActive('modern')
+    markUnsaved(false)
+  }
+
+  setLoading('Ready!', 100)
+  hideLoading()
 })
 
-async function onStoreSwitch(id) {
+/* ════════════════════════════════════════════════════
+   STORE UI
+════════════════════════════════════════════════════ */
+function renderStorePill() {
+  const store = allStores.find(s => s._id === currentStoreId)
+  document.getElementById('store-name-display').textContent = store?.name || 'Select Store'
+  document.getElementById('preview-url-text').textContent   = `ekart.aasaitech.in/${store?.slug || 'your-store'}`
+}
+
+function renderStoreDropdown() {
+  const dd = document.getElementById('store-dropdown')
+  const items = allStores.map(s => `
+    <div class="store-dropdown-item ${s._id === currentStoreId ? 'active' : ''}"
+         onclick="switchStore('${s._id}')">
+      <div class="store-dropdown-dot"></div>
+      ${escHtml(s.name)}
+    </div>`).join('')
+  dd.innerHTML = items + `
+    <hr class="store-dropdown-sep">
+    <div class="store-dropdown-item" onclick="window.location='home.html'">
+      <span style="font-size:14px;">+</span> Manage Stores
+    </div>`
+}
+
+function toggleStoreDropdown() {
+  document.getElementById('store-dropdown').classList.toggle('open')
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#store-pill') && !e.target.closest('#store-dropdown')) {
+    document.getElementById('store-dropdown').classList.remove('open')
+  }
+})
+
+async function switchStore(id) {
   currentStoreId = id
-  updatePreviewUrl()
+  localStorage.setItem('ekart_store_id', id)
+  document.getElementById('store-dropdown').classList.remove('open')
+  renderStorePill()
+  renderStoreDropdown()
   await loadThemeForStore(id)
 }
 
-function updatePreviewUrl() {
-  const store = allStores.find(s => s._id === currentStoreId)
-  const slug = store?.slug || 'your-store'
-  document.getElementById('preview-url').textContent = `ekart.aasaitech.in/${slug}`
-}
-
-// ── Theme Storage ─────────────────────────────────────────────────────────────
-function setDefaultTheme() {
-  selectedThemeId = 'modern'
-  themeSettings = { ...THEMES[0].settings }
-  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-}
-
-function applyBackendTheme(themeDoc) {
-  if (!themeDoc) return setDefaultTheme()
-  const s = themeDoc.settings || {}
-  selectedThemeId = s.themeId || 'modern'
-  themeSettings = {
-    primaryColor:     s.primary_color   || THEMES[0].settings.primaryColor,
-    bgColor:          s.secondary_color  || THEMES[0].settings.bgColor,
-    textColor:        s.accent_color    || THEMES[0].settings.textColor,
-    font:             s.font_heading    || THEMES[0].settings.font,
-    cardStyle:        s.card_style      || 'rounded',
-    borderRadius:     s.border_radius   || 12,
-    buttonStyle:      s.button_style    || 'filled',
-    announcementText: s.announcement_bar?.text || 'Free shipping on orders above ₹499! 🎉',
-    footerText:       s.footer_text     || '',
-    themeId:          selectedThemeId,
+/* ════════════════════════════════════════════════════
+   LOAD / SAVE THEME  — uses apiFetch from api.js
+════════════════════════════════════════════════════ */
+async function loadThemeForStore(storeId) {
+  if (!storeId) { useDefaults(); return }
+  try {
+    const data = await apiFetch(`/stores/${storeId}/theme`)
+    const doc = data.draft || data.published || null
+    applyThemeFromBackend(doc)
+  } catch(e) {
+    console.warn('Theme load failed, using defaults:', e.message)
+    useDefaults()
   }
-  if (themeDoc.sections && themeDoc.sections.length) {
-    sections = themeDoc.sections.map(bs => {
-      const def = DEFAULT_SECTIONS.find(d => d.id === bs.type) ||
-                  { id: bs.type, icon: '📦', label: bs.type, data: {} }
+  renderSectionsList()
+  renderPreview()
+  markThemeActive(themeData.themeId || 'modern')
+  markUnsaved(false)
+}
+
+function useDefaults() {
+  sections  = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  themeData = { ...THEMES[0].settings, themeId:'modern' }
+}
+
+function applyThemeFromBackend(doc) {
+  if (!doc) { useDefaults(); return }
+  const s = doc.settings || {}
+  themeData = {
+    themeId:          s.themeId           || 'modern',
+    primaryColor:     s.primary_color      || '#5b5cf6',
+    bgColor:          s.secondary_color    || '#09090f',
+    textColor:        s.accent_color       || '#f1f5f9',
+    cardBg:           s.card_bg            || '#13131e',
+    navBg:            s.nav_bg             || '#0e0e17',
+    font:             s.font_heading       || 'Outfit',
+    cols:             String(s.cols || 3),
+    radius:           s.radius             || '12px',
+    btnStyle:         s.button_style       || 'rounded',
+    announcementText: s.announcement_bar?.text || '✨ Free shipping on orders over ₹999!',
+    footerText:       s.footer_text        || '© 2025 My Store.',
+  }
+  if (doc.sections && doc.sections.length) {
+    sections = doc.sections.map(bs => {
+      const def = DEFAULT_SECTIONS.find(d => d.type === bs.type)
       return {
-        id:      bs.type,
-        icon:    def.icon,
-        label:   bs.settings?.label || def.label,
+        id:      bs.id || `sec_${bs.type}_${Date.now()}`,
+        type:    bs.type,
         enabled: bs.is_visible !== false,
-        data:    bs.settings || def.data || {}
+        data:    bs.settings || def?.data || {}
       }
     })
+    // Ensure all default section types exist (even if disabled)
     DEFAULT_SECTIONS.forEach(def => {
-      if (!sections.find(s => s.id === def.id)) {
-        sections.push({ ...def, enabled: false })
+      if (!sections.find(s => s.type === def.type)) {
+        sections.push({ ...JSON.parse(JSON.stringify(def)), enabled:false })
       }
     })
   } else {
@@ -1001,472 +1170,611 @@ function applyBackendTheme(themeDoc) {
   }
 }
 
-function buildBackendSettings() {
+function buildBackendPayload() {
   return {
-    primary_color:    themeSettings.primaryColor,
-    secondary_color:  themeSettings.bgColor,
-    accent_color:     themeSettings.textColor,
-    font_heading:     themeSettings.font,
-    font_body:        themeSettings.font,
-    card_style:       themeSettings.cardStyle,
-    border_radius:    themeSettings.borderRadius,
-    button_style:     themeSettings.buttonStyle,
-    footer_text:      themeSettings.footerText || '',
-    themeId:          selectedThemeId,
-    announcement_bar: {
-      enabled:    sections.find(s => s.id === 'announcement')?.enabled || false,
-      text:       themeSettings.announcementText,
-      bg_color:   themeSettings.primaryColor,
-      text_color: '#ffffff'
-    }
+    settings: {
+      themeId:          themeData.themeId,
+      primary_color:    themeData.primaryColor,
+      secondary_color:  themeData.bgColor,
+      accent_color:     themeData.textColor,
+      card_bg:          themeData.cardBg,
+      nav_bg:           themeData.navBg,
+      font_heading:     themeData.font,
+      font_body:        themeData.font,
+      cols:             parseInt(themeData.cols) || 3,
+      radius:           themeData.radius,
+      button_style:     themeData.btnStyle,
+      footer_text:      themeData.footerText,
+      announcement_bar: {
+        enabled:    sections.find(s => s.type === 'announcement')?.enabled || false,
+        text:       themeData.announcementText,
+        bg_color:   themeData.primaryColor,
+        text_color: '#ffffff'
+      }
+    },
+    sections: sections.map((s, i) => ({
+      id:         s.id,
+      type:       s.type,
+      order:      i + 1,
+      is_visible: s.enabled,
+      settings:   s.data || {}
+    }))
   }
 }
 
-function buildBackendSections() {
-  return sections.map((s, i) => ({
-    id:         `${s.id}-1`,
-    type:       s.id,
-    order:      i + 1,
-    is_visible: s.enabled,
-    settings:   { ...s.data, label: s.label }
-  }))
-}
-
-async function loadThemeForStore(storeId) {
-  if (!storeId) return
-  try {
-    const data = await apiFetch(`/stores/${storeId}/theme`)
-    const themeDoc = data.draft || data.published || null
-    applyBackendTheme(themeDoc)
-  } catch (e) {
-    console.warn('Theme load failed, using defaults:', e.message)
-    setDefaultTheme()
+async function saveAndPublish() {
+  if (!currentStoreId || currentStoreId === 'demo') {
+    toast('Connect your store to save — running in preview mode', 'error'); return
   }
-  syncUIToSettings()
-  renderSectionList()
-  renderPreview()
-  markThemeActive(selectedThemeId)
-  markUnsaved(false)
-}
-
-async function saveTheme() {
-  if (!currentStoreId) return toast('Select a store first', 'error')
   const btn = document.getElementById('save-btn')
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…' }
+  btn.disabled = true
+  btn.innerHTML = '⌛ Saving…'
   try {
+    const payload = buildBackendPayload()
     await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
-      method: 'PUT',
-      body: JSON.stringify(buildBackendSettings())
+      method:'PUT',
+      body:JSON.stringify(payload.settings)
     })
     await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
-      method: 'PUT',
-      body: JSON.stringify({ sections: buildBackendSections() })
+      method:'PUT',
+      body:JSON.stringify({ sections: payload.sections })
     })
-    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method: 'POST' })
+    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method:'POST' })
     markUnsaved(false)
     toast('Theme saved & published! 🚀', 'success')
     renderPreview()
-  } catch (e) {
+  } catch(e) {
     toast('Save failed: ' + e.message, 'error')
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '💾 Save & Publish' }
+    btn.disabled = false
+    btn.innerHTML = '💾 Save &amp; Publish'
   }
 }
 
 function markUnsaved(val) {
-  hasUnsavedChanges = val
-  const el = document.getElementById('unsaved-badge')
-  el.classList.toggle('show', val)
+  hasUnsaved = val
+  document.getElementById('unsaved-indicator').classList.toggle('show', val)
 }
 
-// ── Tab switching ─────────────────────────────────────────────────────────────
-function switchTab(tab, el) {
-  activeTab = tab
-  document.querySelectorAll('.builder-tab').forEach(t => t.classList.remove('active'))
+/* ════════════════════════════════════════════════════
+   LEFT PANEL TABS
+════════════════════════════════════════════════════ */
+function switchLeftTab(tab, el) {
+  activeLeftTab = tab
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'))
   el.classList.add('active')
-  document.getElementById('tab-themes').style.display   = tab === 'themes'   ? '' : 'none'
   document.getElementById('tab-sections').style.display = tab === 'sections' ? '' : 'none'
+  document.getElementById('tab-themes').style.display   = tab === 'themes'   ? '' : 'none'
   document.getElementById('tab-settings').style.display = tab === 'settings' ? '' : 'none'
 }
 
-// ── Themes ────────────────────────────────────────────────────────────────────
-function initThemesGrid() {
-  const grid = document.getElementById('themes-grid')
-  grid.innerHTML = THEMES.map(t => `
-    <div class="theme-card" id="theme-card-${t.id}" onclick="selectTheme('${t.id}')">
-      <div class="theme-preview">${t.previewHTML}</div>
-      <div class="theme-label">${t.label}</div>
-    </div>
-  `).join('')
+/* ════════════════════════════════════════════════════
+   SECTIONS LIST
+════════════════════════════════════════════════════ */
+function renderSectionsList() {
+  const wrap = document.getElementById('sections-list-wrap')
+  if (!wrap) return
+  const enabled  = sections.filter(s => s.enabled)
+  const disabled = sections.filter(s => !s.enabled)
+
+  let html = `<span class="panel-group-label">Active Sections</span>`
+
+  if (!enabled.length) {
+    html += `<div style="padding:20px 10px;text-align:center;color:var(--text3);font-size:12px;">No active sections</div>`
+  }
+  enabled.forEach(s => {
+    const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type }
+    html += renderSectionRow(s, def, sections.indexOf(s), activeSectionId === s.id, true)
+  })
+
+  html += `<div class="add-section-row" onclick="openAddDrawer()"><span>＋</span> Add Section</div>`
+
+  if (disabled.length) {
+    html += `<span class="panel-group-label" style="margin-top:14px;">Hidden Sections</span>`
+    disabled.forEach(s => {
+      const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type }
+      html += renderSectionRow(s, def, sections.indexOf(s), false, false)
+    })
+  }
+
+  wrap.innerHTML = html
+  initDragDrop()
 }
 
-function selectTheme(id) {
-  const theme = THEMES.find(t => t.id === id)
-  if (!theme) return
-  selectedThemeId = id
-  themeSettings = { ...theme.settings }
-  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-  syncUIToSettings()
-  renderSectionList()
-  markThemeActive(id)
-  renderPreview()
+function renderSectionRow(s, def, idx, isActive, isEnabled) {
+  return `
+  <div class="section-row ${isActive?'active':''}" id="srow_${s.id}"
+       draggable="true" data-idx="${idx}"
+       onclick="selectSection('${s.id}')">
+    <span class="section-drag" title="Drag to reorder">⠿</span>
+    <div class="section-icon-wrap">${def.icon}</div>
+    <span class="section-row-label">${def.label}</span>
+    <div class="section-actions">
+      <button class="section-action-btn" onclick="event.stopPropagation();openSectionEditor('${s.id}')" title="Edit">✏️</button>
+      <button class="section-action-btn danger" onclick="event.stopPropagation();removeSection('${s.id}')" title="Remove">🗑</button>
+    </div>
+    <button class="section-toggle ${isEnabled?'on':''}"
+            onclick="event.stopPropagation();toggleSection('${s.id}')"
+            title="${isEnabled?'Hide':'Show'} section"></button>
+  </div>`
+}
+
+function selectSection(id) {
+  activeSectionId = id
+  highlightSectionInPreview(id)
+  openSectionEditor(id)
+  // Ensure sections tab is visible
+  if (activeLeftTab !== 'sections') {
+    document.querySelectorAll('.panel-tab')[0].click()
+  }
+}
+
+function toggleSection(id) {
+  const s = sections.find(x => x.id === id)
+  if (!s) return
+  s.enabled = !s.enabled
   markUnsaved(true)
-  toast(`Theme "${theme.label}" applied!`, 'success')
+  if (activeSectionId === id && !s.enabled) showSectionsListView()
+  else renderSectionsList()
+  renderPreview()
+}
+
+function removeSection(id) {
+  const idx = sections.findIndex(x => x.id === id)
+  if (idx > -1) {
+    sections.splice(idx, 1)
+    markUnsaved(true)
+    if (activeSectionId === id) { activeSectionId = null; showSectionsListView() }
+    else renderSectionsList()
+    renderPreview()
+    toast('Section removed', 'success')
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   SECTION EDITOR (replaces list in left panel)
+════════════════════════════════════════════════════ */
+function openSectionEditor(id) {
+  const s = sections.find(x => x.id === id)
+  if (!s) return
+  activeSectionId = id
+  const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type, fields:[] }
+
+  const tabBody = document.getElementById('tab-sections')
+  tabBody.innerHTML = `
+  <div class="editor-panel">
+    <div class="editor-panel-header">
+      <button class="editor-back-btn" onclick="showSectionsListView()">←</button>
+      <span class="editor-panel-title">${def.label}</span>
+      <span>${def.icon}</span>
+    </div>
+    <div class="editor-fields" id="editor-fields-wrap">
+      ${renderEditorFields(def.fields, s.data)}
+    </div>
+    <div class="editor-footer">
+      <button class="ef-btn ef-btn-ghost"    onclick="resetSectionData('${id}')">↺ Reset</button>
+      <button class="ef-btn ef-btn-primary"  onclick="applySectionChanges('${id}')">✓ Apply</button>
+    </div>
+  </div>`
+
+  highlightSectionInPreview(id)
+}
+
+function showSectionsListView() {
+  activeSectionId = null
+  const tabBody = document.getElementById('tab-sections')
+  tabBody.innerHTML = `<div class="sections-panel" id="sections-list-wrap"></div>`
+  renderSectionsList()
+  clearHighlight()
+}
+
+function renderEditorFields(fields, data) {
+  if (!fields || !fields.length) {
+    return `<div style="padding:28px 14px;text-align:center;color:var(--text3);">
+      <div style="font-size:28px;margin-bottom:10px;">🔒</div>
+      <div style="font-size:13px;color:var(--text2);font-weight:600;">No editable fields</div>
+      <div style="font-size:12px;margin-top:6px;line-height:1.6;">Content is pulled automatically from your store data.</div>
+    </div>`
+  }
+  return `<div class="field-group">
+    <span class="field-group-label">Section Content</span>
+    ${fields.map(f => renderField(f, data[f.key] ?? '')).join('')}
+  </div>`
+}
+
+function renderField(f, value) {
+  const id = `field_${f.key}`
+  let input = ''
+  if (f.type === 'text' || f.type === 'number') {
+    input = `<input type="${f.type}" class="field-input" id="${id}"
+      value="${escHtml(String(value))}"
+      placeholder="${f.placeholder || ''}"
+      ${f.min !== undefined ? `min="${f.min}"` : ''}
+      ${f.max !== undefined ? `max="${f.max}"` : ''}
+      oninput="liveUpdateField('${f.key}',this.value)">`
+  } else if (f.type === 'textarea') {
+    input = `<textarea class="field-input field-textarea" id="${id}"
+      placeholder="${f.placeholder || ''}"
+      oninput="liveUpdateField('${f.key}',this.value)">${escHtml(String(value))}</textarea>`
+  } else if (f.type === 'color') {
+    input = `<div class="field-color-row">
+      <div class="field-color-swatch">
+        <input type="color" id="${id}" value="${value || '#5b5cf6'}"
+          oninput="document.getElementById('${id}_hex').value=this.value;liveUpdateField('${f.key}',this.value)">
+      </div>
+      <input type="text" class="field-input" id="${id}_hex" style="flex:1;"
+        value="${value || ''}" placeholder="#5b5cf6"
+        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('${id}').value=this.value;liveUpdateField('${f.key}',this.value)}">
+    </div>`
+  } else if (f.type === 'select') {
+    input = `<select class="field-select" id="${id}" onchange="liveUpdateField('${f.key}',this.value)">
+      ${(f.opts||[]).map(o => `<option value="${o}" ${value==o?'selected':''}>${o}</option>`).join('')}
+    </select>`
+  }
+  return `<div class="field-row">
+    <div class="field-label">${f.label}</div>
+    ${input}
+  </div>`
+}
+
+function liveUpdateField(key, value) {
+  if (!activeSectionId) return
+  const s = sections.find(x => x.id === activeSectionId)
+  if (!s) return
+  s.data[key] = value
+  markUnsaved(true)
+  renderPreview()
+}
+
+function applySectionChanges(id) {
+  toast('Section updated ✓', 'success')
+  markUnsaved(true)
+}
+
+function resetSectionData(id) {
+  const s   = sections.find(x => x.id === id)
+  const def = DEFAULT_SECTIONS.find(d => d.type === s?.type)
+  if (s && def) {
+    s.data = { ...def.data }
+    openSectionEditor(id)
+    renderPreview()
+    markUnsaved(true)
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   THEMES
+════════════════════════════════════════════════════ */
+function renderThemesGrid() {
+  document.getElementById('themes-grid').innerHTML = THEMES.map(t => `
+    <div class="theme-card" id="tcard_${t.id}" onclick="applyTheme('${t.id}')">
+      <div class="theme-check">✓</div>
+      <div class="theme-preview">${t.previewHTML}</div>
+      <div class="theme-name">${t.name}</div>
+    </div>`).join('')
 }
 
 function markThemeActive(id) {
   document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
-  document.getElementById('theme-card-' + id)?.classList.add('active')
+  document.getElementById('tcard_' + id)?.classList.add('active')
 }
 
-// ── Sections ──────────────────────────────────────────────────────────────────
-const ADD_SECTION_OPTIONS = [
-  { id: 'video',       icon: '🎬', label: 'Video' },
-  { id: 'countdown',   icon: '⏳', label: 'Countdown' },
-  { id: 'gallery',     icon: '🖼️', label: 'Gallery' },
-  { id: 'trustbadges', icon: '🛡️', label: 'Trust Badges' },
-  { id: 'faq',         icon: '❓', label: 'FAQ' },
-  { id: 'map',         icon: '📍', label: 'Store Map' },
-]
-
-function initSectionsPanel() {
-  const addGrid = document.getElementById('add-section-grid')
-  addGrid.innerHTML = ADD_SECTION_OPTIONS.map(o => `
-    <button class="add-section-btn" onclick="addSection('${o.id}','${o.label}','${o.icon}')">
-      <span>${o.icon}</span>
-      <small>${o.label}</small>
-    </button>
-  `).join('')
+function applyTheme(id) {
+  const t = THEMES.find(x => x.id === id)
+  if (!t) return
+  themeData = { ...themeData, ...t.settings, themeId:id }
+  markThemeActive(id)
+  renderPreview()
+  markUnsaved(true)
+  renderSettingsPanel()
+  toast(`"${t.name}" applied!`, 'success')
 }
 
-function renderSectionList() {
-  const list = document.getElementById('section-list')
-  list.innerHTML = sections.map((s, i) => `
-    <div class="section-item" draggable="true" data-idx="${i}"
-      ondragstart="onDragStart(event,${i})"
-      ondragover="onDragOver(event,${i})"
-      ondrop="onDrop(event,${i})"
-      ondragleave="onDragLeave(event)"
-      ondragend="onDragEnd(event)">
-      <span class="section-drag-handle">⠿</span>
-      <span class="section-icon">${s.icon}</span>
-      <span class="section-item-label">${s.label}</span>
-      <button class="section-edit-btn" onclick="openSectionEditor(${i})" title="Edit section">✏️</button>
-      <button class="section-toggle ${s.enabled ? 'on' : ''}" onclick="toggleSection(${i})" title="${s.enabled ? 'Hide' : 'Show'} section"></button>
+/* ════════════════════════════════════════════════════
+   SETTINGS PANEL
+════════════════════════════════════════════════════ */
+function renderSettingsPanel() {
+  document.getElementById('settings-panel-content').innerHTML = `
+  <span class="panel-group-label">Brand Colors</span>
+  <div class="field-row">
+    <div class="field-label">Primary / Accent</div>
+    <div class="field-color-row">
+      <div class="field-color-swatch">
+        <input type="color" id="s_primary" value="${themeData.primaryColor}"
+          oninput="updateSetting('primaryColor',this.value);document.getElementById('s_primary_hex').value=this.value">
+      </div>
+      <input type="text" class="field-input" id="s_primary_hex" style="flex:1;"
+        value="${themeData.primaryColor}" placeholder="#5b5cf6"
+        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_primary').value=this.value;updateSetting('primaryColor',this.value)}">
     </div>
-  `).join('')
+    <div class="color-palette">
+      ${COLOR_PALETTE.map(c => `<div class="color-dot" style="background:${c}" onclick="updateSetting('primaryColor','${c}');document.getElementById('s_primary').value='${c}';document.getElementById('s_primary_hex').value='${c}'"></div>`).join('')}
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Background</div>
+    <div class="field-color-row">
+      <div class="field-color-swatch">
+        <input type="color" id="s_bg" value="${themeData.bgColor}"
+          oninput="updateSetting('bgColor',this.value);document.getElementById('s_bg_hex').value=this.value">
+      </div>
+      <input type="text" class="field-input" id="s_bg_hex" style="flex:1;"
+        value="${themeData.bgColor}" placeholder="#ffffff"
+        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_bg').value=this.value;updateSetting('bgColor',this.value)}">
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Text Color</div>
+    <div class="field-color-row">
+      <div class="field-color-swatch">
+        <input type="color" id="s_text" value="${themeData.textColor}"
+          oninput="updateSetting('textColor',this.value);document.getElementById('s_text_hex').value=this.value">
+      </div>
+      <input type="text" class="field-input" id="s_text_hex" style="flex:1;"
+        value="${themeData.textColor}" placeholder="#111111"
+        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_text').value=this.value;updateSetting('textColor',this.value)}">
+    </div>
+  </div>
+
+  <span class="panel-group-label" style="margin-top:14px;">Typography</span>
+  <div class="font-grid">
+    ${FONTS.map(f => `<div class="font-opt ${themeData.font===f?'active':''}" style="font-family:'${f}',serif"
+      onclick="updateSetting('font','${f}');document.querySelectorAll('.font-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">${f}</div>`).join('')}
+  </div>
+
+  <span class="panel-group-label" style="margin-top:14px;">Layout</span>
+  <div class="field-row">
+    <div class="field-label">Product Columns</div>
+    <select class="field-select" onchange="updateSetting('cols',this.value)">
+      ${['2','3','4'].map(v => `<option value="${v}" ${themeData.cols==v?'selected':''}>${v} Columns</option>`).join('')}
+    </select>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Border Radius <span class="field-hint" id="radius-display">${themeData.radius}</span></div>
+    <div class="field-range-wrap">
+      <input type="range" class="field-range" min="0" max="24" value="${parseInt(themeData.radius)||12}"
+        oninput="const v=this.value+'px';updateSetting('radius',v);document.getElementById('radius-display').textContent=v">
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field-label">Button Style</div>
+    <select class="field-select" onchange="updateSetting('btnStyle',this.value)">
+      ${['rounded','pill','square'].map(v => `<option value="${v}" ${themeData.btnStyle===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}
+    </select>
+  </div>
+
+  <span class="panel-group-label" style="margin-top:14px;">Store Info</span>
+  <div class="field-row">
+    <div class="field-label">Announcement Text</div>
+    <input type="text" class="field-input" value="${escHtml(themeData.announcementText)}"
+      placeholder="Free shipping on orders over ₹999!"
+      oninput="updateSetting('announcementText',this.value)">
+  </div>
+  <div class="field-row">
+    <div class="field-label">Footer Copyright</div>
+    <input type="text" class="field-input" value="${escHtml(themeData.footerText)}"
+      placeholder="© 2025 My Store"
+      oninput="updateSetting('footerText',this.value)">
+  </div>`
 }
 
-// Drag-to-reorder
-let dragIdx = null
-function onDragStart(e, idx) { dragIdx = idx; e.target.classList.add('dragging') }
-function onDragOver(e, idx) {
-  e.preventDefault()
-  document.querySelectorAll('.section-item').forEach(el => el.classList.remove('drag-over'))
-  e.currentTarget.classList.add('drag-over')
-}
-function onDragLeave(e) { e.currentTarget.classList.remove('drag-over') }
-function onDrop(e, idx) {
-  e.preventDefault()
-  if (dragIdx === null || dragIdx === idx) return
-  const moved = sections.splice(dragIdx, 1)[0]
-  sections.splice(idx, 0, moved)
-  renderSectionList()
-  renderPreview()
+function updateSetting(key, value) {
+  themeData[key] = value
   markUnsaved(true)
-}
-function onDragEnd(e) {
-  e.target.classList.remove('dragging')
-  document.querySelectorAll('.section-item').forEach(el => el.classList.remove('drag-over'))
-  dragIdx = null
-}
-
-function toggleSection(idx) {
-  sections[idx].enabled = !sections[idx].enabled
-  renderSectionList()
   renderPreview()
-  markUnsaved(true)
 }
 
-function addSection(id, label, icon) {
-  if (sections.find(s => s.id === id)) {
-    sections.find(s => s.id === id).enabled = true
-    toast(`"${label}" section enabled`, 'success')
+/* ════════════════════════════════════════════════════
+   ADD SECTION DRAWER
+════════════════════════════════════════════════════ */
+function renderAddSectionTypes() {
+  document.getElementById('add-section-types').innerHTML =
+    ADD_SECTION_TYPES.map(t => `
+      <div class="add-section-type" onclick="addSection('${t.type}','${t.name}','${t.icon}')">
+        <span class="add-section-type-icon">${t.icon}</span>
+        <span class="add-section-type-name">${t.name}</span>
+      </div>`).join('')
+}
+function openAddDrawer()  { document.getElementById('add-section-drawer').classList.add('open') }
+function closeAddDrawer() { document.getElementById('add-section-drawer').classList.remove('open') }
+
+function addSection(type, name, icon) {
+  const existing = sections.find(s => s.type === type && !s.enabled)
+  if (existing) {
+    existing.enabled = true
+    toast(`"${name}" section enabled`, 'success')
   } else {
-    sections.splice(sections.length - 1, 0, { id, icon, label, enabled: true, data: {} })
-    toast(`"${label}" section added`, 'success')
+    const def = DEFAULT_SECTIONS.find(d => d.type === type)
+    const newSec = { id:`sec_${type}_${Date.now()}`, type, enabled:true, data: def ? {...def.data} : {} }
+    const footerIdx = sections.findIndex(s => s.type === 'footer')
+    if (footerIdx > -1) sections.splice(footerIdx, 0, newSec)
+    else sections.push(newSec)
+    toast(`"${name}" section added`, 'success')
   }
-  renderSectionList()
-  renderPreview()
+  closeAddDrawer()
   markUnsaved(true)
-}
-
-// ── Section Editor ────────────────────────────────────────────────────────────
-const SECTION_FIELDS = {
-  hero: [
-    { key: 'heading',    label: 'Heading',      type: 'text',     placeholder: 'Welcome to our Store' },
-    { key: 'subheading', label: 'Sub-heading',  type: 'text',     placeholder: 'Discover amazing products' },
-    { key: 'ctaText',    label: 'Button Text',  type: 'text',     placeholder: 'Shop Now' },
-    { key: 'ctaLink',    label: 'Button Link',  type: 'text',     placeholder: '#products' },
-  ],
-  featured: [
-    { key: 'title', label: 'Section Title',     type: 'text',   placeholder: 'Featured Products' },
-    { key: 'count', label: 'Products to show',  type: 'number', placeholder: '8' },
-  ],
-  categories: [
-    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'Browse Categories' },
-  ],
-  banner: [
-    { key: 'heading', label: 'Heading',          type: 'text',     placeholder: 'Special Offer' },
-    { key: 'subtext', label: 'Sub Text',         type: 'textarea', placeholder: 'Get 20% off' },
-    { key: 'ctaText', label: 'Button Text',      type: 'text',     placeholder: 'Claim Offer' },
-    { key: 'bgColor', label: 'Background Color', type: 'color' },
-  ],
-  testimonials: [
-    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'What Customers Say' },
-  ],
-  newsletter: [
-    { key: 'heading', label: 'Heading',  type: 'text',     placeholder: 'Stay in the loop' },
-    { key: 'subtext', label: 'Sub Text', type: 'textarea', placeholder: 'Get exclusive deals...' },
-  ],
-}
-
-function openSectionEditor(idx) {
-  editingSection = idx
-  const s = sections[idx]
-  const fields = SECTION_FIELDS[s.id]
-  document.getElementById('right-panel-title').textContent = `Edit: ${s.label}`
-  if (!fields || fields.length === 0) {
-    document.getElementById('right-panel-content').innerHTML = `
-      <div style="text-align:center;padding:30px 16px;color:var(--text3);">
-        <div style="font-size:28px;margin-bottom:10px;">${s.icon}</div>
-        <div style="font-size:12px;font-weight:600;color:var(--text2);">No customizable fields for this section.</div>
-        <div style="font-size:11px;margin-top:6px;line-height:1.6;">Content is pulled automatically from your store data.</div>
-      </div>`
-    return
-  }
-  document.getElementById('right-panel-content').innerHTML = fields.map(f => {
-    const val = s.data[f.key] ?? ''
-    if (f.type === 'textarea') return `<div class="edit-field"><label class="edit-label">${f.label}</label><textarea class="edit-input edit-textarea" data-key="${f.key}" placeholder="${f.placeholder}">${val}</textarea></div>`
-    if (f.type === 'color')    return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="color" class="setting-color" data-key="${f.key}" value="${val || '#6c63ff'}"></div>`
-    if (f.type === 'number')   return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="number" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}" min="1" max="24"></div>`
-    return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="text" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}"></div>`
-  }).join('')
-}
-
-function applySection() {
-  if (editingSection === null) return
-  const inputs = document.querySelectorAll('#right-panel-content [data-key]')
-  inputs.forEach(inp => { sections[editingSection].data[inp.dataset.key] = inp.value })
-  renderPreview()
-  markUnsaved(true)
-  toast('Section updated', 'success')
-}
-
-function resetSection() {
-  if (editingSection === null) return
-  sections[editingSection].data = {}
-  openSectionEditor(editingSection)
-  renderPreview()
-  markUnsaved(true)
-}
-
-function closeRightPanel() {
-  editingSection = null
-  document.getElementById('right-panel-title').textContent = 'Section Editor'
-  document.getElementById('right-panel-content').innerHTML = `
-    <div style="text-align:center;padding:40px 20px;color:var(--text3);">
-      <div style="font-size:32px;margin-bottom:10px;">👆</div>
-      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">Select a section to edit</div>
-      <div style="font-size:12px;line-height:1.6;">Click the ✏️ button on any section in the Sections tab to customize it.</div>
-    </div>`
-}
-
-// ── Settings Panel ────────────────────────────────────────────────────────────
-const PRIMARY_SWATCHES = ['#6c63ff','#e8847a','#00d4ff','#c9a84c','#ff4d00','#34d399','#f59e0b','#ec4899','#111111']
-
-function initSettingsPanel() {
-  const swatchRow = document.getElementById('primary-swatches')
-  swatchRow.innerHTML = PRIMARY_SWATCHES.map(c =>
-    `<div class="color-swatch" style="background:${c}" title="${c}" onclick="onColorChange('primaryColor','${c}')"></div>`
-  ).join('')
-  const fp = document.getElementById('font-picker')
-  fp.innerHTML = FONTS.map(f =>
-    `<div class="font-opt" data-font="${f}" style="font-family:'${f}',serif" onclick="onFontChange('${f}',this)">${f}</div>`
-  ).join('')
-}
-
-function syncUIToSettings() {
-  const s = themeSettings
-  document.getElementById('set-primary-color').value     = s.primaryColor || '#6c63ff'
-  document.getElementById('set-primary-color-hex').value = s.primaryColor || '#6c63ff'
-  document.getElementById('set-bg-color').value          = s.bgColor      || '#ffffff'
-  document.getElementById('set-bg-color-hex').value      = s.bgColor      || '#ffffff'
-  document.getElementById('set-text-color').value        = s.textColor    || '#111111'
-  document.getElementById('set-text-color-hex').value    = s.textColor    || '#111111'
-  document.querySelectorAll('.font-opt').forEach(el => el.classList.toggle('active', el.dataset.font === s.font))
-  document.getElementById('set-cols').value      = s.cols     || '3'
-  const rad = parseInt(s.radius) || 12
-  document.getElementById('set-radius').value    = rad
-  document.getElementById('set-radius-val').textContent = rad + 'px'
-  document.getElementById('set-btn-style').value = s.btnStyle || 'rounded'
-  document.getElementById('set-announcement').value = s.announcement || ''
-  document.getElementById('set-footer').value        = s.footerText   || ''
-}
-
-function onColorChange(key, val) {
-  themeSettings[key] = val
-  document.getElementById('set-primary-color').value     = val
-  document.getElementById('set-primary-color-hex').value = val
-  markUnsaved(true)
+  // If editor is open, close it first so sections-list-wrap exists
+  if (activeSectionId) showSectionsListView()
+  else renderSectionsList()
   renderPreview()
 }
 
-function onHexInput(key, val) {
-  if (!/^#[0-9a-fA-F]{6}$/.test(val)) return
-  themeSettings[key] = val
-  document.getElementById('set-primary-color').value = val
-  markUnsaved(true)
-  renderPreview()
+/* ════════════════════════════════════════════════════
+   DRAG & DROP REORDER
+════════════════════════════════════════════════════ */
+let dragSrcIdx = null
+
+function initDragDrop() {
+  document.querySelectorAll('.section-row[draggable]').forEach(row => {
+    row.addEventListener('dragstart', () => {
+      dragSrcIdx = parseInt(row.dataset.idx)
+      setTimeout(() => row.classList.add('dragging'), 0)
+    })
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging')
+      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('drag-over'))
+    })
+    row.addEventListener('dragover', e => {
+      e.preventDefault()
+      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('drag-over'))
+      row.classList.add('drag-over')
+    })
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over'))
+    row.addEventListener('drop', e => {
+      e.preventDefault()
+      const dropIdx = parseInt(row.dataset.idx)
+      if (dragSrcIdx === null || dragSrcIdx === dropIdx) return
+      const moved = sections.splice(dragSrcIdx, 1)[0]
+      sections.splice(dropIdx, 0, moved)
+      dragSrcIdx = null
+      markUnsaved(true)
+      if (activeSectionId) showSectionsListView()
+      else renderSectionsList()
+      renderPreview()
+    })
+  })
 }
 
-function onFontChange(font, el) {
-  themeSettings.font = font
-  document.querySelectorAll('.font-opt').forEach(e => e.classList.remove('active'))
-  el.classList.add('active')
-  markUnsaved(true)
-  renderPreview()
-}
-
-function onSettingChange(key, val) {
-  themeSettings[key] = val
-  markUnsaved(true)
-  renderPreview()
-}
-
-// ── Device ────────────────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════
+   DEVICE
+════════════════════════════════════════════════════ */
 function setDevice(device, btn) {
   currentDevice = device
-  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'))
+  document.querySelectorAll('.tb-device-btn').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
-  const shell = document.getElementById('device-shell')
-  shell.className = 'preview-device-shell ' + device
+  const shell  = document.getElementById('device-shell')
   const iframe = document.getElementById('preview-iframe')
-  iframe.height = device === 'desktop' ? 700 : device === 'tablet' ? 900 : 780
+  shell.className = 'device-shell ' + device
+  iframe.height   = device === 'desktop' ? 720 : device === 'tablet' ? 900 : 800
 }
 
-function refreshPreview()  { renderPreview() }
-function previewInNewTab() {
+function previewLive() {
   const store = allStores.find(s => s._id === currentStoreId)
-  const url = store?.published_url || `https://ekart.aasaitech.in/${store?.slug || ''}`
+  const url = store?.published_url || `https://ekart.aasaitech.in/shop.html?store=${store?.slug || ''}`
   window.open(url, '_blank')
 }
 
-// ── Preview Generator ─────────────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════
+   PREVIEW RENDER
+════════════════════════════════════════════════════ */
 function renderPreview() {
-  const s = themeSettings
-  const isMobile = currentDevice === 'mobile'
-  const isLight = isLightColor(s.bgColor || '#ffffff')
+  const isMobile  = currentDevice === 'mobile'
+  const isLight   = isLightColor(themeData.bgColor || '#ffffff')
+  const cols      = isMobile ? 2 : parseInt(themeData.cols || 3)
+  const btnRadius = themeData.btnStyle === 'pill'   ? '999px'
+                  : themeData.btnStyle === 'square' ? '3px'
+                  : (themeData.radius || '12px')
+  const fontEnc   = encodeURIComponent(themeData.font || 'Outfit')
 
-  let sectionsHTML = sections.filter(sec => sec.enabled).map(sec => buildSection(sec, s, isMobile)).join('\n')
-
-  const btnRadius = s.btnStyle === 'pill' ? '999px' : s.btnStyle === 'square' ? '3px' : (s.radius || '12px')
-  const fontUrl = encodeURIComponent(s.font || 'Outfit')
-  const cols = isMobile ? 2 : parseInt(s.cols || 3)
+  const sectionsHTML = sections
+    .filter(s => s.enabled)
+    .map(s => buildSectionHTML(s, isMobile))
+    .join('\n')
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=${fontUrl}:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --primary: ${s.primaryColor || '#6c63ff'};
-    --bg: ${s.bgColor || '#ffffff'};
-    --text: ${s.textColor || '#111111'};
-    --card-bg: ${s.cardBg || '#f5f5f5'};
-    --nav-bg: ${s.navBg || '#ffffff'};
-    --accent-text: ${s.accentText || s.primaryColor || '#6c63ff'};
-    --radius: ${s.radius || '12px'};
-    --btn-radius: ${btnRadius};
-    --cols: ${cols};
-    --font: '${s.font || 'Outfit'}', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); }
-  a { color: inherit; text-decoration: none; }
-  .announcement { background: var(--primary); color: white; text-align: center; padding: 9px 16px; font-size: 13px; font-weight: 600; }
-  .navbar { background: var(--nav-bg); padding: 0 5%; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,${isLight ? '.08' : '.25'}); position: sticky; top: 0; z-index: 100; }
-  .navbar-logo { font-size: 20px; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
-  .navbar-logo span { color: var(--primary); }
-  .navbar-links { display: flex; gap: 24px; font-size: 13.5px; font-weight: 600; color: ${isLight ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.7)'}; }
-  .navbar-right { display: flex; align-items: center; gap: 14px; }
-  .navbar-cart { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; background: var(--primary); color: white; padding: 7px 16px; border-radius: var(--btn-radius); }
-  .hero { padding: ${isMobile ? '40px 5% 36px' : '72px 5% 64px'}; text-align: center; }
-  .hero h1 { font-size: ${isMobile ? '28px' : '52px'}; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 16px; }
-  .hero h1 em { font-style: normal; color: var(--primary); }
-  .hero p { font-size: ${isMobile ? '14px' : '17px'}; opacity: .65; max-width: 520px; margin: 0 auto 28px; line-height: 1.7; }
-  .btn-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: ${isMobile ? '11px 24px' : '14px 32px'}; border-radius: var(--btn-radius); font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); transition: opacity .15s; }
-  .btn-cta:hover { opacity: .88; }
-  .section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
-  .section-title { font-size: ${isMobile ? '20px' : '28px'}; font-weight: 800; margin-bottom: ${isMobile ? '16px' : '24px'}; letter-spacing: -.02em; }
-  .products-grid { display: grid; grid-template-columns: repeat(var(--cols),1fr); gap: ${isMobile ? '10px' : '16px'}; }
-  .product-card { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; }
-  .product-img { width: 100%; aspect-ratio: 1; background: ${s.primaryColor}22; display: flex; align-items: center; justify-content: center; font-size: 32px; }
-  .product-info { padding: ${isMobile ? '10px' : '14px'}; }
-  .product-name { font-size: ${isMobile ? '12px' : '14px'}; font-weight: 700; margin-bottom: 4px; }
-  .product-price { font-size: ${isMobile ? '13px' : '15px'}; font-weight: 800; color: var(--primary); }
-  .product-old { font-size: 11px; text-decoration: line-through; opacity: .4; margin-left: 5px; }
-  .product-btn { width: 100%; margin-top: 10px; padding: ${isMobile ? '7px' : '9px'}; background: var(--primary); color: white; border: none; border-radius: var(--btn-radius); font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: var(--font); }
-  .cats-grid { display: grid; grid-template-columns: repeat(${isMobile ? 2 : 4},1fr); gap: ${isMobile ? '10px' : '14px'}; }
-  .cat-card { background: var(--card-bg); border-radius: var(--radius); padding: ${isMobile ? '20px 14px' : '28px 20px'}; text-align: center; }
-  .cat-icon { font-size: ${isMobile ? '28px' : '36px'}; margin-bottom: 10px; }
-  .cat-name { font-size: ${isMobile ? '13px' : '14px'}; font-weight: 700; }
-  .promo-banner { background: var(--primary); color: white; padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align: center; }
-  .promo-banner h2 { font-size: ${isMobile ? '22px' : '36px'}; font-weight: 800; margin-bottom: 10px; }
-  .promo-banner p { opacity: .8; margin-bottom: 20px; font-size: ${isMobile ? '13px' : '16px'}; }
-  .btn-white { background: white; color: var(--primary); padding: 11px 24px; border-radius: var(--btn-radius); font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: var(--font); }
-  .testimonials { padding: ${isMobile ? '28px 5%' : '48px 5%'}; background: var(--card-bg); }
-  .testimonials-grid { display: grid; grid-template-columns: repeat(${isMobile ? 1 : 3},1fr); gap: 16px; margin-top: 24px; }
-  .testimonial-card { background: var(--bg); border-radius: var(--radius); padding: 20px; }
-  .testimonial-stars { color: #fbbf24; margin-bottom: 10px; font-size: 14px; }
-  .testimonial-text { font-size: 13.5px; line-height: 1.65; opacity: .75; margin-bottom: 14px; }
-  .testimonial-author { display: flex; align-items: center; gap: 10px; }
-  .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
-  .testimonial-name { font-size: 13px; font-weight: 700; }
-  .newsletter { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align: center; }
-  .newsletter h2 { font-size: ${isMobile ? '22px' : '30px'}; font-weight: 800; margin-bottom: 10px; }
-  .newsletter p { opacity: .6; margin-bottom: 20px; font-size: ${isMobile ? '13px' : '15px'}; }
-  .newsletter-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
-  .newsletter-input { flex: 1; min-width: 180px; padding: 11px 16px; border: 1.5px solid rgba(0,0,0,${isLight ? '.12' : '.3'}); border-radius: var(--btn-radius); font-size: 14px; background: var(--bg); color: var(--text); font-family: var(--font); outline: none; }
-  .footer { padding: ${isMobile ? '24px 5%' : '32px 5%'}; border-top: 1px solid rgba(0,0,0,${isLight ? '.08' : '.2'}); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  .footer-logo { font-size: 16px; font-weight: 800; }
-  .footer-logo span { color: var(--primary); }
-  .footer-text { font-size: 12px; opacity: .4; }
-  .footer-links { display: flex; gap: 16px; font-size: 12.5px; opacity: .5; font-weight: 600; }
-  .video-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align:center; }
-  .video-placeholder { background: var(--card-bg); border-radius: var(--radius); height: ${isMobile ? '180px' : '320px'}; display: flex; align-items:center;justify-content:center;flex-direction:column;gap:12px; }
-  .play-btn { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); display:flex;align-items:center;justify-content:center;font-size:22px; }
-  .countdown-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align:center; background:var(--card-bg); }
-  .countdown-grid { display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap; }
-  .countdown-unit { background:var(--bg);border-radius:var(--radius);padding:16px 20px;min-width:70px; }
-  .countdown-num { font-size:32px;font-weight:900;color:var(--primary);line-height:1; }
-  .countdown-label { font-size:11px;font-weight:700;opacity:.5;text-transform:uppercase;letter-spacing:.08em;margin-top:4px; }
-  .gallery-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
-  .gallery-grid { display:grid;grid-template-columns:repeat(${isMobile ? 2 : 4},1fr);gap:${isMobile ? '8px' : '12px'}; }
-  .gallery-item { aspect-ratio:1;background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px; }
-  .trust-section { padding: ${isMobile ? '20px 5%' : '32px 5%'}; background:var(--card-bg); }
-  .trust-grid { display:grid;grid-template-columns:repeat(${isMobile ? 2 : 4},1fr);gap:12px;margin-top:16px; }
-  .trust-item { display:flex;align-items:center;gap:10px;padding:14px; }
-  .trust-icon { font-size:22px;flex-shrink:0; }
-  .trust-text { font-size:12.5px;font-weight:700; }
-  .faq-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
-  .faq-item { border-bottom:1px solid rgba(0,0,0,${isLight ? '.08' : '.2'});padding:16px 0; }
-  .faq-q { font-size:15px;font-weight:700;margin-bottom:8px; }
-  .faq-a { font-size:13.5px;opacity:.6;line-height:1.65; }
-  .map-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
-  .map-placeholder { background:var(--card-bg);border-radius:var(--radius);height:200px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-top:16px; }
+:root{
+  --primary:${themeData.primaryColor||'#5b5cf6'};
+  --bg:${themeData.bgColor||'#09090f'};
+  --text:${themeData.textColor||'#f1f5f9'};
+  --card-bg:${themeData.cardBg||'#13131e'};
+  --nav-bg:${themeData.navBg||'#0e0e17'};
+  --radius:${themeData.radius||'12px'};
+  --btn-r:${btnRadius};
+  --font:'${themeData.font||'Outfit'}',sans-serif;
+  --cols:${cols};
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}
+a{color:inherit;text-decoration:none}
+.announcement-bar{
+  background:var(--primary);color:white;
+  text-align:center;padding:10px 16px;
+  font-size:13px;font-weight:600;letter-spacing:.01em;
+}
+.navbar{
+  background:var(--nav-bg);
+  padding:0 5%;height:${isMobile?'52px':'62px'};
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});
+  position:sticky;top:0;z-index:100;
+}
+.nav-logo{font-size:${isMobile?'18px':'22px'};font-weight:900;letter-spacing:-.03em}
+.nav-links{display:flex;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65}
+.nav-right{display:flex;align-items:center;gap:${isMobile?'8px':'14px'}}
+.nav-search{width:34px;height:34px;border-radius:8px;background:rgba(${isLight?'0,0,0,.06':'255,255,255,.06'});border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
+.hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg)}
+.hero h1{font-size:${isMobile?'28px':'54px'};font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
+.hero h1 em{font-style:normal;color:var(--primary)}
+.hero p{font-size:${isMobile?'14px':'17px'};opacity:.6;max-width:520px;margin:0 auto 32px;line-height:1.7}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'14px 32px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'16px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s}
+.btn-cta:hover{opacity:.88}
+.section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;margin-bottom:${isMobile?'18px':'28px'};letter-spacing:-.02em}
+.products-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:${isMobile?'10px':'18px'}}
+.product-card{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;transition:transform .2s}
+.product-card:hover{transform:translateY(-3px)}
+.product-img{width:100%;aspect-ratio:1;background:${themeData.primaryColor}18;display:flex;align-items:center;justify-content:center;font-size:38px}
+.product-info{padding:${isMobile?'10px':'14px'}}
+.product-name{font-size:${isMobile?'12px':'14px'};font-weight:700;margin-bottom:6px}
+.price-row{display:flex;align-items:center;gap:6px}
+.product-price{font-size:${isMobile?'13px':'15px'};font-weight:800;color:var(--primary)}
+.product-old{font-size:11px;text-decoration:line-through;opacity:.38}
+.product-btn{width:100%;margin-top:10px;padding:${isMobile?'7px':'9px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.product-btn:hover{opacity:.88}
+.cats-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:${isMobile?'10px':'16px'}}
+.cat-card{background:var(--card-bg);border-radius:var(--radius);padding:${isMobile?'20px 12px':'32px 20px'};text-align:center;cursor:pointer;transition:transform .2s}
+.cat-card:hover{transform:translateY(-2px)}
+.cat-icon{font-size:${isMobile?'28px':'36px'};margin-bottom:10px}
+.cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}
+.promo-banner{background:var(--primary);color:white;padding:${isMobile?'36px 5%':'64px 5%'};text-align:center}
+.promo-banner h2{font-size:${isMobile?'22px':'36px'};font-weight:900;margin-bottom:10px}
+.promo-banner p{opacity:.8;margin-bottom:24px;font-size:${isMobile?'13px':'16px'}}
+.btn-white{background:white;color:var(--primary);padding:${isMobile?'10px 22px':'12px 28px'};border-radius:var(--btn-r);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
+.testimonials{padding:${isMobile?'32px 5%':'56px 5%'};background:var(--card-bg)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(${isMobile?1:3},1fr);gap:16px;margin-top:24px}
+.testimonial{background:var(--bg);border-radius:var(--radius);padding:20px}
+.t-stars{color:#f59e0b;font-size:13px;margin-bottom:10px}
+.t-text{font-size:13.5px;line-height:1.65;opacity:.7;margin-bottom:14px}
+.t-author{display:flex;align-items:center;gap:10px}
+.t-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px}
+.t-name{font-size:13px;font-weight:700}
+.newsletter{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
+.newsletter h2{font-size:${isMobile?'22px':'30px'};font-weight:800;margin-bottom:10px}
+.newsletter p{opacity:.6;margin-bottom:24px;font-size:${isMobile?'13px':'15px'}}
+.newsletter-form{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap}
+.newsletter-input{flex:1;min-width:180px;padding:11px 16px;border:1.5px solid rgba(${isLight?'0,0,0,.12':'255,255,255,.1'});border-radius:var(--btn-r);font-size:14px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
+.footer{padding:${isMobile?'24px 5%':'40px 5%'};border-top:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.footer-logo{font-size:17px;font-weight:900}
+.footer-copy{font-size:12px;opacity:.38}
+.footer-links{display:flex;gap:18px;font-size:12.5px;opacity:.45;font-weight:600}
+.video-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
+.video-box{background:var(--card-bg);border-radius:var(--radius);height:${isMobile?'180px':'320px'};display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;margin-top:20px}
+.play-circle{width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
+.countdown-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center;background:var(--card-bg)}
+.countdown-row{display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.cd-unit{background:var(--bg);border-radius:var(--radius);padding:${isMobile?'12px 16px':'18px 24px'};min-width:72px}
+.cd-num{font-size:${isMobile?'28px':'38px'};font-weight:900;color:var(--primary);line-height:1}
+.cd-label{font-size:11px;font-weight:700;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.gallery-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.gallery-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:${isMobile?'8px':'12px'}}
+.gallery-item{aspect-ratio:1;background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px}
+.trust-section{padding:${isMobile?'20px 5%':'32px 5%'};background:var(--card-bg)}
+.trust-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:12px;margin-top:12px}
+.trust-item{display:flex;align-items:center;gap:10px;padding:12px}
+.trust-icon{font-size:20px}
+.trust-label{font-size:13px;font-weight:700}
+.faq-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.faq-item{border-bottom:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});padding:18px 0}
+.faq-q{font-size:15px;font-weight:700;margin-bottom:8px}
+.faq-a{font-size:13.5px;opacity:.6;line-height:1.65}
 </style>
 </head>
 <body>
@@ -1474,141 +1782,269 @@ ${sectionsHTML}
 </body>
 </html>`
 
-  const iframe = document.getElementById('preview-iframe')
-  const doc = iframe.contentDocument || iframe.contentWindow.document
-  doc.open(); doc.write(html); doc.close()
+  try {
+    const iframe = document.getElementById('preview-iframe')
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
+    setTimeout(() => setupPreviewClicks(iframe), 500)
+  } catch(e) { console.warn('Preview render error:', e) }
 }
 
-function buildSection(sec, s, isMobile) {
+/* ════════════════════════════════════════════════════
+   BUILD SECTION HTML
+════════════════════════════════════════════════════ */
+function buildSectionHTML(sec, isMobile) {
   const d = sec.data || {}
-  switch (sec.id) {
-    case 'announcement': return `<div class="announcement">${s.announcement || '✨ Free shipping on orders over ₹999!'}</div>`
-    case 'navbar': return `
+  const w = (content) =>
+    `<div data-section-id="${sec.id}" style="position:relative;cursor:pointer;">${content}</div>`
+
+  switch(sec.type) {
+    case 'announcement': return w(`
+      <div class="announcement-bar"
+           style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}">
+        ${d.text || themeData.announcementText}
+      </div>`)
+
+    case 'navbar': return w(`
       <nav class="navbar">
-        <div class="navbar-logo">e<span>K</span>art</div>
-        ${!isMobile ? `<div class="navbar-links"><a href="#">Home</a><a href="#">Products</a><a href="#">Categories</a><a href="#">About</a></div>` : ''}
-        <div class="navbar-right">
-          <div class="navbar-cart">🛒 Cart (0)</div>
+        <div class="nav-logo">${escHtml(d.logoText || 'My Store')}</div>
+        ${!isMobile ? `<div class="nav-links"><a>Home</a><a>Products</a><a>Categories</a><a>About</a></div>` : ''}
+        <div class="nav-right">
+          ${d.showSearch!=='no' ? `<button class="nav-search">🔍</button>` : ''}
+          ${d.showCart!=='no'   ? `<button class="nav-cart">🛒 Cart (0)</button>` : ''}
         </div>
-      </nav>`
-    case 'hero': return `
-      <section class="hero">
-        <h1>${(d.heading || 'Welcome to our <em>Store</em>').replace(/(.*)(store|shop)(.*)/i, '$1<em>$2</em>$3')}</h1>
-        <p>${d.subheading || 'Discover amazing products at great prices. Shop now and enjoy fast delivery.'}</p>
-        <a href="${d.ctaLink || '#products'}" class="btn-cta">${d.ctaText || 'Shop Now'} →</a>
-      </section>`
-    case 'featured': return `
-      <section class="section" id="products">
-        <h2 class="section-title">${d.title || 'Featured Products'}</h2>
-        <div class="products-grid">
-          ${['👟','👗','🎧','📱','⌚','👜','🕶️','💻'].slice(0, parseInt(d.count)||8).map((emoji, i) => `
-          <div class="product-card">
-            <div class="product-img">${emoji}</div>
-            <div class="product-info">
-              <div class="product-name">Product Name ${i+1}</div>
-              <div style="display:flex;align-items:center;">
-                <span class="product-price">₹${(499 + i * 200).toLocaleString()}</span>
-                <span class="product-old">₹${(799 + i * 300).toLocaleString()}</span>
+      </nav>`)
+
+    case 'hero': {
+      const rawH = d.heading || 'Welcome to our Store'
+      const heading = rawH.replace(/(store|shop)/gi, m => `<em>${m}</em>`)
+      return w(`
+        <section class="hero" style="${d.bgColor?'background:'+d.bgColor+';':''}">
+          <h1>${heading}</h1>
+          <p>${d.subheading || 'Discover amazing products at the best prices. Fast delivery across India.'}</p>
+          <a href="${d.ctaLink || '#products'}" class="btn-cta">${d.ctaText || 'Shop Now'} →</a>
+        </section>`)
+    }
+
+    case 'featured': {
+      const count   = parseInt(d.count) || 8
+      const fCols   = isMobile ? 2 : (parseInt(d.columns) || parseInt(themeData.cols) || 3)
+      const emojis  = ['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠']
+      return w(`
+        <section class="section" id="products">
+          <h2 class="section-title">${d.title || 'Featured Products'}</h2>
+          <div class="products-grid" style="--cols:${fCols}">
+            ${emojis.slice(0, count).map((e, i) => `
+            <div class="product-card">
+              <div class="product-img">${e}</div>
+              <div class="product-info">
+                <div class="product-name">Product Name ${i+1}</div>
+                <div class="price-row">
+                  <span class="product-price">₹${(499+i*200).toLocaleString()}</span>
+                  <span class="product-old">₹${(799+i*300).toLocaleString()}</span>
+                </div>
+                <button class="product-btn">Add to Cart</button>
               </div>
-              <button class="product-btn">Add to Cart</button>
-            </div>
-          </div>`).join('')}
-        </div>
-      </section>`
-    case 'categories': return `
-      <section class="section">
-        <h2 class="section-title">${d.title || 'Browse Categories'}</h2>
-        <div class="cats-grid">
-          ${[['👟','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty']].map(([emoji, name]) => `
-          <div class="cat-card"><div class="cat-icon">${emoji}</div><div class="cat-name">${name}</div></div>`).join('')}
-        </div>
-      </section>`
-    case 'banner': return `
-      <section class="promo-banner" style="${d.bgColor ? 'background:'+d.bgColor+';' : ''}">
-        <h2>${d.heading || 'Special Offer'}</h2>
+            </div>`).join('')}
+          </div>
+        </section>`)
+    }
+
+    case 'categories': {
+      const cCols = isMobile ? 2 : (parseInt(d.columns) || 4)
+      const cats  = [['👗','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty'],['🎮','Gaming'],['🍕','Food']]
+      return w(`
+        <section class="section">
+          <h2 class="section-title">${d.title || 'Browse by Category'}</h2>
+          <div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">
+            ${cats.slice(0,cCols).map(([e,n]) => `
+            <div class="cat-card"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div></div>`).join('')}
+          </div>
+        </section>`)
+    }
+
+    case 'banner': return w(`
+      <section class="promo-banner" style="${d.bgColor?'background:'+d.bgColor+';':''}">
+        <h2>${d.heading || 'Limited Time Offer'}</h2>
         <p>${d.subtext || 'Get 20% off your first order. Use code WELCOME20'}</p>
         <button class="btn-white">${d.ctaText || 'Claim Offer'}</button>
-      </section>`
-    case 'testimonials': return `
-      <section class="testimonials">
-        <h2 class="section-title">${d.title || 'What Our Customers Say'}</h2>
-        <div class="testimonials-grid">
-          ${[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality.'],['R','Rahul K.','Best shopping experience ever. Will definitely come back!'],['A','Anita P.','Great products and excellent customer service. Highly recommended!']].map(([a,n,t]) => `
-          <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <div class="testimonial-text">"${t}"</div>
-            <div class="testimonial-author">
-              <div class="testimonial-avatar">${a}</div>
-              <div class="testimonial-name">${n}</div>
-            </div>
-          </div>`).join('')}
-        </div>
-      </section>`
-    case 'newsletter': return `
+      </section>`)
+
+    case 'testimonials': {
+      const tCols = isMobile ? 1 : (parseInt(d.columns) || 3)
+      return w(`
+        <section class="testimonials">
+          <h2 class="section-title">${d.title || 'What Customers Say'}</h2>
+          <div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">
+            ${[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality.'],
+               ['R','Rahul K.','Best shopping experience. Will definitely order again!'],
+               ['A','Anita P.','Great products and excellent customer service. 5 stars!']].map(([av,n,t]) => `
+            <div class="testimonial">
+              <div class="t-stars">★★★★★</div>
+              <div class="t-text">"${t}"</div>
+              <div class="t-author">
+                <div class="t-avatar">${av}</div>
+                <div class="t-name">${n}</div>
+              </div>
+            </div>`).join('')}
+          </div>
+        </section>`)
+    }
+
+    case 'newsletter': return w(`
       <section class="newsletter">
         <h2>${d.heading || 'Stay in the loop'}</h2>
-        <p>${d.subtext || 'Get exclusive deals and new arrivals straight to your inbox.'}</p>
+        <p>${d.subtext || 'Get exclusive deals and offers straight to your inbox.'}</p>
         <div class="newsletter-form">
           <input class="newsletter-input" type="email" placeholder="Enter your email address">
-          <button class="btn-cta" style="white-space:nowrap;">Subscribe →</button>
+          <button class="btn-cta" style="white-space:nowrap;">${d.btnText || 'Subscribe'} →</button>
         </div>
-      </section>`
-    case 'footer': return `
+      </section>`)
+
+    case 'footer': return w(`
       <footer class="footer">
-        <div class="footer-logo">e<span>K</span>art</div>
-        <div class="footer-text">${s.footerText || '© 2025 My Store. All rights reserved.'}</div>
-        <div class="footer-links"><a>Privacy</a><a>Terms</a><a>Contact</a></div>
-      </footer>`
-    case 'video': return `
+        <div class="footer-logo">My Store</div>
+        <div class="footer-copy">${escHtml(d.footerText || themeData.footerText)}</div>
+        ${d.showSocial !== 'no' ? `<div class="footer-links">
+          <a>Instagram</a><a>Facebook</a><a>Twitter</a>
+        </div>` : ''}
+      </footer>`)
+
+    case 'video': return w(`
       <section class="video-section">
-        <h2 class="section-title">Watch Our Story</h2>
-        <div class="video-placeholder">
-          <div class="play-btn">▶</div>
-          <div style="font-size:14px;font-weight:600;opacity:.5;">Click to Play Video</div>
+        <h2 class="section-title">${d.heading || 'Our Story'}</h2>
+        <div class="video-box">
+          <div class="play-circle">▶</div>
+          <div style="font-size:14px;font-weight:600;opacity:.5">${d.videoUrl ? 'Click to Play' : 'Add video URL in settings'}</div>
         </div>
-      </section>`
-    case 'countdown': return `
+      </section>`)
+
+    case 'countdown': return w(`
       <section class="countdown-section">
-        <h2 class="section-title">⏳ Deal Ends In</h2>
-        <div class="countdown-grid">
+        <h2 class="section-title">⏳ ${d.heading || 'Deal Ends In'}</h2>
+        <div class="countdown-row">
           ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l]) => `
-          <div class="countdown-unit"><div class="countdown-num">${n}</div><div class="countdown-label">${l}</div></div>`).join('')}
+          <div class="cd-unit"><div class="cd-num">${n}</div><div class="cd-label">${l}</div></div>`).join('')}
         </div>
-      </section>`
-    case 'gallery': return `
-      <section class="gallery-section">
-        <h2 class="section-title">Our Gallery</h2>
-        <div class="gallery-grid">
-          ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0,isMobile?4:8).map(e => `<div class="gallery-item">${e}</div>`).join('')}
-        </div>
-      </section>`
-    case 'trustbadges': return `
+      </section>`)
+
+    case 'gallery': {
+      const gCols = isMobile ? 2 : (parseInt(d.columns) || 4)
+      return w(`
+        <section class="gallery-section">
+          <h2 class="section-title">${d.title || 'Our Gallery'}</h2>
+          <div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">
+            ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0, isMobile?4:8)
+              .map(e => `<div class="gallery-item">${e}</div>`).join('')}
+          </div>
+        </section>`)
+    }
+
+    case 'trustbadges': return w(`
       <section class="trust-section">
         <div class="trust-grid">
-          ${[['🚚','Free Shipping'],['🔒','Secure Payment'],['↩️','Easy Returns'],['⭐','Top Rated']].map(([ic,tx]) => `
-          <div class="trust-item"><span class="trust-icon">${ic}</span><span class="trust-text">${tx}</span></div>`).join('')}
+          ${[[d.badge1||'Free Shipping','🚚'],
+             [d.badge2||'Secure Payment','🔒'],
+             [d.badge3||'Easy Returns','↩️'],
+             [d.badge4||'24/7 Support','💬']].map(([label, icon]) => `
+          <div class="trust-item">
+            <span class="trust-icon">${icon}</span>
+            <span class="trust-label">${escHtml(label)}</span>
+          </div>`).join('')}
         </div>
-      </section>`
-    case 'faq': return `
+      </section>`)
+
+    case 'faq': return w(`
       <section class="faq-section">
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        ${[['How long does shipping take?','We deliver within 3-7 business days across India. Express shipping available at checkout.'],['What is your return policy?','We offer a hassle-free 30-day return policy. No questions asked.'],['Do you offer cash on delivery?','Yes! COD is available on all orders across India.']].map(([q,a]) => `
-        <div class="faq-item"><div class="faq-q">${q}</div><div class="faq-a">${a}</div></div>`).join('')}
-      </section>`
-    case 'map': return `
-      <section class="map-section">
-        <h2 class="section-title">Find Us</h2>
-        <div class="map-placeholder">📍</div>
-      </section>`
+        <h2 class="section-title">${d.title || 'Frequently Asked Questions'}</h2>
+        ${d.q1 ? `<div class="faq-item"><div class="faq-q">${escHtml(d.q1)}</div><div class="faq-a">${escHtml(d.a1||'')}</div></div>` : ''}
+        ${d.q2 ? `<div class="faq-item"><div class="faq-q">${escHtml(d.q2)}</div><div class="faq-a">${escHtml(d.a2||'')}</div></div>` : ''}
+        ${!d.q1 ? `
+        <div class="faq-item"><div class="faq-q">How long does shipping take?</div><div class="faq-a">Typically 3-7 business days. Express delivery available at checkout.</div></div>
+        <div class="faq-item"><div class="faq-q">What is your return policy?</div><div class="faq-a">Hassle-free 30-day returns. No questions asked.</div></div>
+        <div class="faq-item"><div class="faq-q">Do you offer Cash on Delivery?</div><div class="faq-a">Yes! COD available across India on all orders.</div></div>` : ''}
+      </section>`)
+
     default: return ''
   }
 }
 
+/* ════════════════════════════════════════════════════
+   PREVIEW CLICK-TO-EDIT
+════════════════════════════════════════════════════ */
+function setupPreviewClicks(iframe) {
+  try {
+    const doc = iframe.contentDocument
+    if (!doc) return
+    doc.querySelectorAll('[data-section-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.getAttribute('data-section-id')
+        selectSection(id)
+      })
+      el.addEventListener('mouseenter', () => {
+        if (el.getAttribute('data-section-id') !== activeSectionId) {
+          el.style.outline = '2px dashed rgba(91,92,246,.4)'
+          el.style.outlineOffset = '-2px'
+        }
+      })
+      el.addEventListener('mouseleave', () => {
+        if (el.getAttribute('data-section-id') !== activeSectionId) {
+          el.style.outline = 'none'
+        }
+      })
+    })
+  } catch(e) {}
+}
+
+function highlightSectionInPreview(id) {
+  try {
+    const iframe = document.getElementById('preview-iframe')
+    const doc = iframe.contentDocument
+    if (!doc) return
+    doc.querySelectorAll('[data-section-id]').forEach(el => {
+      const isTarget = el.getAttribute('data-section-id') === id
+      el.style.outline = isTarget ? '2px solid rgba(91,92,246,.8)' : 'none'
+      el.style.outlineOffset = '-2px'
+      if (isTarget) el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+    })
+  } catch(e) {}
+}
+
+function clearHighlight() {
+  try {
+    const doc = document.getElementById('preview-iframe').contentDocument
+    if (!doc) return
+    doc.querySelectorAll('[data-section-id]').forEach(el => { el.style.outline = 'none' })
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════════════════ */
 function isLightColor(hex) {
-  const c = hex.replace('#','')
+  const c = (hex||'').replace('#','')
   if (c.length !== 6) return true
-  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16)
+  const r=parseInt(c.slice(0,2),16), g=parseInt(c.slice(2,4),16), b=parseInt(c.slice(4,6),16)
   return (r*299 + g*587 + b*114) / 1000 > 128
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+}
+
+function toast(msg, type = 'success') {
+  const el = document.createElement('div')
+  el.className = `toast ${type}`
+  el.innerHTML = `
+    <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
+    <span class="toast-text">${msg}</span>`
+  document.getElementById('toast-container').appendChild(el)
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')))
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400) }, 3200)
 }
 </script>
 </body>
