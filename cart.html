@@ -98,6 +98,9 @@
   <div class="header-inner">
     <a class="back-btn" id="shopLink" href="javascript:history.back()">← Continue Shopping</a>
     <span class="page-title">Your Cart 🛒</span>
+    <a href="javascript:void(0)" id="accountBtn" style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;color:var(--text2);text-decoration:none;white-space:nowrap;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+      👤 <span id="accountBtnLabel">Account</span>
+    </a>
   </div>
 </header>
 
@@ -123,6 +126,20 @@ let paymentEnabled  = false   // set after fetching store config
 let selectedPayment = 'cod'   // 'cod' or 'razorpay'
 
 if (slug) document.getElementById('shopLink').href = `shop.html?store=${slug}`
+
+// Wire account button
+;(function() {
+  const custToken = slug && localStorage.getItem(`cust_token_${slug}`)
+  const custName  = slug && localStorage.getItem(`cust_name_${slug}`)
+  const btn   = document.getElementById('accountBtn')
+  const label = document.getElementById('accountBtnLabel')
+  if (btn) {
+    btn.href = custToken
+      ? `customer-account.html?store=${slug}`
+      : `customer-login.html?store=${slug}&redirect=${encodeURIComponent(location.href)}`
+    if (label) label.textContent = (custToken && custName) ? custName.split(' ')[0] : 'Login'
+  }
+})()
 
 function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
 function saveCart(c) { localStorage.setItem('cart_' + slug, JSON.stringify(c)) }
