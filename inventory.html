@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#080910">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+.stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 7px; }
+.stat-val { font-size: 28px; font-weight: 900; font-family: 'DM Mono', monospace; letter-spacing: -.04em; }
+.stat-sub { font-size: 11.5px; color: var(--text2); margin-top: 4px; }
+.filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.search-field { flex: 1; min-width: 160px; padding: 9px 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 13px; outline: none; }
+.search-field:focus { border-color: var(--accent); }
+.filter-btn { padding: 9px 14px; border: 1px solid var(--border); background: var(--surface); border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; color: var(--text2); transition: all .15s; }
+.filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,.06); }
+.filter-btn.red.active { border-color: var(--red); color: var(--red); background: rgba(248,113,113,.06); }
+.filter-btn.yellow.active { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,.06); }
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.table-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 10px; flex-wrap: wrap; }
+.table-title { font-size: 14px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); border-bottom: 1px solid var(--border); }
+td { padding: 11px 14px; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.015); }
+.thumb { width: 34px; height: 34px; border-radius: 7px; object-fit: cover; background: var(--surface2); flex-shrink: 0; }
+.thumb-ph { width: 34px; height: 34px; border-radius: 7px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.badge-red    { background: rgba(248,113,113,.12); color: #f87171; }
+.badge-yellow { background: rgba(251,191,36,.12); color: #fbbf24; }
+.badge-green  { background: rgba(52,211,153,.12); color: #34d399; }
+.badge-gray   { background: rgba(255,255,255,.07); color: var(--text2); }
+.stock-input { width: 72px; padding: 6px 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; text-align: center; outline: none; transition: border-color .2s; }
+.stock-input:focus { border-color: var(--accent); }
+.stock-input.changed { border-color: var(--accent); background: rgba(108,99,255,.08); }
+.bulk-save-bar { display: none; position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 20px; align-items: center; justify-content: space-between; gap: 12px; z-index: 50; }
+.bulk-save-bar.visible { display: flex; }
+.bulk-save-bar span { font-size: 13px; font-weight: 700; color: var(--accent2); }
+.btn-primary { padding: 9px 20px; background: var(--accent); color: #fff; border: none; border-radius: 9px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 6px; transition: opacity .15s; }
+.btn-primary:hover:not(:disabled) { opacity: .88; }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-secondary { padding: 9px 16px; background: transparent; border: 1px solid var(--border); border-radius: 9px; color: var(--text2); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s; }
+.btn-secondary:hover { border-color: var(--text); color: var(--text); }
+.threshold-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.threshold-row input { width: 52px; padding: 6px 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; text-align: center; outline: none; }
+.empty-state { padding: 50px 20px; text-align: center; color: var(--text2); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { animation: spin .7s linear infinite; display: inline-block; }
+@media(max-width:900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:600px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+</head>
+<body>
+
+<!-- SKELETON -->
+<div id="page-skeleton">
+  <div class="skel-sidebar">
+    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      </div>
+    </div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+  </div>
+  <div class="skel-main">
+    <div class="skel-topbar">
+      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
+    </div>
+    <div class="skel-body">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;">
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+        <div class="skel" style="height:78px;border-radius:13px;"></div>
+      </div>
+      <div class="skel" style="height:44px;border-radius:9px;margin-bottom:12px;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.8;"></div>
+      <div class="skel" style="height:52px;border-radius:9px;opacity:.6;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
+    <div style="min-width:0;">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Merchant</div>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
+    <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+    <a class="nav-item active" href="inventory.html"><span class="nav-icon">📋</span>Inventory</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left"><span class="topbar-title">Inventory</span></div>
+    <div class="topbar-right">
+      <div class="store-select-wrap" id="store-select-wrap">
+        <span class="store-select-label">Store</span>
+        <select class="store-selector" id="store-selector"></select>
+      </div>
+      <div id="topbar-actions"></div>
+    </div>
+  </div>
+
+  <div id="page-content" class="content page-enter" style="display:none;">
+
+    <!-- STATS -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Products</div>
+        <div class="stat-val" id="statTotal">—</div>
+        <div class="stat-sub">Tracked + untracked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-val" id="statLow" style="color:var(--yellow)">—</div>
+        <div class="stat-sub" id="statLowSub">Below threshold</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Out of Stock</div>
+        <div class="stat-val" id="statOut" style="color:var(--red)">—</div>
+        <div class="stat-sub">Stock qty = 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Healthy</div>
+        <div class="stat-val" id="statHealthy" style="color:var(--green)">—</div>
+        <div class="stat-sub">Well stocked</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <input class="search-field" id="invSearch" placeholder="Search by name or SKU…" oninput="applyFilters()">
+      <div class="threshold-row">
+        <span style="font-size:12.5px;color:var(--text2);font-weight:600;">Low stock threshold:</span>
+        <input type="number" id="thresholdInput" value="5" min="1" max="100" onchange="loadInventory()">
+      </div>
+      <button class="filter-btn" id="filterAll" onclick="setFilter('all')">All</button>
+      <button class="filter-btn yellow" id="filterLow" onclick="setFilter('low')">⚠️ Low Stock</button>
+      <button class="filter-btn red" id="filterOut" onclick="setFilter('out')">❌ Out of Stock</button>
+      <button class="btn-secondary" onclick="exportCSV()" style="font-size:12px;">⬇ Export CSV</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-title">Stock Levels</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:12px;color:var(--text2);" id="editHint">Edit qty cells below, then save</span>
+          <button class="btn-primary" id="btnSaveAll" onclick="saveAllChanges()" style="display:none;">💾 Save All Changes</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Status</th>
+            <th>Tracking</th>
+            <th>Current Stock</th>
+            <th>New Stock</th>
+            <th>Note</th>
+          </tr></thead>
+          <tbody id="invBody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">Loading inventory…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BULK SAVE BAR -->
+    <div class="bulk-save-bar" id="bulkSaveBar">
+      <span id="changesCount">0 changes pending</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-secondary" onclick="discardChanges()">✕ Discard</button>
+        <button class="btn-primary" onclick="saveAllChanges()" id="btnBulkSave">💾 Save Changes</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let currentStoreId = ''
+let allProducts    = []
+let changes        = {} // { productId: { qty, note } }
+let activeFilter   = 'all'
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('inventory', (id) => { currentStoreId = id; loadInventory() })
+  if (!nav) return
+  currentStoreId = nav.currentStoreId
+  setTopbarActions('')
+  if (currentStoreId) await loadInventory()
+})
+
+async function loadInventory() {
+  const threshold = parseInt(document.getElementById('thresholdInput')?.value) || 5
+  const filterParam = activeFilter === 'low' ? '&low_stock=true' : activeFilter === 'out' ? '&out_of_stock=true' : ''
+  try {
+    const data = await apiFetch(`/stores/${currentStoreId}/inventory?threshold=${threshold}${filterParam}`)
+    allProducts = data.products || []
+
+    // Load alerts for stats (always unfiltered)
+    const alerts = await apiFetch(`/stores/${currentStoreId}/inventory/alerts/low-stock?threshold=${threshold}`)
+    const outCnt  = (alerts.out_of_stock || []).length
+    const lowCnt  = (alerts.low_stock    || []).length
+    const total   = data.total || allProducts.length
+    document.getElementById('statTotal').textContent   = total
+    document.getElementById('statLow').textContent     = lowCnt
+    document.getElementById('statOut').textContent     = outCnt
+    document.getElementById('statHealthy').textContent = Math.max(0, total - lowCnt - outCnt)
+    document.getElementById('statLowSub').textContent  = `Below ${threshold} units`
+
+    changes = {}
+    updateSaveBar()
+    renderTable(allProducts)
+  } catch (e) {
+    document.getElementById('invBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--red);">Error: ${e.message}</td></tr>`
+  }
+}
+
+function renderTable(products) {
+  const body = document.getElementById('invBody')
+  if (!products.length) {
+    body.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📦</div><h3>No products found</h3><p>Try a different filter or add products first</p></div></td></tr>'
+    return
+  }
+  body.innerHTML = products.map(p => {
+    const thumb = p.images?.[0]
+      ? `<img class="thumb" src="${p.images[0]}" alt="">`
+      : `<div class="thumb-ph">📦</div>`
+    const stockClass = p.is_out_of_stock ? 'badge-red' : p.is_low_stock ? 'badge-yellow' : 'badge-green'
+    const stockLabel = p.is_out_of_stock ? 'Out of Stock' : p.is_low_stock ? 'Low Stock' : 'In Stock'
+    const tracking   = p.track_inventory
+    return `<tr id="row-${p._id}">
+      <td><div style="display:flex;align-items:center;gap:10px;">${thumb}
+        <div><div style="font-weight:700;font-size:13px;">${p.name}</div>
+        ${p.status !== 'active' ? `<span style="font-size:10px;color:var(--text3);text-transform:uppercase;">${p.status}</span>` : ''}</div>
+      </div></td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);">${p.sku || '—'}</td>
+      <td><span class="badge ${stockClass}">${stockLabel}</span></td>
+      <td style="color:var(--text2);">${tracking ? '✅ Yes' : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${p.is_out_of_stock?'var(--red)':p.is_low_stock?'var(--yellow)':'var(--text)'};">
+        ${tracking ? p.stock_qty : '∞'}
+      </td>
+      <td>
+        ${tracking
+          ? `<input class="stock-input" type="number" min="0" data-id="${p._id}" data-orig="${p.stock_qty}" value="${p.stock_qty}" onchange="onStockChange(this)" oninput="onStockChange(this)">`
+          : `<span style="font-size:12px;color:var(--text3);">Not tracked</span>`}
+      </td>
+      <td>
+        ${tracking
+          ? `<input class="stock-input" type="text" style="width:120px;" data-note="${p._id}" placeholder="Reason…" oninput="onNoteChange('${p._id}', this.value)">`
+          : '—'}
+      </td>
+    </tr>`
+  }).join('')
+}
+
+function onStockChange(el) {
+  const id   = el.dataset.id
+  const orig = parseInt(el.dataset.orig)
+  const newVal = parseInt(el.value)
+  el.classList.toggle('changed', newVal !== orig)
+  if (newVal !== orig) {
+    changes[id] = { qty: newVal, note: changes[id]?.note || '' }
+  } else {
+    delete changes[id]
+    // But keep note if user typed one
+    const noteEl = document.querySelector(`[data-note="${id}"]`)
+    if (noteEl?.value) changes[id] = { qty: newVal, note: noteEl.value }
+  }
+  updateSaveBar()
+}
+
+function onNoteChange(id, val) {
+  if (changes[id]) changes[id].note = val
+}
+
+function updateSaveBar() {
+  const count = Object.keys(changes).length
+  const bar   = document.getElementById('bulkSaveBar')
+  const btn   = document.getElementById('btnSaveAll')
+  bar.classList.toggle('visible', count > 0)
+  if (btn) btn.style.display = count > 0 ? 'flex' : 'none'
+  const countEl = document.getElementById('changesCount')
+  if (countEl) countEl.textContent = `${count} change${count !== 1 ? 's' : ''} pending`
+}
+
+async function saveAllChanges() {
+  const pending = Object.entries(changes)
+  if (!pending.length) return
+  const btn = document.getElementById('btnBulkSave')
+  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Saving…'
+  try {
+    const updates = pending.map(([id, { qty, note }]) => ({ product_id: id, stock_qty: qty, note: note || 'Manual adjustment' }))
+    const result  = await apiFetch(`/stores/${currentStoreId}/inventory/bulk`, { method: 'POST', body: JSON.stringify({ updates }) })
+    toast(`✅ Updated ${result.updated} product${result.updated !== 1 ? 's' : ''}`, 'success')
+    if (result.errors?.length) toast(`⚠️ ${result.errors.length} errors`, 'error')
+    await loadInventory()
+  } catch (e) {
+    toast(e.message || 'Save failed', 'error')
+  } finally {
+    btn.disabled = false; btn.innerHTML = '💾 Save Changes'
+  }
+}
+
+function discardChanges() {
+  changes = {}
+  loadInventory()
+}
+
+function setFilter(f) {
+  activeFilter = f
+  ;['all','low','out'].forEach(k => {
+    const el = document.getElementById('filter' + k.charAt(0).toUpperCase() + k.slice(1))
+    el?.classList.toggle('active', k === f)
+  })
+  loadInventory()
+}
+
+function applyFilters() {
+  const q = document.getElementById('invSearch').value.toLowerCase()
+  if (!q) { renderTable(allProducts); return }
+  renderTable(allProducts.filter(p =>
+    p.name.toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q)
+  ))
+}
+
+function exportCSV() {
+  if (!allProducts.length) return toast('No data to export', 'error')
+  const rows = [['Product', 'SKU', 'Stock', 'Tracked', 'Status', 'Low Stock', 'Out of Stock']]
+  allProducts.forEach(p => rows.push([p.name, p.sku||'', p.track_inventory ? p.stock_qty : '∞', p.track_inventory ? 'Yes' : 'No', p.status, p.is_low_stock ? 'Yes' : 'No', p.is_out_of_stock ? 'Yes' : 'No']))
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const a = document.createElement('a')
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = `inventory-${new Date().toISOString().slice(0,10)}.csv`
+  a.click()
+  toast('CSV downloaded!', 'success')
+}
+</script>
+</body>
+</html>
