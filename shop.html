@@ -155,7 +155,7 @@
     /* ── PRODUCT CARDS ── */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      grid-template-columns: repeat(var(--cols, 3), 1fr);
       gap: 18px;
     }
     .product-card {
@@ -526,52 +526,49 @@
   <div id="theme-sections-top"></div>
 
   <!-- Real browsable products grid — always shown, positioned after featured/categories -->
-  <div id="mainLayout" style="max-width:1200px;margin:0 auto;padding:32px 24px;" >
+  <div id="mainLayout" style="padding:48px 5%;">
     <a id="mainProducts" style="display:block;position:relative;top:-80px;visibility:hidden;"></a>
 
-    <!-- Section title row -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <h2 id="allProductsTitle" style="font-size:24px;font-weight:800;letter-spacing:-.02em;">All Products</h2>
+    <!-- Section header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+      <h2 id="allProductsTitle" style="font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--text);">All Products</h2>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <!-- Inline search -->
         <div style="position:relative;">
           <input type="text" id="searchInput" placeholder="Search products..."
             oninput="onSearch()"
-            style="padding:8px 14px 8px 36px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:var(--font);outline:none;background:#fff;width:200px;transition:border-color .15s;"
+            style="padding:9px 14px 9px 36px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13.5px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text);width:200px;transition:border-color .15s;"
             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
           <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;">🔍</span>
         </div>
-        <!-- Sort -->
         <select id="sortSelect" onchange="loadProducts()"
-          style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13.5px;font-family:var(--font);outline:none;background:#fff;color:var(--text);cursor:pointer;">
+          style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13.5px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text);cursor:pointer;">
           <option value="">Newest</option>
           <option value="price_asc">Price: Low → High</option>
           <option value="price_desc">Price: High → Low</option>
           <option value="name_asc">Name: A → Z</option>
         </select>
-        <!-- Price range -->
         <div style="display:flex;align-items:center;gap:6px;">
           <input type="number" id="priceMin" placeholder="Min ₹" min="0"
-            style="width:80px;padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:var(--font);outline:none;background:#fff;">
+            style="width:80px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text);">
           <span style="color:var(--text3);font-size:12px;">—</span>
           <input type="number" id="priceMax" placeholder="Max ₹" min="0"
-            style="width:80px;padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:var(--font);outline:none;background:#fff;">
+            style="width:80px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text);">
           <button onclick="loadProducts()"
-            style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">Apply</button>
+            style="padding:9px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);">Apply</button>
         </div>
       </div>
     </div>
 
     <!-- Category pills (populated from real API) -->
     <div id="catPills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-      <button class="cat-pill active" data-cat="" onclick="selectCat(this,'')">🛍 All</button>
+      <button class="cat-pill active" data-cat="" onclick="selectCatPill(this,'')">🛍 All</button>
     </div>
 
     <!-- Hidden sidebar catList kept for compatibility -->
     <div id="catList" style="display:none;"></div>
 
     <!-- Results bar -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="margin-bottom:16px;">
       <span id="resultsCount" style="font-size:13.5px;color:var(--text2);font-weight:500;">Loading...</span>
     </div>
 
@@ -656,6 +653,11 @@
       root.style.setProperty('--radius', radius)
       root.style.setProperty('--font', `'${font}', sans-serif`)
       root.style.setProperty('--btn-r', btnStyle === 'pill' ? '999px' : btnStyle === 'square' ? '3px' : radius)
+      // Set product grid columns from theme
+      const cols = s.cols || s.columns || 3
+      root.style.setProperty('--cols', window.innerWidth <= 768 ? '2' : String(parseInt(cols) || 3))
+      // Update body background
+      document.body.style.background = secondary
 
       // Update original hero banner background
       const hero = document.getElementById('heroBanner')
@@ -799,8 +801,8 @@
         col2Links:    d.col2Links    || '',
         // Video
         videoUrl:     d.videoUrl     || s.video_url    || '',
-        // Countdown
-        targetDate:   d.targetDate   || s.target_date  || '',
+        // Countdown - builder saves as 'endDate', shop reads as 'targetDate'
+        targetDate:   d.targetDate   || d.endDate     || s.target_date  || s.endDate || '',
         subtext:      d.subtext      || s.subtext      || '',
         ctaText2:     d.ctaText      || '',
         expiredText:  d.expiredText  || 'Offer has ended',
@@ -879,7 +881,7 @@
             ${d.bgImage ? `<div class="hero-bg-img" style="background-image:url('${d.bgImage}')"></div>` : ''}
             <div class="hero-overlay-div" style="${overlayStyle}"></div>
             <div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">
-              ${d.badgeText ? `<div style="display:inline-block;background:var(--primary);color:white;font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;margin-bottom:14px;letter-spacing:.06em;">${escHtml(d.badgeText)}</div>` : ''}
+              ${(d.badgeText || d.badge) ? `<div style="display:inline-block;background:var(--primary);color:white;font-size:11px;font-weight:800;padding:4px 12px;border-radius:999px;margin-bottom:14px;letter-spacing:.06em;">${escHtml(d.badgeText || d.badge)}</div>` : ''}
               <h1>${heading}</h1>
               <p>${escHtml(d.subheading || 'Discover amazing products at the best prices.')}</p>
               <div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}">
@@ -1283,21 +1285,25 @@
 
     function renderGridCard(p) {
       const d   = discountPct(p)
+      const oos = isOOS(p)
       const img = p.images?.[0]
-        ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='📦';">`
+        ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
         : '<span style="font-size:48px;">📦</span>'
-      return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
+      return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}" style="background:var(--card-bg);border-radius:var(--radius);">
         ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
         <div class="product-img">${img}</div>
         <div class="product-info">
           ${p.category_name ? `<div class="product-cat">${escHtml(p.category_name)}</div>` : ''}
           <div class="product-name">${escHtml(p.name)}</div>
           <div class="product-price-row">
-            <span class="product-price">${currency}${p.price.toFixed(2)}</span>
+            <span class="product-price" style="color:var(--accent)">${currency}${p.price.toFixed(2)}</span>
             ${p.compare_at_price ? `<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
             ${d ? `<span class="product-discount">${d}% off</span>` : ''}
           </div>
-          ${addBtn(p)}
+          ${oos
+            ? `<div class="out-badge">Out of Stock</div>`
+            : `<button class="btn-add" id="btn-${p._id}" onclick="event.preventDefault();addToCart('${p._id}','${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 Add to Cart</button>`
+          }
         </div>
       </a>`
     }
