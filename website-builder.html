@@ -6,821 +6,324 @@
 <title>eKart — Website Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- Token extraction (must run before anything else) -->
 <script>
 ;(function(){
-  var p=new URLSearchParams(location.search), t=p.get('token');
-  if(t){ localStorage.setItem('ekart_token',t); history.replaceState({},'','/website-builder.html'); }
+  var p=new URLSearchParams(location.search),t=p.get('token');
+  if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/website-builder.html');}
 })();
 </script>
-<!-- api.js provides apiFetch() with auth headers + base URL handling -->
 <script src="api.js"></script>
-
 <style>
-/* ═══════════════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════════════ */
-:root {
-  --bg:        #09090f;
-  --surface:   #0e0e17;
-  --surface2:  #13131e;
-  --surface3:  #181826;
-  --border:    rgba(255,255,255,.06);
-  --border2:   rgba(255,255,255,.10);
-  --border3:   rgba(255,255,255,.16);
-  --accent:    #5b5cf6;
-  --accent2:   #818cf8;
-  --green:     #22c55e;
-  --amber:     #f59e0b;
-  --red:       #ef4444;
-  --text:      #f1f5f9;
-  --text2:     #94a3b8;
-  --text3:     #475569;
-  --panel-w:   280px;
-  --topbar-h:  52px;
+:root{
+  --bg:#09090f;--surface:#0e0e17;--surface2:#13131e;--surface3:#181826;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+  --accent:#5b5cf6;--accent2:#818cf8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+  --panel-w:272px;--topbar-h:52px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; }
-body {
-  font-family:'Plus Jakarta Sans',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  height:100vh;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
+/* ── Topbar ── */
+#topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;z-index:200;position:relative}
+.tb-logo{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);letter-spacing:-.04em;text-decoration:none;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--border2);margin-right:4px;flex-shrink:0}
+.tb-logo em{color:var(--accent2);font-style:normal}
+.tb-store-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px 5px 8px;cursor:pointer;transition:all .15s;min-width:0;flex-shrink:0}
+.tb-store-pill:hover{border-color:var(--accent)}
+.tb-store-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px rgba(34,197,94,.6)}
+.tb-store-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.tb-store-chevron{color:var(--text3);font-size:10px;flex-shrink:0}
+.tb-page-label{font-size:12px;font-weight:600;color:var(--text3);display:flex;align-items:center;gap:5px}
+.tb-page-label::before{content:'/';color:var(--border3)}
+.tb-spacer{flex:1}
+.tb-unsaved{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--amber);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);padding:4px 10px;border-radius:6px;opacity:0;transition:opacity .3s;white-space:nowrap}
+.tb-unsaved.show{opacity:1}
+.tb-device-group{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0}
+.tb-device-btn{padding:6px 10px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:14px;transition:all .15s;line-height:1}
+.tb-device-btn.active{background:var(--surface3);color:var(--accent2)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.tb-btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.tb-btn-ghost:hover{border-color:var(--border3);color:var(--text)}
+.tb-btn-accent{background:rgba(91,92,246,.12);color:var(--accent2);border:1px solid rgba(91,92,246,.3)}
+.tb-btn-accent:hover{background:rgba(91,92,246,.2);border-color:rgba(91,92,246,.5)}
+.tb-btn-primary{background:var(--accent);color:white}
+.tb-btn-primary:hover{background:#4f4de0;box-shadow:0 4px 16px rgba(91,92,246,.4)}
+.tb-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.store-dropdown{position:absolute;top:calc(var(--topbar-h)+4px);left:86px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:600;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+.store-dropdown.open{display:block}
+.store-dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:600;color:var(--text2)}
+.store-dropdown-item:hover{background:var(--surface3);color:var(--text)}
+.store-dropdown-item.active{color:var(--accent2)}
+.store-dropdown-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 
-/* ═══════════════════════════════════════════════════════
-   TOPBAR
-═══════════════════════════════════════════════════════ */
-#topbar {
-  height:var(--topbar-h);
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  gap:8px;
-  flex-shrink:0;
-  z-index:200;
-  position:relative;
-}
-.tb-logo {
-  font-family:'Outfit',sans-serif;
-  font-size:18px;
-  font-weight:900;
-  color:var(--text);
-  letter-spacing:-.04em;
-  text-decoration:none;
-  display:flex;
-  align-items:center;
-  padding-right:12px;
-  border-right:1px solid var(--border2);
-  margin-right:4px;
-  flex-shrink:0;
-}
-.tb-logo em { color:var(--accent2); font-style:normal; }
+/* ── Layout ── */
+#builder-wrap{display:flex;flex:1;overflow:hidden}
 
-.tb-store-pill {
-  display:flex;
-  align-items:center;
-  gap:7px;
-  background:var(--surface2);
-  border:1px solid var(--border2);
-  border-radius:8px;
-  padding:5px 10px 5px 8px;
-  cursor:pointer;
-  transition:all .15s;
-  min-width:0;
-  flex-shrink:0;
-}
-.tb-store-pill:hover { border-color:var(--accent); }
-.tb-store-dot {
-  width:7px; height:7px;
-  border-radius:50%;
-  background:var(--green);
-  flex-shrink:0;
-  box-shadow:0 0 6px rgba(34,197,94,.6);
-}
-.tb-store-name {
-  font-size:13px; font-weight:700;
-  color:var(--text);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  max-width:130px;
-}
-.tb-store-chevron { color:var(--text3); font-size:10px; flex-shrink:0; }
+/* ── Left Panel ── */
+#left-panel{width:var(--panel-w);min-width:var(--panel-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.panel-tab{flex:1;padding:11px 4px;font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--text3);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.panel-tab.active{color:var(--accent2);border-bottom-color:var(--accent);background:rgba(91,92,246,.04)}
+.panel-tab:hover:not(.active){color:var(--text2)}
+.panel-body{flex:1;overflow-y:auto;overflow-x:hidden}
+.panel-body::-webkit-scrollbar{width:3px}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-.tb-page-label {
-  font-size:12px; font-weight:600; color:var(--text3);
-  display:flex; align-items:center; gap:5px;
-}
-.tb-page-label::before { content:'/'; color:var(--border3); }
+/* ── Section List ── */
+.sections-panel{padding:10px}
+.panel-group-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:10px 4px 6px;display:block}
+.section-row{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:2px;border:1.5px solid transparent}
+.section-row:hover{background:var(--surface2)}
+.section-row.active{background:rgba(91,92,246,.08);border-color:rgba(91,92,246,.25)}
+.section-drag{color:var(--text3);font-size:12px;cursor:grab;padding:2px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.section-row:hover .section-drag{opacity:1}
+.section-icon-wrap{width:26px;height:26px;border-radius:6px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:background .15s}
+.section-row.active .section-icon-wrap{background:rgba(91,92,246,.18)}
+.section-row-label{font-size:12px;font-weight:600;color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.section-row.active .section-row-label{color:var(--text)}
+.section-actions{display:flex;align-items:center;gap:2px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.section-row:hover .section-actions,.section-row.active .section-actions{opacity:1}
+.section-action-btn{width:22px;height:22px;border-radius:5px;border:none;background:var(--surface3);color:var(--text3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.section-action-btn:hover{background:var(--border2);color:var(--text)}
+.section-action-btn.danger:hover{background:rgba(239,68,68,.15);color:var(--red)}
+.section-toggle{width:28px;height:16px;border-radius:8px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .15s;flex-shrink:0}
+.section-toggle.on{background:var(--accent)}
+.section-toggle::after{content:'';position:absolute;width:11px;height:11px;background:white;border-radius:50%;top:2.5px;left:2.5px;transition:left .15s}
+.section-toggle.on::after{left:14.5px}
+.add-section-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px dashed var(--border2);cursor:pointer;transition:all .15s;color:var(--text3);font-size:12.5px;font-weight:600;margin-top:6px}
+.add-section-row:hover{border-color:var(--accent);color:var(--accent2);background:rgba(91,92,246,.04)}
 
-.tb-spacer { flex:1; }
+/* ── Section Editor ── */
+.editor-panel{display:flex;flex-direction:column;height:100%}
+.editor-panel-header{padding:11px 12px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.editor-back-btn{width:26px;height:26px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .12s;flex-shrink:0}
+.editor-back-btn:hover{border-color:var(--border3);color:var(--text)}
+.editor-panel-title{font-size:13px;font-weight:800;color:var(--text);flex:1}
+.editor-fields{flex:1;overflow-y:auto;padding:0 0 8px}
+.editor-fields::-webkit-scrollbar{width:3px}
+.editor-fields::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.field-group{padding:12px 12px 4px;border-bottom:1px solid var(--border)}
+.field-group:last-child{border-bottom:none}
+.field-group-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:block}
+.field-row{margin-bottom:10px}
+.field-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.field-hint{font-size:10px;font-weight:500;color:var(--text3);font-family:'DM Mono',monospace}
+.field-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:7px;padding:7px 9px;font-size:12.5px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s;resize:vertical}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.1)}
+.field-input::placeholder{color:var(--text3)}
+.field-textarea{min-height:62px;line-height:1.5}
+.field-color-row{display:flex;gap:7px;align-items:center}
+.field-color-swatch{width:34px;height:34px;border-radius:7px;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;overflow:hidden;padding:2px;background:var(--surface2)}
+.field-color-swatch input[type=color]{width:100%;height:100%;border:none;cursor:pointer;background:none;outline:none;border-radius:4px}
+.field-select{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:7px;padding:7px 9px;font-size:12.5px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.field-select:focus{border-color:var(--accent)}
+.field-select option{background:var(--surface2)}
+.field-range-wrap{display:flex;align-items:center;gap:10px}
+.field-range{flex:1;accent-color:var(--accent);height:4px;cursor:pointer}
+.field-range-val{font-size:11px;font-weight:700;color:var(--text2);min-width:28px;text-align:right;font-family:'DM Mono',monospace}
+.color-palette{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+.color-dot{width:18px;height:18px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.color-dot:hover{transform:scale(1.15)}
+.color-dot.active{border-color:white;box-shadow:0 0 0 2px var(--accent)}
+.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.font-opt{padding:7px 8px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:11.5px;color:var(--text2);text-align:center;transition:all .12s;font-weight:600}
+.font-opt.active,.font-opt:hover{border-color:var(--accent);color:var(--accent2);background:rgba(91,92,246,.06)}
+.editor-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0}
+.ef-btn{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;border:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.ef-btn-ghost{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border2)}
+.ef-btn-ghost:hover{color:var(--text);border-color:var(--border3)}
+.ef-btn-primary{background:var(--accent);color:white}
+.ef-btn-primary:hover{background:#4f4de0}
 
-.tb-unsaved {
-  display:flex; align-items:center; gap:6px;
-  font-size:11.5px; font-weight:600; color:var(--amber);
-  background:rgba(245,158,11,.08);
-  border:1px solid rgba(245,158,11,.2);
-  padding:4px 10px; border-radius:6px;
-  opacity:0; transition:opacity .3s;
-  white-space:nowrap;
-}
-.tb-unsaved.show { opacity:1; }
-
-.tb-device-group {
-  display:flex;
-  background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:8px; overflow:hidden;
-  flex-shrink:0;
-}
-.tb-device-btn {
-  padding:6px 10px; border:none; background:none;
-  color:var(--text3); cursor:pointer; font-size:14px;
-  transition:all .15s; line-height:1;
-}
-.tb-device-btn.active { background:var(--surface3); color:var(--accent2); }
-
-.tb-btn {
-  display:flex; align-items:center; gap:6px;
-  padding:7px 13px; border-radius:8px;
-  font-size:12.5px; font-weight:700;
-  cursor:pointer; border:none;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  transition:all .15s; white-space:nowrap; flex-shrink:0;
-}
-.tb-btn-ghost {
-  background:transparent; color:var(--text2);
-  border:1px solid var(--border2);
-}
-.tb-btn-ghost:hover { border-color:var(--border3); color:var(--text); }
-.tb-btn-accent {
-  background:rgba(91,92,246,.12);
-  color:var(--accent2);
-  border:1px solid rgba(91,92,246,.3);
-}
-.tb-btn-accent:hover { background:rgba(91,92,246,.2); border-color:rgba(91,92,246,.5); }
-.tb-btn-primary { background:var(--accent); color:white; }
-.tb-btn-primary:hover { background:#4f4de0; box-shadow:0 4px 16px rgba(91,92,246,.4); }
-.tb-btn-primary:disabled { opacity:.5; cursor:not-allowed; }
-
-/* ── Store Dropdown ── */
-.store-dropdown {
-  position:absolute;
-  top:calc(var(--topbar-h) + 4px);
-  left:86px;
-  background:var(--surface2);
-  border:1px solid var(--border2);
-  border-radius:10px;
-  padding:6px; z-index:600;
-  min-width:200px;
-  box-shadow:0 12px 40px rgba(0,0,0,.5);
-  display:none;
-}
-.store-dropdown.open { display:block; }
-.store-dropdown-item {
-  display:flex; align-items:center; gap:10px;
-  padding:9px 10px; border-radius:7px;
-  cursor:pointer; transition:background .12s;
-  font-size:13px; font-weight:600; color:var(--text2);
-}
-.store-dropdown-item:hover { background:var(--surface3); color:var(--text); }
-.store-dropdown-item.active { color:var(--accent2); }
-.store-dropdown-dot {
-  width:7px; height:7px; border-radius:50%;
-  background:var(--green); flex-shrink:0;
-}
-.store-dropdown-sep {
-  border:none; border-top:1px solid var(--border);
-  margin:4px 0;
-}
-
-/* ═══════════════════════════════════════════════════════
-   BUILDER LAYOUT
-═══════════════════════════════════════════════════════ */
-#builder-wrap {
-  display:flex; flex:1; overflow:hidden;
-}
-
-/* ═══════════════════════════════════════════════════════
-   LEFT PANEL
-═══════════════════════════════════════════════════════ */
-#left-panel {
-  width:var(--panel-w); min-width:var(--panel-w);
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  display:flex; flex-direction:column;
-  overflow:hidden;
-}
-.panel-tabs {
-  display:flex; border-bottom:1px solid var(--border);
-  flex-shrink:0; background:var(--surface);
-}
-.panel-tab {
-  flex:1; padding:12px 4px;
-  font-size:11.5px; font-weight:700;
-  letter-spacing:.02em; color:var(--text3);
-  cursor:pointer; text-align:center;
-  border-bottom:2px solid transparent;
-  transition:all .15s; user-select:none;
-}
-.panel-tab.active {
-  color:var(--accent2);
-  border-bottom-color:var(--accent);
-  background:rgba(91,92,246,.04);
-}
-.panel-tab:hover:not(.active) { color:var(--text2); }
-
-.panel-body {
-  flex:1; overflow-y:auto; overflow-x:hidden;
-}
-.panel-body::-webkit-scrollbar { width:3px; }
-.panel-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
-
-/* ── Group labels ── */
-.panel-group-label {
-  font-size:10px; font-weight:800;
-  letter-spacing:.12em; text-transform:uppercase;
-  color:var(--text3); padding:10px 4px 6px;
-  display:block;
-}
-
-/* ── Section Rows ── */
-.sections-panel { padding:12px; }
-.section-row {
-  display:flex; align-items:center; gap:7px;
-  padding:8px 9px; border-radius:8px;
-  cursor:pointer; transition:all .15s;
-  margin-bottom:2px;
-  border:1.5px solid transparent;
-}
-.section-row:hover { background:var(--surface2); }
-.section-row.active {
-  background:rgba(91,92,246,.08);
-  border-color:rgba(91,92,246,.25);
-}
-.section-drag {
-  color:var(--text3); font-size:12px;
-  cursor:grab; padding:2px;
-  opacity:0; transition:opacity .15s; flex-shrink:0;
-}
-.section-row:hover .section-drag { opacity:1; }
-.section-icon-wrap {
-  width:28px; height:28px; border-radius:6px;
-  background:var(--surface3);
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; flex-shrink:0; transition:background .15s;
-}
-.section-row.active .section-icon-wrap { background:rgba(91,92,246,.18); }
-.section-row-label {
-  font-size:12.5px; font-weight:600; color:var(--text2);
-  flex:1; min-width:0;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.section-row.active .section-row-label { color:var(--text); }
-.section-actions {
-  display:flex; align-items:center; gap:3px;
-  opacity:0; transition:opacity .15s; flex-shrink:0;
-}
-.section-row:hover .section-actions,
-.section-row.active .section-actions { opacity:1; }
-.section-action-btn {
-  width:22px; height:22px; border-radius:5px;
-  border:none; background:var(--surface3);
-  color:var(--text3); cursor:pointer;
-  font-size:11px;
-  display:flex; align-items:center; justify-content:center;
-  transition:all .12s;
-}
-.section-action-btn:hover { background:var(--border2); color:var(--text); }
-.section-action-btn.danger:hover { background:rgba(239,68,68,.15); color:var(--red); }
-.section-toggle {
-  width:28px; height:16px; border-radius:8px;
-  background:var(--border2); border:none;
-  cursor:pointer; position:relative;
-  transition:background .15s; flex-shrink:0;
-}
-.section-toggle.on { background:var(--accent); }
-.section-toggle::after {
-  content:''; position:absolute;
-  width:11px; height:11px;
-  background:white; border-radius:50%;
-  top:2.5px; left:2.5px;
-  transition:left .15s;
-}
-.section-toggle.on::after { left:14.5px; }
-
-.add-section-row {
-  display:flex; align-items:center; gap:8px;
-  padding:8px 10px; border-radius:8px;
-  border:1.5px dashed var(--border2);
-  cursor:pointer; transition:all .15s;
-  color:var(--text3); font-size:13px; font-weight:600;
-  margin-top:6px;
-}
-.add-section-row:hover {
-  border-color:var(--accent); color:var(--accent2);
-  background:rgba(91,92,246,.04);
-}
-
-/* ── Editor Panel (replaces sections list) ── */
-.editor-panel { display:flex; flex-direction:column; height:100%; }
-.editor-panel-header {
-  padding:12px 12px 10px;
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:9px;
-  flex-shrink:0;
-}
-.editor-back-btn {
-  width:28px; height:28px; border-radius:7px;
-  background:var(--surface2);
-  border:1px solid var(--border2);
-  color:var(--text2); cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; transition:all .12s; flex-shrink:0;
-}
-.editor-back-btn:hover { border-color:var(--border3); color:var(--text); }
-.editor-panel-title { font-size:13px; font-weight:800; color:var(--text); flex:1; }
-.editor-fields { flex:1; overflow-y:auto; padding:12px; }
-.editor-fields::-webkit-scrollbar { width:3px; }
-.editor-fields::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
-.field-group { margin-bottom:18px; }
-.field-group-label {
-  font-size:10px; font-weight:800;
-  letter-spacing:.12em; text-transform:uppercase;
-  color:var(--text3); margin-bottom:10px;
-  padding-bottom:6px; border-bottom:1px solid var(--border);
-  display:block;
-}
-.field-row { margin-bottom:11px; }
-.field-label {
-  font-size:11.5px; font-weight:700; color:var(--text2);
-  margin-bottom:5px;
-  display:flex; align-items:center; justify-content:space-between;
-}
-.field-hint { font-size:10px; font-weight:500; color:var(--text3); }
-.field-input {
-  width:100%;
-  background:var(--surface2);
-  border:1.5px solid var(--border2);
-  border-radius:8px;
-  padding:8px 10px;
-  font-size:12.5px; color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  outline:none; transition:border-color .15s;
-  resize:vertical;
-}
-.field-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,92,246,.1); }
-.field-input::placeholder { color:var(--text3); }
-.field-textarea { min-height:68px; line-height:1.5; }
-.field-color-row { display:flex; gap:8px; align-items:center; }
-.field-color-swatch {
-  width:36px; height:36px;
-  border-radius:8px;
-  border:1.5px solid var(--border2);
-  cursor:pointer; flex-shrink:0;
-  overflow:hidden; padding:2px;
-  background:var(--surface2);
-}
-.field-color-swatch input[type=color] {
-  width:100%; height:100%;
-  border:none; cursor:pointer;
-  background:none; outline:none; border-radius:5px;
-}
-.field-select {
-  width:100%;
-  background:var(--surface2);
-  border:1.5px solid var(--border2);
-  border-radius:8px;
-  padding:8px 10px;
-  font-size:12.5px; color:var(--text);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  outline:none; cursor:pointer;
-  transition:border-color .15s;
-  appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 10px center;
-  padding-right:28px;
-}
-.field-select:focus { border-color:var(--accent); }
-.field-select option { background:var(--surface2); }
-.field-range-wrap { display:flex; align-items:center; gap:10px; }
-.field-range { flex:1; accent-color:var(--accent); height:4px; cursor:pointer; }
-.field-range-val {
-  font-size:12px; font-weight:700; color:var(--text2);
-  min-width:32px; text-align:right;
-  font-family:'DM Mono',monospace;
-}
-.color-palette { display:flex; gap:5px; flex-wrap:wrap; margin-top:7px; }
-.color-dot {
-  width:20px; height:20px; border-radius:5px;
-  cursor:pointer; border:2px solid transparent; transition:transform .12s;
-}
-.color-dot:hover { transform:scale(1.15); }
-.color-dot.active { border-color:white; box-shadow:0 0 0 2px var(--accent); }
-.font-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.font-opt {
-  padding:8px 10px;
-  background:var(--surface2);
-  border:1.5px solid var(--border2);
-  border-radius:8px; cursor:pointer;
-  font-size:12px; color:var(--text2);
-  text-align:center; transition:all .12s; font-weight:600;
-}
-.font-opt.active,.font-opt:hover {
-  border-color:var(--accent); color:var(--accent2);
-  background:rgba(91,92,246,.06);
-}
-.editor-footer {
-  padding:10px 12px;
-  border-top:1px solid var(--border);
-  display:flex; gap:8px; flex-shrink:0;
-}
-.ef-btn {
-  flex:1; padding:9px; border-radius:8px;
-  font-size:12.5px; font-weight:700; cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  transition:all .15s; border:none;
-  display:flex; align-items:center; justify-content:center; gap:5px;
-}
-.ef-btn-ghost {
-  background:var(--surface2); color:var(--text2);
-  border:1.5px solid var(--border2);
-}
-.ef-btn-ghost:hover { color:var(--text); border-color:var(--border3); }
-.ef-btn-primary { background:var(--accent); color:white; }
-.ef-btn-primary:hover { background:#4f4de0; }
+/* ── Toggle switch field ── */
+.field-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0}
+.field-toggle{width:36px;height:20px;border-radius:10px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .15s;flex-shrink:0}
+.field-toggle.on{background:var(--accent)}
+.field-toggle::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:left .15s}
+.field-toggle.on::after{left:19px}
 
 /* ── Themes Panel ── */
-.themes-panel { padding:12px; }
-.theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.theme-card {
-  border:2px solid var(--border);
-  border-radius:10px; overflow:hidden;
-  cursor:pointer; transition:all .2s; position:relative;
-}
-.theme-card:hover { border-color:rgba(91,92,246,.4); transform:translateY(-1px); }
-.theme-card.active {
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(91,92,246,.15);
-}
-.theme-check {
-  position:absolute; top:6px; right:6px;
-  width:18px; height:18px; background:var(--accent);
-  border-radius:50%; display:none;
-  align-items:center; justify-content:center;
-  font-size:10px; color:white; font-weight:700; z-index:2;
-}
-.theme-card.active .theme-check { display:flex; }
-.theme-preview { height:72px; overflow:hidden; position:relative; }
-.theme-name {
-  padding:6px 8px; font-size:11px; font-weight:700;
-  color:var(--text2); background:var(--surface2);
-  border-top:1px solid var(--border);
-}
-.themes-browse-cta {
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  margin-top:10px; padding:12px;
-  background:rgba(91,92,246,.06);
-  border:1.5px dashed rgba(91,92,246,.3);
-  border-radius:10px; cursor:pointer;
-  font-size:13px; font-weight:700; color:var(--accent2);
-  transition:all .15s; text-align:center;
-  flex-direction:column;
-}
-.themes-browse-cta:hover { background:rgba(91,92,246,.1); border-color:rgba(91,92,246,.5); }
-.themes-browse-cta-sub { font-size:11px; color:var(--text3); font-weight:600; margin-top:2px; }
+.themes-panel{padding:10px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.theme-card{border:2px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.theme-card:hover{border-color:rgba(91,92,246,.4);transform:translateY(-1px)}
+.theme-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.15)}
+.theme-check{position:absolute;top:5px;right:5px;width:17px;height:17px;background:var(--accent);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700;z-index:2}
+.theme-card.active .theme-check{display:flex}
+.theme-preview{height:68px;overflow:hidden}
+.theme-name{padding:5px 8px;font-size:10.5px;font-weight:700;color:var(--text2);background:var(--surface2);border-top:1px solid var(--border)}
+.themes-browse-cta{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;margin-top:10px;padding:14px;background:rgba(91,92,246,.06);border:1.5px dashed rgba(91,92,246,.3);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s}
+.themes-browse-cta:hover{background:rgba(91,92,246,.1);border-color:rgba(91,92,246,.5)}
+.themes-browse-cta-title{font-size:13px;font-weight:800;color:var(--accent2)}
+.themes-browse-cta-sub{font-size:10.5px;color:var(--text3);font-weight:600}
 
 /* ── Settings Panel ── */
-.settings-panel { padding:14px; }
+.settings-panel{padding:12px}
 
-/* ═══════════════════════════════════════════════════════
-   CENTER PREVIEW
-═══════════════════════════════════════════════════════ */
-#center-panel {
-  flex:1; display:flex; flex-direction:column;
-  background:#111118; overflow:hidden; position:relative;
-}
-.preview-bar {
-  height:40px;
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center;
-  padding:0 14px; gap:10px; flex-shrink:0;
-}
-.preview-url {
-  flex:1;
-  display:flex; align-items:center; gap:8px;
-  background:var(--bg);
-  border:1px solid var(--border2);
-  border-radius:7px;
-  padding:5px 12px;
-  max-width:460px; margin:0 auto;
-}
-.preview-url-lock { font-size:11px; color:var(--green); }
-.preview-url-text {
-  font-size:12px;
-  font-family:'DM Mono',monospace;
-  color:var(--text3);
-  overflow:hidden; text-overflow:ellipsis;
-  white-space:nowrap; flex:1;
-}
-.preview-refresh {
-  background:none; border:none; color:var(--text3);
-  font-size:13px; cursor:pointer; padding:2px 5px;
-  border-radius:4px; transition:all .12s; margin-left:auto;
-}
-.preview-refresh:hover { color:var(--text); background:var(--surface2); }
-.preview-canvas {
-  flex:1; overflow:auto;
-  display:flex; align-items:flex-start; justify-content:center;
-  padding:20px;
-}
-.preview-canvas::-webkit-scrollbar { width:5px; height:5px; }
-.preview-canvas::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
-.device-shell {
-  background:white; border-radius:4px;
-  overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
-  transition:all .3s ease; flex-shrink:0;
-}
-.device-shell.desktop { width:100%; max-width:1100px; }
-.device-shell.tablet {
-  width:768px; border-radius:14px;
-  border:10px solid #1a1c2e;
-  box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7);
-}
-.device-shell.mobile {
-  width:375px; border-radius:32px;
-  border:10px solid #1a1c2e;
-  box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7);
-}
-.device-shell iframe { display:block; width:100%; border:none; }
+/* ── Center Preview ── */
+#center-panel{flex:1;display:flex;flex-direction:column;background:#111118;overflow:hidden}
+.preview-bar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
+.preview-url{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:5px 12px;max-width:460px;margin:0 auto}
+.preview-url-lock{font-size:11px;color:var(--green)}
+.preview-url-text{font-size:11.5px;font-family:'DM Mono',monospace;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.preview-refresh{background:none;border:none;color:var(--text3);font-size:12.5px;cursor:pointer;padding:3px 7px;border-radius:4px;transition:all .12s;margin-left:auto;display:flex;align-items:center;gap:4px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600}
+.preview-refresh:hover{color:var(--text);background:var(--surface2)}
+.preview-canvas{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px}
+.preview-canvas::-webkit-scrollbar{width:5px;height:5px}
+.preview-canvas::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.device-shell{background:white;border-radius:4px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);transition:all .3s ease;flex-shrink:0}
+.device-shell.desktop{width:100%;max-width:1100px}
+.device-shell.tablet{width:768px;border-radius:14px;border:10px solid #1a1c2e;box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7)}
+.device-shell.mobile{width:375px;border-radius:32px;border:10px solid #1a1c2e;box-shadow:0 0 0 1px var(--border),0 30px 60px rgba(0,0,0,.7)}
+.device-shell iframe{display:block;width:100%;border:none}
 
-/* ═══════════════════════════════════════════════════════
-   ADD SECTION DRAWER (slides up from bottom)
-═══════════════════════════════════════════════════════ */
-.add-section-drawer {
-  position:fixed;
-  bottom:0;
-  left:var(--panel-w);
-  right:0;
-  background:var(--surface);
-  border-top:1px solid var(--border2);
-  padding:18px 24px 24px;
-  z-index:300;
-  transform:translateY(100%);
-  transition:transform .25s cubic-bezier(.2,.8,.2,1);
-  box-shadow:0 -20px 60px rgba(0,0,0,.5);
-}
-.add-section-drawer.open { transform:translateY(0); }
-.add-section-drawer-header {
-  display:flex; align-items:center;
-  justify-content:space-between; margin-bottom:14px;
-}
-.add-section-drawer-title { font-size:15px; font-weight:800; color:var(--text); }
-.add-section-drawer-close {
-  width:28px; height:28px; border-radius:7px;
-  border:1px solid var(--border2);
-  background:var(--surface2); color:var(--text2);
-  cursor:pointer; font-size:14px;
-  display:flex; align-items:center; justify-content:center;
-  transition:all .12s;
-}
-.add-section-drawer-close:hover { border-color:var(--border3); color:var(--text); }
-.add-section-types {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
-  gap:9px;
-}
-.add-section-type {
-  display:flex; flex-direction:column;
-  align-items:center; gap:7px;
-  padding:14px 10px;
-  background:var(--surface2);
-  border:1.5px solid var(--border2);
-  border-radius:10px; cursor:pointer;
-  transition:all .15s; text-align:center;
-}
-.add-section-type:hover {
-  border-color:var(--accent);
-  background:rgba(91,92,246,.06);
-  transform:translateY(-2px);
-}
-.add-section-type-icon { font-size:22px; }
-.add-section-type-name { font-size:12px; font-weight:700; color:var(--text2); }
+/* ── Add Section Drawer ── */
+.add-section-drawer{position:fixed;bottom:0;left:var(--panel-w);right:0;background:var(--surface);border-top:1px solid var(--border2);padding:16px 24px 24px;z-index:300;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
+.add-section-drawer.open{transform:translateY(0)}
+.add-section-drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.add-section-drawer-title{font-size:14px;font-weight:800;color:var(--text)}
+.asd-close{width:26px;height:26px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.asd-close:hover{border-color:var(--border3);color:var(--text)}
+.add-section-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.add-section-type{display:flex;flex-direction:column;align-items:center;gap:6px;padding:13px 10px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center}
+.add-section-type:hover{border-color:var(--accent);background:rgba(91,92,246,.06);transform:translateY(-2px)}
+.add-section-type-icon{font-size:20px}
+.add-section-type-name{font-size:11px;font-weight:700;color:var(--text2)}
 
-/* ═══════════════════════════════════════════════════════
-   THEME MINI PREVIEWS (CSS Art)
-═══════════════════════════════════════════════════════ */
-.tp-modern{background:#0f0f14;height:72px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
-.tp-m-nav{height:10px;background:#1a1a25;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px}
-.tp-m-logo{width:16px;height:3px;background:#6c63ff;border-radius:1px}
+/* ── Theme preview CSS art ── */
+.tp-modern{background:#0f0f14;height:68px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
+.tp-m-nav{height:9px;background:#1a1a25;border-radius:2px;display:flex;align-items:center;padding:0 4px;gap:3px}
+.tp-m-logo{width:14px;height:3px;background:#6c63ff;border-radius:1px}
 .tp-m-links{margin-left:auto;display:flex;gap:2px}
-.tp-m-links span{width:12px;height:2px;background:#333;border-radius:1px}
+.tp-m-links span{width:11px;height:2px;background:#333;border-radius:1px}
 .tp-m-hero{flex:1;background:linear-gradient(135deg,rgba(108,99,255,.2),transparent);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-m-h{width:48px;height:5px;background:rgba(255,255,255,.7);border-radius:1px}
-.tp-m-sub{width:34px;height:3px;background:rgba(255,255,255,.25);border-radius:1px}
-.tp-m-btn{width:24px;height:5px;background:#6c63ff;border-radius:1px;margin-top:2px}
+.tp-m-h{width:44px;height:4px;background:rgba(255,255,255,.7);border-radius:1px}
+.tp-m-sub{width:30px;height:2px;background:rgba(255,255,255,.25);border-radius:1px}
+.tp-m-btn{width:22px;height:4px;background:#6c63ff;border-radius:1px;margin-top:2px}
 .tp-m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-.tp-m-card{height:10px;background:#1a1a25;border-radius:2px}
-
-.tp-minimal{background:#fafafa;height:72px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
-.tp-mn-nav{height:10px;background:white;border-bottom:1px solid #eee;display:flex;align-items:center;padding:0 4px}
-.tp-mn-logo{width:14px;height:3px;background:#111;border-radius:1px}
+.tp-m-card{height:9px;background:#1a1a25;border-radius:2px}
+.tp-minimal{background:#fafafa;height:68px;padding:4px 6px;display:flex;flex-direction:column;gap:3px}
+.tp-mn-nav{height:9px;background:white;border-bottom:1px solid #eee;display:flex;align-items:center;padding:0 4px}
+.tp-mn-logo{width:13px;height:3px;background:#111;border-radius:1px}
 .tp-mn-hero{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-mn-h{width:42px;height:4px;background:#222;border-radius:1px}
-.tp-mn-sub{width:30px;height:2px;background:#aaa;border-radius:1px}
+.tp-mn-h{width:38px;height:3px;background:#222;border-radius:1px}
+.tp-mn-sub{width:26px;height:2px;background:#aaa;border-radius:1px}
 .tp-mn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-.tp-mn-card{height:10px;background:#f0f0f0;border-radius:2px}
-
-.tp-bold{background:#ff4d00;height:72px}
-.tp-bo-nav{height:12px;background:#e03d00;display:flex;align-items:center;padding:0 5px}
-.tp-bo-logo{width:16px;height:4px;background:white;border-radius:1px}
-.tp-bo-hero{height:36px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-bo-h{width:45px;height:6px;background:white;border-radius:1px}
+.tp-mn-card{height:9px;background:#f0f0f0;border-radius:2px}
+.tp-bold{background:#ff4d00;height:68px}
+.tp-bo-nav{height:11px;background:#e03d00;display:flex;align-items:center;padding:0 5px}
+.tp-bo-logo{width:14px;height:3px;background:white;border-radius:1px}
+.tp-bo-hero{height:33px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-bo-h{width:40px;height:5px;background:white;border-radius:1px}
 .tp-bo-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 4px 4px}
-.tp-bo-card{height:10px;background:rgba(0,0,0,.15);border-radius:2px}
-
-.tp-luxury{background:#0d0b09;height:72px}
-.tp-lx-nav{height:12px;background:#0d0b09;border-bottom:1px solid #2a2318;display:flex;align-items:center;justify-content:center}
-.tp-lx-logo{width:20px;height:2px;background:#c9a84c}
-.tp-lx-hero{height:32px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-lx-h{width:36px;height:4px;background:#c9a84c}
-.tp-lx-sub{width:26px;height:2px;background:#5a4a2e}
+.tp-bo-card{height:9px;background:rgba(0,0,0,.15);border-radius:2px}
+.tp-luxury{background:#0d0b09;height:68px}
+.tp-lx-nav{height:11px;background:#0d0b09;border-bottom:1px solid #2a2318;display:flex;align-items:center;justify-content:center}
+.tp-lx-logo{width:18px;height:2px;background:#c9a84c}
+.tp-lx-hero{height:30px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-lx-h{width:32px;height:3px;background:#c9a84c}
+.tp-lx-sub{width:22px;height:2px;background:#5a4a2e}
 .tp-lx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
-.tp-lx-card{height:10px;background:#1a1510;border:1px solid #2a2318}
-
-.tp-pastel{background:#fef6f0;height:72px}
-.tp-ps-nav{height:10px;background:#fff;display:flex;align-items:center;padding:0 5px}
-.tp-ps-logo{width:16px;height:3px;background:#e8847a;border-radius:4px}
-.tp-ps-hero{height:32px;background:linear-gradient(135deg,#fde8e0,#fef0fa);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-ps-h{width:38px;height:4px;background:#d47a8f;border-radius:4px}
+.tp-lx-card{height:9px;background:#1a1510;border:1px solid #2a2318}
+.tp-pastel{background:#fef6f0;height:68px}
+.tp-ps-nav{height:9px;background:#fff;display:flex;align-items:center;padding:0 5px}
+.tp-ps-logo{width:14px;height:3px;background:#e8847a;border-radius:4px}
+.tp-ps-hero{height:30px;background:linear-gradient(135deg,#fde8e0,#fef0fa);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-ps-h{width:34px;height:3px;background:#d47a8f;border-radius:4px}
 .tp-ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
-.tp-ps-card{height:14px;background:#fde8e0;border-radius:4px}
-
-.tp-tech{background:#020d1a;height:72px}
-.tp-tc-nav{height:10px;background:#020d1a;border-bottom:1px solid #0a3a5a;display:flex;align-items:center;padding:0 5px}
-.tp-tc-logo{width:16px;height:3px;background:#00d4ff;border-radius:1px}
-.tp-tc-hero{height:32px;background:linear-gradient(135deg,rgba(0,212,255,.1),transparent);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
-.tp-tc-h{width:38px;height:4px;background:#00d4ff;border-radius:1px}
+.tp-ps-card{height:13px;background:#fde8e0;border-radius:4px}
+.tp-tech{background:#020d1a;height:68px}
+.tp-tc-nav{height:9px;background:#020d1a;border-bottom:1px solid #0a3a5a;display:flex;align-items:center;padding:0 5px}
+.tp-tc-logo{width:14px;height:3px;background:#00d4ff;border-radius:1px}
+.tp-tc-hero{height:30px;background:linear-gradient(135deg,rgba(0,212,255,.1),transparent);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
+.tp-tc-h{width:34px;height:3px;background:#00d4ff;border-radius:1px}
 .tp-tc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
-.tp-tc-card{height:10px;background:#0a1a2a;border:1px solid #0a3a5a;border-radius:1px}
+.tp-tc-card{height:9px;background:#0a1a2a;border:1px solid #0a3a5a;border-radius:1px}
 
-/* ═══════════════════════════════════════════════════════
-   LOADING OVERLAY
-═══════════════════════════════════════════════════════ */
-#loading-overlay {
-  position:fixed; inset:0; background:var(--bg);
-  display:flex; align-items:center; justify-content:center;
-  flex-direction:column; gap:16px; z-index:9999;
-  transition:opacity .4s;
-}
-#loading-overlay.hidden { opacity:0; pointer-events:none; }
-.loading-logo {
-  font-family:'Outfit',sans-serif;
-  font-size:28px; font-weight:900; color:var(--text); letter-spacing:-.04em;
-}
-.loading-logo em { color:var(--accent2); font-style:normal; }
-.loading-bar {
-  width:180px; height:3px;
-  background:var(--surface2); border-radius:2px; overflow:hidden;
-}
-.loading-bar-fill {
-  height:100%; width:0;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  border-radius:2px; transition:width .4s ease;
-}
-.loading-text { font-size:12.5px; color:var(--text3); font-weight:600; }
+/* ── Loading ── */
+#loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999;transition:opacity .4s}
+#loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-logo{font-family:'Outfit',sans-serif;font-size:28px;font-weight:900;color:var(--text);letter-spacing:-.04em}
+.loading-logo em{color:var(--accent2);font-style:normal}
+.loading-bar{width:180px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.loading-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+.loading-text{font-size:12px;color:var(--text3);font-weight:600}
 
-/* ═══════════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════════ */
-#toast-container {
-  position:fixed; bottom:24px; right:24px;
-  z-index:9999; display:flex; flex-direction:column;
-  gap:8px; align-items:flex-end;
-}
-.toast {
-  display:flex; align-items:center; gap:10px;
-  padding:11px 15px; border-radius:10px;
-  background:var(--surface2); border:1px solid var(--border2);
-  box-shadow:0 8px 32px rgba(0,0,0,.4);
-  transform:translateX(80px); opacity:0;
-  transition:all .3s cubic-bezier(.2,.8,.2,1);
-  max-width:300px;
-}
-.toast.show { transform:translateX(0); opacity:1; }
-.toast.success { border-color:rgba(34,197,94,.3); }
-.toast.error   { border-color:rgba(239,68,68,.3); }
-.toast-icon { font-size:16px; flex-shrink:0; }
-.toast-text { font-size:12.5px; font-weight:700; color:var(--text); }
-
-/* Drag states */
-.section-row.dragging { opacity:.3; }
-.section-row.drag-over { border-color:var(--accent)!important; background:rgba(91,92,246,.06)!important; }
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateX(80px);opacity:0;transition:all .3s cubic-bezier(.2,.8,.2,1);max-width:300px}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.success{border-color:rgba(34,197,94,.3)}
+.toast.error{border-color:rgba(239,68,68,.3)}
+.toast-icon{font-size:16px;flex-shrink:0}
+.toast-text{font-size:12.5px;font-weight:700;color:var(--text)}
+.section-row.dragging{opacity:.3}
+.section-row.drag-over{border-color:var(--accent)!important;background:rgba(91,92,246,.06)!important}
 </style>
 </head>
 <body>
 
-<!-- ── Loading Overlay ── -->
 <div id="loading-overlay">
   <div class="loading-logo">e<em>K</em>art</div>
   <div class="loading-bar"><div class="loading-bar-fill" id="loading-fill"></div></div>
-  <div class="loading-text" id="loading-text">Loading your store…</div>
+  <div class="loading-text" id="loading-text">Loading…</div>
 </div>
 
-<!-- ── Topbar ── -->
 <div id="topbar">
   <a class="tb-logo" href="home.html">e<em>K</em>art</a>
-
-  <!-- Store switcher pill -->
   <div class="tb-store-pill" onclick="toggleStoreDropdown()" id="store-pill">
     <div class="tb-store-dot"></div>
     <div class="tb-store-name" id="store-name-display">Loading…</div>
     <div class="tb-store-chevron">▾</div>
   </div>
-
-  <!-- Store dropdown (portal, absolute positioned) -->
   <div class="store-dropdown" id="store-dropdown"></div>
-
   <span class="tb-page-label">Website Builder</span>
   <div class="tb-spacer"></div>
-
-  <!-- Unsaved badge -->
   <div class="tb-unsaved" id="unsaved-indicator"><span>●</span> Unsaved changes</div>
-
-  <!-- Device switcher -->
   <div class="tb-device-group">
     <button class="tb-device-btn active" onclick="setDevice('desktop',this)" title="Desktop">🖥</button>
-    <button class="tb-device-btn" onclick="setDevice('tablet',this)"  title="Tablet">▭</button>
-    <button class="tb-device-btn" onclick="setDevice('mobile',this)"  title="Mobile">📱</button>
+    <button class="tb-device-btn" onclick="setDevice('tablet',this)" title="Tablet">▭</button>
+    <button class="tb-device-btn" onclick="setDevice('mobile',this)" title="Mobile">📱</button>
   </div>
-
-  <!-- Browse Themes (restored from doc1) -->
-  <button class="tb-btn tb-btn-accent" onclick="window.location='themes-store.html'">
-    🎭 Browse Themes
-  </button>
-
-  <!-- Live Preview -->
+  <button class="tb-btn tb-btn-accent" onclick="window.location='themes-store.html'">🎭 Browse Themes</button>
   <button class="tb-btn tb-btn-ghost" onclick="previewLive()">↗ Preview</button>
-
-  <!-- Save -->
-  <button class="tb-btn tb-btn-primary" id="save-btn" onclick="saveAndPublish()">
-    💾 Save &amp; Publish
-  </button>
+  <button class="tb-btn tb-btn-primary" id="save-btn" onclick="saveAndPublish()">💾 Save &amp; Publish</button>
 </div>
 
-<!-- ── Builder Wrap ── -->
 <div id="builder-wrap">
-
-  <!-- LEFT PANEL -->
   <div id="left-panel">
     <div class="panel-tabs">
       <div class="panel-tab active" onclick="switchLeftTab('sections',this)">Sections</div>
       <div class="panel-tab" onclick="switchLeftTab('themes',this)">Themes</div>
       <div class="panel-tab" onclick="switchLeftTab('settings',this)">Settings</div>
     </div>
-
-    <!-- SECTIONS TAB -->
     <div class="panel-body" id="tab-sections">
       <div class="sections-panel" id="sections-list-wrap"></div>
     </div>
-
-    <!-- THEMES TAB -->
-    <div class="panel-body" id="tab-themes" style="display:none;">
+    <div class="panel-body" id="tab-themes" style="display:none">
       <div class="themes-panel">
         <span class="panel-group-label">Quick Apply</span>
         <div class="theme-grid" id="themes-grid"></div>
-        <!-- Browse Theme Store CTA (restored from doc1) -->
         <div class="themes-browse-cta" onclick="window.location='themes-store.html'">
-          <div style="font-size:22px;">🎭</div>
-          <div style="font-size:13px;font-weight:800;">Browse Theme Store</div>
+          <div style="font-size:20px">🎭</div>
+          <div class="themes-browse-cta-title">Browse Theme Store</div>
           <div class="themes-browse-cta-sub">24+ professional themes available</div>
         </div>
       </div>
     </div>
-
-    <!-- SETTINGS TAB -->
-    <div class="panel-body" id="tab-settings" style="display:none;">
+    <div class="panel-body" id="tab-settings" style="display:none">
       <div class="settings-panel" id="settings-panel-content"></div>
     </div>
   </div>
 
-  <!-- CENTER: PREVIEW -->
   <div id="center-panel">
     <div class="preview-bar">
       <div class="preview-url">
         <span class="preview-url-lock">🔒</span>
         <span class="preview-url-text" id="preview-url-text">ekart.aasaitech.in/your-store</span>
       </div>
-      <button class="preview-refresh" onclick="renderPreview()" title="Refresh">↺ Refresh</button>
+      <button class="preview-refresh" onclick="renderPreview()">↺ Refresh</button>
     </div>
     <div class="preview-canvas">
       <div class="device-shell desktop" id="device-shell">
@@ -828,507 +331,510 @@ body {
       </div>
     </div>
   </div>
-
 </div>
 
-<!-- ── Add Section Drawer ── -->
 <div class="add-section-drawer" id="add-section-drawer">
   <div class="add-section-drawer-header">
     <span class="add-section-drawer-title">Add Section</span>
-    <button class="add-section-drawer-close" onclick="closeAddDrawer()">✕</button>
+    <button class="asd-close" onclick="closeAddDrawer()">✕</button>
   </div>
   <div class="add-section-types" id="add-section-types"></div>
 </div>
 
-<!-- ── Toast Container ── -->
 <div id="toast-container"></div>
 
 <script>
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    STATE
-════════════════════════════════════════════════════ */
-let currentUser    = null
-let allStores      = []
-let currentStoreId = null
-let currentDevice  = 'desktop'
-let activeLeftTab  = 'sections'
-let activeSectionId = null
-let hasUnsaved     = false
+════════════════════════════════════════════════ */
+let currentUser=null,allStores=[],currentStoreId=null
+let currentDevice='desktop',activeLeftTab='sections',activeSectionId=null,hasUnsaved=false
 
-let themeData = {
-  themeId: 'modern',
-  primaryColor: '#5b5cf6',
-  bgColor: '#09090f',
-  textColor: '#f1f5f9',
-  cardBg: '#13131e',
-  navBg: '#0e0e17',
-  font: 'Outfit',
-  cols: '3',
-  radius: '12px',
-  btnStyle: 'rounded',
-  announcementText: '✨ Free shipping on orders over ₹999!',
-  footerText: '© 2025 eKart Store. All rights reserved.'
+let themeData={
+  themeId:'modern',primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',
+  cardBg:'#13131e',navBg:'#0e0e17',font:'Outfit',cols:'3',radius:'12px',
+  btnStyle:'rounded',announcementText:'✨ Free shipping on orders over ₹999!',
+  footerText:'© 2025 eKart Store. All rights reserved.'
+}
+let sections=[]
+
+/* ════════════════════════════════════════════════
+   TYPE RESOLUTION
+   We NEVER translate types — we preserve the exact string the backend gave us.
+   resolveFrontendType() just maps backend strings → SECTION_DEFS keys for UI.
+   On save, we send s._bt (original backend type) unchanged.
+════════════════════════════════════════════════ */
+const BACKEND_TYPE_ALIASES={
+  navigation:'navbar', nav:'navbar', header:'navbar',
+  featured_products:'featured', products:'featured',
+  category_grid:'categories', categories_grid:'categories',
+  trust_badges:'trustbadges', trust_section:'trustbadges', trust:'trustbadges',
+  newsletter_signup:'newsletter',
+  announcement_bar:'announcement',
+  promo_banner:'banner', promotional_banner:'banner',
+  image_gallery:'gallery', photo_gallery:'gallery',
+  countdown_timer:'countdown',
+  faq_section:'faq',
 }
 
-let sections = []
+function resolveFrontendType(bt){
+  if(SECTION_DEFS[bt]) return bt                    // exact match
+  return BACKEND_TYPE_ALIASES[bt] || bt             // alias or passthrough
+}
 
-/* ════════════════════════════════════════════════════
-   SECTION DEFINITIONS
-════════════════════════════════════════════════════ */
-const SECTION_DEFS = {
-  announcement: { icon:'📢', label:'Announcement Bar', fields:[
-    { key:'text',      label:'Message',         type:'text',  placeholder:'Free shipping on orders over ₹999!' },
-    { key:'bgColor',   label:'Background Color', type:'color' },
-    { key:'textColor', label:'Text Color',       type:'color' },
+function getSectionDef(type){
+  return SECTION_DEFS[type] || SECTION_DEFS[resolveFrontendType(type)] || {icon:'📦',label:type,groups:[]}
+}
+
+/* ════════════════════════════════════════════════
+   SECTION DEFINITIONS  (with grouped fields)
+════════════════════════════════════════════════ */
+const SECTION_DEFS={
+  announcement:{icon:'📢',label:'Announcement Bar',groups:[
+    {label:'Content',fields:[
+      {key:'text',label:'Message',type:'text',placeholder:'✨ Free shipping on orders over ₹999!'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background Color',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'textSize',label:'Text Size',type:'select',opts:['small','normal','large']},
+      {key:'bold',label:'Bold Text',type:'select',opts:['yes','no']},
+    ]},
   ]},
-  navbar: { icon:'🔝', label:'Navigation Bar', fields:[
-    { key:'logoText',   label:'Logo Text',   type:'text',   placeholder:'My Store' },
-    { key:'showSearch', label:'Show Search', type:'select', opts:['yes','no'] },
-    { key:'showCart',   label:'Show Cart',   type:'select', opts:['yes','no'] },
+  navbar:{icon:'🔝',label:'Navigation Bar',groups:[
+    {label:'Branding',fields:[
+      {key:'logoText',label:'Logo Text',type:'text',placeholder:'My Store'},
+      {key:'logoColor',label:'Logo Color',type:'color'},
+    ]},
+    {label:'Appearance',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'linkColor',label:'Link Color',type:'color'},
+    ]},
+    {label:'Options',fields:[
+      {key:'showSearch',label:'Show Search Button',type:'select',opts:['yes','no']},
+      {key:'showCart',label:'Show Cart Button',type:'select',opts:['yes','no']},
+      {key:'sticky',label:'Sticky on Scroll',type:'select',opts:['yes','no']},
+    ]},
   ]},
-  hero: { icon:'🖼️', label:'Hero Banner', fields:[
-    { key:'heading',    label:'Main Heading', type:'text',     placeholder:'Welcome to our Store' },
-    { key:'subheading', label:'Sub-heading',  type:'textarea', placeholder:'Discover amazing products' },
-    { key:'ctaText',    label:'Button Text',  type:'text',     placeholder:'Shop Now' },
-    { key:'ctaLink',    label:'Button URL',   type:'text',     placeholder:'#products' },
-    { key:'bgColor',    label:'Background',   type:'color' },
-    { key:'textAlign',  label:'Alignment',    type:'select',   opts:['center','left','right'] },
+  hero:{icon:'🖼️',label:'Hero Banner',groups:[
+    {label:'Content',fields:[
+      {key:'heading',label:'Main Heading',type:'text',placeholder:'Welcome to our Store'},
+      {key:'subheading',label:'Subheading',type:'textarea',placeholder:'Discover amazing products at the best prices.'},
+      {key:'ctaText',label:'Primary Button Text',type:'text',placeholder:'Shop Now'},
+      {key:'ctaLink',label:'Primary Button URL',type:'text',placeholder:'#products'},
+      {key:'cta2Text',label:'Secondary Button',type:'text',placeholder:'Learn More (optional)'},
+      {key:'cta2Link',label:'Secondary URL',type:'text',placeholder:'#about'},
+    ]},
+    {label:'Appearance',fields:[
+      {key:'bgColor',label:'Background Color',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'bgImage',label:'Background Image URL',type:'text',placeholder:'https://example.com/img.jpg'},
+      {key:'overlayColor',label:'Image Overlay Color',type:'color'},
+      {key:'overlayOpacity',label:'Overlay Opacity',type:'range',min:0,max:80,step:10,suffix:'%'},
+    ]},
+    {label:'Layout',fields:[
+      {key:'textAlign',label:'Text Alignment',type:'select',opts:['center','left','right']},
+      {key:'size',label:'Section Height',type:'select',opts:['compact','normal','tall','fullscreen']},
+    ]},
   ]},
-  featured: { icon:'⭐', label:'Featured Products', fields:[
-    { key:'title',   label:'Section Title',    type:'text',   placeholder:'Featured Products' },
-    { key:'count',   label:'Products to Show', type:'number', placeholder:'8', min:1, max:24 },
-    { key:'columns', label:'Columns',          type:'select', opts:['2','3','4'] },
+  featured:{icon:'⭐',label:'Featured Products',groups:[
+    {label:'Content',fields:[
+      {key:'title',label:'Section Title',type:'text',placeholder:'Featured Products'},
+      {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Handpicked just for you'},
+    ]},
+    {label:'Product Grid',fields:[
+      {key:'count',label:'Products to Show',type:'number',placeholder:'8',min:1,max:24},
+      {key:'columns',label:'Columns',type:'select',opts:['2','3','4']},
+    ]},
+    {label:'Card Style',fields:[
+      {key:'cardStyle',label:'Card Appearance',type:'select',opts:['shadow','bordered','flat','elevated']},
+      {key:'cardBg',label:'Card Background',type:'color'},
+      {key:'priceColor',label:'Price Color',type:'color'},
+      {key:'btnText',label:'Add to Cart Label',type:'text',placeholder:'Add to Cart'},
+      {key:'showOldPrice',label:'Show Original Price',type:'select',opts:['yes','no']},
+      {key:'showRating',label:'Show Rating Stars',type:'select',opts:['no','yes']},
+      {key:'showBadge',label:'Show Product Badge',type:'select',opts:['no','yes']},
+      {key:'badgeText',label:'Badge Label',type:'text',placeholder:'New'},
+    ]},
   ]},
-  categories: { icon:'🗂️', label:'Category Grid', fields:[
-    { key:'title',   label:'Section Title', type:'text',   placeholder:'Browse by Category' },
-    { key:'columns', label:'Columns',       type:'select', opts:['2','3','4','6'] },
+  categories:{icon:'🗂️',label:'Category Grid',groups:[
+    {label:'Content',fields:[
+      {key:'title',label:'Section Title',type:'text',placeholder:'Browse by Category'},
+    ]},
+    {label:'Layout',fields:[
+      {key:'columns',label:'Columns',type:'select',opts:['2','3','4','6']},
+      {key:'style',label:'Card Style',type:'select',opts:['card','minimal','circle']},
+    ]},
   ]},
-  banner: { icon:'📣', label:'Promo Banner', fields:[
-    { key:'heading', label:'Heading',    type:'text',     placeholder:'Limited Time Offer' },
-    { key:'subtext', label:'Sub Text',   type:'textarea', placeholder:'Get 20% off your first order' },
-    { key:'ctaText', label:'Button',     type:'text',     placeholder:'Claim Offer' },
-    { key:'bgColor', label:'Background', type:'color' },
+  banner:{icon:'📣',label:'Promo Banner',groups:[
+    {label:'Content',fields:[
+      {key:'heading',label:'Heading',type:'text',placeholder:'Limited Time Offer'},
+      {key:'subtext',label:'Sub Text',type:'textarea',placeholder:'Get 20% off your first order'},
+      {key:'ctaText',label:'Button Text',type:'text',placeholder:'Claim Offer'},
+      {key:'ctaLink',label:'Button URL',type:'text',placeholder:'#'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'layout',label:'Layout',type:'select',opts:['center','left','split']},
+    ]},
   ]},
-  testimonials: { icon:'💬', label:'Testimonials', fields:[
-    { key:'title',   label:'Section Title', type:'text',   placeholder:'What Customers Say' },
-    { key:'columns', label:'Columns',       type:'select', opts:['1','2','3'] },
+  testimonials:{icon:'💬',label:'Testimonials',groups:[
+    {label:'Content',fields:[
+      {key:'title',label:'Section Title',type:'text',placeholder:'What Customers Say'},
+      {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Don\'t just take our word for it'},
+    ]},
+    {label:'Layout',fields:[
+      {key:'columns',label:'Columns',type:'select',opts:['1','2','3']},
+      {key:'style',label:'Card Style',type:'select',opts:['card','minimal','quote']},
+    ]},
   ]},
-  newsletter: { icon:'📧', label:'Newsletter Signup', fields:[
-    { key:'heading', label:'Heading',     type:'text',     placeholder:'Stay in the loop' },
-    { key:'subtext', label:'Sub Text',    type:'textarea', placeholder:'Get deals in your inbox' },
-    { key:'btnText', label:'Button Text', type:'text',     placeholder:'Subscribe' },
+  newsletter:{icon:'📧',label:'Newsletter Signup',groups:[
+    {label:'Content',fields:[
+      {key:'heading',label:'Heading',type:'text',placeholder:'Stay in the loop'},
+      {key:'subtext',label:'Sub Text',type:'textarea',placeholder:'Get exclusive deals straight to your inbox'},
+      {key:'btnText',label:'Button Text',type:'text',placeholder:'Subscribe'},
+      {key:'inputPlaceholder',label:'Input Placeholder',type:'text',placeholder:'Enter your email…'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'btnColor',label:'Button Color',type:'color'},
+    ]},
   ]},
-  footer: { icon:'📄', label:'Footer', fields:[
-    { key:'footerText', label:'Copyright Text',    type:'text',   placeholder:'© 2025 My Store' },
-    { key:'showSocial', label:'Show Social Links', type:'select', opts:['yes','no'] },
+  footer:{icon:'📄',label:'Footer',groups:[
+    {label:'Content',fields:[
+      {key:'footerText',label:'Copyright Text',type:'text',placeholder:'© 2025 My Store. All rights reserved.'},
+    ]},
+    {label:'Style & Options',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'showSocial',label:'Social Media Links',type:'select',opts:['yes','no']},
+    ]},
   ]},
-  video: { icon:'🎬', label:'Video Section', fields:[
-    { key:'heading',  label:'Heading',   type:'text', placeholder:'Our Story' },
-    { key:'videoUrl', label:'Video URL', type:'text', placeholder:'https://youtube.com/...' },
+  video:{icon:'🎬',label:'Video Section',groups:[
+    {label:'Content',fields:[
+      {key:'heading',label:'Heading',type:'text',placeholder:'Our Story'},
+      {key:'subtext',label:'Sub Text',type:'text',placeholder:'Watch how we do it'},
+      {key:'videoUrl',label:'Video URL (YouTube/Vimeo)',type:'text',placeholder:'https://youtube.com/embed/...'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+    ]},
   ]},
-  countdown: { icon:'⏳', label:'Countdown Timer', fields:[
-    { key:'heading', label:'Heading',        type:'text', placeholder:'Deal Ends In' },
-    { key:'endDate', label:'End Date/Time',  type:'text', placeholder:'2025-12-31' },
+  countdown:{icon:'⏳',label:'Countdown Timer',groups:[
+    {label:'Content',fields:[
+      {key:'heading',label:'Heading',type:'text',placeholder:'Deal Ends In'},
+      {key:'subtext',label:'Sub Text',type:'text',placeholder:'Hurry — limited time offer!'},
+      {key:'endDate',label:'End Date / Time',type:'text',placeholder:'2025-12-31T23:59:59'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'accentColor',label:'Number Accent',type:'color'},
+    ]},
   ]},
-  gallery: { icon:'🖼️', label:'Image Gallery', fields:[
-    { key:'title',   label:'Title',   type:'text',   placeholder:'Our Gallery' },
-    { key:'columns', label:'Columns', type:'select', opts:['2','3','4'] },
+  gallery:{icon:'🖼️',label:'Image Gallery',groups:[
+    {label:'Content',fields:[
+      {key:'title',label:'Section Title',type:'text',placeholder:'Our Gallery'},
+      {key:'subtitle',label:'Subtitle',type:'text',placeholder:'A peek inside our world'},
+    ]},
+    {label:'Layout',fields:[
+      {key:'columns',label:'Columns',type:'select',opts:['2','3','4']},
+      {key:'imgAspect',label:'Image Ratio',type:'select',opts:['square','landscape','portrait']},
+    ]},
   ]},
-  trustbadges: { icon:'🛡️', label:'Trust Badges', fields:[
-    { key:'badge1', label:'Badge 1', type:'text', placeholder:'Free Shipping' },
-    { key:'badge2', label:'Badge 2', type:'text', placeholder:'Secure Payment' },
-    { key:'badge3', label:'Badge 3', type:'text', placeholder:'Easy Returns' },
-    { key:'badge4', label:'Badge 4', type:'text', placeholder:'24/7 Support' },
+  trustbadges:{icon:'🛡️',label:'Trust Badges',groups:[
+    {label:'Badges',fields:[
+      {key:'badge1',label:'Badge 1 Text',type:'text',placeholder:'Free Shipping'},
+      {key:'badge2',label:'Badge 2 Text',type:'text',placeholder:'Secure Payment'},
+      {key:'badge3',label:'Badge 3 Text',type:'text',placeholder:'Easy Returns'},
+      {key:'badge4',label:'Badge 4 Text',type:'text',placeholder:'24/7 Support'},
+    ]},
+    {label:'Style',fields:[
+      {key:'bgColor',label:'Background',type:'color'},
+      {key:'textColor',label:'Text Color',type:'color'},
+      {key:'layout',label:'Layout',type:'select',opts:['row','2x2','column']},
+    ]},
   ]},
-  faq: { icon:'❓', label:'FAQ Section', fields:[
-    { key:'title', label:'Title',      type:'text',     placeholder:'Frequently Asked Questions' },
-    { key:'q1',    label:'Question 1', type:'text',     placeholder:'How long is shipping?' },
-    { key:'a1',    label:'Answer 1',   type:'textarea', placeholder:'Typically 3-7 business days.' },
-    { key:'q2',    label:'Question 2', type:'text',     placeholder:'What is your return policy?' },
-    { key:'a2',    label:'Answer 2',   type:'textarea', placeholder:'30 days hassle-free returns.' },
+  faq:{icon:'❓',label:'FAQ Section',groups:[
+    {label:'Header',fields:[
+      {key:'title',label:'Title',type:'text',placeholder:'Frequently Asked Questions'},
+      {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Everything you need to know'},
+    ]},
+    {label:'Q&A Pairs',fields:[
+      {key:'q1',label:'Question 1',type:'text',placeholder:'How long is shipping?'},
+      {key:'a1',label:'Answer 1',type:'textarea',placeholder:'Typically 3-7 business days.'},
+      {key:'q2',label:'Question 2',type:'text',placeholder:'What is your return policy?'},
+      {key:'a2',label:'Answer 2',type:'textarea',placeholder:'30 days hassle-free returns.'},
+      {key:'q3',label:'Question 3',type:'text',placeholder:'Do you offer Cash on Delivery?'},
+      {key:'a3',label:'Answer 3',type:'textarea',placeholder:'Yes! COD available across India.'},
+    ]},
   ]},
 }
 
-const DEFAULT_SECTIONS = [
-  { id:'sec_announcement', type:'announcement', enabled:true,  data:{ text:'✨ Free shipping on all orders above ₹999!', bgColor:'#5b5cf6', textColor:'#ffffff' } },
-  { id:'sec_navbar',       type:'navbar',       enabled:true,  data:{ logoText:'My Store', showSearch:'yes', showCart:'yes' } },
-  { id:'sec_hero',         type:'hero',         enabled:true,  data:{ heading:'Welcome to our Store', subheading:'Discover amazing products at the best prices. Fast delivery across India.', ctaText:'Shop Now', ctaLink:'#products', bgColor:'', textAlign:'center' } },
-  { id:'sec_featured',     type:'featured',     enabled:true,  data:{ title:'Featured Products', count:'8', columns:'3' } },
-  { id:'sec_categories',   type:'categories',   enabled:true,  data:{ title:'Browse by Category', columns:'4' } },
-  { id:'sec_banner',       type:'banner',       enabled:false, data:{ heading:'Limited Time Offer', subtext:'Get 20% off your first order. Use code WELCOME20', ctaText:'Claim Offer', bgColor:'' } },
-  { id:'sec_testimonials', type:'testimonials', enabled:false, data:{ title:'What Customers Say', columns:'3' } },
-  { id:'sec_newsletter',   type:'newsletter',   enabled:true,  data:{ heading:'Stay in the loop', subtext:'Get exclusive deals and offers straight to your inbox.', btnText:'Subscribe' } },
-  { id:'sec_footer',       type:'footer',       enabled:true,  data:{ footerText:'© 2025 My Store. All rights reserved.', showSocial:'yes' } },
+const DEFAULT_SECTIONS=[
+  {id:'sec_announcement',type:'announcement',enabled:true,data:{text:'✨ Free shipping on all orders above ₹999!',bgColor:'#5b5cf6',textColor:'#ffffff'}},
+  {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showSearch:'yes',showCart:'yes',sticky:'yes'}},
+  {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
+  {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',cardStyle:'shadow',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart'}},
+  {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'card'}},
+  {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
+  {id:'sec_testimonials',type:'testimonials',enabled:false,data:{title:'What Customers Say',columns:'3',style:'card'}},
+  {id:'sec_newsletter',type:'newsletter',enabled:true,data:{heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address'}},
+  {id:'sec_footer',type:'footer',enabled:true,data:{footerText:'© 2025 My Store. All rights reserved.',showSocial:'yes'}},
 ]
 
-const THEMES = [
-  { id:'modern',  name:'Modern Dark',   previewHTML:`<div class="tp-modern"><div class="tp-m-nav"><div class="tp-m-logo"></div><div class="tp-m-links"><span></span><span></span></div></div><div class="tp-m-hero"><div class="tp-m-h"></div><div class="tp-m-sub"></div><div class="tp-m-btn"></div></div><div class="tp-m-grid"><div class="tp-m-card"></div><div class="tp-m-card"></div><div class="tp-m-card"></div></div></div>`,
-    settings:{ primaryColor:'#5b5cf6', bgColor:'#09090f', textColor:'#f1f5f9', cardBg:'#13131e', navBg:'#0e0e17', font:'Outfit', cols:'3', radius:'12px', btnStyle:'rounded', announcementText:'✨ Free shipping on orders over ₹999!', footerText:'© 2025 My Store. All rights reserved.' } },
-  { id:'minimal', name:'Clean Minimal', previewHTML:`<div class="tp-minimal"><div class="tp-mn-nav"><div class="tp-mn-logo"></div></div><div class="tp-mn-hero"><div class="tp-mn-h"></div><div class="tp-mn-sub"></div></div><div class="tp-mn-grid"><div class="tp-mn-card"></div><div class="tp-mn-card"></div><div class="tp-mn-card"></div></div></div>`,
-    settings:{ primaryColor:'#111111', bgColor:'#ffffff', textColor:'#111111', cardBg:'#f5f5f5', navBg:'#ffffff', font:'DM Serif Display', cols:'3', radius:'4px', btnStyle:'square', announcementText:'Free shipping on all orders above ₹999', footerText:'© 2025 My Store' } },
-  { id:'bold',    name:'Bold & Vibrant', previewHTML:`<div class="tp-bold"><div class="tp-bo-nav"><div class="tp-bo-logo"></div></div><div class="tp-bo-hero"><div class="tp-bo-h"></div></div><div class="tp-bo-grid"><div class="tp-bo-card"></div><div class="tp-bo-card"></div></div></div>`,
-    settings:{ primaryColor:'#ff4d00', bgColor:'#fff5f0', textColor:'#1a0a00', cardBg:'#ffffff', navBg:'#ff4d00', font:'Syne', cols:'2', radius:'8px', btnStyle:'pill', announcementText:'🔥 MEGA SALE — Up to 70% off today only!', footerText:'© 2025 My Store. Made with ❤️' } },
-  { id:'luxury',  name:'Luxury',         previewHTML:`<div class="tp-luxury"><div class="tp-lx-nav"><div class="tp-lx-logo"></div></div><div class="tp-lx-hero"><div class="tp-lx-h"></div><div class="tp-lx-sub"></div></div><div class="tp-lx-grid"><div class="tp-lx-card"></div><div class="tp-lx-card"></div><div class="tp-lx-card"></div></div></div>`,
-    settings:{ primaryColor:'#c9a84c', bgColor:'#0d0b09', textColor:'#e8d5b0', cardBg:'#1a1510', navBg:'#0d0b09', font:'Cormorant Garamond', cols:'3', radius:'0px', btnStyle:'square', announcementText:'Complimentary shipping on all orders', footerText:'© 2025 My Store. Luxury redefined.' } },
-  { id:'pastel',  name:'Soft Pastel',    previewHTML:`<div class="tp-pastel"><div class="tp-ps-nav"><div class="tp-ps-logo"></div></div><div class="tp-ps-hero"><div class="tp-ps-h"></div></div><div class="tp-ps-grid"><div class="tp-ps-card"></div><div class="tp-ps-card"></div><div class="tp-ps-card"></div></div></div>`,
-    settings:{ primaryColor:'#e8847a', bgColor:'#fef6f0', textColor:'#3d2a28', cardBg:'#fff', navBg:'#fff', font:'Nunito', cols:'3', radius:'20px', btnStyle:'pill', announcementText:'💝 Free gift with orders over ₹1499!', footerText:'© 2025 My Store. With love.' } },
-  { id:'tech',    name:'Tech & Neon',    previewHTML:`<div class="tp-tech"><div class="tp-tc-nav"><div class="tp-tc-logo"></div></div><div class="tp-tc-hero"><div class="tp-tc-h"></div></div><div class="tp-tc-grid"><div class="tp-tc-card"></div><div class="tp-tc-card"></div><div class="tp-tc-card"></div></div></div>`,
-    settings:{ primaryColor:'#00d4ff', bgColor:'#020d1a', textColor:'#e0f7ff', cardBg:'#0a1a2a', navBg:'#020d1a', font:'Space Grotesk', cols:'3', radius:'6px', btnStyle:'square', announcementText:'⚡ Lightning deals — Limited stock!', footerText:'© 2025 My Store. Built for the future.' } },
+const THEMES=[
+  {id:'modern',name:'Modern Dark',previewHTML:`<div class="tp-modern"><div class="tp-m-nav"><div class="tp-m-logo"></div><div class="tp-m-links"><span></span><span></span></div></div><div class="tp-m-hero"><div class="tp-m-h"></div><div class="tp-m-sub"></div><div class="tp-m-btn"></div></div><div class="tp-m-grid"><div class="tp-m-card"></div><div class="tp-m-card"></div><div class="tp-m-card"></div></div></div>`,
+    settings:{primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',cardBg:'#13131e',navBg:'#0e0e17',font:'Outfit',cols:'3',radius:'12px',btnStyle:'rounded'}},
+  {id:'minimal',name:'Clean Minimal',previewHTML:`<div class="tp-minimal"><div class="tp-mn-nav"><div class="tp-mn-logo"></div></div><div class="tp-mn-hero"><div class="tp-mn-h"></div><div class="tp-mn-sub"></div></div><div class="tp-mn-grid"><div class="tp-mn-card"></div><div class="tp-mn-card"></div><div class="tp-mn-card"></div></div></div>`,
+    settings:{primaryColor:'#111111',bgColor:'#ffffff',textColor:'#111111',cardBg:'#f5f5f5',navBg:'#ffffff',font:'DM Serif Display',cols:'3',radius:'4px',btnStyle:'square'}},
+  {id:'bold',name:'Bold & Vibrant',previewHTML:`<div class="tp-bold"><div class="tp-bo-nav"><div class="tp-bo-logo"></div></div><div class="tp-bo-hero"><div class="tp-bo-h"></div></div><div class="tp-bo-grid"><div class="tp-bo-card"></div><div class="tp-bo-card"></div></div></div>`,
+    settings:{primaryColor:'#ff4d00',bgColor:'#fff5f0',textColor:'#1a0a00',cardBg:'#ffffff',navBg:'#ff4d00',font:'Syne',cols:'2',radius:'8px',btnStyle:'pill'}},
+  {id:'luxury',name:'Luxury',previewHTML:`<div class="tp-luxury"><div class="tp-lx-nav"><div class="tp-lx-logo"></div></div><div class="tp-lx-hero"><div class="tp-lx-h"></div><div class="tp-lx-sub"></div></div><div class="tp-lx-grid"><div class="tp-lx-card"></div><div class="tp-lx-card"></div><div class="tp-lx-card"></div></div></div>`,
+    settings:{primaryColor:'#c9a84c',bgColor:'#0d0b09',textColor:'#e8d5b0',cardBg:'#1a1510',navBg:'#0d0b09',font:'Cormorant Garamond',cols:'3',radius:'0px',btnStyle:'square'}},
+  {id:'pastel',name:'Soft Pastel',previewHTML:`<div class="tp-pastel"><div class="tp-ps-nav"><div class="tp-ps-logo"></div></div><div class="tp-ps-hero"><div class="tp-ps-h"></div></div><div class="tp-ps-grid"><div class="tp-ps-card"></div><div class="tp-ps-card"></div><div class="tp-ps-card"></div></div></div>`,
+    settings:{primaryColor:'#e8847a',bgColor:'#fef6f0',textColor:'#3d2a28',cardBg:'#fff',navBg:'#fff',font:'Nunito',cols:'3',radius:'20px',btnStyle:'pill'}},
+  {id:'tech',name:'Tech & Neon',previewHTML:`<div class="tp-tech"><div class="tp-tc-nav"><div class="tp-tc-logo"></div></div><div class="tp-tc-hero"><div class="tp-tc-h"></div></div><div class="tp-tc-grid"><div class="tp-tc-card"></div><div class="tp-tc-card"></div><div class="tp-tc-card"></div></div></div>`,
+    settings:{primaryColor:'#00d4ff',bgColor:'#020d1a',textColor:'#e0f7ff',cardBg:'#0a1a2a',navBg:'#020d1a',font:'Space Grotesk',cols:'3',radius:'6px',btnStyle:'square'}},
 ]
 
-const ADD_SECTION_TYPES = [
-  { type:'video',        icon:'🎬', name:'Video' },
-  { type:'countdown',    icon:'⏳', name:'Countdown' },
-  { type:'gallery',      icon:'🖼️', name:'Gallery' },
-  { type:'trustbadges',  icon:'🛡️', name:'Trust Badges' },
-  { type:'faq',          icon:'❓', name:'FAQ' },
-  { type:'banner',       icon:'📣', name:'Promo Banner' },
-  { type:'testimonials', icon:'💬', name:'Testimonials' },
+const ADD_SECTION_TYPES=[
+  {type:'video',icon:'🎬',name:'Video'},
+  {type:'countdown',icon:'⏳',name:'Countdown'},
+  {type:'gallery',icon:'🖼️',name:'Gallery'},
+  {type:'trustbadges',icon:'🛡️',name:'Trust Badges'},
+  {type:'faq',icon:'❓',name:'FAQ'},
+  {type:'banner',icon:'📣',name:'Promo Banner'},
+  {type:'testimonials',icon:'💬',name:'Testimonials'},
 ]
 
-const COLOR_PALETTE = ['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#8b5cf6','#f97316','#c9a84c','#111111']
-const FONTS = ['Outfit','DM Serif Display','Syne','Cormorant Garamond','Nunito','Space Grotesk','Plus Jakarta Sans','Playfair Display']
+const COLOR_PALETTE=['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#8b5cf6','#f97316','#c9a84c','#111111']
+const FONTS=['Outfit','DM Serif Display','Syne','Cormorant Garamond','Nunito','Space Grotesk','Plus Jakarta Sans','Playfair Display']
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    LOADING
-════════════════════════════════════════════════════ */
-function setLoading(text, pct) {
-  const fill = document.getElementById('loading-fill')
-  const txt  = document.getElementById('loading-text')
-  if (fill) fill.style.width = pct + '%'
-  if (txt)  txt.textContent  = text
+════════════════════════════════════════════════ */
+function setLoading(text,pct){
+  const f=document.getElementById('loading-fill'),t=document.getElementById('loading-text')
+  if(f)f.style.width=pct+'%'; if(t)t.textContent=text
 }
-function hideLoading() {
-  setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 400)
-}
+function hideLoading(){setTimeout(()=>document.getElementById('loading-overlay').classList.add('hidden'),400)}
 
-/* ════════════════════════════════════════════════════
-   INIT  — uses apiFetch from api.js
-════════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', async () => {
-  setLoading('Authenticating…', 15)
-
-  // ── Try real auth; fall back to demo ──
-  let authOk = false
-  const hasToken = !!localStorage.getItem('ekart_token')
-
-  if (hasToken) {
-    try {
-      setLoading('Loading user…', 30)
-      currentUser = await apiFetch('/auth/me')
-      authOk = true
-    } catch(e) {
-      console.warn('Auth check failed, demo mode:', e.message)
-    }
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded',async()=>{
+  setLoading('Authenticating…',15)
+  let authOk=false
+  const hasToken=!!localStorage.getItem('ekart_token')
+  if(hasToken){
+    try{setLoading('Loading user…',30); currentUser=await apiFetch('/auth/me'); authOk=true}
+    catch(e){console.warn('Auth failed, demo mode:',e.message)}
   }
-
-  if (authOk) {
-    try {
-      setLoading('Fetching stores…', 55)
-      const storeList = await apiFetch('/stores')
-      allStores = Array.isArray(storeList) ? storeList : (storeList?.stores || [])
-    } catch(e) {
-      console.warn('Store fetch failed:', e.message)
-      allStores = []
-    }
-
-    currentStoreId = localStorage.getItem('ekart_store_id')
-    if (!currentStoreId || !allStores.find(s => s._id === currentStoreId)) {
-      currentStoreId = allStores[0]?._id || null
-    }
-    if (currentStoreId) localStorage.setItem('ekart_store_id', currentStoreId)
+  if(authOk){
+    try{
+      setLoading('Fetching stores…',55)
+      const r=await apiFetch('/stores')
+      allStores=Array.isArray(r)?r:(r?.stores||[])
+    }catch(e){console.warn('Stores failed:',e.message); allStores=[]}
+    currentStoreId=localStorage.getItem('ekart_store_id')
+    if(!currentStoreId||!allStores.find(s=>s._id===currentStoreId)) currentStoreId=allStores[0]?._id||null
+    if(currentStoreId) localStorage.setItem('ekart_store_id',currentStoreId)
   } else {
-    // Demo mode
-    allStores = [{ _id:'demo', name:'Demo Store', slug:'demo-store' }]
-    currentStoreId = 'demo'
-    if (!hasToken) toast('No auth token — running in preview mode', 'error')
+    allStores=[{_id:'demo',name:'Demo Store',slug:'demo-store'}]
+    currentStoreId='demo'
+    if(!hasToken) toast('No auth token — running in preview mode','error')
   }
-
-  setLoading('Building UI…', 75)
-  renderStorePill()
-  renderStoreDropdown()
-  renderThemesGrid()
-  renderSettingsPanel()
-  renderAddSectionTypes()
-
-  setLoading('Loading theme…', 90)
-  if (authOk && currentStoreId && currentStoreId !== 'demo') {
-    await loadThemeForStore(currentStoreId)
-  } else {
-    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-    renderSectionsList()
-    renderPreview()
-    markThemeActive('modern')
-    markUnsaved(false)
-  }
-
-  setLoading('Ready!', 100)
-  hideLoading()
+  setLoading('Building UI…',75)
+  renderStorePill(); renderStoreDropdown(); renderThemesGrid(); renderSettingsPanel(); renderAddSectionTypes()
+  setLoading('Loading theme…',90)
+  if(authOk&&currentStoreId&&currentStoreId!=='demo') await loadThemeForStore(currentStoreId)
+  else{sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS)); renderSectionsList(); renderPreview(); markThemeActive('modern'); markUnsaved(false)}
+  setLoading('Ready!',100); hideLoading()
 })
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    STORE UI
-════════════════════════════════════════════════════ */
-function renderStorePill() {
-  const store = allStores.find(s => s._id === currentStoreId)
-  document.getElementById('store-name-display').textContent = store?.name || 'Select Store'
-  document.getElementById('preview-url-text').textContent   = `ekart.aasaitech.in/${store?.slug || 'your-store'}`
+════════════════════════════════════════════════ */
+function renderStorePill(){
+  const s=allStores.find(x=>x._id===currentStoreId)
+  document.getElementById('store-name-display').textContent=s?.name||'Select Store'
+  document.getElementById('preview-url-text').textContent=`ekart.aasaitech.in/${s?.slug||'your-store'}`
 }
-
-function renderStoreDropdown() {
-  const dd = document.getElementById('store-dropdown')
-  const items = allStores.map(s => `
-    <div class="store-dropdown-item ${s._id === currentStoreId ? 'active' : ''}"
-         onclick="switchStore('${s._id}')">
-      <div class="store-dropdown-dot"></div>
-      ${escHtml(s.name)}
-    </div>`).join('')
-  dd.innerHTML = items + `
-    <hr class="store-dropdown-sep">
-    <div class="store-dropdown-item" onclick="window.location='home.html'">
-      <span style="font-size:14px;">+</span> Manage Stores
-    </div>`
+function renderStoreDropdown(){
+  document.getElementById('store-dropdown').innerHTML=
+    allStores.map(s=>`<div class="store-dropdown-item ${s._id===currentStoreId?'active':''}" onclick="switchStore('${s._id}')"><div class="store-dropdown-dot"></div>${escHtml(s.name)}</div>`).join('')+
+    `<hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+    <div class="store-dropdown-item" onclick="window.location='home.html'"><span>+</span> Manage Stores</div>`
 }
-
-function toggleStoreDropdown() {
-  document.getElementById('store-dropdown').classList.toggle('open')
-}
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#store-pill') && !e.target.closest('#store-dropdown')) {
+function toggleStoreDropdown(){document.getElementById('store-dropdown').classList.toggle('open')}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#store-pill')&&!e.target.closest('#store-dropdown'))
     document.getElementById('store-dropdown').classList.remove('open')
-  }
 })
-
-async function switchStore(id) {
-  currentStoreId = id
-  localStorage.setItem('ekart_store_id', id)
+async function switchStore(id){
+  currentStoreId=id; localStorage.setItem('ekart_store_id',id)
   document.getElementById('store-dropdown').classList.remove('open')
-  renderStorePill()
-  renderStoreDropdown()
-  await loadThemeForStore(id)
+  renderStorePill(); renderStoreDropdown(); await loadThemeForStore(id)
 }
 
-/* ════════════════════════════════════════════════════
-   LOAD / SAVE THEME  — uses apiFetch from api.js
-════════════════════════════════════════════════════ */
-async function loadThemeForStore(storeId) {
-  if (!storeId) { useDefaults(); return }
-  try {
-    const data = await apiFetch(`/stores/${storeId}/theme`)
-    const doc = data.draft || data.published || null
+/* ════════════════════════════════════════════════
+   LOAD / SAVE  — type-safe approach
+   We store _bt = original backend type string on each section.
+   On save, we send _bt unchanged (never translate).
+════════════════════════════════════════════════ */
+async function loadThemeForStore(storeId){
+  if(!storeId){useDefaults();return}
+  try{
+    const data=await apiFetch(`/stores/${storeId}/theme`)
+    const doc=data.draft||data.published||null
     applyThemeFromBackend(doc)
-  } catch(e) {
-    console.warn('Theme load failed, using defaults:', e.message)
+  }catch(e){
+    console.warn('Theme load failed, using defaults:',e.message)
     useDefaults()
   }
-  renderSectionsList()
-  renderPreview()
-  markThemeActive(themeData.themeId || 'modern')
-  markUnsaved(false)
+  renderSectionsList(); renderPreview(); markThemeActive(themeData.themeId||'modern'); markUnsaved(false)
 }
 
-function useDefaults() {
-  sections  = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-  themeData = { ...THEMES[0].settings, themeId:'modern' }
+function useDefaults(){
+  sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  themeData={...THEMES[0].settings,themeId:'modern',announcementText:'✨ Free shipping on orders over ₹999!',footerText:'© 2025 My Store.'}
 }
 
-function applyThemeFromBackend(doc) {
-  if (!doc) { useDefaults(); return }
-  const s = doc.settings || {}
-  themeData = {
-    themeId:          s.themeId           || 'modern',
-    primaryColor:     s.primary_color      || '#5b5cf6',
-    bgColor:          s.secondary_color    || '#09090f',
-    textColor:        s.accent_color       || '#f1f5f9',
-    cardBg:           s.card_bg            || '#13131e',
-    navBg:            s.nav_bg             || '#0e0e17',
-    font:             s.font_heading       || 'Outfit',
-    cols:             String(s.cols || 3),
-    radius:           s.radius             || '12px',
-    btnStyle:         s.button_style       || 'rounded',
-    announcementText: s.announcement_bar?.text || '✨ Free shipping on orders over ₹999!',
-    footerText:       s.footer_text        || '© 2025 My Store.',
+function applyThemeFromBackend(doc){
+  if(!doc){useDefaults();return}
+  const s=doc.settings||{}
+  themeData={
+    themeId:s.themeId||'modern',
+    primaryColor:s.primary_color||'#5b5cf6',
+    bgColor:s.secondary_color||'#09090f',
+    textColor:s.accent_color||'#f1f5f9',
+    cardBg:s.card_bg||'#13131e',
+    navBg:s.nav_bg||'#0e0e17',
+    font:s.font_heading||'Outfit',
+    cols:String(s.cols||3),
+    radius:s.radius||'12px',
+    btnStyle:s.button_style||'rounded',
+    announcementText:s.announcement_bar?.text||'✨ Free shipping on orders over ₹999!',
+    footerText:s.footer_text||'© 2025 My Store.',
   }
-  if (doc.sections && doc.sections.length) {
-    sections = doc.sections.map(bs => {
-      // Translate backend type → frontend type (e.g. 'navigation' → 'navbar')
-      const frontendType = toFrontendType(bs.type)
-      const def = DEFAULT_SECTIONS.find(d => d.type === frontendType)
-      return {
-        id:      bs.id || `sec_${frontendType}_${Date.now()}`,
-        type:    frontendType,
-        enabled: bs.is_visible !== false,
-        data:    bs.settings || def?.data || {}
+  if(doc.sections&&doc.sections.length){
+    sections=doc.sections.map(bs=>{
+      // Keep the EXACT backend type string in _bt — send this unchanged when saving
+      const ft=resolveFrontendType(bs.type)   // for SECTION_DEFS lookup only
+      const def=DEFAULT_SECTIONS.find(d=>d.type===ft)
+      return{
+        id:bs.id||`sec_${ft}_${Date.now()}`,
+        type:ft,         // UI/editor lookup
+        _bt:bs.type,     // original backend string — sent back as-is on save
+        enabled:bs.is_visible!==false,
+        data:{...(def?.data||{}),...(bs.settings||{})}
       }
     })
-    // Ensure all default section types exist (even if disabled)
-    DEFAULT_SECTIONS.forEach(def => {
-      if (!sections.find(s => s.type === def.type)) {
-        sections.push({ ...JSON.parse(JSON.stringify(def)), enabled:false })
-      }
+    DEFAULT_SECTIONS.forEach(def=>{
+      if(!sections.find(s=>s.type===def.type))
+        sections.push({...JSON.parse(JSON.stringify(def)),enabled:false})
     })
-  } else {
-    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  }else{
+    sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
   }
 }
 
-// Maps our internal frontend type names → backend-accepted type names.
-// The backend was rejecting 'navbar', 'categories', 'trustbadges', etc.
-// Inspect your API's allowed enum; extend this map if needed.
-const BACKEND_TYPE_MAP = {
-  navbar:       'navigation',
-  categories:   'category_grid',
-  trustbadges:  'trust_badges',
-  featured:     'featured_products',
-  newsletter:   'newsletter_signup',
-  announcement: 'announcement_bar',
-  // pass-through types (already match backend names)
-  hero:         'hero',
-  banner:       'banner',
-  testimonials: 'testimonials',
-  footer:       'footer',
-  video:        'video',
-  countdown:    'countdown',
-  gallery:      'gallery',
-  faq:          'faq',
-}
-
-// Reverse map: backend type → our frontend type (used when loading)
-const FRONTEND_TYPE_MAP = Object.fromEntries(
-  Object.entries(BACKEND_TYPE_MAP).map(([k, v]) => [v, k])
-)
-
-function toBackendType(frontendType) {
-  return BACKEND_TYPE_MAP[frontendType] || frontendType
-}
-
-function toFrontendType(backendType) {
-  return FRONTEND_TYPE_MAP[backendType] || backendType
-}
-
-function buildBackendPayload() {
-  return {
-    settings: {
-      themeId:          themeData.themeId,
-      primary_color:    themeData.primaryColor,
-      secondary_color:  themeData.bgColor,
-      accent_color:     themeData.textColor,
-      card_bg:          themeData.cardBg,
-      nav_bg:           themeData.navBg,
-      font_heading:     themeData.font,
-      font_body:        themeData.font,
-      cols:             parseInt(themeData.cols) || 3,
-      radius:           themeData.radius,
-      button_style:     themeData.btnStyle,
-      footer_text:      themeData.footerText,
-      announcement_bar: {
-        enabled:    sections.find(s => s.type === 'announcement')?.enabled || false,
-        text:       themeData.announcementText,
-        bg_color:   themeData.primaryColor,
-        text_color: '#ffffff'
+function buildBackendPayload(){
+  return{
+    settings:{
+      themeId:themeData.themeId,
+      primary_color:themeData.primaryColor,
+      secondary_color:themeData.bgColor,
+      accent_color:themeData.textColor,
+      card_bg:themeData.cardBg,
+      nav_bg:themeData.navBg,
+      font_heading:themeData.font,
+      font_body:themeData.font,
+      cols:parseInt(themeData.cols)||3,
+      radius:themeData.radius,
+      button_style:themeData.btnStyle,
+      footer_text:themeData.footerText,
+      announcement_bar:{
+        enabled:sections.find(s=>s.type==='announcement')?.enabled||false,
+        text:themeData.announcementText,
+        bg_color:themeData.primaryColor,
+        text_color:'#ffffff'
       }
     },
-    sections: sections.map((s, i) => ({
-      id:         s.id,
-      type:       toBackendType(s.type),   // ← translate to backend enum
-      order:      i + 1,
-      is_visible: s.enabled,
-      settings:   s.data || {}
+    // KEY FIX: send _bt (original backend type) unchanged.
+    // For new sections added by user that have no _bt, send type as-is.
+    sections:sections.map((s,i)=>({
+      id:s.id,
+      type:s._bt||s.type,   // ← ALWAYS send the original backend type back
+      order:i+1,
+      is_visible:s.enabled,
+      settings:s.data||{}
     }))
   }
 }
 
-async function saveAndPublish() {
-  if (!currentStoreId || currentStoreId === 'demo') {
-    toast('Connect your store to save — running in preview mode', 'error'); return
-  }
-  const btn = document.getElementById('save-btn')
-  btn.disabled = true
-  btn.innerHTML = '⌛ Saving…'
-  try {
-    const payload = buildBackendPayload()
-
-    // Log the section types being sent — helps debug backend validation errors
-    console.log('[Save] Section types being sent:',
-      payload.sections.map(s => `${s.type} (order:${s.order})`).join(', '))
-
-    await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
-      method:'PUT',
-      body:JSON.stringify(payload.settings)
-    })
-    await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
-      method:'PUT',
-      body:JSON.stringify({ sections: payload.sections })
-    })
-    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method:'POST' })
-    markUnsaved(false)
-    toast('Theme saved & published! 🚀', 'success')
-    renderPreview()
-  } catch(e) {
-    // Show the full error message so we can see exactly which type/field is invalid
-    console.error('[Save] Error:', e)
-    toast('Save failed: ' + e.message, 'error')
-  } finally {
-    btn.disabled = false
-    btn.innerHTML = '💾 Save &amp; Publish'
+async function saveAndPublish(){
+  if(!currentStoreId||currentStoreId==='demo'){toast('Connect your store to save — preview mode only','error');return}
+  const btn=document.getElementById('save-btn')
+  btn.disabled=true; btn.innerHTML='⌛ Saving…'
+  try{
+    const payload=buildBackendPayload()
+    console.log('[Save] sections types:',payload.sections.map(s=>`${s.type}`).join(', '))
+    await apiFetch(`/stores/${currentStoreId}/theme/settings`,{method:'PUT',body:JSON.stringify(payload.settings)})
+    await apiFetch(`/stores/${currentStoreId}/theme/sections`,{method:'PUT',body:JSON.stringify({sections:payload.sections})})
+    await apiFetch(`/stores/${currentStoreId}/theme/publish`,{method:'POST'})
+    markUnsaved(false); toast('Saved & published! 🚀','success'); renderPreview()
+  }catch(e){
+    console.error('[Save] error:',e)
+    toast('Save failed: '+e.message,'error')
+  }finally{
+    btn.disabled=false; btn.innerHTML='💾 Save &amp; Publish'
   }
 }
 
-function markUnsaved(val) {
-  hasUnsaved = val
-  document.getElementById('unsaved-indicator').classList.toggle('show', val)
+function markUnsaved(val){
+  hasUnsaved=val
+  document.getElementById('unsaved-indicator').classList.toggle('show',val)
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    LEFT PANEL TABS
-════════════════════════════════════════════════════ */
-function switchLeftTab(tab, el) {
-  activeLeftTab = tab
-  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'))
+════════════════════════════════════════════════ */
+function switchLeftTab(tab,el){
+  activeLeftTab=tab
+  document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'))
   el.classList.add('active')
-  document.getElementById('tab-sections').style.display = tab === 'sections' ? '' : 'none'
-  document.getElementById('tab-themes').style.display   = tab === 'themes'   ? '' : 'none'
-  document.getElementById('tab-settings').style.display = tab === 'settings' ? '' : 'none'
+  document.getElementById('tab-sections').style.display=tab==='sections'?'':'none'
+  document.getElementById('tab-themes').style.display=tab==='themes'?'':'none'
+  document.getElementById('tab-settings').style.display=tab==='settings'?'':'none'
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    SECTIONS LIST
-════════════════════════════════════════════════════ */
-function renderSectionsList() {
-  const wrap = document.getElementById('sections-list-wrap')
-  if (!wrap) return
-  const enabled  = sections.filter(s => s.enabled)
-  const disabled = sections.filter(s => !s.enabled)
-
-  let html = `<span class="panel-group-label">Active Sections</span>`
-
-  if (!enabled.length) {
-    html += `<div style="padding:20px 10px;text-align:center;color:var(--text3);font-size:12px;">No active sections</div>`
+════════════════════════════════════════════════ */
+function renderSectionsList(){
+  const wrap=document.getElementById('sections-list-wrap')
+  if(!wrap)return
+  const enabled=sections.filter(s=>s.enabled)
+  const disabled=sections.filter(s=>!s.enabled)
+  let html=`<span class="panel-group-label">Active Sections</span>`
+  if(!enabled.length) html+=`<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">No active sections</div>`
+  enabled.forEach(s=>html+=renderSectionRow(s,sections.indexOf(s),activeSectionId===s.id,true))
+  html+=`<div class="add-section-row" onclick="openAddDrawer()"><span>＋</span> Add Section</div>`
+  if(disabled.length){
+    html+=`<span class="panel-group-label" style="margin-top:12px">Hidden Sections</span>`
+    disabled.forEach(s=>html+=renderSectionRow(s,sections.indexOf(s),false,false))
   }
-  enabled.forEach(s => {
-    const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type }
-    html += renderSectionRow(s, def, sections.indexOf(s), activeSectionId === s.id, true)
-  })
-
-  html += `<div class="add-section-row" onclick="openAddDrawer()"><span>＋</span> Add Section</div>`
-
-  if (disabled.length) {
-    html += `<span class="panel-group-label" style="margin-top:14px;">Hidden Sections</span>`
-    disabled.forEach(s => {
-      const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type }
-      html += renderSectionRow(s, def, sections.indexOf(s), false, false)
-    })
-  }
-
-  wrap.innerHTML = html
+  wrap.innerHTML=html
   initDragDrop()
 }
 
-function renderSectionRow(s, def, idx, isActive, isEnabled) {
-  return `
-  <div class="section-row ${isActive?'active':''}" id="srow_${s.id}"
-       draggable="true" data-idx="${idx}"
-       onclick="selectSection('${s.id}')">
+function renderSectionRow(s,idx,isActive,isEnabled){
+  const def=getSectionDef(s.type)
+  return`<div class="section-row ${isActive?'active':''}" id="srow_${s.id}" draggable="true" data-idx="${idx}" onclick="selectSection('${s.id}')">
     <span class="section-drag" title="Drag to reorder">⠿</span>
     <div class="section-icon-wrap">${def.icon}</div>
     <span class="section-row-label">${def.label}</span>
@@ -1336,240 +842,159 @@ function renderSectionRow(s, def, idx, isActive, isEnabled) {
       <button class="section-action-btn" onclick="event.stopPropagation();openSectionEditor('${s.id}')" title="Edit">✏️</button>
       <button class="section-action-btn danger" onclick="event.stopPropagation();removeSection('${s.id}')" title="Remove">🗑</button>
     </div>
-    <button class="section-toggle ${isEnabled?'on':''}"
-            onclick="event.stopPropagation();toggleSection('${s.id}')"
-            title="${isEnabled?'Hide':'Show'} section"></button>
+    <button class="section-toggle ${isEnabled?'on':''}" onclick="event.stopPropagation();toggleSection('${s.id}')" title="${isEnabled?'Hide':'Show'} section"></button>
   </div>`
 }
 
-function selectSection(id) {
-  activeSectionId = id
-  highlightSectionInPreview(id)
-  openSectionEditor(id)
-  // Ensure sections tab is visible
-  if (activeLeftTab !== 'sections') {
-    document.querySelectorAll('.panel-tab')[0].click()
-  }
+function selectSection(id){
+  activeSectionId=id; highlightSectionInPreview(id); openSectionEditor(id)
+  if(activeLeftTab!=='sections') document.querySelectorAll('.panel-tab')[0].click()
 }
-
-function toggleSection(id) {
-  const s = sections.find(x => x.id === id)
-  if (!s) return
-  s.enabled = !s.enabled
-  markUnsaved(true)
-  if (activeSectionId === id && !s.enabled) showSectionsListView()
+function toggleSection(id){
+  const s=sections.find(x=>x.id===id); if(!s)return
+  s.enabled=!s.enabled; markUnsaved(true)
+  if(activeSectionId===id&&!s.enabled) showSectionsListView()
   else renderSectionsList()
   renderPreview()
 }
-
-function removeSection(id) {
-  const idx = sections.findIndex(x => x.id === id)
-  if (idx > -1) {
-    sections.splice(idx, 1)
-    markUnsaved(true)
-    if (activeSectionId === id) { activeSectionId = null; showSectionsListView() }
-    else renderSectionsList()
-    renderPreview()
-    toast('Section removed', 'success')
+function removeSection(id){
+  const idx=sections.findIndex(x=>x.id===id)
+  if(idx>-1){
+    sections.splice(idx,1); markUnsaved(true)
+    if(activeSectionId===id){activeSectionId=null;showSectionsListView()}else renderSectionsList()
+    renderPreview(); toast('Section removed','success')
   }
 }
 
-/* ════════════════════════════════════════════════════
-   SECTION EDITOR (replaces list in left panel)
-════════════════════════════════════════════════════ */
-function openSectionEditor(id) {
-  const s = sections.find(x => x.id === id)
-  if (!s) return
-  activeSectionId = id
-  const def = SECTION_DEFS[s.type] || { icon:'📦', label:s.type, fields:[] }
-
-  const tabBody = document.getElementById('tab-sections')
-  tabBody.innerHTML = `
+/* ════════════════════════════════════════════════
+   SECTION EDITOR
+════════════════════════════════════════════════ */
+function openSectionEditor(id){
+  const s=sections.find(x=>x.id===id); if(!s)return
+  activeSectionId=id
+  const def=getSectionDef(s.type)
+  document.getElementById('tab-sections').innerHTML=`
   <div class="editor-panel">
     <div class="editor-panel-header">
       <button class="editor-back-btn" onclick="showSectionsListView()">←</button>
       <span class="editor-panel-title">${def.label}</span>
-      <span>${def.icon}</span>
+      <span style="font-size:16px">${def.icon}</span>
     </div>
     <div class="editor-fields" id="editor-fields-wrap">
-      ${renderEditorFields(def.fields, s.data)}
+      ${renderEditorFields(def,s.data)}
     </div>
     <div class="editor-footer">
-      <button class="ef-btn ef-btn-ghost"    onclick="resetSectionData('${id}')">↺ Reset</button>
-      <button class="ef-btn ef-btn-primary"  onclick="applySectionChanges('${id}')">✓ Apply</button>
+      <button class="ef-btn ef-btn-ghost" onclick="resetSectionData('${id}')">↺ Reset</button>
+      <button class="ef-btn ef-btn-primary" onclick="applySectionChanges('${id}')">✓ Apply</button>
     </div>
   </div>`
-
   highlightSectionInPreview(id)
 }
 
-function showSectionsListView() {
-  activeSectionId = null
-  const tabBody = document.getElementById('tab-sections')
-  tabBody.innerHTML = `<div class="sections-panel" id="sections-list-wrap"></div>`
-  renderSectionsList()
-  clearHighlight()
+function showSectionsListView(){
+  activeSectionId=null
+  document.getElementById('tab-sections').innerHTML=`<div class="sections-panel" id="sections-list-wrap"></div>`
+  renderSectionsList(); clearHighlight()
 }
 
-function renderEditorFields(fields, data) {
-  if (!fields || !fields.length) {
-    return `<div style="padding:28px 14px;text-align:center;color:var(--text3);">
-      <div style="font-size:28px;margin-bottom:10px;">🔒</div>
-      <div style="font-size:13px;color:var(--text2);font-weight:600;">No editable fields</div>
-      <div style="font-size:12px;margin-top:6px;line-height:1.6;">Content is pulled automatically from your store data.</div>
-    </div>`
-  }
-  return `<div class="field-group">
-    <span class="field-group-label">Section Content</span>
-    ${fields.map(f => renderField(f, data[f.key] ?? '')).join('')}
-  </div>`
+function renderEditorFields(def,data){
+  const groups=def.groups||[]
+  if(!groups.length) return`<div style="padding:28px 14px;text-align:center;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔒</div><div style="font-size:13px;color:var(--text2);font-weight:600">No editable fields</div><div style="font-size:12px;margin-top:6px;line-height:1.6">Content is pulled from your store.</div></div>`
+  return groups.map(g=>`
+    <div class="field-group">
+      <span class="field-group-label">${g.label}</span>
+      ${g.fields.map(f=>renderField(f,data[f.key]??'')).join('')}
+    </div>`).join('')
 }
 
-function renderField(f, value) {
-  const id = `field_${f.key}`
-  let input = ''
-  if (f.type === 'text' || f.type === 'number') {
-    input = `<input type="${f.type}" class="field-input" id="${id}"
-      value="${escHtml(String(value))}"
-      placeholder="${f.placeholder || ''}"
-      ${f.min !== undefined ? `min="${f.min}"` : ''}
-      ${f.max !== undefined ? `max="${f.max}"` : ''}
-      oninput="liveUpdateField('${f.key}',this.value)">`
-  } else if (f.type === 'textarea') {
-    input = `<textarea class="field-input field-textarea" id="${id}"
-      placeholder="${f.placeholder || ''}"
-      oninput="liveUpdateField('${f.key}',this.value)">${escHtml(String(value))}</textarea>`
-  } else if (f.type === 'color') {
-    input = `<div class="field-color-row">
-      <div class="field-color-swatch">
-        <input type="color" id="${id}" value="${value || '#5b5cf6'}"
-          oninput="document.getElementById('${id}_hex').value=this.value;liveUpdateField('${f.key}',this.value)">
-      </div>
-      <input type="text" class="field-input" id="${id}_hex" style="flex:1;"
-        value="${value || ''}" placeholder="#5b5cf6"
+function renderField(f,value){
+  const id=`field_${f.key}`
+  let input=''
+  const esc=escHtml(String(value))
+  if(f.type==='text'||f.type==='number'){
+    input=`<input type="${f.type}" class="field-input" id="${id}" value="${esc}" placeholder="${f.placeholder||''}" ${f.min!==undefined?'min="'+f.min+'"':''} ${f.max!==undefined?'max="'+f.max+'"':''} oninput="liveUpdateField('${f.key}',this.value)">`
+  }else if(f.type==='textarea'){
+    input=`<textarea class="field-input field-textarea" id="${id}" placeholder="${f.placeholder||''}" oninput="liveUpdateField('${f.key}',this.value)">${esc}</textarea>`
+  }else if(f.type==='color'){
+    const v=value||'#5b5cf6'
+    input=`<div class="field-color-row">
+      <div class="field-color-swatch"><input type="color" id="${id}" value="${v}" oninput="document.getElementById('${id}_h').value=this.value;liveUpdateField('${f.key}',this.value)"></div>
+      <input type="text" class="field-input" id="${id}_h" style="flex:1" value="${v}" placeholder="#5b5cf6"
         oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('${id}').value=this.value;liveUpdateField('${f.key}',this.value)}">
     </div>`
-  } else if (f.type === 'select') {
-    input = `<select class="field-select" id="${id}" onchange="liveUpdateField('${f.key}',this.value)">
-      ${(f.opts||[]).map(o => `<option value="${o}" ${value==o?'selected':''}>${o}</option>`).join('')}
+  }else if(f.type==='select'){
+    input=`<select class="field-select" id="${id}" onchange="liveUpdateField('${f.key}',this.value)">
+      ${(f.opts||[]).map(o=>`<option value="${o}" ${value==o?'selected':''}>${o}</option>`).join('')}
     </select>`
+  }else if(f.type==='range'){
+    const v=parseInt(value)||0
+    const sfx=f.suffix||''
+    input=`<div class="field-range-wrap">
+      <input type="range" class="field-range" id="${id}" min="${f.min||0}" max="${f.max||100}" step="${f.step||1}" value="${v}"
+        oninput="document.getElementById('${id}_v').textContent=this.value+'${sfx}';liveUpdateField('${f.key}',this.value+'${sfx}')">
+      <span class="field-range-val" id="${id}_v">${v}${sfx}</span>
+    </div>`
   }
-  return `<div class="field-row">
-    <div class="field-label">${f.label}</div>
-    ${input}
-  </div>`
+  return`<div class="field-row"><div class="field-label">${f.label}</div>${input}</div>`
 }
 
-function liveUpdateField(key, value) {
-  if (!activeSectionId) return
-  const s = sections.find(x => x.id === activeSectionId)
-  if (!s) return
-  s.data[key] = value
-  markUnsaved(true)
-  renderPreview()
+function liveUpdateField(key,value){
+  if(!activeSectionId)return
+  const s=sections.find(x=>x.id===activeSectionId); if(!s)return
+  s.data[key]=value; markUnsaved(true); renderPreview()
+}
+function applySectionChanges(id){toast('Section updated ✓','success');markUnsaved(true)}
+function resetSectionData(id){
+  const s=sections.find(x=>x.id===id)
+  const def=DEFAULT_SECTIONS.find(d=>d.type===s?.type)
+  if(s&&def){s.data={...def.data};openSectionEditor(id);renderPreview();markUnsaved(true)}
 }
 
-function applySectionChanges(id) {
-  toast('Section updated ✓', 'success')
-  markUnsaved(true)
-}
-
-function resetSectionData(id) {
-  const s   = sections.find(x => x.id === id)
-  const def = DEFAULT_SECTIONS.find(d => d.type === s?.type)
-  if (s && def) {
-    s.data = { ...def.data }
-    openSectionEditor(id)
-    renderPreview()
-    markUnsaved(true)
-  }
-}
-
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    THEMES
-════════════════════════════════════════════════════ */
-function renderThemesGrid() {
-  document.getElementById('themes-grid').innerHTML = THEMES.map(t => `
+════════════════════════════════════════════════ */
+function renderThemesGrid(){
+  document.getElementById('themes-grid').innerHTML=THEMES.map(t=>`
     <div class="theme-card" id="tcard_${t.id}" onclick="applyTheme('${t.id}')">
       <div class="theme-check">✓</div>
       <div class="theme-preview">${t.previewHTML}</div>
       <div class="theme-name">${t.name}</div>
     </div>`).join('')
 }
-
-function markThemeActive(id) {
-  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
-  document.getElementById('tcard_' + id)?.classList.add('active')
+function markThemeActive(id){
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('active'))
+  document.getElementById('tcard_'+id)?.classList.add('active')
+}
+function applyTheme(id){
+  const t=THEMES.find(x=>x.id===id); if(!t)return
+  themeData={...themeData,...t.settings,themeId:id}
+  markThemeActive(id); renderPreview(); markUnsaved(true); renderSettingsPanel()
+  toast(`"${t.name}" applied!`,'success')
 }
 
-function applyTheme(id) {
-  const t = THEMES.find(x => x.id === id)
-  if (!t) return
-  themeData = { ...themeData, ...t.settings, themeId:id }
-  markThemeActive(id)
-  renderPreview()
-  markUnsaved(true)
-  renderSettingsPanel()
-  toast(`"${t.name}" applied!`, 'success')
-}
-
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    SETTINGS PANEL
-════════════════════════════════════════════════════ */
-function renderSettingsPanel() {
-  document.getElementById('settings-panel-content').innerHTML = `
+════════════════════════════════════════════════ */
+function renderSettingsPanel(){
+  document.getElementById('settings-panel-content').innerHTML=`
   <span class="panel-group-label">Brand Colors</span>
-  <div class="field-row">
-    <div class="field-label">Primary / Accent</div>
-    <div class="field-color-row">
-      <div class="field-color-swatch">
-        <input type="color" id="s_primary" value="${themeData.primaryColor}"
-          oninput="updateSetting('primaryColor',this.value);document.getElementById('s_primary_hex').value=this.value">
-      </div>
-      <input type="text" class="field-input" id="s_primary_hex" style="flex:1;"
-        value="${themeData.primaryColor}" placeholder="#5b5cf6"
-        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_primary').value=this.value;updateSetting('primaryColor',this.value)}">
-    </div>
-    <div class="color-palette">
-      ${COLOR_PALETTE.map(c => `<div class="color-dot" style="background:${c}" onclick="updateSetting('primaryColor','${c}');document.getElementById('s_primary').value='${c}';document.getElementById('s_primary_hex').value='${c}'"></div>`).join('')}
-    </div>
-  </div>
-  <div class="field-row">
-    <div class="field-label">Background</div>
-    <div class="field-color-row">
-      <div class="field-color-swatch">
-        <input type="color" id="s_bg" value="${themeData.bgColor}"
-          oninput="updateSetting('bgColor',this.value);document.getElementById('s_bg_hex').value=this.value">
-      </div>
-      <input type="text" class="field-input" id="s_bg_hex" style="flex:1;"
-        value="${themeData.bgColor}" placeholder="#ffffff"
-        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_bg').value=this.value;updateSetting('bgColor',this.value)}">
-    </div>
-  </div>
-  <div class="field-row">
-    <div class="field-label">Text Color</div>
-    <div class="field-color-row">
-      <div class="field-color-swatch">
-        <input type="color" id="s_text" value="${themeData.textColor}"
-          oninput="updateSetting('textColor',this.value);document.getElementById('s_text_hex').value=this.value">
-      </div>
-      <input type="text" class="field-input" id="s_text_hex" style="flex:1;"
-        value="${themeData.textColor}" placeholder="#111111"
-        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_text').value=this.value;updateSetting('textColor',this.value)}">
-    </div>
-  </div>
+  ${colorField('Primary Color','primaryColor',themeData.primaryColor,true)}
+  ${colorField('Background','bgColor',themeData.bgColor)}
+  ${colorField('Text Color','textColor',themeData.textColor)}
+  ${colorField('Card Background','cardBg',themeData.cardBg)}
+  ${colorField('Navbar Background','navBg',themeData.navBg)}
 
-  <span class="panel-group-label" style="margin-top:14px;">Typography</span>
+  <span class="panel-group-label" style="margin-top:14px">Typography</span>
   <div class="font-grid">
-    ${FONTS.map(f => `<div class="font-opt ${themeData.font===f?'active':''}" style="font-family:'${f}',serif"
+    ${FONTS.map(f=>`<div class="font-opt ${themeData.font===f?'active':''}" style="font-family:'${f}',serif"
       onclick="updateSetting('font','${f}');document.querySelectorAll('.font-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">${f}</div>`).join('')}
   </div>
 
-  <span class="panel-group-label" style="margin-top:14px;">Layout</span>
+  <span class="panel-group-label" style="margin-top:14px">Layout & Shape</span>
   <div class="field-row">
     <div class="field-label">Product Columns</div>
     <select class="field-select" onchange="updateSetting('cols',this.value)">
-      ${['2','3','4'].map(v => `<option value="${v}" ${themeData.cols==v?'selected':''}>${v} Columns</option>`).join('')}
+      ${['2','3','4'].map(v=>`<option value="${v}" ${themeData.cols==v?'selected':''}>${v} Columns</option>`).join('')}
     </select>
   </div>
   <div class="field-row">
@@ -1582,13 +1007,13 @@ function renderSettingsPanel() {
   <div class="field-row">
     <div class="field-label">Button Style</div>
     <select class="field-select" onchange="updateSetting('btnStyle',this.value)">
-      ${['rounded','pill','square'].map(v => `<option value="${v}" ${themeData.btnStyle===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}
+      ${['rounded','pill','square'].map(v=>`<option value="${v}" ${themeData.btnStyle===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}
     </select>
   </div>
 
-  <span class="panel-group-label" style="margin-top:14px;">Store Info</span>
+  <span class="panel-group-label" style="margin-top:14px">Store Info</span>
   <div class="field-row">
-    <div class="field-label">Announcement Text</div>
+    <div class="field-label">Announcement Bar Text</div>
     <input type="text" class="field-input" value="${escHtml(themeData.announcementText)}"
       placeholder="Free shipping on orders over ₹999!"
       oninput="updateSetting('announcementText',this.value)">
@@ -1601,493 +1026,480 @@ function renderSettingsPanel() {
   </div>`
 }
 
-function updateSetting(key, value) {
-  themeData[key] = value
-  markUnsaved(true)
-  renderPreview()
+function colorField(label,key,val,withPalette=false){
+  return`<div class="field-row">
+    <div class="field-label">${label}</div>
+    <div class="field-color-row">
+      <div class="field-color-swatch">
+        <input type="color" id="s_${key}" value="${val||'#000000'}"
+          oninput="updateSetting('${key}',this.value);document.getElementById('s_${key}_h').value=this.value">
+      </div>
+      <input type="text" class="field-input" id="s_${key}_h" style="flex:1" value="${val||''}" placeholder="#000000"
+        oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('s_${key}').value=this.value;updateSetting('${key}',this.value)}">
+    </div>
+    ${withPalette?`<div class="color-palette">${COLOR_PALETTE.map(c=>`<div class="color-dot" style="background:${c}" onclick="updateSetting('${key}','${c}');document.getElementById('s_${key}').value='${c}';document.getElementById('s_${key}_h').value='${c}'"></div>`).join('')}</div>`:''}
+  </div>`
 }
 
-/* ════════════════════════════════════════════════════
+function updateSetting(key,value){themeData[key]=value; markUnsaved(true); renderPreview()}
+
+/* ════════════════════════════════════════════════
    ADD SECTION DRAWER
-════════════════════════════════════════════════════ */
-function renderAddSectionTypes() {
-  document.getElementById('add-section-types').innerHTML =
-    ADD_SECTION_TYPES.map(t => `
-      <div class="add-section-type" onclick="addSection('${t.type}','${t.name}','${t.icon}')">
-        <span class="add-section-type-icon">${t.icon}</span>
-        <span class="add-section-type-name">${t.name}</span>
-      </div>`).join('')
+════════════════════════════════════════════════ */
+function renderAddSectionTypes(){
+  document.getElementById('add-section-types').innerHTML=
+    ADD_SECTION_TYPES.map(t=>`<div class="add-section-type" onclick="addSection('${t.type}','${t.name}','${t.icon}')"><span class="add-section-type-icon">${t.icon}</span><span class="add-section-type-name">${t.name}</span></div>`).join('')
 }
-function openAddDrawer()  { document.getElementById('add-section-drawer').classList.add('open') }
-function closeAddDrawer() { document.getElementById('add-section-drawer').classList.remove('open') }
-
-function addSection(type, name, icon) {
-  const existing = sections.find(s => s.type === type && !s.enabled)
-  if (existing) {
-    existing.enabled = true
-    toast(`"${name}" section enabled`, 'success')
-  } else {
-    const def = DEFAULT_SECTIONS.find(d => d.type === type)
-    const newSec = { id:`sec_${type}_${Date.now()}`, type, enabled:true, data: def ? {...def.data} : {} }
-    const footerIdx = sections.findIndex(s => s.type === 'footer')
-    if (footerIdx > -1) sections.splice(footerIdx, 0, newSec)
-    else sections.push(newSec)
-    toast(`"${name}" section added`, 'success')
+function openAddDrawer(){document.getElementById('add-section-drawer').classList.add('open')}
+function closeAddDrawer(){document.getElementById('add-section-drawer').classList.remove('open')}
+function addSection(type,name,icon){
+  const existing=sections.find(s=>s.type===type&&!s.enabled)
+  if(existing){existing.enabled=true;toast(`"${name}" enabled`,'success')}
+  else{
+    const def=DEFAULT_SECTIONS.find(d=>d.type===type)
+    const ns={id:`sec_${type}_${Date.now()}`,type,enabled:true,data:def?{...def.data}:{}}
+    const fi=sections.findIndex(s=>s.type==='footer')
+    if(fi>-1)sections.splice(fi,0,ns); else sections.push(ns)
+    toast(`"${name}" section added`,'success')
   }
-  closeAddDrawer()
-  markUnsaved(true)
-  // If editor is open, close it first so sections-list-wrap exists
-  if (activeSectionId) showSectionsListView()
-  else renderSectionsList()
+  closeAddDrawer(); markUnsaved(true)
+  if(activeSectionId)showSectionsListView(); else renderSectionsList()
   renderPreview()
 }
 
-/* ════════════════════════════════════════════════════
-   DRAG & DROP REORDER
-════════════════════════════════════════════════════ */
-let dragSrcIdx = null
-
-function initDragDrop() {
-  document.querySelectorAll('.section-row[draggable]').forEach(row => {
-    row.addEventListener('dragstart', () => {
-      dragSrcIdx = parseInt(row.dataset.idx)
-      setTimeout(() => row.classList.add('dragging'), 0)
-    })
-    row.addEventListener('dragend', () => {
-      row.classList.remove('dragging')
-      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('drag-over'))
-    })
-    row.addEventListener('dragover', e => {
+/* ════════════════════════════════════════════════
+   DRAG & DROP
+════════════════════════════════════════════════ */
+let dragSrcIdx=null
+function initDragDrop(){
+  document.querySelectorAll('.section-row[draggable]').forEach(row=>{
+    row.addEventListener('dragstart',()=>{dragSrcIdx=parseInt(row.dataset.idx);setTimeout(()=>row.classList.add('dragging'),0)})
+    row.addEventListener('dragend',()=>{row.classList.remove('dragging');document.querySelectorAll('.section-row').forEach(r=>r.classList.remove('drag-over'))})
+    row.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.section-row').forEach(r=>r.classList.remove('drag-over'));row.classList.add('drag-over')})
+    row.addEventListener('dragleave',()=>row.classList.remove('drag-over'))
+    row.addEventListener('drop',e=>{
       e.preventDefault()
-      document.querySelectorAll('.section-row').forEach(r => r.classList.remove('drag-over'))
-      row.classList.add('drag-over')
-    })
-    row.addEventListener('dragleave', () => row.classList.remove('drag-over'))
-    row.addEventListener('drop', e => {
-      e.preventDefault()
-      const dropIdx = parseInt(row.dataset.idx)
-      if (dragSrcIdx === null || dragSrcIdx === dropIdx) return
-      const moved = sections.splice(dragSrcIdx, 1)[0]
-      sections.splice(dropIdx, 0, moved)
-      dragSrcIdx = null
+      const dropIdx=parseInt(row.dataset.idx)
+      if(dragSrcIdx===null||dragSrcIdx===dropIdx)return
+      const moved=sections.splice(dragSrcIdx,1)[0]; sections.splice(dropIdx,0,moved); dragSrcIdx=null
       markUnsaved(true)
-      if (activeSectionId) showSectionsListView()
-      else renderSectionsList()
+      if(activeSectionId)showSectionsListView(); else renderSectionsList()
       renderPreview()
     })
   })
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    DEVICE
-════════════════════════════════════════════════════ */
-function setDevice(device, btn) {
-  currentDevice = device
-  document.querySelectorAll('.tb-device-btn').forEach(b => b.classList.remove('active'))
+════════════════════════════════════════════════ */
+function setDevice(device,btn){
+  currentDevice=device
+  document.querySelectorAll('.tb-device-btn').forEach(b=>b.classList.remove('active'))
   btn.classList.add('active')
-  const shell  = document.getElementById('device-shell')
-  const iframe = document.getElementById('preview-iframe')
-  shell.className = 'device-shell ' + device
-  iframe.height   = device === 'desktop' ? 720 : device === 'tablet' ? 900 : 800
+  const shell=document.getElementById('device-shell'); const iframe=document.getElementById('preview-iframe')
+  shell.className='device-shell '+device
+  iframe.height=device==='desktop'?720:device==='tablet'?900:800
+}
+function previewLive(){
+  const s=allStores.find(x=>x._id===currentStoreId)
+  window.open(s?.published_url||`https://ekart.aasaitech.in/shop.html?store=${s?.slug||''}`,'_blank')
 }
 
-function previewLive() {
-  const store = allStores.find(s => s._id === currentStoreId)
-  const url = store?.published_url || `https://ekart.aasaitech.in/shop.html?store=${store?.slug || ''}`
-  window.open(url, '_blank')
-}
-
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    PREVIEW RENDER
-════════════════════════════════════════════════════ */
-function renderPreview() {
-  const isMobile  = currentDevice === 'mobile'
-  const isLight   = isLightColor(themeData.bgColor || '#ffffff')
-  const cols      = isMobile ? 2 : parseInt(themeData.cols || 3)
-  const btnRadius = themeData.btnStyle === 'pill'   ? '999px'
-                  : themeData.btnStyle === 'square' ? '3px'
-                  : (themeData.radius || '12px')
-  const fontEnc   = encodeURIComponent(themeData.font || 'Outfit')
+════════════════════════════════════════════════ */
+function renderPreview(){
+  const isMobile=currentDevice==='mobile'
+  const isLight=isLightColor(themeData.bgColor||'#ffffff')
+  const btnRadius=themeData.btnStyle==='pill'?'999px':themeData.btnStyle==='square'?'3px':(themeData.radius||'12px')
+  const fontEnc=encodeURIComponent(themeData.font||'Outfit')
+  const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
 
-  const sectionsHTML = sections
-    .filter(s => s.enabled)
-    .map(s => buildSectionHTML(s, isMobile))
-    .join('\n')
-
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+  const html=`<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --primary:${themeData.primaryColor||'#5b5cf6'};
-  --bg:${themeData.bgColor||'#09090f'};
-  --text:${themeData.textColor||'#f1f5f9'};
-  --card-bg:${themeData.cardBg||'#13131e'};
-  --nav-bg:${themeData.navBg||'#0e0e17'};
-  --radius:${themeData.radius||'12px'};
-  --btn-r:${btnRadius};
-  --font:'${themeData.font||'Outfit'}',sans-serif;
-  --cols:${cols};
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--text)}
-a{color:inherit;text-decoration:none}
-.announcement-bar{
-  background:var(--primary);color:white;
-  text-align:center;padding:10px 16px;
-  font-size:13px;font-weight:600;letter-spacing:.01em;
-}
-.navbar{
-  background:var(--nav-bg);
-  padding:0 5%;height:${isMobile?'52px':'62px'};
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});
-  position:sticky;top:0;z-index:100;
-}
+:root{--primary:${themeData.primaryColor||'#5b5cf6'};--bg:${themeData.bgColor||'#09090f'};--text:${themeData.textColor||'#f1f5f9'};--card-bg:${themeData.cardBg||'#13131e'};--nav-bg:${themeData.navBg||'#0e0e17'};--radius:${themeData.radius||'12px'};--btn-r:${btnRadius};--font:'${themeData.font||'Outfit'}',sans-serif;--cols:${isMobile?2:parseInt(themeData.cols||3)}}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}
+/* Announcement */
+.announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.01em}
+/* Navbar */
+.navbar{background:var(--nav-bg);padding:0 5%;height:${isMobile?'52px':'62px'};display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});position:sticky;top:0;z-index:100}
 .nav-logo{font-size:${isMobile?'18px':'22px'};font-weight:900;letter-spacing:-.03em}
 .nav-links{display:flex;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65}
 .nav-right{display:flex;align-items:center;gap:${isMobile?'8px':'14px'}}
 .nav-search{width:34px;height:34px;border-radius:8px;background:rgba(${isLight?'0,0,0,.06':'255,255,255,.06'});border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
 .nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
-.hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg)}
+/* Hero */
+.hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg);position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
+.hero-overlay{position:absolute;inset:0;z-index:1}
+.hero-content{position:relative;z-index:2}
 .hero h1{font-size:${isMobile?'28px':'54px'};font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
 .hero h1 em{font-style:normal;color:var(--primary)}
-.hero p{font-size:${isMobile?'14px':'17px'};opacity:.6;max-width:520px;margin:0 auto 32px;line-height:1.7}
-.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'14px 32px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'16px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s}
+.hero p{font-size:${isMobile?'14px':'17px'};opacity:.65;max-width:520px;margin:0 auto 32px;line-height:1.7}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'13px 30px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'15px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s}
 .btn-cta:hover{opacity:.88}
+.btn-cta-ghost{background:transparent;color:var(--text);border:1.5px solid rgba(${isLight?'0,0,0,.2':'255,255,255,.2'})}
+.btn-cta-ghost:hover{background:rgba(${isLight?'0,0,0,.04':'255,255,255,.04'})}
+/* Sections */
 .section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;margin-bottom:${isMobile?'18px':'28px'};letter-spacing:-.02em}
+.section-header{margin-bottom:${isMobile?'18px':'28px'}}
+.section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;letter-spacing:-.02em}
+.section-subtitle{font-size:${isMobile?'12px':'14px'};opacity:.55;margin-top:6px}
+/* Products */
 .products-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:${isMobile?'10px':'18px'}}
-.product-card{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;transition:transform .2s}
-.product-card:hover{transform:translateY(-3px)}
-.product-img{width:100%;aspect-ratio:1;background:${themeData.primaryColor}18;display:flex;align-items:center;justify-content:center;font-size:38px}
+.product-card{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;transition:transform .2s,box-shadow .2s}
+.product-card.shadow-style:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.product-card.bordered-style{border:1.5px solid rgba(${isLight?'0,0,0,.1':'255,255,255,.08'})}
+.product-card.elevated-style{box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.product-card.elevated-style:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.product-badge{position:absolute;top:10px;left:10px;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.04em}
+.product-img{width:100%;aspect-ratio:1;background:${themeData.primaryColor}18;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative}
 .product-info{padding:${isMobile?'10px':'14px'}}
-.product-name{font-size:${isMobile?'12px':'14px'};font-weight:700;margin-bottom:6px}
+.product-name{font-size:${isMobile?'12px':'13.5px'};font-weight:700;margin-bottom:6px;line-height:1.4}
+.stars{font-size:11px;color:#f59e0b;margin-bottom:5px}
 .price-row{display:flex;align-items:center;gap:6px}
-.product-price{font-size:${isMobile?'13px':'15px'};font-weight:800;color:var(--primary)}
+.product-price{font-size:${isMobile?'14px':'16px'};font-weight:800;color:var(--primary)}
 .product-old{font-size:11px;text-decoration:line-through;opacity:.38}
 .product-btn{width:100%;margin-top:10px;padding:${isMobile?'7px':'9px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s}
 .product-btn:hover{opacity:.88}
-.cats-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:${isMobile?'10px':'16px'}}
+/* Categories */
+.cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}
 .cat-card{background:var(--card-bg);border-radius:var(--radius);padding:${isMobile?'20px 12px':'32px 20px'};text-align:center;cursor:pointer;transition:transform .2s}
 .cat-card:hover{transform:translateY(-2px)}
+.cat-card.circle-style{border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cat-card.minimal-style{background:transparent;border:1.5px solid rgba(${isLight?'0,0,0,.1':'255,255,255,.08'})}
 .cat-icon{font-size:${isMobile?'28px':'36px'};margin-bottom:10px}
 .cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}
-.promo-banner{background:var(--primary);color:white;padding:${isMobile?'36px 5%':'64px 5%'};text-align:center}
-.promo-banner h2{font-size:${isMobile?'22px':'36px'};font-weight:900;margin-bottom:10px}
-.promo-banner p{opacity:.8;margin-bottom:24px;font-size:${isMobile?'13px':'16px'}}
+/* Promo Banner */
+.promo-banner{color:white;padding:${isMobile?'40px 5%':'68px 5%'};text-align:center}
+.promo-banner.left-layout{text-align:left;display:flex;align-items:center;gap:40px;flex-wrap:wrap}
+.promo-content h2{font-size:${isMobile?'22px':'36px'};font-weight:900;margin-bottom:10px}
+.promo-content p{opacity:.8;margin-bottom:24px;font-size:${isMobile?'13px':'16px'}}
 .btn-white{background:white;color:var(--primary);padding:${isMobile?'10px 22px':'12px 28px'};border-radius:var(--btn-r);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
+/* Testimonials */
 .testimonials{padding:${isMobile?'32px 5%':'56px 5%'};background:var(--card-bg)}
-.testimonials-grid{display:grid;grid-template-columns:repeat(${isMobile?1:3},1fr);gap:16px;margin-top:24px}
+.testimonials-grid{display:grid;gap:16px;margin-top:24px}
 .testimonial{background:var(--bg);border-radius:var(--radius);padding:20px}
+.testimonial.quote-style{background:transparent;border-left:3px solid var(--primary);border-radius:0}
+.testimonial.minimal-style{background:transparent;border:1.5px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'})}
 .t-stars{color:#f59e0b;font-size:13px;margin-bottom:10px}
 .t-text{font-size:13.5px;line-height:1.65;opacity:.7;margin-bottom:14px}
 .t-author{display:flex;align-items:center;gap:10px}
 .t-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px}
 .t-name{font-size:13px;font-weight:700}
+/* Newsletter */
 .newsletter{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .newsletter h2{font-size:${isMobile?'22px':'30px'};font-weight:800;margin-bottom:10px}
 .newsletter p{opacity:.6;margin-bottom:24px;font-size:${isMobile?'13px':'15px'}}
 .newsletter-form{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap}
 .newsletter-input{flex:1;min-width:180px;padding:11px 16px;border:1.5px solid rgba(${isLight?'0,0,0,.12':'255,255,255,.1'});border-radius:var(--btn-r);font-size:14px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
+/* Footer */
 .footer{padding:${isMobile?'24px 5%':'40px 5%'};border-top:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
 .footer-logo{font-size:17px;font-weight:900}
-.footer-copy{font-size:12px;opacity:.38}
+.footer-copy{font-size:12px;opacity:.4}
 .footer-links{display:flex;gap:18px;font-size:12.5px;opacity:.45;font-weight:600}
+/* Video */
 .video-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
-.video-box{background:var(--card-bg);border-radius:var(--radius);height:${isMobile?'180px':'320px'};display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;margin-top:20px}
+.video-box{border-radius:var(--radius);height:${isMobile?'200px':'340px'};overflow:hidden;position:relative;background:var(--card-bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;margin-top:20px}
 .play-circle{width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
-.countdown-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center;background:var(--card-bg)}
-.countdown-row{display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap}
-.cd-unit{background:var(--bg);border-radius:var(--radius);padding:${isMobile?'12px 16px':'18px 24px'};min-width:72px}
-.cd-num{font-size:${isMobile?'28px':'38px'};font-weight:900;color:var(--primary);line-height:1}
+/* Countdown */
+.countdown-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
+.countdown-row{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.cd-unit{border-radius:var(--radius);padding:${isMobile?'12px 16px':'18px 24px'};min-width:72px;background:var(--card-bg)}
+.cd-num{font-size:${isMobile?'28px':'38px'};font-weight:900;line-height:1}
 .cd-label{font-size:11px;font-weight:700;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+/* Gallery */
 .gallery-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.gallery-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:${isMobile?'8px':'12px'}}
-.gallery-item{aspect-ratio:1;background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px}
-.trust-section{padding:${isMobile?'20px 5%':'32px 5%'};background:var(--card-bg)}
-.trust-grid{display:grid;grid-template-columns:repeat(${isMobile?2:4},1fr);gap:12px;margin-top:12px}
-.trust-item{display:flex;align-items:center;gap:10px;padding:12px}
+.gallery-grid{display:grid;gap:${isMobile?'8px':'12px'}}
+.gallery-item{background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px}
+/* Trust */
+.trust-section{padding:${isMobile?'20px 5%':'32px 5%'}}
+.trust-grid{display:grid;gap:12px}
+.trust-item{display:flex;align-items:center;gap:12px;padding:10px}
 .trust-icon{font-size:20px}
 .trust-label{font-size:13px;font-weight:700}
+/* FAQ */
 .faq-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .faq-item{border-bottom:1px solid rgba(${isLight?'0,0,0,.08':'255,255,255,.06'});padding:18px 0}
 .faq-q{font-size:15px;font-weight:700;margin-bottom:8px}
 .faq-a{font-size:13.5px;opacity:.6;line-height:1.65}
 </style>
 </head>
-<body>
-${sectionsHTML}
-</body>
+<body>${sectionsHTML}</body>
 </html>`
 
-  try {
-    const iframe = document.getElementById('preview-iframe')
-    const doc = iframe.contentDocument || iframe.contentWindow.document
-    doc.open(); doc.write(html); doc.close()
-    setTimeout(() => setupPreviewClicks(iframe), 500)
-  } catch(e) { console.warn('Preview render error:', e) }
+  try{
+    const iframe=document.getElementById('preview-iframe')
+    const doc=iframe.contentDocument||iframe.contentWindow.document
+    doc.open();doc.write(html);doc.close()
+    setTimeout(()=>setupPreviewClicks(iframe),500)
+  }catch(e){console.warn('Preview error:',e)}
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    BUILD SECTION HTML
-════════════════════════════════════════════════════ */
-function buildSectionHTML(sec, isMobile) {
-  const d = sec.data || {}
-  const w = (content) =>
-    `<div data-section-id="${sec.id}" style="position:relative;cursor:pointer;">${content}</div>`
+════════════════════════════════════════════════ */
+function buildSectionHTML(sec,isMobile){
+  const d=sec.data||{}
+  const w=(cls,content)=>`<div data-section-id="${sec.id}" class="${cls}" style="position:relative;cursor:pointer">${content}</div>`
 
-  switch(sec.type) {
-    case 'announcement': return w(`
-      <div class="announcement-bar"
-           style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}">
-        ${d.text || themeData.announcementText}
-      </div>`)
-
-    case 'navbar': return w(`
-      <nav class="navbar">
-        <div class="nav-logo">${escHtml(d.logoText || 'My Store')}</div>
-        ${!isMobile ? `<div class="nav-links"><a>Home</a><a>Products</a><a>Categories</a><a>About</a></div>` : ''}
+  switch(sec.type){
+    case 'announcement':{
+      const sz=d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px'
+      const fw=d.bold==='no'?'500':'700'
+      return w('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};">${d.text||themeData.announcementText}</div>`)
+    }
+    case 'navbar':{
+      const logoStyle=`${d.logoColor?'color:'+d.logoColor+';':''}${d.bgColor?'':''}`
+      const navStyle=d.bgColor?`background:${d.bgColor};`:''
+      const pos=d.sticky!=='no'?'sticky':'relative'
+      return w('',`<nav class="navbar" style="${navStyle}position:${pos};top:0;">
+        <div class="nav-logo" style="${logoStyle}">${escHtml(d.logoText||'My Store')}</div>
+        ${!isMobile?`<div class="nav-links" style="${d.linkColor?'color:'+d.linkColor+';':''}"><a>Home</a><a>Products</a><a>Categories</a><a>About</a></div>`:''}
         <div class="nav-right">
-          ${d.showSearch!=='no' ? `<button class="nav-search">🔍</button>` : ''}
-          ${d.showCart!=='no'   ? `<button class="nav-cart">🛒 Cart (0)</button>` : ''}
+          ${d.showSearch!=='no'?`<button class="nav-search">🔍</button>`:''}
+          ${d.showCart!=='no'?`<button class="nav-cart">🛒 Cart (0)</button>`:''}
         </div>
       </nav>`)
-
-    case 'hero': {
-      const rawH = d.heading || 'Welcome to our Store'
-      const heading = rawH.replace(/(store|shop)/gi, m => `<em>${m}</em>`)
-      return w(`
-        <section class="hero" style="${d.bgColor?'background:'+d.bgColor+';':''}">
+    }
+    case 'hero':{
+      const rawH=d.heading||'Welcome to our Store'
+      const heading=rawH.replace(/(store|shop)/gi,m=>`<em>${m}</em>`)
+      const align=d.textAlign||'center'
+      const padMap={compact:`${isMobile?'32px 5% 28px':'48px 5% 40px'}`,normal:`${isMobile?'48px 5% 40px':'80px 5% 72px'}`,tall:`${isMobile?'72px 5% 60px':'120px 5% 100px'}`,fullscreen:`${isMobile?'80px 5%':'160px 5%'}`}
+      const pad=padMap[d.size||'normal']
+      const bgStyle=d.bgColor&&!d.bgImage?`background:${d.bgColor};`:`background:var(--bg);`
+      const overlayStyle=d.bgImage&&d.overlayColor?`background:${d.overlayColor};opacity:${(parseInt(d.overlayOpacity)||0)/100};`:'opacity:0;'
+      return w('',`<section class="hero" style="${bgStyle}padding:${pad};text-align:${align};">
+        ${d.bgImage?`<div class="hero-bg" style="background-image:url('${d.bgImage}')"></div>`:''}
+        <div class="hero-overlay" style="${overlayStyle}"></div>
+        <div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">
           <h1>${heading}</h1>
-          <p>${d.subheading || 'Discover amazing products at the best prices. Fast delivery across India.'}</p>
-          <a href="${d.ctaLink || '#products'}" class="btn-cta">${d.ctaText || 'Shop Now'} →</a>
-        </section>`)
+          <p>${d.subheading||'Discover amazing products at the best prices. Fast delivery across India.'}</p>
+          <div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}">
+            <a href="${d.ctaLink||'#products'}" class="btn-cta">${d.ctaText||'Shop Now'} →</a>
+            ${d.cta2Text?`<a href="${d.cta2Link||'#'}" class="btn-cta btn-cta-ghost">${d.cta2Text}</a>`:''}
+          </div>
+        </div>
+      </section>`)
     }
-
-    case 'featured': {
-      const count   = parseInt(d.count) || 8
-      const fCols   = isMobile ? 2 : (parseInt(d.columns) || parseInt(themeData.cols) || 3)
-      const emojis  = ['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠']
-      return w(`
-        <section class="section" id="products">
-          <h2 class="section-title">${d.title || 'Featured Products'}</h2>
-          <div class="products-grid" style="--cols:${fCols}">
-            ${emojis.slice(0, count).map((e, i) => `
-            <div class="product-card">
-              <div class="product-img">${e}</div>
-              <div class="product-info">
-                <div class="product-name">Product Name ${i+1}</div>
-                <div class="price-row">
-                  <span class="product-price">₹${(499+i*200).toLocaleString()}</span>
-                  <span class="product-old">₹${(799+i*300).toLocaleString()}</span>
-                </div>
-                <button class="product-btn">Add to Cart</button>
+    case 'featured':{
+      const count=parseInt(d.count)||8
+      const fCols=isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3)
+      const cBg=d.cardBg||themeData.cardBg||'#13131e'
+      const pColor=d.priceColor||themeData.primaryColor||'#5b5cf6'
+      const cardClass=`product-card ${(d.cardStyle||'shadow')}-style`
+      const btnTxt=d.btnText||'Add to Cart'
+      const showOld=d.showOldPrice!=='no'
+      const showRating=d.showRating==='yes'
+      const showBadge=d.showBadge==='yes'
+      const badge=d.badgeText||'New'
+      const emojis=['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠']
+      return w('',`<section class="section" id="products">
+        <div class="section-header">
+          <h2 class="section-title">${d.title||'Featured Products'}</h2>
+          ${d.subtitle?`<p class="section-subtitle">${d.subtitle}</p>`:''}
+        </div>
+        <div class="products-grid" style="--cols:${fCols}">
+          ${emojis.slice(0,count).map((e,i)=>`
+          <div class="${cardClass}" style="background:${cBg}">
+            <div class="product-img">
+              ${showBadge&&i<3?`<div class="product-badge">${badge}</div>`:''}
+              ${e}
+            </div>
+            <div class="product-info">
+              ${showRating?`<div class="stars">★★★★☆ <span style="opacity:.4;font-size:10px">(${12+i*7})</span></div>`:''}
+              <div class="product-name">Premium Product ${i+1}</div>
+              <div class="price-row">
+                <span class="product-price" style="color:${pColor}">₹${(499+i*200).toLocaleString()}</span>
+                ${showOld?`<span class="product-old">₹${(799+i*300).toLocaleString()}</span>`:''}
               </div>
-            </div>`).join('')}
-          </div>
-        </section>`)
-    }
-
-    case 'categories': {
-      const cCols = isMobile ? 2 : (parseInt(d.columns) || 4)
-      const cats  = [['👗','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty'],['🎮','Gaming'],['🍕','Food']]
-      return w(`
-        <section class="section">
-          <h2 class="section-title">${d.title || 'Browse by Category'}</h2>
-          <div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">
-            ${cats.slice(0,cCols).map(([e,n]) => `
-            <div class="cat-card"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div></div>`).join('')}
-          </div>
-        </section>`)
-    }
-
-    case 'banner': return w(`
-      <section class="promo-banner" style="${d.bgColor?'background:'+d.bgColor+';':''}">
-        <h2>${d.heading || 'Limited Time Offer'}</h2>
-        <p>${d.subtext || 'Get 20% off your first order. Use code WELCOME20'}</p>
-        <button class="btn-white">${d.ctaText || 'Claim Offer'}</button>
-      </section>`)
-
-    case 'testimonials': {
-      const tCols = isMobile ? 1 : (parseInt(d.columns) || 3)
-      return w(`
-        <section class="testimonials">
-          <h2 class="section-title">${d.title || 'What Customers Say'}</h2>
-          <div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">
-            ${[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality.'],
-               ['R','Rahul K.','Best shopping experience. Will definitely order again!'],
-               ['A','Anita P.','Great products and excellent customer service. 5 stars!']].map(([av,n,t]) => `
-            <div class="testimonial">
-              <div class="t-stars">★★★★★</div>
-              <div class="t-text">"${t}"</div>
-              <div class="t-author">
-                <div class="t-avatar">${av}</div>
-                <div class="t-name">${n}</div>
-              </div>
-            </div>`).join('')}
-          </div>
-        </section>`)
-    }
-
-    case 'newsletter': return w(`
-      <section class="newsletter">
-        <h2>${d.heading || 'Stay in the loop'}</h2>
-        <p>${d.subtext || 'Get exclusive deals and offers straight to your inbox.'}</p>
-        <div class="newsletter-form">
-          <input class="newsletter-input" type="email" placeholder="Enter your email address">
-          <button class="btn-cta" style="white-space:nowrap;">${d.btnText || 'Subscribe'} →</button>
-        </div>
-      </section>`)
-
-    case 'footer': return w(`
-      <footer class="footer">
-        <div class="footer-logo">My Store</div>
-        <div class="footer-copy">${escHtml(d.footerText || themeData.footerText)}</div>
-        ${d.showSocial !== 'no' ? `<div class="footer-links">
-          <a>Instagram</a><a>Facebook</a><a>Twitter</a>
-        </div>` : ''}
-      </footer>`)
-
-    case 'video': return w(`
-      <section class="video-section">
-        <h2 class="section-title">${d.heading || 'Our Story'}</h2>
-        <div class="video-box">
-          <div class="play-circle">▶</div>
-          <div style="font-size:14px;font-weight:600;opacity:.5">${d.videoUrl ? 'Click to Play' : 'Add video URL in settings'}</div>
-        </div>
-      </section>`)
-
-    case 'countdown': return w(`
-      <section class="countdown-section">
-        <h2 class="section-title">⏳ ${d.heading || 'Deal Ends In'}</h2>
-        <div class="countdown-row">
-          ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l]) => `
-          <div class="cd-unit"><div class="cd-num">${n}</div><div class="cd-label">${l}</div></div>`).join('')}
-        </div>
-      </section>`)
-
-    case 'gallery': {
-      const gCols = isMobile ? 2 : (parseInt(d.columns) || 4)
-      return w(`
-        <section class="gallery-section">
-          <h2 class="section-title">${d.title || 'Our Gallery'}</h2>
-          <div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">
-            ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0, isMobile?4:8)
-              .map(e => `<div class="gallery-item">${e}</div>`).join('')}
-          </div>
-        </section>`)
-    }
-
-    case 'trustbadges': return w(`
-      <section class="trust-section">
-        <div class="trust-grid">
-          ${[[d.badge1||'Free Shipping','🚚'],
-             [d.badge2||'Secure Payment','🔒'],
-             [d.badge3||'Easy Returns','↩️'],
-             [d.badge4||'24/7 Support','💬']].map(([label, icon]) => `
-          <div class="trust-item">
-            <span class="trust-icon">${icon}</span>
-            <span class="trust-label">${escHtml(label)}</span>
+              <button class="product-btn">${btnTxt}</button>
+            </div>
           </div>`).join('')}
         </div>
       </section>`)
-
-    case 'faq': return w(`
-      <section class="faq-section">
-        <h2 class="section-title">${d.title || 'Frequently Asked Questions'}</h2>
-        ${d.q1 ? `<div class="faq-item"><div class="faq-q">${escHtml(d.q1)}</div><div class="faq-a">${escHtml(d.a1||'')}</div></div>` : ''}
-        ${d.q2 ? `<div class="faq-item"><div class="faq-q">${escHtml(d.q2)}</div><div class="faq-a">${escHtml(d.a2||'')}</div></div>` : ''}
-        ${!d.q1 ? `
-        <div class="faq-item"><div class="faq-q">How long does shipping take?</div><div class="faq-a">Typically 3-7 business days. Express delivery available at checkout.</div></div>
-        <div class="faq-item"><div class="faq-q">What is your return policy?</div><div class="faq-a">Hassle-free 30-day returns. No questions asked.</div></div>
-        <div class="faq-item"><div class="faq-q">Do you offer Cash on Delivery?</div><div class="faq-a">Yes! COD available across India on all orders.</div></div>` : ''}
+    }
+    case 'categories':{
+      const cCols=isMobile?2:(parseInt(d.columns)||4)
+      const style=d.style||'card'
+      const cats=[['👗','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty'],['🎮','Gaming'],['🍕','Food'],['⌚','Watches'],['👟','Footwear']]
+      return w('',`<section class="section">
+        <div class="section-header"><h2 class="section-title">${d.title||'Browse by Category'}</h2></div>
+        <div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">
+          ${cats.slice(0,cCols).map(([e,n])=>`<div class="cat-card ${style}-style"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div></div>`).join('')}
+        </div>
       </section>`)
-
-    default: return ''
+    }
+    case 'banner':{
+      const bg=d.bgColor||themeData.primaryColor||'#5b5cf6'
+      const tc=d.textColor||'#ffffff'
+      const layout=d.layout||'center'
+      return w('',`<section class="promo-banner ${layout}-layout" style="background:${bg};color:${tc}">
+        <div class="promo-content">
+          <h2>${d.heading||'Limited Time Offer'}</h2>
+          <p>${d.subtext||'Get 20% off your first order. Use code WELCOME20'}</p>
+          <button class="btn-white" style="color:${bg}">${d.ctaText||'Claim Offer'}</button>
+        </div>
+      </section>`)
+    }
+    case 'testimonials':{
+      const tCols=isMobile?1:(parseInt(d.columns)||3)
+      const style=d.style||'card'
+      const ts=[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality. Highly recommend!'],
+                ['R','Rahul K.','Best shopping experience. Will definitely order again!'],
+                ['A','Anita P.','Great products and excellent customer service. Five stars!']]
+      return w('',`<section class="testimonials">
+        <div class="section-header">
+          <h2 class="section-title">${d.title||'What Customers Say'}</h2>
+          ${d.subtitle?`<p class="section-subtitle">${d.subtitle}</p>`:''}
+        </div>
+        <div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">
+          ${ts.map(([av,n,t])=>`<div class="testimonial ${style}-style"><div class="t-stars">★★★★★</div><div class="t-text">"${t}"</div><div class="t-author"><div class="t-avatar">${av}</div><div class="t-name">${n}</div></div></div>`).join('')}
+        </div>
+      </section>`)
+    }
+    case 'newsletter':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const btnBg=d.btnColor||themeData.primaryColor||'#5b5cf6'
+      return w('',`<section class="newsletter" style="${bg}${tc}">
+        <h2>${d.heading||'Stay in the loop'}</h2>
+        <p>${d.subtext||'Get exclusive deals and offers straight to your inbox.'}</p>
+        <div class="newsletter-form">
+          <input class="newsletter-input" type="email" placeholder="${d.inputPlaceholder||'Enter your email address'}">
+          <button class="btn-cta" style="background:${btnBg};white-space:nowrap">${d.btnText||'Subscribe'} →</button>
+        </div>
+      </section>`)
+    }
+    case 'footer':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      return w('',`<footer class="footer" style="${bg}${tc}">
+        <div class="footer-logo">My Store</div>
+        <div class="footer-copy">${escHtml(d.footerText||themeData.footerText)}</div>
+        ${d.showSocial!=='no'?`<div class="footer-links"><a>Instagram</a><a>Facebook</a><a>Twitter</a></div>`:''}
+      </footer>`)
+    }
+    case 'video':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      return w('',`<section class="video-section" style="${bg}">
+        <div class="section-header"><h2 class="section-title">${d.heading||'Our Story'}</h2>${d.subtext?`<p class="section-subtitle">${d.subtext}</p>`:''}</div>
+        <div class="video-box">
+          ${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div style="font-size:13px;font-weight:600;opacity:.5">Add video URL to embed</div>`}
+        </div>
+      </section>`)
+    }
+    case 'countdown':{
+      const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const ac=d.accentColor||themeData.primaryColor||'#5b5cf6'
+      return w('',`<section class="countdown-section" style="${bg}${tc}">
+        <div class="section-header">
+          <h2 class="section-title">⏳ ${d.heading||'Deal Ends In'}</h2>
+          ${d.subtext?`<p class="section-subtitle">${d.subtext}</p>`:''}
+        </div>
+        <div class="countdown-row">
+          ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l])=>`<div class="cd-unit"><div class="cd-num" style="color:${ac}">${n}</div><div class="cd-label">${l}</div></div>`).join('')}
+        </div>
+      </section>`)
+    }
+    case 'gallery':{
+      const gCols=isMobile?2:(parseInt(d.columns)||4)
+      const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1'
+      return w('',`<section class="gallery-section">
+        <div class="section-header">
+          <h2 class="section-title">${d.title||'Our Gallery'}</h2>
+          ${d.subtitle?`<p class="section-subtitle">${d.subtitle}</p>`:''}
+        </div>
+        <div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">
+          ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0,isMobile?4:8).map(e=>`<div class="gallery-item" style="aspect-ratio:${ratio}">${e}</div>`).join('')}
+        </div>
+      </section>`)
+    }
+    case 'trustbadges':{
+      const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const layout=d.layout||'row'
+      const gridCols=layout==='2x2'?(isMobile?2:2):layout==='column'?1:(isMobile?2:4)
+      return w('',`<section class="trust-section" style="${bg}${tc}">
+        <div class="trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">
+          ${[[d.badge1||'Free Shipping','🚚'],[d.badge2||'Secure Payment','🔒'],[d.badge3||'Easy Returns','↩️'],[d.badge4||'24/7 Support','💬']].map(([label,icon])=>`<div class="trust-item"><span class="trust-icon">${icon}</span><span class="trust-label">${escHtml(label)}</span></div>`).join('')}
+        </div>
+      </section>`)
+    }
+    case 'faq':{
+      const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3]].filter(([q])=>q)
+      const defaults=pairs.length?pairs:[
+        ['How long does shipping take?','Typically 3-7 business days across India. Express delivery available at checkout.'],
+        ['What is your return policy?','Hassle-free 30-day returns. No questions asked, full refund guaranteed.'],
+        ['Do you offer Cash on Delivery?','Yes! COD available across India on all orders.'],
+      ]
+      return w('',`<section class="faq-section">
+        <div class="section-header">
+          <h2 class="section-title">${d.title||'Frequently Asked Questions'}</h2>
+          ${d.subtitle?`<p class="section-subtitle">${d.subtitle}</p>`:''}
+        </div>
+        ${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtml(q)}</div><div class="faq-a">${escHtml(a)}</div></div>`).join('')}
+      </section>`)
+    }
+    default:return''
   }
 }
 
-/* ════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    PREVIEW CLICK-TO-EDIT
-════════════════════════════════════════════════════ */
-function setupPreviewClicks(iframe) {
-  try {
-    const doc = iframe.contentDocument
-    if (!doc) return
-    doc.querySelectorAll('[data-section-id]').forEach(el => {
-      el.addEventListener('click', () => {
-        const id = el.getAttribute('data-section-id')
-        selectSection(id)
+════════════════════════════════════════════════ */
+function setupPreviewClicks(iframe){
+  try{
+    const doc=iframe.contentDocument; if(!doc)return
+    doc.querySelectorAll('[data-section-id]').forEach(el=>{
+      el.addEventListener('click',()=>selectSection(el.getAttribute('data-section-id')))
+      el.addEventListener('mouseenter',()=>{
+        if(el.getAttribute('data-section-id')!==activeSectionId)
+          el.style.outline='2px dashed rgba(91,92,246,.45)'
       })
-      el.addEventListener('mouseenter', () => {
-        if (el.getAttribute('data-section-id') !== activeSectionId) {
-          el.style.outline = '2px dashed rgba(91,92,246,.4)'
-          el.style.outlineOffset = '-2px'
-        }
-      })
-      el.addEventListener('mouseleave', () => {
-        if (el.getAttribute('data-section-id') !== activeSectionId) {
-          el.style.outline = 'none'
-        }
+      el.addEventListener('mouseleave',()=>{
+        if(el.getAttribute('data-section-id')!==activeSectionId) el.style.outline='none'
       })
     })
-  } catch(e) {}
+  }catch(e){}
 }
-
-function highlightSectionInPreview(id) {
-  try {
-    const iframe = document.getElementById('preview-iframe')
-    const doc = iframe.contentDocument
-    if (!doc) return
-    doc.querySelectorAll('[data-section-id]').forEach(el => {
-      const isTarget = el.getAttribute('data-section-id') === id
-      el.style.outline = isTarget ? '2px solid rgba(91,92,246,.8)' : 'none'
-      el.style.outlineOffset = '-2px'
-      if (isTarget) el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+function highlightSectionInPreview(id){
+  try{
+    const doc=document.getElementById('preview-iframe').contentDocument; if(!doc)return
+    doc.querySelectorAll('[data-section-id]').forEach(el=>{
+      const match=el.getAttribute('data-section-id')===id
+      el.style.outline=match?'2px solid rgba(91,92,246,.8)':'none'
+      el.style.outlineOffset='-2px'
+      if(match)el.scrollIntoView({behavior:'smooth',block:'nearest'})
     })
-  } catch(e) {}
+  }catch(e){}
+}
+function clearHighlight(){
+  try{document.getElementById('preview-iframe').contentDocument.querySelectorAll('[data-section-id]').forEach(el=>el.style.outline='none')}catch(e){}
 }
 
-function clearHighlight() {
-  try {
-    const doc = document.getElementById('preview-iframe').contentDocument
-    if (!doc) return
-    doc.querySelectorAll('[data-section-id]').forEach(el => { el.style.outline = 'none' })
-  } catch(e) {}
+/* ════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════ */
+function isLightColor(hex){
+  const c=(hex||'').replace('#',''); if(c.length!==6)return true
+  const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16)
+  return(r*299+g*587+b*114)/1000>128
 }
-
-/* ════════════════════════════════════════════════════
-   UTILITIES
-════════════════════════════════════════════════════ */
-function isLightColor(hex) {
-  const c = (hex||'').replace('#','')
-  if (c.length !== 6) return true
-  const r=parseInt(c.slice(0,2),16), g=parseInt(c.slice(2,4),16), b=parseInt(c.slice(4,6),16)
-  return (r*299 + g*587 + b*114) / 1000 > 128
-}
-
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-}
-
-function toast(msg, type = 'success') {
-  const el = document.createElement('div')
-  el.className = `toast ${type}`
-  el.innerHTML = `
-    <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
-    <span class="toast-text">${msg}</span>`
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(msg,type='success'){
+  const el=document.createElement('div')
+  el.className=`toast ${type}`
+  el.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'❌'}</span><span class="toast-text">${msg}</span>`
   document.getElementById('toast-container').appendChild(el)
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')))
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400) }, 3200)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')))
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200)
 }
 </script>
 </body>
