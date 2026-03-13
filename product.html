@@ -153,6 +153,9 @@ textarea.form-input { min-height: 80px; resize: vertical; }
   <a class="nav-logo" id="navLogo" href="#">e<span>K</span>art<span class="dot"></span></a>
   <span class="nav-store" id="navStoreName"></span>
   <div class="nav-actions">
+    <a href="javascript:void(0)" id="accountBtn" style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:9px;font-size:13px;font-weight:700;color:var(--text2);text-decoration:none;white-space:nowrap;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+      👤 <span id="accountBtnLabel">Account</span>
+    </a>
     <a class="btn-cart" id="cartBtn" href="#">🛒 Cart <span class="cart-count" id="cartCount">0</span></a>
   </div>
 </nav>
@@ -255,6 +258,15 @@ async function init() {
   document.getElementById('bcHome').href     = `shop.html?store=${slug}`
   document.getElementById('bcShop').href     = `shop.html?store=${slug}`
   document.getElementById('cartBtn').href    = `cart.html?store=${slug}`
+  // Wire account button
+  const custToken = localStorage.getItem(`cust_token_${slug}`)
+  const custName  = localStorage.getItem(`cust_name_${slug}`)
+  const acctBtn   = document.getElementById('accountBtn')
+  const acctLabel = document.getElementById('accountBtnLabel')
+  if (acctBtn) {
+    acctBtn.href = custToken ? `customer-account.html?store=${slug}` : `customer-login.html?store=${slug}`
+    if (acctLabel) acctLabel.textContent = (custToken && custName) ? custName.split(' ')[0] : 'Login'
+  }
   updateCartCount()
 
   try {
