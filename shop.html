@@ -6,7 +6,6 @@
   <title>eKart Shop</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ... (all existing styles remain exactly the same) ... */
     :root {
       --accent: #6c63ff;
       --primary: #6c63ff;
@@ -38,49 +37,25 @@
 
     /* ── LOADER ── */
     #initial-loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      font-family: sans-serif;
-      transition: opacity 0.3s;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; font-family: sans-serif; transition: opacity 0.3s;
     }
-    #initial-loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #initial-loader.hidden { opacity: 0; pointer-events: none; }
 
-    /* ── ORIGINAL HEADER (hidden when theme has navbar) ── */
+    /* ── ORIGINAL HEADER ── */
     #origHeader {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 200;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 200;
     }
     .header-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      height: 64px;
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; gap: 16px; height: 64px;
     }
     .store-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-      flex-shrink: 0;
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text); flex-shrink: 0;
     }
     .store-logo img { height: 36px; object-fit: contain; border-radius: 6px; }
     .store-logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; }
@@ -116,7 +91,7 @@
       color: var(--green); white-space: nowrap;
     }
 
-    /* ── ORIGINAL HERO (hidden when theme has hero) ── */
+    /* ── ORIGINAL HERO ── */
     #heroBanner {
       width: 100%; padding: 52px 24px; text-align: center;
       color: white; position: relative; overflow: hidden;
@@ -192,10 +167,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 48px; overflow: hidden; position: relative;
     }
-    .product-img img {
-      width: 100%; height: 100%; object-fit: cover;
-      display: block;
-    }
+    .product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .product-badge {
       position: absolute; top: 10px; left: 10px; z-index: 2;
       font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px;
@@ -210,46 +182,34 @@
     .product-discount { font-size: 11px; font-weight: 700; color: var(--green); background: #f0fdf4; padding: 2px 6px; border-radius: 4px; }
     .out-badge { text-align: center; font-size: 12px; color: #ef4444; font-weight: 700; padding: 7px; background: #fef2f2; border-radius: 8px; }
 
-    /* New quantity control styles */
+    /* ── CART CONTROLS ── */
     .cart-controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-      margin-top: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 4px; margin-top: 8px;
     }
     .qty-btn {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: var(--accent);
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity .15s;
+      width: 32px; height: 32px; border: none;
+      background: var(--accent); color: white;
+      font-size: 16px; font-weight: 700; border-radius: 8px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: opacity .15s; flex-shrink: 0;
     }
     .qty-btn:hover { opacity: 0.85; }
     .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .qty-value {
-      font-size: 14px;
-      font-weight: 700;
-      min-width: 24px;
-      text-align: center;
+      font-size: 14px; font-weight: 700; min-width: 24px; text-align: center;
     }
+
+    /* FIX 1: btn-add — fully explicit, no CSS variable dependency for layout */
     .btn-add {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       gap: 6px;
       width: 100%;
       padding: 9px;
       background: var(--accent);
-      color: white;
+      color: white !important;
       border: none;
       border-radius: 9px;
       font-size: 13px;
@@ -257,9 +217,31 @@
       cursor: pointer;
       font-family: var(--font);
       transition: all .15s;
+      text-decoration: none;
     }
-    .btn-add:hover { background: #7c74ff; }
+    .btn-add:hover { opacity: 0.88; }
     .btn-add.added { background: var(--green); }
+
+    /* FIX 3: tc-product-btn — styled for featured section cards */
+    .tc-product-btn {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px;
+      width: 100%;
+      padding: 9px;
+      background: var(--primary);
+      color: white !important;
+      border: none;
+      border-radius: var(--btn-r, 9px);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all .15s;
+      margin-top: 8px;
+    }
+    .tc-product-btn:hover { opacity: 0.88; }
 
     /* ── PAGINATION ── */
     .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
@@ -303,18 +285,14 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ══════════════════════════════════════════════════════════
-       THEME SECTION STYLES (unchanged)
-    ══════════════════════════════════════════════════════════ */
+    /* ══ THEME SECTION STYLES ══ */
 
-    /* Announcement */
     .announcement-bar {
       background: var(--primary); color: white; text-align: center;
       padding: 9px 16px; font-size: 13px; font-weight: 600; letter-spacing: .01em;
       position: relative; z-index: 201;
     }
 
-    /* Navbar */
     .tc-navbar {
       background: var(--nav-bg); padding: 0 5%;
       height: var(--navbar-h); display: flex; align-items: center;
@@ -339,7 +317,6 @@
     }
     .nav-logo-img { height: 36px; object-fit: contain; border-radius: 6px; }
 
-    /* Hero */
     .tc-hero {
       padding: 80px 5% 72px; text-align: center;
       background: var(--bg); position: relative; overflow: hidden;
@@ -371,13 +348,11 @@
     }
     .btn-cta-ghost:hover { background: rgba(0,0,0,.04); }
 
-    /* Sections common */
     .tc-section { padding: 56px 5%; }
     .tc-section-header { margin-bottom: 28px; }
     .tc-section-title { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
     .tc-section-subtitle { font-size: 14px; opacity: .55; margin-top: 6px; }
 
-    /* Featured products (theme) */
     .tc-products-grid {
       display: grid;
       grid-template-columns: repeat(var(--cols, 3), 1fr);
@@ -405,7 +380,6 @@
     .tc-product-price { font-size: 16px; font-weight: 800; color: var(--primary); }
     .tc-product-old { font-size: 11px; text-decoration: line-through; opacity: .38; }
 
-    /* Category cards */
     .tc-cats-grid { display: grid; gap: 16px; }
     .tc-cat-card {
       background: var(--card-bg); border-radius: var(--radius);
@@ -415,7 +389,6 @@
     .tc-cat-icon { font-size: 36px; margin-bottom: 10px; }
     .tc-cat-name { font-size: 14px; font-weight: 700; }
 
-    /* Promo Banner */
     .tc-promo-banner { color: white; padding: 68px 5%; text-align: center; }
     .tc-promo-content h2 { font-size: 36px; font-weight: 900; margin-bottom: 10px; }
     .tc-promo-content p { opacity: .8; margin-bottom: 24px; font-size: 16px; }
@@ -425,7 +398,6 @@
       border: none; cursor: pointer; font-family: var(--font);
     }
 
-    /* Testimonials */
     .tc-testimonials { padding: 56px 5%; background: var(--card-bg); }
     .tc-testimonials-grid { display: grid; gap: 16px; margin-top: 24px; }
     .tc-testimonial { background: var(--bg); border-radius: var(--radius); padding: 20px; }
@@ -439,7 +411,7 @@
     }
     .tc-t-name { font-size: 13px; font-weight: 700; }
 
-    /* Newsletter */
+    /* FIX 3: Newsletter — scoped subscribe button, NOT using btn-add */
     .tc-newsletter { padding: 56px 5%; text-align: center; }
     .tc-newsletter h2 { font-size: 30px; font-weight: 800; margin-bottom: 10px; }
     .tc-newsletter p { opacity: .6; margin-bottom: 24px; font-size: 15px; }
@@ -450,8 +422,14 @@
       font-size: 14px; background: var(--card-bg); color: var(--text);
       font-family: var(--font); outline: none;
     }
+    /* Subscribe button uses btn-cta — ensure it never gets btn-add styling */
+    .tc-newsletter-form .btn-cta {
+      white-space: nowrap;
+      /* Override any accidental inheritance */
+      width: auto !important;
+      display: inline-flex !important;
+    }
 
-    /* Footer */
     .tc-footer {
       padding: 40px 5%; border-top: 1px solid rgba(0,0,0,.08);
       display: flex; align-items: center; justify-content: space-between;
@@ -462,7 +440,6 @@
     .tc-footer-links { display: flex; gap: 18px; font-size: 12.5px; opacity: .45; font-weight: 600; }
     .tc-footer-links a { text-decoration: none; color: inherit; }
 
-    /* Video */
     .tc-video-section { padding: 56px 5%; text-align: center; }
     .tc-video-box {
       border-radius: var(--radius); height: 340px; overflow: hidden;
@@ -477,14 +454,12 @@
       font-size: 24px; cursor: pointer;
     }
 
-    /* Countdown */
     .tc-countdown-section { padding: 56px 5%; text-align: center; }
     .tc-countdown-row { display: flex; gap: 14px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
     .tc-cd-unit { border-radius: var(--radius); padding: 18px 24px; min-width: 72px; background: var(--card-bg); }
     .tc-cd-num { font-size: 38px; font-weight: 900; line-height: 1; color: var(--primary); }
     .tc-cd-label { font-size: 11px; font-weight: 700; opacity: .45; text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
 
-    /* Gallery */
     .tc-gallery-section { padding: 56px 5%; }
     .tc-gallery-grid { display: grid; gap: 12px; }
     .tc-gallery-item {
@@ -494,7 +469,6 @@
     }
     .tc-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-    /* Trust Badges */
     .tc-trust-section { padding: 32px 5%; }
     .tc-trust-grid { display: grid; gap: 12px; }
     .tc-trust-item { display: flex; align-items: center; gap: 12px; padding: 10px; }
@@ -502,13 +476,11 @@
     .tc-trust-label { font-size: 13px; font-weight: 700; }
     .tc-trust-sub { font-size: 12px; opacity: .55; }
 
-    /* FAQ */
     .tc-faq-section { padding: 56px 5%; }
     .tc-faq-item { border-bottom: 1px solid rgba(0,0,0,.08); padding: 18px 0; }
     .tc-faq-q { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .tc-faq-a { font-size: 13.5px; opacity: .6; line-height: 1.65; }
 
-    /* Category pills */
     .cat-pill {
       padding: 7px 16px; border: 1.5px solid var(--border); border-radius: 999px;
       font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text2);
@@ -517,7 +489,6 @@
     .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
     .cat-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* Skeleton shimmer */
     @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
     .tc-skeleton {
       background: linear-gradient(90deg, #e8eaf0 25%, #f1f5f9 50%, #e8eaf0 75%) !important;
@@ -557,7 +528,7 @@
     <div style="margin-top:16px; font-size:18px; color:#333;">Loading store...</div>
   </div>
 
-  <!-- Original sticky header (hidden when theme has navbar section) -->
+  <!-- Original sticky header -->
   <header id="origHeader">
     <div class="header-inner">
       <a class="store-logo" href="javascript:void(0)" id="storeLogo" onclick="scrollToTop()">
@@ -579,22 +550,27 @@
     </div>
   </header>
 
-  <!-- Original hero (hidden when theme has hero section) -->
+  <!-- Original hero -->
   <div id="heroBanner">
     <div class="hero-content">
       <h1 id="heroTitle">Welcome</h1>
       <p id="heroTagline">Discover amazing products</p>
+      <!-- FIX 2: onclick scroll instead of href="#mainProducts" -->
+      <div style="margin-top:24px;">
+        <button class="btn-cta" onclick="smoothScrollToProducts()" style="border:none;cursor:pointer;">
+          Shop Now →
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Theme sections: announcement, navbar, hero, featured, categories go here (ABOVE products) -->
+  <!-- Theme sections: announcement, navbar, hero, featured, categories -->
   <div id="theme-sections-top"></div>
 
-  <!-- Real browsable products grid — always shown, positioned after featured/categories -->
+  <!-- Real browsable products grid -->
   <div id="mainLayout" style="padding:48px 5%;">
     <a id="mainProducts" style="display:block;position:relative;visibility:hidden;"></a>
 
-    <!-- Section header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
       <h2 id="allProductsTitle" style="font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--text);">All Products</h2>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -624,25 +600,22 @@
       </div>
     </div>
 
-    <!-- Category pills (populated from real API) -->
+    <!-- Category pills -->
     <div id="catPills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
       <button class="cat-pill active" data-cat="" onclick="selectCatPill(this,'')">🛍 All</button>
     </div>
 
-    <!-- Hidden sidebar catList kept for compatibility -->
     <div id="catList" style="display:none;"></div>
 
-    <!-- Results bar -->
     <div style="margin-bottom:16px;">
       <span id="resultsCount" style="font-size:13.5px;color:var(--text2);font-weight:500;">Loading...</span>
     </div>
 
-    <!-- Products grid -->
     <div class="products-grid" id="productsGrid"></div>
     <div class="pagination" id="pagination"></div>
   </div>
 
-  <!-- Theme sections: testimonials, newsletter, footer go here (BELOW products) -->
+  <!-- Theme sections: testimonials, newsletter, footer -->
   <div id="theme-sections-bottom"></div>
 
   <div class="cart-bar" id="cartBar">
@@ -670,7 +643,7 @@
     let searchTimeout = null
     let currency = '₹'
     let themeData = null
-    let searchQuery = ''  // unified search term
+    let searchQuery = ''
 
     // ========== HELPER FUNCTIONS ==========
     function escHtml(s) {
@@ -683,7 +656,6 @@
       return (r*299 + g*587 + b*114) / 1000 > 128
     }
 
-    // Hide the initial loader
     function hideLoader() {
       const loader = document.getElementById('initial-loader')
       if (loader) {
@@ -692,27 +664,34 @@
       }
     }
 
-    // Unified search update
     function updateSearch(val) {
       searchQuery = val
-      // sync both input fields
       const orig = document.getElementById('origSearchInput')
       const main = document.getElementById('mainSearchInput')
       if (orig) orig.value = val
       if (main) main.value = val
       clearTimeout(searchTimeout)
-      searchTimeout = setTimeout(() => {
-        currentPage = 1
-        loadProducts()
-      }, 350)
+      searchTimeout = setTimeout(() => { currentPage = 1; loadProducts() }, 350)
     }
 
-    // Scroll to top smoothly
     function scrollToTop() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    // Scroll to element by ID with offset for sticky header
+    // FIX 2: Dedicated smooth scroll to products section
+    function smoothScrollToProducts() {
+      const anchor = document.getElementById('mainProducts')
+      const navbar = document.querySelector('.tc-navbar') || document.getElementById('origHeader')
+      const offset = navbar ? navbar.offsetHeight + 10 : 70
+      if (anchor) {
+        const y = anchor.getBoundingClientRect().top + window.pageYOffset - offset
+        window.scrollTo({ top: y, behavior: 'smooth' })
+      } else {
+        const layout = document.getElementById('mainLayout')
+        if (layout) layout.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+
     function scrollToElement(elId) {
       const el = document.getElementById(elId)
       if (!el) return
@@ -722,7 +701,6 @@
       window.scrollTo({ top: y, behavior: 'smooth' })
     }
 
-    // Adjust hidden anchor offset based on sticky navbar height
     function adjustMainProductsOffset() {
       const anchor = document.getElementById('mainProducts')
       if (!anchor) return
@@ -731,7 +709,6 @@
       anchor.style.top = `-${height + 20}px`
     }
 
-    // Toast message
     function toast(msg) {
       const t = document.getElementById('toast')
       t.textContent = msg
@@ -739,7 +716,6 @@
       setTimeout(() => t.classList.remove('show'), 2000)
     }
 
-    // Demo newsletter subscription
     function subscribeNewsletter() {
       const email = document.querySelector('.tc-newsletter-input')?.value
       if (email) {
@@ -749,16 +725,12 @@
       }
     }
 
-    // Play video (demo)
     function playVideo(url) {
-      if (url) {
-        window.open(url, '_blank')
-      } else {
-        toast('No video configured')
-      }
+      if (url) window.open(url, '_blank')
+      else toast('No video configured')
     }
 
-    // ========== CART FUNCTIONS (with quantity controls) ==========
+    // ========== CART FUNCTIONS ==========
     function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
     function saveCart(cart) { localStorage.setItem('cart_' + slug, JSON.stringify(cart)) }
 
@@ -766,32 +738,6 @@
       const cart = getCart()
       const item = cart.find(i => i.product_id === productId && !i.variant)
       return item ? item.qty : 0
-    }
-
-    function updateCartItem(productId, change) {
-      let cart = getCart()
-      const index = cart.findIndex(i => i.product_id === productId && !i.variant)
-      if (index === -1 && change > 0) {
-        // Need product details to add - but we don't have them here.
-        // This function is called from increment, so we need product details.
-        // We'll store product name, price, image in data attributes or fetch from store.
-        // For simplicity, we'll pass them from the button click.
-        // But here we only have productId. So we'll rely on addToCart for first addition,
-        // and for increment/decrement we'll use separate functions that already have details.
-        // We'll call incrementCartItem and decrementCartItem from the buttons.
-      } else if (index !== -1) {
-        const newQty = cart[index].qty + change
-        if (newQty <= 0) {
-          cart.splice(index, 1)
-        } else {
-          cart[index].qty = newQty
-        }
-        saveCart(cart)
-        updateCartUI()
-        // Update the specific product card's controls
-        updateProductCardControls(productId)
-        toast(change > 0 ? '➕ Item added' : '➖ Item removed')
-      }
     }
 
     function incrementCartItem(productId, name, price, image) {
@@ -824,28 +770,26 @@
       }
     }
 
-    // Update the controls area of a single product card (both main grid and featured)
+    // Update all card controls for a given product ID (handles both main grid + featured)
     function updateProductCardControls(productId) {
       const qty = getCartItemQty(productId)
       const containers = document.querySelectorAll(`.cart-controls[data-product-id="${productId}"]`)
       containers.forEach(container => {
+        const name  = container.dataset.name  || ''
+        const price = container.dataset.price || 0
+        const image = container.dataset.image || ''
         if (qty === 0) {
-          // Show "Add to Cart" button
-          container.innerHTML = `<button class="btn-add" onclick="event.preventDefault(); addToCart('${productId}', this.dataset.name, this.dataset.price, this.dataset.image)" data-name="${container.dataset.name}" data-price="${container.dataset.price}" data-image="${container.dataset.image}">🛒 Add to Cart</button>`
+          container.innerHTML = `<button class="btn-add" onclick="event.preventDefault(); addToCart('${productId}', '${name.replace(/'/g,"\\'")}', ${price}, '${image}')">🛒 Add to Cart</button>`
         } else {
-          // Show quantity controls
           container.innerHTML = `
-            <div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
-              <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${productId}')">−</button>
-              <span class="qty-value">${qty}</span>
-              <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${productId}', '${container.dataset.name}', ${container.dataset.price}, '${container.dataset.image}')">+</button>
-            </div>
+            <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${productId}')">−</button>
+            <span class="qty-value">${qty}</span>
+            <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${productId}', '${name.replace(/'/g,"\\'")}', ${price}, '${image}')">+</button>
           `
         }
       })
     }
 
-    // Original addToCart now just calls increment
     function addToCart(id, name, price, image) {
       incrementCartItem(id, name, price, image)
     }
@@ -860,22 +804,21 @@
       const bar = document.getElementById('cartBar')
       if (qty > 0) {
         bar.classList.add('show')
-        document.getElementById('cartBarQty').textContent    = `${qty} item${qty!==1?'s':''} — `
-        document.getElementById('cartBarTotal').textContent  = `${currency}${amt.toFixed(2)}`
+        document.getElementById('cartBarQty').textContent   = `${qty} item${qty!==1?'s':''} — `
+        document.getElementById('cartBarTotal').textContent = `${currency}${amt.toFixed(2)}`
       } else {
         bar.classList.remove('show')
       }
       updateThemeNavCart()
     }
 
-    // Update theme navbar cart count
     function updateThemeNavCart() {
       const cart = getCart()
       const qty = cart.reduce((s,x) => s + x.qty, 0)
       document.querySelectorAll('.theme-cart-qty').forEach(el => el.textContent = qty)
     }
 
-    // ========== THEME LOADING & RENDERING ==========
+    // ========== THEME LOADING ==========
     async function loadTheme() {
       try {
         const res = await fetch(`${API}/shop/${slug}/theme`)
@@ -952,52 +895,40 @@
         if (d.targetDate) startCountdown(sec.id, d.targetDate)
       })
 
-      // Attach click handlers to navbar links for smooth scrolling
       setupNavLinks()
     }
 
     function setupNavLinks() {
-      // Handle all hash links (including those in navbar, hero, etc.)
-      document.querySelectorAll('a[href^="#"]').forEach(link => {
+      // FIX 2: All hash links pointing to #mainProducts use smooth scroll function
+      document.querySelectorAll('a[href="#mainProducts"], a[href*="mainProducts"]').forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault()
-          const id = link.getAttribute('href').substring(1)
-          if (id === 'mainProducts' || id === 'catPills') {
-            scrollToElement(id)
-          } else {
-            const target = document.getElementById(id)
-            if (target) scrollToElement(id)
-          }
+          smoothScrollToProducts()
+        })
+      })
+
+      document.querySelectorAll('a[href^="#"]').forEach(link => {
+        const href = link.getAttribute('href')
+        if (href === '#mainProducts') return // already handled above
+        link.addEventListener('click', (e) => {
+          e.preventDefault()
+          const id = href.substring(1)
+          const target = document.getElementById(id)
+          if (target) scrollToElement(id)
         })
       })
 
       const navHome = document.querySelector('.nav-links a[href*="home"]') || document.querySelector('.nav-links a:first-child')
-      if (navHome) {
-        navHome.addEventListener('click', (e) => {
-          e.preventDefault()
-          scrollToTop()
-        })
-      }
+      if (navHome) navHome.addEventListener('click', (e) => { e.preventDefault(); scrollToTop() })
+
       const navProducts = document.querySelector('.nav-links a[href*="products"]')
-      if (navProducts) {
-        navProducts.addEventListener('click', (e) => {
-          e.preventDefault()
-          scrollToElement('mainProducts')
-        })
-      }
+      if (navProducts) navProducts.addEventListener('click', (e) => { e.preventDefault(); smoothScrollToProducts() })
+
       const navCategories = document.querySelector('.nav-links a[href*="categories"]')
-      if (navCategories) {
-        navCategories.addEventListener('click', (e) => {
-          e.preventDefault()
-          scrollToElement('catPills')
-        })
-      }
+      if (navCategories) navCategories.addEventListener('click', (e) => { e.preventDefault(); scrollToElement('catPills') })
 
       const logo = document.querySelector('.nav-logo')
-      if (logo) {
-        logo.style.cursor = 'pointer'
-        logo.addEventListener('click', scrollToTop)
-      }
+      if (logo) { logo.style.cursor = 'pointer'; logo.addEventListener('click', scrollToTop) }
     }
 
     function getSectionData(sec) {
@@ -1068,6 +999,8 @@
         q4:d.q4||s.q4||'', a4:d.a4||s.a4||'',
         q5:d.q5||s.q5||'', a5:d.a5||s.a5||'',
         inputPlaceholder: d.inputPlaceholder || 'Enter your email address',
+        // FIX 3: newsletter btn text defaults to 'Subscribe', not 'Add to Cart'
+        btnText2:     d.btnText2      || d.subscribeText  || s.button_text || 'Subscribe',
         btnColor:     d.btnColor     || '',
         footerText:   d.footerText   || s.footerText   || `© ${new Date().getFullYear()} My Store. All rights reserved.`,
         showSocial:   d.showSocial   || 'yes',
@@ -1081,7 +1014,6 @@
         videoUrl:     d.videoUrl     || s.video_url    || '',
         targetDate:   d.targetDate   || d.endDate     || s.target_date  || s.endDate || '',
         subtext:      d.subtext      || s.subtext      || '',
-        ctaText2:     d.ctaText      || '',
         expiredText:  d.expiredText  || 'Offer has ended',
         imgAspect:    d.imgAspect    || 'square',
         img1:d.img1||'', img2:d.img2||'', img3:d.img3||'',
@@ -1093,6 +1025,8 @@
         link5Text:d.link5Text||'Blog',
         cartText:     d.cartText     || 'Cart',
         tagline:      d.tagline      || '',
+        viewAllText:  d.viewAllText  || 'View All →',
+        showCount:    d.showCount    || s.show_count   || 'no',
       }
     }
 
@@ -1123,7 +1057,7 @@
             </div>
             ${!isMobile ? `<div class="nav-links" style="${d.linkColor?'color:'+d.linkColor+';':''}">
               <a href="javascript:void(0)" onclick="scrollToTop()">${escHtml(d.link1Text||'Home')}</a>
-              <a href="javascript:void(0)" onclick="scrollToElement('mainProducts')">${escHtml(d.link2Text||'Products')}</a>
+              <a href="javascript:void(0)" onclick="smoothScrollToProducts()">${escHtml(d.link2Text||'Products')}</a>
               <a href="javascript:void(0)" onclick="scrollToElement('catPills')">${escHtml(d.link3Text||'Categories')}</a>
               ${d.link4Text ? `<a href="javascript:void(0)" onclick="scrollToElement('${d.link4Text.toLowerCase()}')">${escHtml(d.link4Text)}</a>` : ''}
               ${d.link5Text && d.link5Text !== 'Blog' ? `<a href="javascript:void(0)">${escHtml(d.link5Text)}</a>` : ''}
@@ -1136,6 +1070,7 @@
         }
 
         case 'hero': {
+          // FIX 2: All CTA links in hero use onclick smooth scroll, not href="#mainProducts"
           const heading = escHtml(d.heading || 'Welcome to our Store').replace(/(store|shop)/gi, m => `<em>${m}</em>`)
           const align = d.textAlign || 'center'
           const padMap = {
@@ -1149,6 +1084,10 @@
           const overlayStyle = d.bgImage && d.overlayColor
             ? `background:${d.overlayColor};opacity:${(parseInt(d.overlayOpacity)||40)/100};`
             : 'opacity:0;'
+          // Determine if CTA should scroll to products or go to URL
+          const ctaIsHash = !d.ctaLink || d.ctaLink === '#' || d.ctaLink === '#mainProducts' || d.ctaLink.startsWith('#')
+          const ctaOnClick = ctaIsHash ? `onclick="event.preventDefault(); smoothScrollToProducts()"` : ''
+          const ctaHref = ctaIsHash ? 'javascript:void(0)' : d.ctaLink
           return `<section class="tc-hero" style="${bgStyle}padding:${pad};text-align:${align};">
             ${d.bgImage ? `<div class="hero-bg-img" style="background-image:url('${d.bgImage}')"></div>` : ''}
             <div class="hero-overlay-div" style="${overlayStyle}"></div>
@@ -1157,7 +1096,7 @@
               <h1>${heading}</h1>
               <p>${escHtml(d.subheading || 'Discover amazing products at the best prices.')}</p>
               <div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}">
-                <a href="${d.ctaLink || '#mainProducts'}" class="btn-cta">${escHtml(d.ctaText || 'Shop Now')} →</a>
+                <a href="${ctaHref}" class="btn-cta" ${ctaOnClick}>${escHtml(d.ctaText || 'Shop Now')} →</a>
                 ${d.cta2Text ? `<a href="${d.cta2Link||'#'}" class="btn-cta btn-cta-ghost">${escHtml(d.cta2Text)}</a>` : ''}
               </div>
             </div>
@@ -1175,7 +1114,7 @@
                 <h2 class="tc-section-title">${escHtml(d.title || 'Featured Products')}</h2>
                 ${d.subtitle ? `<p class="tc-section-subtitle">${escHtml(d.subtitle)}</p>` : ''}
               </div>
-              <a href="#mainProducts" class="tc-viewall-btn" style="font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:7px 16px;border:1.5px solid var(--primary);border-radius:var(--btn-r);">${escHtml(d.viewAllText||'View All →')}</a>
+              <a href="javascript:void(0)" onclick="smoothScrollToProducts()" class="tc-viewall-btn" style="font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:7px 16px;border:1.5px solid var(--primary);border-radius:var(--btn-r);">${escHtml(d.viewAllText||'View All →')}</a>
             </div>
             <div class="tc-products-grid" id="${secId}-grid" style="--cols:${cols}">
               ${Array.from({length:Math.min(count,3)}).map(()=>`
@@ -1210,12 +1149,16 @@
         case 'banner': {
           const bg = d.bgColor || 'var(--primary)'
           const tc = d.textColor || '#ffffff'
+          // FIX 2: banner CTA also scrolls to products if pointing to hash
+          const ctaIsHash = !d.ctaLink || d.ctaLink === '#' || d.ctaLink === '#mainProducts' || d.ctaLink.startsWith('#')
+          const ctaOnClick = ctaIsHash ? `onclick="smoothScrollToProducts()"` : ''
+          const ctaHref = ctaIsHash ? 'javascript:void(0)' : d.ctaLink
           return `<section class="tc-promo-banner" style="background:${bg};color:${tc}">
             <div class="tc-promo-content">
               <h2>${escHtml(d.heading || 'Limited Time Offer')}</h2>
               <p>${escHtml(d.subtext || d.subheading || 'Get 20% off your first order.')}</p>
               ${d.couponCode ? `<div style="display:inline-block;background:rgba(255,255,255,.2);border:2px dashed rgba(255,255,255,.6);padding:8px 20px;border-radius:8px;font-size:15px;font-weight:800;letter-spacing:.08em;margin-bottom:16px;">${escHtml(d.couponCode)}</div><br>` : ''}
-              ${d.ctaText ? `<a href="${d.ctaLink || '#mainProducts'}" class="btn-white" style="color:${bg}">${escHtml(d.ctaText)}</a>` : ''}
+              ${d.ctaText ? `<a href="${ctaHref}" class="btn-white" style="color:${bg}" ${ctaOnClick}>${escHtml(d.ctaText)}</a>` : ''}
             </div>
           </section>`
         }
@@ -1248,15 +1191,18 @@
         }
 
         case 'newsletter': {
+          // FIX 3: subscribe button uses btn-cta class only, never btn-add
+          // btn text is 'Subscribe' by default
           const bg = d.bgColor ? `background:${d.bgColor};` : ''
           const tc = d.textColor ? `color:${d.textColor};` : ''
           const btnBg = d.btnColor || 'var(--primary)'
+          const subscribeText = d.btnText2 || 'Subscribe'
           return `<section class="tc-newsletter" style="${bg}${tc}">
             <h2>${escHtml(d.heading||'Stay in the loop')}</h2>
             <p>${escHtml(d.subtext||d.subheading||'Get exclusive deals and offers straight to your inbox.')}</p>
             <div class="tc-newsletter-form">
               <input class="tc-newsletter-input" type="email" placeholder="${escHtml(d.inputPlaceholder||'Enter your email address')}">
-              <button class="btn-cta" style="background:${btnBg};white-space:nowrap" onclick="subscribeNewsletter()">${escHtml(d.btnText||'Subscribe')} →</button>
+              <button class="btn-cta" style="background:${btnBg};white-space:nowrap;" onclick="subscribeNewsletter()">${escHtml(subscribeText)} →</button>
             </div>
           </section>`
         }
@@ -1311,7 +1257,7 @@
                 `<div class="tc-cd-unit"><div class="tc-cd-num ${cls}" style="color:${ac}" id="${sid}-${cls}">${n}</div><div class="tc-cd-label">${l}</div></div>`
               ).join('')}
             </div>
-            ${d.ctaText ? `<div style="margin-top:24px;"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtml(d.ctaText)}</a></div>` : ''}
+            ${d.ctaText ? `<div style="margin-top:24px;"><a href="javascript:void(0)" class="btn-cta" onclick="smoothScrollToProducts()">${escHtml(d.ctaText)}</a></div>` : ''}
           </section>`
         }
 
@@ -1392,9 +1338,9 @@
         const diff = target - now
         const container = document.getElementById(`countdown-${secId}`)
         if (!container) return
-
         if (diff <= 0) {
-          container.querySelector('.tc-countdown-row').innerHTML = `<div style="font-size:18px;opacity:.6">${d.expiredText || 'Offer has ended'}</div>`
+          const row = container.querySelector('.tc-countdown-row')
+          if (row) row.innerHTML = `<div style="font-size:18px;opacity:.6">Offer has ended</div>`
           return
         }
         const days  = Math.floor(diff / 86400000)
@@ -1501,7 +1447,7 @@
     }
 
     async function loadProducts() {
-      const params   = new URLSearchParams({ page: currentPage })
+      const params = new URLSearchParams({ page: currentPage })
       if (searchQuery) params.set('q', searchQuery)
       if (currentCat) params.set('category', currentCat)
       const sort = document.getElementById('sortSelect').value
@@ -1534,11 +1480,8 @@
         return
       }
       grid.innerHTML = products.map(p => renderGridCard(p)).join('')
-      // After inserting cards, update controls for any products already in cart
       products.forEach(p => {
-        if (getCartItemQty(p._id) > 0) {
-          updateProductCardControls(p._id)
-        }
+        if (getCartItemQty(p._id) > 0) updateProductCardControls(p._id)
       })
     }
 
@@ -1554,9 +1497,9 @@
       const img = p.images?.[0]
         ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
         : '<span style="font-size:48px;">📦</span>'
-
-      // Get current cart quantity for this product
       const qty = getCartItemQty(p._id)
+      const safeImg = (p.images?.[0]||'').replace(/'/g, "\\'")
+      const safeName = escHtml(p.name).replace(/'/g, "\\'")
 
       return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}" style="background:var(--card-bg);border-radius:var(--radius);">
         ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
@@ -1571,14 +1514,12 @@
           </div>
           ${oos
             ? `<div class="out-badge">Out of Stock</div>`
-            : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${p.images?.[0]||''}">
+            : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
                 ${qty === 0
-                  ? `<button class="btn-add" onclick="event.preventDefault(); addToCart('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">🛒 Add to Cart</button>`
-                  : `<div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
-                      <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
-                      <span class="qty-value">${qty}</span>
-                      <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">+</button>
-                    </div>`
+                  ? `<button class="btn-add" onclick="event.preventDefault(); addToCart('${p._id}', '${safeName}', ${p.price}, '${safeImg}')">🛒 Add to Cart</button>`
+                  : `<button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
+                     <span class="qty-value">${qty}</span>
+                     <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${safeName}', ${p.price}, '${safeImg}')">+</button>`
                 }
               </div>`
           }
@@ -1600,7 +1541,7 @@
       el.innerHTML = html
     }
 
-    function goPage(p)         { currentPage = p; loadProducts(); window.scrollTo({top:0,behavior:'smooth'}) }
+    function goPage(p) { currentPage = p; loadProducts(); window.scrollTo({top:0,behavior:'smooth'}) }
     function selectCat(el, id) {
       document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('active'))
       el.classList.add('active')
@@ -1617,9 +1558,6 @@
         const products = (data.products || []).slice(0, count)
         if (!products.length) { grid.closest('section').style.display = 'none'; return }
 
-        const cols = parseInt(grid.closest('.tc-section').querySelector('.tc-products-grid')?.style.getPropertyValue('--cols')) ||
-                     (window.innerWidth <= 768 ? 2 : parseInt(d.columns) || 3)
-
         grid.innerHTML = products.map(p => {
           const disc = p.compare_at_price && p.compare_at_price > p.price
             ? Math.round((1 - p.price / p.compare_at_price) * 100) : 0
@@ -1628,8 +1566,12 @@
             ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
             : '<span style="font-size:48px">📦</span>'
           const qty = getCartItemQty(p._id)
+          const safeImg = (p.images?.[0]||'').replace(/'/g, "\\'")
+          const safeName = escHtml(p.name).replace(/'/g, "\\'")
+          const btnLabel = escHtml(d.btnText || 'Add to Cart')
+
           return `<div class="tc-product-card" style="text-decoration:none;color:var(--text);">
-            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;">
+            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block;">
               <div class="tc-product-img" style="position:relative;">
                 ${disc >= 5 ? `<div class="tc-product-badge">−${disc}%</div>` : ''}
                 ${img}
@@ -1637,26 +1579,26 @@
               <div class="tc-product-info">
                 ${p.category_name ? `<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${escHtml(p.category_name)}</div>` : ''}
                 <div class="tc-product-name">${escHtml(p.name)}</div>
-                <div class="tc-price-row">
+                <div class="tc-price-row" style="margin-bottom:8px;">
                   <span class="tc-product-price">${currency}${p.price.toFixed(2)}</span>
                   ${p.compare_at_price ? `<span class="tc-product-old">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
-                  ${disc ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;">${disc}% off</span>` : ''}
+                  ${disc ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;margin-left:4px;">${disc}% off</span>` : ''}
                 </div>
-            </a>
-                ${oos
-                  ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px;">Out of Stock</div>`
-                  : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${p.images?.[0]||''}">
-                      ${qty === 0
-                        ? `<button class="tc-product-btn" onclick="event.preventDefault(); addToCart('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">🛒 ${escHtml(d.btnText||'Add to Cart')}</button>`
-                        : `<div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
-                            <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
-                            <span class="qty-value">${qty}</span>
-                            <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">+</button>
-                          </div>`
-                      }
-                    </div>`
-                }
               </div>
+            </a>
+            <div style="padding:0 14px 14px;">
+              ${oos
+                ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px;">Out of Stock</div>`
+                : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
+                    ${qty === 0
+                      ? `<button class="tc-product-btn" onclick="event.preventDefault(); addToCart('${p._id}', '${safeName}', ${p.price}, '${safeImg}')">🛒 ${btnLabel}</button>`
+                      : `<button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
+                         <span class="qty-value">${qty}</span>
+                         <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${safeName}', ${p.price}, '${safeImg}')">+</button>`
+                    }
+                  </div>`
+              }
+            </div>
           </div>`
         }).join('')
       } catch(e) {
@@ -1713,7 +1655,7 @@
         x.classList.toggle('active', x.dataset.cat === catId)
       })
       loadProducts()
-      scrollToElement('mainProducts')
+      smoothScrollToProducts()
     }
 
     if (slug) {
