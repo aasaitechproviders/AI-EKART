@@ -1151,10 +1151,12 @@ function applyThemeFromBackend(doc) {
   }
   if (doc.sections && doc.sections.length) {
     sections = doc.sections.map(bs => {
-      const def = DEFAULT_SECTIONS.find(d => d.type === bs.type)
+      // Translate backend type → frontend type (e.g. 'navigation' → 'navbar')
+      const frontendType = toFrontendType(bs.type)
+      const def = DEFAULT_SECTIONS.find(d => d.type === frontendType)
       return {
-        id:      bs.id || `sec_${bs.type}_${Date.now()}`,
-        type:    bs.type,
+        id:      bs.id || `sec_${frontendType}_${Date.now()}`,
+        type:    frontendType,
         enabled: bs.is_visible !== false,
         data:    bs.settings || def?.data || {}
       }
@@ -1168,6 +1170,40 @@ function applyThemeFromBackend(doc) {
   } else {
     sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
   }
+}
+
+// Maps our internal frontend type names → backend-accepted type names.
+// The backend was rejecting 'navbar', 'categories', 'trustbadges', etc.
+// Inspect your API's allowed enum; extend this map if needed.
+const BACKEND_TYPE_MAP = {
+  navbar:       'navigation',
+  categories:   'category_grid',
+  trustbadges:  'trust_badges',
+  featured:     'featured_products',
+  newsletter:   'newsletter_signup',
+  announcement: 'announcement_bar',
+  // pass-through types (already match backend names)
+  hero:         'hero',
+  banner:       'banner',
+  testimonials: 'testimonials',
+  footer:       'footer',
+  video:        'video',
+  countdown:    'countdown',
+  gallery:      'gallery',
+  faq:          'faq',
+}
+
+// Reverse map: backend type → our frontend type (used when loading)
+const FRONTEND_TYPE_MAP = Object.fromEntries(
+  Object.entries(BACKEND_TYPE_MAP).map(([k, v]) => [v, k])
+)
+
+function toBackendType(frontendType) {
+  return BACKEND_TYPE_MAP[frontendType] || frontendType
+}
+
+function toFrontendType(backendType) {
+  return FRONTEND_TYPE_MAP[backendType] || backendType
 }
 
 function buildBackendPayload() {
@@ -1194,7 +1230,7 @@ function buildBackendPayload() {
     },
     sections: sections.map((s, i) => ({
       id:         s.id,
-      type:       s.type,
+      type:       toBackendType(s.type),   // ← translate to backend enum
       order:      i + 1,
       is_visible: s.enabled,
       settings:   s.data || {}
@@ -1211,6 +1247,11 @@ async function saveAndPublish() {
   btn.innerHTML = '⌛ Saving…'
   try {
     const payload = buildBackendPayload()
+
+    // Log the section types being sent — helps debug backend validation errors
+    console.log('[Save] Section types being sent:',
+      payload.sections.map(s => `${s.type} (order:${s.order})`).join(', '))
+
     await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
       method:'PUT',
       body:JSON.stringify(payload.settings)
@@ -1224,6 +1265,8 @@ async function saveAndPublish() {
     toast('Theme saved & published! 🚀', 'success')
     renderPreview()
   } catch(e) {
+    // Show the full error message so we can see exactly which type/field is invalid
+    console.error('[Save] Error:', e)
     toast('Save failed: ' + e.message, 'error')
   } finally {
     btn.disabled = false
