@@ -55,16 +55,18 @@
         <div class="sidebar-user-email" id="nav-user-email">…</div>
       </div>
     </div>
-    <div class="nav-section"><div class="nav-section-label">Merchant</div>
+        <div class="nav-section"><div class="nav-section-label">Merchant</div>
       <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
       <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
       <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
       <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
       <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
       <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+      <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
       <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-    </div><div class="nav-section"><div class="nav-section-label">AI Tools</div>
+      <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span>Inventory</a>
+    </div>
+    <div class="nav-section"><div class="nav-section-label">AI Tools</div>
       <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
     </div>
     <div class="sidebar-bottom">
@@ -113,6 +115,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('orders', (id) => { currentStoreId = id; loadOrders() })
   if (!nav) return
   currentStoreId = nav.currentStoreId
+  setTopbarActions(`<button class="btn btn-secondary" onclick="exportCSV()" style="font-size:12px;">⬇ Export CSV</button>`)
   if (currentStoreId) await loadOrders()
   else renderEmpty()
 })
@@ -181,7 +184,7 @@ function renderOrders(orders) {
       <div style="font-size:11px;color:var(--text3);">${o.customer_email}</div></td>
     <td style="color:var(--text2);font-size:12.5px;">${o.items?.length||0} item(s)</td>
     <td><strong style="font-family:'DM Mono',monospace;">₹${o.total?.toFixed(2)}</strong><br>
-      <span style="font-size:10.5px;color:var(--text3);">COD</span></td>
+      <span style="font-size:10.5px;color:var(--text3);">${o.payment_method === 'razorpay' ? '⚡ Razorpay' : 'COD'}</span></td>
     <td>${statusBadge(o.status)}</td>
     <td style="font-size:12px;color:var(--text3);">${new Date(o.created_at).toLocaleDateString('en-IN')}</td>
     <td><button class="btn btn-secondary btn-sm" onclick="openOrderEdit('${o._id}')">✏️ Update</button></td>
@@ -198,6 +201,7 @@ function openOrderEdit(id) {
     <strong>#${o.order_number}</strong> — ${o.customer_name} (${o.customer_email})<br>
     Phone: ${o.customer_phone||'—'}<br>
     Ship to: ${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}<br>
+    Payment: ${o.payment_method === 'razorpay' ? '⚡ Razorpay' : 'Cash on Delivery'}${o.razorpay_payment_id ? ` <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);">(${o.razorpay_payment_id})</span>` : ''}<br>
     Items: ${(o.items||[]).map(i=>`${i.name} ×${i.qty} @ ₹${i.price}`).join(', ')}<br>
     <strong style="font-size:14px;">Total: ₹${o.total?.toFixed(2)}</strong>`
   openModal('orderModal')
@@ -216,6 +220,31 @@ async function saveOrder() {
     await loadOrders()
     toast('Order updated!', 'success')
   } catch (e) { toast(e.message, 'error') }
+}
+
+function exportCSV() {
+  if (!allOrders.length) return toast('No orders to export', 'error')
+  const rows = [['Order #','Customer','Email','Phone','Items','Total','Payment','Status','Date','Tracking']]
+  allOrders.forEach(o => {
+    rows.push([
+      o.order_number,
+      o.customer_name,
+      o.customer_email,
+      o.customer_phone || '',
+      (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(' | '),
+      o.total?.toFixed(2),
+      o.payment_method === 'razorpay' ? 'Razorpay' : 'COD',
+      o.status,
+      new Date(o.created_at).toLocaleDateString('en-IN'),
+      o.tracking_number || ''
+    ])
+  })
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const a = document.createElement('a')
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`
+  a.click()
+  toast('CSV downloaded!', 'success')
 }
 
 function renderEmpty() {
