@@ -86,9 +86,8 @@
   background: var(--accent);
   border-radius: 50%;
   font-size: 10px;
-  display: flex; align-items: center; justify-content: center;
-  color: white;
   display: grid; place-items: center;
+  color: white;
   font-weight: 700;
 }
 .theme-preview {
@@ -103,6 +102,30 @@
   color: var(--text2);
   background: var(--surface2);
   border-top: 1px solid var(--border);
+}
+
+/* Browse themes CTA inside themes tab */
+.browse-themes-cta {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(108,99,255,.06);
+  border: 1px dashed rgba(108,99,255,.3);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+.browse-themes-cta:hover {
+  background: rgba(108,99,255,.1);
+  border-color: rgba(108,99,255,.5);
+}
+.browse-themes-cta-icon { font-size: 22px; margin-bottom: 6px; }
+.browse-themes-cta-title {
+  font-size: 12.5px; font-weight: 800;
+  color: var(--accent2); margin-bottom: 3px;
+}
+.browse-themes-cta-sub {
+  font-size: 11px; color: var(--text3); font-weight: 600;
 }
 
 /* Sections panel */
@@ -507,6 +530,21 @@
 /* Toast already in nav.css but we ensure it's above builder */
 .toast-container { z-index: 9999; }
 
+/* Store select */
+.store-select-wrap {
+  display: flex; align-items: center; gap: 6px;
+}
+.store-select-label {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+}
+.store-selector {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 12.5px; font-weight: 600; color: var(--text2);
+  font-family: 'Outfit', sans-serif; outline: none; cursor: pointer;
+}
+.store-selector:focus { border-color: var(--accent); }
+
 </style>
 <script>
 ;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/website-builder.html')}})()</script>
@@ -554,7 +592,7 @@
   </div>
 </div>
 
-<!-- Real sidebar (same nav pattern) -->
+<!-- Real sidebar -->
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
   <div class="sidebar-user">
@@ -592,6 +630,8 @@
       <span class="topbar-title">🎨 Website Builder</span>
       <span class="unsaved-badge" id="unsaved-badge">● Unsaved changes</span>
     </div>
+
+    <!-- ── TOPBAR RIGHT: Browse Themes + Preview + Save ── -->
     <div class="topbar-right" id="topbar-actions">
       <div class="publish-bar">
         <div class="store-select-wrap">
@@ -602,6 +642,12 @@
           <div class="publish-dot"></div>
           <span>Live</span>
         </div>
+
+        <!-- ✅ NEW: Browse Themes button — links to themes-store.html -->
+        <button class="btn btn-secondary btn-sm" onclick="window.location='themes-store.html'">
+          🎭 Browse Themes
+        </button>
+
         <button class="btn btn-secondary btn-sm" onclick="previewInNewTab()">🔗 Preview</button>
         <button class="btn btn-primary" id="save-btn" onclick="saveTheme()">💾 Save & Publish</button>
       </div>
@@ -622,9 +668,16 @@
 
         <!-- THEMES tab -->
         <div class="builder-panel" id="tab-themes">
-          <div class="panel-section-sep">Choose Theme</div>
+          <div class="panel-section-sep">Quick Apply</div>
           <div class="themes-grid" id="themes-grid">
             <!-- injected by JS -->
+          </div>
+
+          <!-- ✅ NEW: Browse Themes CTA card inside the themes panel -->
+          <div class="browse-themes-cta" onclick="window.location='themes-store.html'">
+            <div class="browse-themes-cta-icon">🎭</div>
+            <div class="browse-themes-cta-title">Browse Theme Store</div>
+            <div class="browse-themes-cta-sub">24+ professional themes available</div>
           </div>
         </div>
 
@@ -753,7 +806,6 @@
   </div>
 </div>
 
-<!-- store-select-wrap needed for nav.js store selector -->
 <div id="store-select-wrap" style="display:none;"></div>
 
 <script>
@@ -766,7 +818,6 @@ let activeTab = 'themes'
 let editingSection = null
 let hasUnsavedChanges = false
 
-// Theme definitions
 const THEMES = [
   {
     id: 'modern', label: 'Modern Dark',
@@ -862,7 +913,6 @@ const THEMES = [
 
 const FONTS = ['Outfit', 'DM Serif Display', 'Syne', 'Cormorant Garamond', 'Nunito', 'Space Grotesk']
 
-// Default sections list
 const DEFAULT_SECTIONS = [
   { id: 'announcement', icon: '📢', label: 'Announcement Bar', enabled: true, data: {} },
   { id: 'navbar', icon: '🔝', label: 'Navigation', enabled: true, data: {} },
@@ -875,7 +925,6 @@ const DEFAULT_SECTIONS = [
   { id: 'footer', icon: '📄', label: 'Footer', enabled: true, data: {} }
 ]
 
-// Global store theme settings
 let themeSettings = {}
 let sections = []
 let selectedThemeId = 'modern'
@@ -907,32 +956,29 @@ function updatePreviewUrl() {
   document.getElementById('preview-url').textContent = `ekart.aasaitech.in/${slug}`
 }
 
-// ── Theme Storage (API-backed) ────────────────────────────────────────────────
+// ── Theme Storage ─────────────────────────────────────────────────────────────
 function setDefaultTheme() {
   selectedThemeId = 'modern'
   themeSettings = { ...THEMES[0].settings }
   sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
 }
 
-// Map backend theme settings → our internal themeSettings + sections
 function applyBackendTheme(themeDoc) {
   if (!themeDoc) return setDefaultTheme()
   const s = themeDoc.settings || {}
-  // Detect which preset theme best matches by primary color, or use stored themeId
   selectedThemeId = s.themeId || 'modern'
   themeSettings = {
-    primaryColor:  s.primary_color  || THEMES[0].settings.primaryColor,
-    bgColor:       s.secondary_color || THEMES[0].settings.bgColor,
-    textColor:     s.accent_color   || THEMES[0].settings.textColor,
-    font:          s.font_heading   || THEMES[0].settings.font,
-    cardStyle:     s.card_style     || 'rounded',
-    borderRadius:  s.border_radius  || 12,
-    buttonStyle:   s.button_style   || 'filled',
+    primaryColor:     s.primary_color   || THEMES[0].settings.primaryColor,
+    bgColor:          s.secondary_color  || THEMES[0].settings.bgColor,
+    textColor:        s.accent_color    || THEMES[0].settings.textColor,
+    font:             s.font_heading    || THEMES[0].settings.font,
+    cardStyle:        s.card_style      || 'rounded',
+    borderRadius:     s.border_radius   || 12,
+    buttonStyle:      s.button_style    || 'filled',
     announcementText: s.announcement_bar?.text || 'Free shipping on orders above ₹499! 🎉',
-    footerText:    s.footer_text    || '',
-    themeId:       selectedThemeId,
+    footerText:       s.footer_text     || '',
+    themeId:          selectedThemeId,
   }
-  // Map backend sections format → our internal format
   if (themeDoc.sections && themeDoc.sections.length) {
     sections = themeDoc.sections.map(bs => {
       const def = DEFAULT_SECTIONS.find(d => d.id === bs.type) ||
@@ -945,7 +991,6 @@ function applyBackendTheme(themeDoc) {
         data:    bs.settings || def.data || {}
       }
     })
-    // ensure all default sections exist
     DEFAULT_SECTIONS.forEach(def => {
       if (!sections.find(s => s.id === def.id)) {
         sections.push({ ...def, enabled: false })
@@ -956,23 +1001,22 @@ function applyBackendTheme(themeDoc) {
   }
 }
 
-// Build backend payload from current UI state
 function buildBackendSettings() {
   return {
-    primary_color:   themeSettings.primaryColor,
-    secondary_color: themeSettings.bgColor,
-    accent_color:    themeSettings.textColor,
-    font_heading:    themeSettings.font,
-    font_body:       themeSettings.font,
-    card_style:      themeSettings.cardStyle,
-    border_radius:   themeSettings.borderRadius,
-    button_style:    themeSettings.buttonStyle,
-    footer_text:     themeSettings.footerText || '',
-    themeId:         selectedThemeId,
+    primary_color:    themeSettings.primaryColor,
+    secondary_color:  themeSettings.bgColor,
+    accent_color:     themeSettings.textColor,
+    font_heading:     themeSettings.font,
+    font_body:        themeSettings.font,
+    card_style:       themeSettings.cardStyle,
+    border_radius:    themeSettings.borderRadius,
+    button_style:     themeSettings.buttonStyle,
+    footer_text:      themeSettings.footerText || '',
+    themeId:          selectedThemeId,
     announcement_bar: {
-      enabled: sections.find(s => s.id === 'announcement')?.enabled || false,
-      text:    themeSettings.announcementText,
-      bg_color: themeSettings.primaryColor,
+      enabled:    sections.find(s => s.id === 'announcement')?.enabled || false,
+      text:       themeSettings.announcementText,
+      bg_color:   themeSettings.primaryColor,
       text_color: '#ffffff'
     }
   }
@@ -992,7 +1036,6 @@ async function loadThemeForStore(storeId) {
   if (!storeId) return
   try {
     const data = await apiFetch(`/stores/${storeId}/theme`)
-    // Use draft if exists, otherwise use published
     const themeDoc = data.draft || data.published || null
     applyBackendTheme(themeDoc)
   } catch (e) {
@@ -1011,17 +1054,14 @@ async function saveTheme() {
   const btn = document.getElementById('save-btn')
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…' }
   try {
-    // 1. Save settings (creates/updates draft)
     await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
       method: 'PUT',
       body: JSON.stringify(buildBackendSettings())
     })
-    // 2. Save sections
     await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
       method: 'PUT',
       body: JSON.stringify({ sections: buildBackendSections() })
     })
-    // 3. Publish draft → live
     await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method: 'POST' })
     markUnsaved(false)
     toast('Theme saved & published! 🚀', 'success')
@@ -1044,7 +1084,7 @@ function switchTab(tab, el) {
   activeTab = tab
   document.querySelectorAll('.builder-tab').forEach(t => t.classList.remove('active'))
   el.classList.add('active')
-  document.getElementById('tab-themes').style.display = tab === 'themes' ? '' : 'none'
+  document.getElementById('tab-themes').style.display   = tab === 'themes'   ? '' : 'none'
   document.getElementById('tab-sections').style.display = tab === 'sections' ? '' : 'none'
   document.getElementById('tab-settings').style.display = tab === 'settings' ? '' : 'none'
 }
@@ -1081,12 +1121,12 @@ function markThemeActive(id) {
 
 // ── Sections ──────────────────────────────────────────────────────────────────
 const ADD_SECTION_OPTIONS = [
-  { id: 'video', icon: '🎬', label: 'Video' },
-  { id: 'countdown', icon: '⏳', label: 'Countdown' },
-  { id: 'gallery', icon: '🖼️', label: 'Gallery' },
+  { id: 'video',       icon: '🎬', label: 'Video' },
+  { id: 'countdown',   icon: '⏳', label: 'Countdown' },
+  { id: 'gallery',     icon: '🖼️', label: 'Gallery' },
   { id: 'trustbadges', icon: '🛡️', label: 'Trust Badges' },
-  { id: 'faq', icon: '❓', label: 'FAQ' },
-  { id: 'map', icon: '📍', label: 'Store Map' },
+  { id: 'faq',         icon: '❓', label: 'FAQ' },
+  { id: 'map',         icon: '📍', label: 'Store Map' },
 ]
 
 function initSectionsPanel() {
@@ -1161,32 +1201,32 @@ function addSection(id, label, icon) {
   markUnsaved(true)
 }
 
-// ── Section Editor (right panel) ──────────────────────────────────────────────
+// ── Section Editor ────────────────────────────────────────────────────────────
 const SECTION_FIELDS = {
   hero: [
-    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Welcome to our Store' },
-    { key: 'subheading', label: 'Sub-heading', type: 'text', placeholder: 'Discover amazing products' },
-    { key: 'ctaText', label: 'Button Text', type: 'text', placeholder: 'Shop Now' },
-    { key: 'ctaLink', label: 'Button Link', type: 'text', placeholder: '#products' },
+    { key: 'heading',    label: 'Heading',      type: 'text',     placeholder: 'Welcome to our Store' },
+    { key: 'subheading', label: 'Sub-heading',  type: 'text',     placeholder: 'Discover amazing products' },
+    { key: 'ctaText',    label: 'Button Text',  type: 'text',     placeholder: 'Shop Now' },
+    { key: 'ctaLink',    label: 'Button Link',  type: 'text',     placeholder: '#products' },
   ],
   featured: [
-    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'Featured Products' },
-    { key: 'count', label: 'Products to show', type: 'number', placeholder: '8' },
+    { key: 'title', label: 'Section Title',     type: 'text',   placeholder: 'Featured Products' },
+    { key: 'count', label: 'Products to show',  type: 'number', placeholder: '8' },
   ],
   categories: [
     { key: 'title', label: 'Section Title', type: 'text', placeholder: 'Browse Categories' },
   ],
   banner: [
-    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Special Offer' },
-    { key: 'subtext', label: 'Sub Text', type: 'textarea', placeholder: 'Get 20% off' },
-    { key: 'ctaText', label: 'Button Text', type: 'text', placeholder: 'Claim Offer' },
+    { key: 'heading', label: 'Heading',          type: 'text',     placeholder: 'Special Offer' },
+    { key: 'subtext', label: 'Sub Text',         type: 'textarea', placeholder: 'Get 20% off' },
+    { key: 'ctaText', label: 'Button Text',      type: 'text',     placeholder: 'Claim Offer' },
     { key: 'bgColor', label: 'Background Color', type: 'color' },
   ],
   testimonials: [
     { key: 'title', label: 'Section Title', type: 'text', placeholder: 'What Customers Say' },
   ],
   newsletter: [
-    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Stay in the loop' },
+    { key: 'heading', label: 'Heading',  type: 'text',     placeholder: 'Stay in the loop' },
     { key: 'subtext', label: 'Sub Text', type: 'textarea', placeholder: 'Get exclusive deals...' },
   ],
 }
@@ -1208,8 +1248,8 @@ function openSectionEditor(idx) {
   document.getElementById('right-panel-content').innerHTML = fields.map(f => {
     const val = s.data[f.key] ?? ''
     if (f.type === 'textarea') return `<div class="edit-field"><label class="edit-label">${f.label}</label><textarea class="edit-input edit-textarea" data-key="${f.key}" placeholder="${f.placeholder}">${val}</textarea></div>`
-    if (f.type === 'color') return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="color" class="setting-color" data-key="${f.key}" value="${val || '#6c63ff'}"></div>`
-    if (f.type === 'number') return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="number" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}" min="1" max="24"></div>`
+    if (f.type === 'color')    return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="color" class="setting-color" data-key="${f.key}" value="${val || '#6c63ff'}"></div>`
+    if (f.type === 'number')   return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="number" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}" min="1" max="24"></div>`
     return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="text" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}"></div>`
   }).join('')
 }
@@ -1217,9 +1257,7 @@ function openSectionEditor(idx) {
 function applySection() {
   if (editingSection === null) return
   const inputs = document.querySelectorAll('#right-panel-content [data-key]')
-  inputs.forEach(inp => {
-    sections[editingSection].data[inp.dataset.key] = inp.value
-  })
+  inputs.forEach(inp => { sections[editingSection].data[inp.dataset.key] = inp.value })
   renderPreview()
   markUnsaved(true)
   toast('Section updated', 'success')
@@ -1260,29 +1298,25 @@ function initSettingsPanel() {
 
 function syncUIToSettings() {
   const s = themeSettings
-  // Colors
-  document.getElementById('set-primary-color').value = s.primaryColor || '#6c63ff'
+  document.getElementById('set-primary-color').value     = s.primaryColor || '#6c63ff'
   document.getElementById('set-primary-color-hex').value = s.primaryColor || '#6c63ff'
-  document.getElementById('set-bg-color').value = s.bgColor || '#ffffff'
-  document.getElementById('set-bg-color-hex').value = s.bgColor || '#ffffff'
-  document.getElementById('set-text-color').value = s.textColor || '#111111'
-  document.getElementById('set-text-color-hex').value = s.textColor || '#111111'
-  // Font
+  document.getElementById('set-bg-color').value          = s.bgColor      || '#ffffff'
+  document.getElementById('set-bg-color-hex').value      = s.bgColor      || '#ffffff'
+  document.getElementById('set-text-color').value        = s.textColor    || '#111111'
+  document.getElementById('set-text-color-hex').value    = s.textColor    || '#111111'
   document.querySelectorAll('.font-opt').forEach(el => el.classList.toggle('active', el.dataset.font === s.font))
-  // Layout
-  document.getElementById('set-cols').value = s.cols || '3'
+  document.getElementById('set-cols').value      = s.cols     || '3'
   const rad = parseInt(s.radius) || 12
-  document.getElementById('set-radius').value = rad
+  document.getElementById('set-radius').value    = rad
   document.getElementById('set-radius-val').textContent = rad + 'px'
   document.getElementById('set-btn-style').value = s.btnStyle || 'rounded'
-  // Store info
   document.getElementById('set-announcement').value = s.announcement || ''
-  document.getElementById('set-footer').value = s.footerText || ''
+  document.getElementById('set-footer').value        = s.footerText   || ''
 }
 
 function onColorChange(key, val) {
   themeSettings[key] = val
-  document.getElementById('set-primary-color').value = val
+  document.getElementById('set-primary-color').value     = val
   document.getElementById('set-primary-color-hex').value = val
   markUnsaved(true)
   renderPreview()
@@ -1321,7 +1355,7 @@ function setDevice(device, btn) {
   iframe.height = device === 'desktop' ? 700 : device === 'tablet' ? 900 : 780
 }
 
-function refreshPreview() { renderPreview() }
+function refreshPreview()  { renderPreview() }
 function previewInNewTab() {
   const store = allStores.find(s => s._id === currentStoreId)
   const url = store?.published_url || `https://ekart.aasaitech.in/${store?.slug || ''}`
@@ -1334,7 +1368,6 @@ function renderPreview() {
   const isMobile = currentDevice === 'mobile'
   const isLight = isLightColor(s.bgColor || '#ffffff')
 
-  // Build section HTML
   let sectionsHTML = sections.filter(sec => sec.enabled).map(sec => buildSection(sec, s, isMobile)).join('\n')
 
   const btnRadius = s.btnStyle === 'pill' ? '999px' : s.btnStyle === 'square' ? '3px' : (s.radius || '12px')
@@ -1577,7 +1610,6 @@ function isLightColor(hex) {
   const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16)
   return (r*299 + g*587 + b*114) / 1000 > 128
 }
-
 </script>
 </body>
 </html>
