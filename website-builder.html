@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#080910">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eKart — Website Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
+<style>
+
+/* ── Builder Layout ── */
+.builder-wrap {
+  display: flex;
+  height: calc(100vh - 58px);
+  overflow: hidden;
+}
+
+/* Left Panel: Sections + Settings */
+.builder-left {
+  width: 280px;
+  min-width: 280px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.builder-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.builder-tab {
+  flex: 1;
+  padding: 11px 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text3);
+  cursor: pointer;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  letter-spacing: .02em;
+}
+.builder-tab.active {
+  color: var(--accent2);
+  border-bottom-color: var(--accent);
+  background: rgba(108,99,255,.04);
+}
+.builder-tab:hover:not(.active) { color: var(--text2); }
+
+.builder-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.builder-panel::-webkit-scrollbar { width: 4px; }
+.builder-panel::-webkit-scrollbar-track { background: transparent; }
+.builder-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Themes Grid */
+.themes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.theme-card {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+.theme-card:hover { border-color: rgba(108,99,255,.4); transform: translateY(-1px); }
+.theme-card.active { border-color: var(--accent); }
+.theme-card.active::after {
+  content: '✓';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 18px; height: 18px;
+  background: var(--accent);
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  display: grid; place-items: center;
+  font-weight: 700;
+}
+.theme-preview {
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+}
+.theme-label {
+  padding: 7px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text2);
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+
+/* Sections panel */
+.section-list { display: flex; flex-direction: column; gap: 6px; }
+.section-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px 11px;
+  cursor: grab;
+  transition: all .15s;
+  user-select: none;
+}
+.section-item:hover { border-color: var(--border2); background: var(--surface3); }
+.section-item.dragging { opacity: 0.4; }
+.section-item.drag-over { border-color: var(--accent); background: rgba(108,99,255,.06); }
+.section-drag-handle { color: var(--text3); font-size: 13px; cursor: grab; }
+.section-icon { font-size: 15px; }
+.section-item-label { font-size: 12.5px; font-weight: 600; color: var(--text2); flex: 1; }
+.section-toggle {
+  width: 28px; height: 16px;
+  background: var(--border2);
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: background .15s;
+  flex-shrink: 0;
+  border: none;
+}
+.section-toggle.on { background: var(--accent); }
+.section-toggle::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: white;
+  border-radius: 50%;
+  top: 2px; left: 2px;
+  transition: left .15s;
+}
+.section-toggle.on::after { left: 14px; }
+.section-edit-btn {
+  background: none; border: none;
+  color: var(--text3); cursor: pointer;
+  font-size: 12px; padding: 2px 4px;
+  border-radius: 4px;
+  transition: color .1s;
+}
+.section-edit-btn:hover { color: var(--accent2); }
+
+/* Add Section */
+.add-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.add-section-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 5px; padding: 10px 6px;
+  background: var(--bg);
+  border: 1px dashed var(--border2);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Outfit', sans-serif;
+}
+.add-section-btn:hover { border-color: var(--accent); background: rgba(108,99,255,.05); }
+.add-section-btn span { font-size: 20px; }
+.add-section-btn small { font-size: 10.5px; font-weight: 600; color: var(--text3); }
+
+/* Settings panel */
+.settings-group { margin-bottom: 18px; }
+.settings-group-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+.setting-row { margin-bottom: 10px; }
+.setting-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 5px;
+  display: block;
+}
+.setting-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  outline: none;
+  transition: border-color .15s;
+}
+.setting-input:focus { border-color: var(--accent); }
+.setting-color-row {
+  display: flex; gap: 6px; align-items: center;
+}
+.setting-color {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  padding: 3px;
+  background: var(--bg);
+}
+.color-swatch-row {
+  display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;
+}
+.color-swatch {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .1s;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active { border-color: white; }
+
+.font-picker {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.font-opt {
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  font-size: 12px;
+  color: var(--text2);
+}
+.font-opt:hover, .font-opt.active { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,.06); }
+
+/* Center: Preview */
+.builder-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #13141f;
+  overflow: hidden;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 12px;
+}
+.preview-url-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  max-width: 420px;
+}
+.preview-url-icon { font-size: 12px; color: var(--green); }
+.preview-url-text { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.preview-device-btns { display: flex; gap: 4px; }
+.device-btn {
+  padding: 6px 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .15s;
+}
+.device-btn.active { background: rgba(108,99,255,.12); border-color: rgba(108,99,255,.3); color: var(--accent2); }
+.device-btn:hover:not(.active) { color: var(--text2); border-color: var(--border2); }
+
+.preview-frame-wrap {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+}
+.preview-frame-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+.preview-frame-wrap::-webkit-scrollbar-track { background: transparent; }
+.preview-frame-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.preview-device-shell {
+  transition: all .3s ease;
+  flex-shrink: 0;
+}
+.preview-device-shell.desktop { width: 100%; max-width: 1100px; }
+.preview-device-shell.tablet {
+  width: 768px;
+  border: 12px solid #1a1c2e;
+  border-radius: 18px;
+  box-shadow: 0 0 0 1px var(--border), 0 30px 60px rgba(0,0,0,.6);
+}
+.preview-device-shell.mobile {
+  width: 375px;
+  border: 10px solid #1a1c2e;
+  border-radius: 36px;
+  box-shadow: 0 0 0 1px var(--border), 0 30px 60px rgba(0,0,0,.6);
+}
+
+#preview-iframe {
+  width: 100%;
+  border: none;
+  display: block;
+  border-radius: 4px;
+  transition: height .2s;
+}
+.preview-device-shell.tablet #preview-iframe,
+.preview-device-shell.mobile #preview-iframe {
+  border-radius: 8px;
+}
+
+/* Right Panel: Section editor */
+.builder-right {
+  width: 260px;
+  min-width: 260px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.builder-right-header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.builder-right-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text2);
+  letter-spacing: .03em;
+}
+.builder-right-close {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 16px; padding: 2px;
+  border-radius: 4px; transition: color .1s;
+}
+.builder-right-close:hover { color: var(--text); }
+.builder-right-panel { flex: 1; overflow-y: auto; padding: 14px; }
+.builder-right-panel::-webkit-scrollbar { width: 4px; }
+.builder-right-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Action bar */
+.builder-action-bar {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Section labels */
+.panel-section-sep {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 14px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Theme preview mini canvases */
+/* THEME: Modern (dark) */
+.tp-modern { background: #0f0f14; }
+.tp-modern-nav { height: 12px; background: #1a1a25; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
+.tp-modern-nav-dot { width: 20px; height: 4px; background: #6c63ff; border-radius: 2px; }
+.tp-modern-nav-links { display: flex; gap: 3px; margin-left: auto; }
+.tp-modern-nav-links span { width: 16px; height: 3px; background: #2a2a38; border-radius: 1px; }
+.tp-modern-hero { height: 34px; background: linear-gradient(135deg,rgba(108,99,255,.25),transparent); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
+.tp-modern-h { width: 50px; height: 5px; background: rgba(255,255,255,.6); border-radius: 2px; }
+.tp-modern-sub { width: 36px; height: 3px; background: rgba(255,255,255,.25); border-radius: 1px; }
+.tp-modern-btn { width: 28px; height: 5px; background: #6c63ff; border-radius: 2px; margin-top: 2px; }
+.tp-modern-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
+.tp-modern-grid-card { height: 14px; background: #1a1a25; border-radius: 3px; }
+
+/* THEME: Minimal (white) */
+.tp-minimal { background: #fafafa; }
+.tp-minimal-nav { height: 12px; background: white; border-bottom: 1px solid #eee; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
+.tp-minimal-nav-dot { width: 16px; height: 3px; background: #111; border-radius: 1px; }
+.tp-minimal-hero { height: 34px; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px; }
+.tp-minimal-h { width: 44px; height: 5px; background: #222; border-radius: 1px; }
+.tp-minimal-sub { width: 32px; height: 2px; background: #aaa; border-radius: 1px; }
+.tp-minimal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
+.tp-minimal-card { height: 16px; background: #f0f0f0; border-radius: 2px; }
+
+/* THEME: Bold */
+.tp-bold { background: #ff4d00; }
+.tp-bold-nav { height: 12px; background: #ff4d00; display: flex; align-items: center; padding: 0 6px; }
+.tp-bold-logo { width: 18px; height: 4px; background: white; border-radius: 1px; }
+.tp-bold-hero { height: 36px; background: linear-gradient(135deg,#ff4d00,#ff8c42); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
+.tp-bold-h { width: 48px; height: 7px; background: white; border-radius: 2px; }
+.tp-bold-sub { width: 34px; height: 3px; background: rgba(255,255,255,.5); border-radius: 1px; }
+.tp-bold-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 4px 5px; }
+.tp-bold-card { height: 16px; background: #ff6a1a; border-radius: 3px; }
+
+/* THEME: Luxury */
+.tp-luxury { background: #0d0b09; }
+.tp-luxury-nav { height: 12px; background: #0d0b09; border-bottom: 1px solid #2a2318; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+.tp-luxury-logo { width: 22px; height: 3px; background: #c9a84c; border-radius: 0; }
+.tp-luxury-hero { height: 36px; background: linear-gradient(180deg,#1a1510,#0d0b09); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
+.tp-luxury-h { width: 40px; height: 5px; background: #c9a84c; border-radius: 0; }
+.tp-luxury-sub { width: 30px; height: 2px; background: #5a4a2e; border-radius: 0; }
+.tp-luxury-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; padding: 4px 5px; }
+.tp-luxury-card { height: 14px; background: #1a1510; border: 1px solid #2a2318; border-radius: 0; }
+
+/* THEME: Pastel */
+.tp-pastel { background: #fef6f0; }
+.tp-pastel-nav { height: 12px; background: #fff; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
+.tp-pastel-logo { width: 18px; height: 4px; background: #e8847a; border-radius: 4px; }
+.tp-pastel-hero { height: 34px; background: linear-gradient(135deg,#fde8e0,#fef0fa); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
+.tp-pastel-h { width: 44px; height: 5px; background: #d47a8f; border-radius: 4px; }
+.tp-pastel-sub { width: 32px; height: 3px; background: #eab5c0; border-radius: 2px; }
+.tp-pastel-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
+.tp-pastel-card { height: 14px; background: #fde8e0; border-radius: 4px; }
+
+/* THEME: Tech */
+.tp-tech { background: #020d1a; }
+.tp-tech-nav { height: 12px; background: #020d1a; border-bottom: 1px solid #0a3a5a; display: flex; align-items: center; padding: 0 6px; }
+.tp-tech-logo { width: 18px; height: 4px; background: #00d4ff; border-radius: 1px; }
+.tp-tech-hero { height: 36px; background: linear-gradient(135deg,rgba(0,212,255,.1),transparent); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; }
+.tp-tech-h { width: 44px; height: 5px; background: #00d4ff; border-radius: 1px; }
+.tp-tech-sub { width: 32px; height: 2px; background: #0a3a5a; border-radius: 1px; }
+.tp-tech-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; padding: 4px 5px; }
+.tp-tech-card { height: 14px; background: #0a1a2a; border: 1px solid #0a3a5a; border-radius: 2px; }
+
+/* Publish bar */
+.publish-bar {
+  display: flex; align-items: center; gap: 10px;
+}
+.publish-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 600; color: var(--text3);
+}
+.publish-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: lpulse 2s infinite;
+}
+
+/* Edit section form */
+.edit-field { margin-bottom: 12px; }
+.edit-label { font-size: 11px; font-weight: 700; color: var(--text2); margin-bottom: 5px; display: block; }
+.edit-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 8px 11px; font-size: 12.5px;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  outline: none; transition: border-color .15s;
+}
+.edit-input:focus { border-color: var(--accent); }
+.edit-textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
+.edit-range { width: 100%; accent-color: var(--accent); margin-top: 4px; }
+
+/* Unsaved badge */
+.unsaved-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(251,191,36,.1);
+  border: 1px solid rgba(251,191,36,.25);
+  color: #fbbf24;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.unsaved-badge.show { opacity: 1; }
+
+/* Loading skeleton */
+.skel { background: linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%); background-size: 200% 100%; animation: skel-shimmer 1.4s infinite; border-radius: 6px; }
+@keyframes skel-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel-sidebar { display:flex;height:100vh;width:100%; }
+.skel-sidebar-inner { width:220px;min-width:220px;padding:20px 14px; }
+.skel-main { flex:1;padding:20px; }
+.skel-topbar { height:58px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:12px; }
+
+/* Toast already in nav.css but we ensure it's above builder */
+.toast-container { z-index: 9999; }
+
+</style>
+<script>
+;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/website-builder.html')}})()</script>
+<script src="api.js"></script>
+<script src="nav.js"></script>
+</head>
+<body>
+
+<!-- Skeleton -->
+<div id="page-skeleton">
+  <div class="skel-sidebar">
+    <div class="skel-sidebar-inner">
+      <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+        <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+          <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
+          <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+        </div>
+      </div>
+      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;opacity:.6;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:4px;opacity:.3;"></div>
+    </div>
+    <div class="skel-main">
+      <div class="skel-topbar">
+        <div class="skel" style="height:16px;width:120px;border-radius:5px;"></div>
+      </div>
+      <div style="display:flex;height:calc(100vh - 58px);">
+        <div style="width:280px;background:var(--surface);border-right:1px solid var(--border);padding:14px;">
+          <div class="skel" style="height:36px;border-radius:8px;margin-bottom:12px;"></div>
+          <div class="skel" style="height:100px;border-radius:10px;margin-bottom:10px;"></div>
+          <div class="skel" style="height:100px;border-radius:10px;opacity:.6;"></div>
+        </div>
+        <div style="flex:1;background:#13141f;display:flex;align-items:center;justify-content:center;">
+          <div class="skel" style="width:700px;height:500px;border-radius:12px;opacity:.3;"></div>
+        </div>
+        <div style="width:260px;background:var(--surface);border-left:1px solid var(--border);padding:14px;">
+          <div class="skel" style="height:22px;border-radius:6px;margin-bottom:12px;"></div>
+          <div class="skel" style="height:40px;border-radius:8px;margin-bottom:8px;"></div>
+          <div class="skel" style="height:40px;border-radius:8px;margin-bottom:8px;opacity:.6;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Real sidebar (same nav pattern) -->
+<div class="sidebar" id="sidebar">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
+    <div style="min-width:0;">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Merchant</div>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
+    <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+    <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span>Inventory</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Storefront</div>
+    <a class="nav-item active" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+  </div>
+</div>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">🎨 Website Builder</span>
+      <span class="unsaved-badge" id="unsaved-badge">● Unsaved changes</span>
+    </div>
+    <div class="topbar-right" id="topbar-actions">
+      <div class="publish-bar">
+        <div class="store-select-wrap">
+          <span class="store-select-label">Store</span>
+          <select class="store-selector" id="store-selector"></select>
+        </div>
+        <div class="publish-status" id="publish-status">
+          <div class="publish-dot"></div>
+          <span>Live</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="previewInNewTab()">🔗 Preview</button>
+        <button class="btn btn-primary" id="save-btn" onclick="saveTheme()">💾 Save & Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Builder body (hidden until loaded) -->
+  <div id="page-content" style="display:none; padding:0;">
+    <div class="builder-wrap">
+
+      <!-- LEFT: Sections & Themes & Settings -->
+      <div class="builder-left">
+        <div class="builder-tabs">
+          <div class="builder-tab active" onclick="switchTab('themes',this)">🎨 Themes</div>
+          <div class="builder-tab" onclick="switchTab('sections',this)">📐 Sections</div>
+          <div class="builder-tab" onclick="switchTab('settings',this)">⚙️ Settings</div>
+        </div>
+
+        <!-- THEMES tab -->
+        <div class="builder-panel" id="tab-themes">
+          <div class="panel-section-sep">Choose Theme</div>
+          <div class="themes-grid" id="themes-grid">
+            <!-- injected by JS -->
+          </div>
+        </div>
+
+        <!-- SECTIONS tab -->
+        <div class="builder-panel" id="tab-sections" style="display:none;">
+          <div class="panel-section-sep">Page Sections (drag to reorder)</div>
+          <div class="section-list" id="section-list">
+            <!-- injected by JS -->
+          </div>
+          <div class="panel-section-sep" style="margin-top:16px;">Add Section</div>
+          <div class="add-section-grid" id="add-section-grid">
+            <!-- injected by JS -->
+          </div>
+        </div>
+
+        <!-- SETTINGS tab -->
+        <div class="builder-panel" id="tab-settings" style="display:none;">
+          <div class="settings-group">
+            <div class="settings-group-label">Brand Colors</div>
+            <div class="setting-row">
+              <span class="setting-label">Primary Color</span>
+              <div class="setting-color-row">
+                <input type="color" class="setting-color" id="set-primary-color" oninput="onColorChange('primaryColor',this.value)">
+                <input class="setting-input" style="flex:1;" id="set-primary-color-hex" oninput="onHexInput('primaryColor',this.value)" placeholder="#6c63ff">
+              </div>
+              <div class="color-swatch-row" id="primary-swatches"></div>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Background Color</span>
+              <div class="setting-color-row">
+                <input type="color" class="setting-color" id="set-bg-color" oninput="onColorChange('bgColor',this.value)">
+                <input class="setting-input" style="flex:1;" id="set-bg-color-hex" oninput="onHexInput('bgColor',this.value)" placeholder="#ffffff">
+              </div>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Text Color</span>
+              <div class="setting-color-row">
+                <input type="color" class="setting-color" id="set-text-color" oninput="onColorChange('textColor',this.value)">
+                <input class="setting-input" style="flex:1;" id="set-text-color-hex" oninput="onHexInput('textColor',this.value)" placeholder="#111111">
+              </div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-label">Typography</div>
+            <div class="font-picker" id="font-picker"></div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-label">Layout</div>
+            <div class="setting-row">
+              <span class="setting-label">Product Columns</span>
+              <select class="setting-input" id="set-cols" onchange="onSettingChange('cols',this.value)">
+                <option value="2">2 Columns</option>
+                <option value="3" selected>3 Columns</option>
+                <option value="4">4 Columns</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Border Radius</span>
+              <input type="range" class="edit-range" id="set-radius" min="0" max="24" value="12" oninput="onSettingChange('radius', this.value + 'px'); document.getElementById('set-radius-val').textContent=this.value+'px'">
+              <span id="set-radius-val" style="font-size:11px;color:var(--text3);">12px</span>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Button Style</span>
+              <select class="setting-input" id="set-btn-style" onchange="onSettingChange('btnStyle',this.value)">
+                <option value="rounded">Rounded</option>
+                <option value="pill">Pill</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-label">Store Info</div>
+            <div class="setting-row">
+              <span class="setting-label">Announcement Bar</span>
+              <input class="setting-input" id="set-announcement" placeholder="Free shipping on orders over ₹999!" oninput="onSettingChange('announcement',this.value)">
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Footer Text</span>
+              <input class="setting-input" id="set-footer" placeholder="© 2025 My Store" oninput="onSettingChange('footerText',this.value)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Preview -->
+      <div class="builder-center">
+        <div class="preview-toolbar">
+          <div class="preview-url-bar">
+            <span class="preview-url-icon">🔒</span>
+            <span class="preview-url-text" id="preview-url">ekart.aasaitech.in/your-store</span>
+          </div>
+          <div class="preview-device-btns">
+            <button class="device-btn active" title="Desktop" onclick="setDevice('desktop',this)">🖥️</button>
+            <button class="device-btn" title="Tablet" onclick="setDevice('tablet',this)">📱</button>
+            <button class="device-btn" title="Mobile" onclick="setDevice('mobile',this)">📲</button>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="refreshPreview()" title="Refresh preview">↺ Refresh</button>
+        </div>
+        <div class="preview-frame-wrap">
+          <div class="preview-device-shell desktop" id="device-shell">
+            <iframe id="preview-iframe" src="about:blank" height="700" scrolling="yes"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Section Editor -->
+      <div class="builder-right" id="builder-right">
+        <div class="builder-right-header">
+          <span class="builder-right-title" id="right-panel-title">Section Editor</span>
+          <button class="builder-right-close" onclick="closeRightPanel()">✕</button>
+        </div>
+        <div class="builder-right-panel" id="right-panel-content">
+          <div style="text-align:center;padding:40px 20px;color:var(--text3);">
+            <div style="font-size:32px;margin-bottom:10px;">👆</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">Select a section to edit</div>
+            <div style="font-size:12px;line-height:1.6;">Click the ✏️ button on any section in the Sections tab to customize it.</div>
+          </div>
+        </div>
+        <div class="builder-action-bar">
+          <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="resetSection()">↺ Reset</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="applySection()">✓ Apply</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- store-select-wrap needed for nav.js store selector -->
+<div id="store-select-wrap" style="display:none;"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let currentUser = null
+let allStores = []
+let currentStoreId = null
+let currentDevice = 'desktop'
+let activeTab = 'themes'
+let editingSection = null
+let hasUnsavedChanges = false
+
+// Theme definitions
+const THEMES = [
+  {
+    id: 'modern', label: 'Modern Dark',
+    settings: {
+      primaryColor: '#6c63ff', bgColor: '#0f0f14', textColor: '#f0f2ff',
+      cardBg: '#1a1a25', navBg: '#1a1a25', accentText: '#a78bfa',
+      font: 'Outfit', cols: '3', radius: '12px', btnStyle: 'rounded',
+      announcement: '✨ Free shipping on orders over ₹999!',
+      footerText: '© 2025 My Store. All rights reserved.'
+    },
+    previewHTML: `<div class="tp-modern">
+      <div class="tp-modern-nav"><div class="tp-modern-nav-dot"></div><div class="tp-modern-nav-links"><span></span><span></span><span></span></div></div>
+      <div class="tp-modern-hero"><div class="tp-modern-h"></div><div class="tp-modern-sub"></div><div class="tp-modern-btn"></div></div>
+      <div class="tp-modern-grid"><div class="tp-modern-grid-card"></div><div class="tp-modern-grid-card"></div><div class="tp-modern-grid-card"></div></div>
+    </div>`
+  },
+  {
+    id: 'minimal', label: 'Clean Minimal',
+    settings: {
+      primaryColor: '#111111', bgColor: '#ffffff', textColor: '#111111',
+      cardBg: '#f5f5f5', navBg: '#ffffff', accentText: '#555555',
+      font: 'DM Serif Display', cols: '3', radius: '4px', btnStyle: 'square',
+      announcement: 'Free shipping on all orders above ₹999',
+      footerText: '© 2025 My Store'
+    },
+    previewHTML: `<div class="tp-minimal">
+      <div class="tp-minimal-nav"><div class="tp-minimal-nav-dot"></div></div>
+      <div class="tp-minimal-hero"><div class="tp-minimal-h"></div><div class="tp-minimal-sub"></div></div>
+      <div class="tp-minimal-grid"><div class="tp-minimal-card"></div><div class="tp-minimal-card"></div><div class="tp-minimal-card"></div></div>
+    </div>`
+  },
+  {
+    id: 'bold', label: 'Bold & Vibrant',
+    settings: {
+      primaryColor: '#ff4d00', bgColor: '#fff5f0', textColor: '#1a0a00',
+      cardBg: '#fff', navBg: '#ff4d00', accentText: '#ff4d00',
+      font: 'Syne', cols: '2', radius: '8px', btnStyle: 'pill',
+      announcement: '🔥 MEGA SALE — Up to 70% off today only!',
+      footerText: '© 2025 My Store. Made with ❤️'
+    },
+    previewHTML: `<div class="tp-bold">
+      <div class="tp-bold-nav"><div class="tp-bold-logo"></div></div>
+      <div class="tp-bold-hero"><div class="tp-bold-h"></div><div class="tp-bold-sub"></div></div>
+      <div class="tp-bold-grid"><div class="tp-bold-card"></div><div class="tp-bold-card"></div></div>
+    </div>`
+  },
+  {
+    id: 'luxury', label: 'Luxury',
+    settings: {
+      primaryColor: '#c9a84c', bgColor: '#0d0b09', textColor: '#e8d5b0',
+      cardBg: '#1a1510', navBg: '#0d0b09', accentText: '#c9a84c',
+      font: 'Cormorant Garamond', cols: '3', radius: '0px', btnStyle: 'square',
+      announcement: 'Complimentary shipping on all orders',
+      footerText: '© 2025 My Store. Luxury redefined.'
+    },
+    previewHTML: `<div class="tp-luxury">
+      <div class="tp-luxury-nav"><div class="tp-luxury-logo"></div></div>
+      <div class="tp-luxury-hero"><div class="tp-luxury-h"></div><div class="tp-luxury-sub"></div></div>
+      <div class="tp-luxury-grid"><div class="tp-luxury-card"></div><div class="tp-luxury-card"></div><div class="tp-luxury-card"></div></div>
+    </div>`
+  },
+  {
+    id: 'pastel', label: 'Soft Pastel',
+    settings: {
+      primaryColor: '#e8847a', bgColor: '#fef6f0', textColor: '#3d2a28',
+      cardBg: '#fff', navBg: '#fff', accentText: '#d47a8f',
+      font: 'Nunito', cols: '3', radius: '20px', btnStyle: 'pill',
+      announcement: '💝 Free gift with orders over ₹1499!',
+      footerText: '© 2025 My Store. With love.'
+    },
+    previewHTML: `<div class="tp-pastel">
+      <div class="tp-pastel-nav"><div class="tp-pastel-logo"></div></div>
+      <div class="tp-pastel-hero"><div class="tp-pastel-h"></div><div class="tp-pastel-sub"></div></div>
+      <div class="tp-pastel-grid"><div class="tp-pastel-card"></div><div class="tp-pastel-card"></div><div class="tp-pastel-card"></div></div>
+    </div>`
+  },
+  {
+    id: 'tech', label: 'Tech & Neon',
+    settings: {
+      primaryColor: '#00d4ff', bgColor: '#020d1a', textColor: '#e0f7ff',
+      cardBg: '#0a1a2a', navBg: '#020d1a', accentText: '#00d4ff',
+      font: 'Space Grotesk', cols: '3', radius: '6px', btnStyle: 'square',
+      announcement: '⚡ Lightning deals — Limited stock!',
+      footerText: '© 2025 My Store. Built for the future.'
+    },
+    previewHTML: `<div class="tp-tech">
+      <div class="tp-tech-nav"><div class="tp-tech-logo"></div></div>
+      <div class="tp-tech-hero"><div class="tp-tech-h"></div><div class="tp-tech-sub"></div></div>
+      <div class="tp-tech-grid"><div class="tp-tech-card"></div><div class="tp-tech-card"></div><div class="tp-tech-card"></div></div>
+    </div>`
+  }
+]
+
+const FONTS = ['Outfit', 'DM Serif Display', 'Syne', 'Cormorant Garamond', 'Nunito', 'Space Grotesk']
+
+// Default sections list
+const DEFAULT_SECTIONS = [
+  { id: 'announcement', icon: '📢', label: 'Announcement Bar', enabled: true, data: {} },
+  { id: 'navbar', icon: '🔝', label: 'Navigation', enabled: true, data: {} },
+  { id: 'hero', icon: '🖼️', label: 'Hero Banner', enabled: true, data: { heading: 'Welcome to our Store', subheading: 'Discover amazing products at great prices', ctaText: 'Shop Now', ctaLink: '#products', showImage: true } },
+  { id: 'featured', icon: '⭐', label: 'Featured Products', enabled: true, data: { title: 'Featured Products', count: 8 } },
+  { id: 'categories', icon: '🗂️', label: 'Categories', enabled: true, data: { title: 'Browse Categories' } },
+  { id: 'banner', icon: '📣', label: 'Promo Banner', enabled: false, data: { heading: 'Special Offer', subtext: 'Get 20% off your first order', ctaText: 'Claim Offer', bgColor: '' } },
+  { id: 'testimonials', icon: '💬', label: 'Testimonials', enabled: false, data: { title: 'What Our Customers Say' } },
+  { id: 'newsletter', icon: '📧', label: 'Newsletter', enabled: true, data: { heading: 'Stay in the loop', subtext: 'Get exclusive deals and offers straight to your inbox.' } },
+  { id: 'footer', icon: '📄', label: 'Footer', enabled: true, data: {} }
+]
+
+// Global store theme settings
+let themeSettings = {}
+let sections = []
+let selectedThemeId = 'modern'
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('builder', onStoreSwitch)
+  if (!nav) return
+  currentUser = nav.user
+  allStores = nav.stores
+  currentStoreId = nav.currentStoreId
+
+  updatePreviewUrl()
+  initThemesGrid()
+  loadThemeForStore(currentStoreId)
+  initSectionsPanel()
+  initSettingsPanel()
+  renderPreview()
+})
+
+function onStoreSwitch(id) {
+  currentStoreId = id
+  updatePreviewUrl()
+  loadThemeForStore(id)
+}
+
+function updatePreviewUrl() {
+  const store = allStores.find(s => s._id === currentStoreId)
+  const slug = store?.slug || 'your-store'
+  document.getElementById('preview-url').textContent = `ekart.aasaitech.in/${slug}`
+}
+
+// ── Theme Storage (localStorage per store) ────────────────────────────────────
+function getStorageKey(storeId) { return `ekart_theme_${storeId}` }
+
+function loadThemeForStore(storeId) {
+  const saved = localStorage.getItem(getStorageKey(storeId))
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved)
+      selectedThemeId = parsed.themeId || 'modern'
+      themeSettings = { ...THEMES.find(t => t.id === selectedThemeId)?.settings, ...parsed.settings }
+      sections = parsed.sections || JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+    } catch {
+      setDefaultTheme()
+    }
+  } else {
+    setDefaultTheme()
+  }
+  syncUIToSettings()
+  renderSectionList()
+  renderPreview()
+  markThemeActive(selectedThemeId)
+  markUnsaved(false)
+}
+
+function setDefaultTheme() {
+  selectedThemeId = 'modern'
+  themeSettings = { ...THEMES[0].settings }
+  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+}
+
+function saveTheme() {
+  if (!currentStoreId) return toast('Select a store first', 'error')
+  const data = { themeId: selectedThemeId, settings: themeSettings, sections }
+  localStorage.setItem(getStorageKey(currentStoreId), JSON.stringify(data))
+  markUnsaved(false)
+  toast('Theme saved & published! 🚀', 'success')
+  renderPreview()
+}
+
+function markUnsaved(val) {
+  hasUnsavedChanges = val
+  const el = document.getElementById('unsaved-badge')
+  el.classList.toggle('show', val)
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab, el) {
+  activeTab = tab
+  document.querySelectorAll('.builder-tab').forEach(t => t.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('tab-themes').style.display = tab === 'themes' ? '' : 'none'
+  document.getElementById('tab-sections').style.display = tab === 'sections' ? '' : 'none'
+  document.getElementById('tab-settings').style.display = tab === 'settings' ? '' : 'none'
+}
+
+// ── Themes ────────────────────────────────────────────────────────────────────
+function initThemesGrid() {
+  const grid = document.getElementById('themes-grid')
+  grid.innerHTML = THEMES.map(t => `
+    <div class="theme-card" id="theme-card-${t.id}" onclick="selectTheme('${t.id}')">
+      <div class="theme-preview">${t.previewHTML}</div>
+      <div class="theme-label">${t.label}</div>
+    </div>
+  `).join('')
+}
+
+function selectTheme(id) {
+  const theme = THEMES.find(t => t.id === id)
+  if (!theme) return
+  selectedThemeId = id
+  themeSettings = { ...theme.settings }
+  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  syncUIToSettings()
+  renderSectionList()
+  markThemeActive(id)
+  renderPreview()
+  markUnsaved(true)
+  toast(`Theme "${theme.label}" applied!`, 'success')
+}
+
+function markThemeActive(id) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'))
+  document.getElementById('theme-card-' + id)?.classList.add('active')
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+const ADD_SECTION_OPTIONS = [
+  { id: 'video', icon: '🎬', label: 'Video' },
+  { id: 'countdown', icon: '⏳', label: 'Countdown' },
+  { id: 'gallery', icon: '🖼️', label: 'Gallery' },
+  { id: 'trustbadges', icon: '🛡️', label: 'Trust Badges' },
+  { id: 'faq', icon: '❓', label: 'FAQ' },
+  { id: 'map', icon: '📍', label: 'Store Map' },
+]
+
+function initSectionsPanel() {
+  const addGrid = document.getElementById('add-section-grid')
+  addGrid.innerHTML = ADD_SECTION_OPTIONS.map(o => `
+    <button class="add-section-btn" onclick="addSection('${o.id}','${o.label}','${o.icon}')">
+      <span>${o.icon}</span>
+      <small>${o.label}</small>
+    </button>
+  `).join('')
+}
+
+function renderSectionList() {
+  const list = document.getElementById('section-list')
+  list.innerHTML = sections.map((s, i) => `
+    <div class="section-item" draggable="true" data-idx="${i}"
+      ondragstart="onDragStart(event,${i})"
+      ondragover="onDragOver(event,${i})"
+      ondrop="onDrop(event,${i})"
+      ondragleave="onDragLeave(event)"
+      ondragend="onDragEnd(event)">
+      <span class="section-drag-handle">⠿</span>
+      <span class="section-icon">${s.icon}</span>
+      <span class="section-item-label">${s.label}</span>
+      <button class="section-edit-btn" onclick="openSectionEditor(${i})" title="Edit section">✏️</button>
+      <button class="section-toggle ${s.enabled ? 'on' : ''}" onclick="toggleSection(${i})" title="${s.enabled ? 'Hide' : 'Show'} section"></button>
+    </div>
+  `).join('')
+}
+
+// Drag-to-reorder
+let dragIdx = null
+function onDragStart(e, idx) { dragIdx = idx; e.target.classList.add('dragging') }
+function onDragOver(e, idx) {
+  e.preventDefault()
+  document.querySelectorAll('.section-item').forEach(el => el.classList.remove('drag-over'))
+  e.currentTarget.classList.add('drag-over')
+}
+function onDragLeave(e) { e.currentTarget.classList.remove('drag-over') }
+function onDrop(e, idx) {
+  e.preventDefault()
+  if (dragIdx === null || dragIdx === idx) return
+  const moved = sections.splice(dragIdx, 1)[0]
+  sections.splice(idx, 0, moved)
+  renderSectionList()
+  renderPreview()
+  markUnsaved(true)
+}
+function onDragEnd(e) {
+  e.target.classList.remove('dragging')
+  document.querySelectorAll('.section-item').forEach(el => el.classList.remove('drag-over'))
+  dragIdx = null
+}
+
+function toggleSection(idx) {
+  sections[idx].enabled = !sections[idx].enabled
+  renderSectionList()
+  renderPreview()
+  markUnsaved(true)
+}
+
+function addSection(id, label, icon) {
+  if (sections.find(s => s.id === id)) {
+    sections.find(s => s.id === id).enabled = true
+    toast(`"${label}" section enabled`, 'success')
+  } else {
+    sections.splice(sections.length - 1, 0, { id, icon, label, enabled: true, data: {} })
+    toast(`"${label}" section added`, 'success')
+  }
+  renderSectionList()
+  renderPreview()
+  markUnsaved(true)
+}
+
+// ── Section Editor (right panel) ──────────────────────────────────────────────
+const SECTION_FIELDS = {
+  hero: [
+    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Welcome to our Store' },
+    { key: 'subheading', label: 'Sub-heading', type: 'text', placeholder: 'Discover amazing products' },
+    { key: 'ctaText', label: 'Button Text', type: 'text', placeholder: 'Shop Now' },
+    { key: 'ctaLink', label: 'Button Link', type: 'text', placeholder: '#products' },
+  ],
+  featured: [
+    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'Featured Products' },
+    { key: 'count', label: 'Products to show', type: 'number', placeholder: '8' },
+  ],
+  categories: [
+    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'Browse Categories' },
+  ],
+  banner: [
+    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Special Offer' },
+    { key: 'subtext', label: 'Sub Text', type: 'textarea', placeholder: 'Get 20% off' },
+    { key: 'ctaText', label: 'Button Text', type: 'text', placeholder: 'Claim Offer' },
+    { key: 'bgColor', label: 'Background Color', type: 'color' },
+  ],
+  testimonials: [
+    { key: 'title', label: 'Section Title', type: 'text', placeholder: 'What Customers Say' },
+  ],
+  newsletter: [
+    { key: 'heading', label: 'Heading', type: 'text', placeholder: 'Stay in the loop' },
+    { key: 'subtext', label: 'Sub Text', type: 'textarea', placeholder: 'Get exclusive deals...' },
+  ],
+}
+
+function openSectionEditor(idx) {
+  editingSection = idx
+  const s = sections[idx]
+  const fields = SECTION_FIELDS[s.id]
+  document.getElementById('right-panel-title').textContent = `Edit: ${s.label}`
+  if (!fields || fields.length === 0) {
+    document.getElementById('right-panel-content').innerHTML = `
+      <div style="text-align:center;padding:30px 16px;color:var(--text3);">
+        <div style="font-size:28px;margin-bottom:10px;">${s.icon}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2);">No customizable fields for this section.</div>
+        <div style="font-size:11px;margin-top:6px;line-height:1.6;">Content is pulled automatically from your store data.</div>
+      </div>`
+    return
+  }
+  document.getElementById('right-panel-content').innerHTML = fields.map(f => {
+    const val = s.data[f.key] ?? ''
+    if (f.type === 'textarea') return `<div class="edit-field"><label class="edit-label">${f.label}</label><textarea class="edit-input edit-textarea" data-key="${f.key}" placeholder="${f.placeholder}">${val}</textarea></div>`
+    if (f.type === 'color') return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="color" class="setting-color" data-key="${f.key}" value="${val || '#6c63ff'}"></div>`
+    if (f.type === 'number') return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="number" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}" min="1" max="24"></div>`
+    return `<div class="edit-field"><label class="edit-label">${f.label}</label><input type="text" class="edit-input" data-key="${f.key}" value="${val}" placeholder="${f.placeholder}"></div>`
+  }).join('')
+}
+
+function applySection() {
+  if (editingSection === null) return
+  const inputs = document.querySelectorAll('#right-panel-content [data-key]')
+  inputs.forEach(inp => {
+    sections[editingSection].data[inp.dataset.key] = inp.value
+  })
+  renderPreview()
+  markUnsaved(true)
+  toast('Section updated', 'success')
+}
+
+function resetSection() {
+  if (editingSection === null) return
+  sections[editingSection].data = {}
+  openSectionEditor(editingSection)
+  renderPreview()
+  markUnsaved(true)
+}
+
+function closeRightPanel() {
+  editingSection = null
+  document.getElementById('right-panel-title').textContent = 'Section Editor'
+  document.getElementById('right-panel-content').innerHTML = `
+    <div style="text-align:center;padding:40px 20px;color:var(--text3);">
+      <div style="font-size:32px;margin-bottom:10px;">👆</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">Select a section to edit</div>
+      <div style="font-size:12px;line-height:1.6;">Click the ✏️ button on any section in the Sections tab to customize it.</div>
+    </div>`
+}
+
+// ── Settings Panel ────────────────────────────────────────────────────────────
+const PRIMARY_SWATCHES = ['#6c63ff','#e8847a','#00d4ff','#c9a84c','#ff4d00','#34d399','#f59e0b','#ec4899','#111111']
+
+function initSettingsPanel() {
+  const swatchRow = document.getElementById('primary-swatches')
+  swatchRow.innerHTML = PRIMARY_SWATCHES.map(c =>
+    `<div class="color-swatch" style="background:${c}" title="${c}" onclick="onColorChange('primaryColor','${c}')"></div>`
+  ).join('')
+  const fp = document.getElementById('font-picker')
+  fp.innerHTML = FONTS.map(f =>
+    `<div class="font-opt" data-font="${f}" style="font-family:'${f}',serif" onclick="onFontChange('${f}',this)">${f}</div>`
+  ).join('')
+}
+
+function syncUIToSettings() {
+  const s = themeSettings
+  // Colors
+  document.getElementById('set-primary-color').value = s.primaryColor || '#6c63ff'
+  document.getElementById('set-primary-color-hex').value = s.primaryColor || '#6c63ff'
+  document.getElementById('set-bg-color').value = s.bgColor || '#ffffff'
+  document.getElementById('set-bg-color-hex').value = s.bgColor || '#ffffff'
+  document.getElementById('set-text-color').value = s.textColor || '#111111'
+  document.getElementById('set-text-color-hex').value = s.textColor || '#111111'
+  // Font
+  document.querySelectorAll('.font-opt').forEach(el => el.classList.toggle('active', el.dataset.font === s.font))
+  // Layout
+  document.getElementById('set-cols').value = s.cols || '3'
+  const rad = parseInt(s.radius) || 12
+  document.getElementById('set-radius').value = rad
+  document.getElementById('set-radius-val').textContent = rad + 'px'
+  document.getElementById('set-btn-style').value = s.btnStyle || 'rounded'
+  // Store info
+  document.getElementById('set-announcement').value = s.announcement || ''
+  document.getElementById('set-footer').value = s.footerText || ''
+}
+
+function onColorChange(key, val) {
+  themeSettings[key] = val
+  document.getElementById('set-primary-color').value = val
+  document.getElementById('set-primary-color-hex').value = val
+  markUnsaved(true)
+  renderPreview()
+}
+
+function onHexInput(key, val) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(val)) return
+  themeSettings[key] = val
+  document.getElementById('set-primary-color').value = val
+  markUnsaved(true)
+  renderPreview()
+}
+
+function onFontChange(font, el) {
+  themeSettings.font = font
+  document.querySelectorAll('.font-opt').forEach(e => e.classList.remove('active'))
+  el.classList.add('active')
+  markUnsaved(true)
+  renderPreview()
+}
+
+function onSettingChange(key, val) {
+  themeSettings[key] = val
+  markUnsaved(true)
+  renderPreview()
+}
+
+// ── Device ────────────────────────────────────────────────────────────────────
+function setDevice(device, btn) {
+  currentDevice = device
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  const shell = document.getElementById('device-shell')
+  shell.className = 'preview-device-shell ' + device
+  const iframe = document.getElementById('preview-iframe')
+  iframe.height = device === 'desktop' ? 700 : device === 'tablet' ? 900 : 780
+}
+
+function refreshPreview() { renderPreview() }
+function previewInNewTab() {
+  const store = allStores.find(s => s._id === currentStoreId)
+  const url = store?.published_url || `https://ekart.aasaitech.in/${store?.slug || ''}`
+  window.open(url, '_blank')
+}
+
+// ── Preview Generator ─────────────────────────────────────────────────────────
+function renderPreview() {
+  const s = themeSettings
+  const isMobile = currentDevice === 'mobile'
+  const isLight = isLightColor(s.bgColor || '#ffffff')
+
+  // Build section HTML
+  let sectionsHTML = sections.filter(sec => sec.enabled).map(sec => buildSection(sec, s, isMobile)).join('\n')
+
+  const btnRadius = s.btnStyle === 'pill' ? '999px' : s.btnStyle === 'square' ? '3px' : (s.radius || '12px')
+  const fontUrl = encodeURIComponent(s.font || 'Outfit')
+  const cols = isMobile ? 2 : parseInt(s.cols || 3)
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=${fontUrl}:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: ${s.primaryColor || '#6c63ff'};
+    --bg: ${s.bgColor || '#ffffff'};
+    --text: ${s.textColor || '#111111'};
+    --card-bg: ${s.cardBg || '#f5f5f5'};
+    --nav-bg: ${s.navBg || '#ffffff'};
+    --accent-text: ${s.accentText || s.primaryColor || '#6c63ff'};
+    --radius: ${s.radius || '12px'};
+    --btn-radius: ${btnRadius};
+    --cols: ${cols};
+    --font: '${s.font || 'Outfit'}', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); }
+  a { color: inherit; text-decoration: none; }
+  .announcement { background: var(--primary); color: white; text-align: center; padding: 9px 16px; font-size: 13px; font-weight: 600; }
+  .navbar { background: var(--nav-bg); padding: 0 5%; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,${isLight ? '.08' : '.25'}); position: sticky; top: 0; z-index: 100; }
+  .navbar-logo { font-size: 20px; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
+  .navbar-logo span { color: var(--primary); }
+  .navbar-links { display: flex; gap: 24px; font-size: 13.5px; font-weight: 600; color: ${isLight ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.7)'}; }
+  .navbar-right { display: flex; align-items: center; gap: 14px; }
+  .navbar-cart { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; background: var(--primary); color: white; padding: 7px 16px; border-radius: var(--btn-radius); }
+  .hero { padding: ${isMobile ? '40px 5% 36px' : '72px 5% 64px'}; text-align: center; }
+  .hero h1 { font-size: ${isMobile ? '28px' : '52px'}; font-weight: 800; line-height: 1.1; letter-spacing: -.03em; margin-bottom: 16px; }
+  .hero h1 em { font-style: normal; color: var(--primary); }
+  .hero p { font-size: ${isMobile ? '14px' : '17px'}; opacity: .65; max-width: 520px; margin: 0 auto 28px; line-height: 1.7; }
+  .btn-cta { display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: white; padding: ${isMobile ? '11px 24px' : '14px 32px'}; border-radius: var(--btn-radius); font-size: ${isMobile ? '14px' : '16px'}; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); transition: opacity .15s; }
+  .btn-cta:hover { opacity: .88; }
+  .section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
+  .section-title { font-size: ${isMobile ? '20px' : '28px'}; font-weight: 800; margin-bottom: ${isMobile ? '16px' : '24px'}; letter-spacing: -.02em; }
+  .products-grid { display: grid; grid-template-columns: repeat(var(--cols),1fr); gap: ${isMobile ? '10px' : '16px'}; }
+  .product-card { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; }
+  .product-img { width: 100%; aspect-ratio: 1; background: ${s.primaryColor}22; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+  .product-info { padding: ${isMobile ? '10px' : '14px'}; }
+  .product-name { font-size: ${isMobile ? '12px' : '14px'}; font-weight: 700; margin-bottom: 4px; }
+  .product-price { font-size: ${isMobile ? '13px' : '15px'}; font-weight: 800; color: var(--primary); }
+  .product-old { font-size: 11px; text-decoration: line-through; opacity: .4; margin-left: 5px; }
+  .product-btn { width: 100%; margin-top: 10px; padding: ${isMobile ? '7px' : '9px'}; background: var(--primary); color: white; border: none; border-radius: var(--btn-radius); font-size: 12.5px; font-weight: 700; cursor: pointer; font-family: var(--font); }
+  .cats-grid { display: grid; grid-template-columns: repeat(${isMobile ? 2 : 4},1fr); gap: ${isMobile ? '10px' : '14px'}; }
+  .cat-card { background: var(--card-bg); border-radius: var(--radius); padding: ${isMobile ? '20px 14px' : '28px 20px'}; text-align: center; }
+  .cat-icon { font-size: ${isMobile ? '28px' : '36px'}; margin-bottom: 10px; }
+  .cat-name { font-size: ${isMobile ? '13px' : '14px'}; font-weight: 700; }
+  .promo-banner { background: var(--primary); color: white; padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align: center; }
+  .promo-banner h2 { font-size: ${isMobile ? '22px' : '36px'}; font-weight: 800; margin-bottom: 10px; }
+  .promo-banner p { opacity: .8; margin-bottom: 20px; font-size: ${isMobile ? '13px' : '16px'}; }
+  .btn-white { background: white; color: var(--primary); padding: 11px 24px; border-radius: var(--btn-radius); font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: var(--font); }
+  .testimonials { padding: ${isMobile ? '28px 5%' : '48px 5%'}; background: var(--card-bg); }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(${isMobile ? 1 : 3},1fr); gap: 16px; margin-top: 24px; }
+  .testimonial-card { background: var(--bg); border-radius: var(--radius); padding: 20px; }
+  .testimonial-stars { color: #fbbf24; margin-bottom: 10px; font-size: 14px; }
+  .testimonial-text { font-size: 13.5px; line-height: 1.65; opacity: .75; margin-bottom: 14px; }
+  .testimonial-author { display: flex; align-items: center; gap: 10px; }
+  .testimonial-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+  .testimonial-name { font-size: 13px; font-weight: 700; }
+  .newsletter { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align: center; }
+  .newsletter h2 { font-size: ${isMobile ? '22px' : '30px'}; font-weight: 800; margin-bottom: 10px; }
+  .newsletter p { opacity: .6; margin-bottom: 20px; font-size: ${isMobile ? '13px' : '15px'}; }
+  .newsletter-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; }
+  .newsletter-input { flex: 1; min-width: 180px; padding: 11px 16px; border: 1.5px solid rgba(0,0,0,${isLight ? '.12' : '.3'}); border-radius: var(--btn-radius); font-size: 14px; background: var(--bg); color: var(--text); font-family: var(--font); outline: none; }
+  .footer { padding: ${isMobile ? '24px 5%' : '32px 5%'}; border-top: 1px solid rgba(0,0,0,${isLight ? '.08' : '.2'}); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .footer-logo { font-size: 16px; font-weight: 800; }
+  .footer-logo span { color: var(--primary); }
+  .footer-text { font-size: 12px; opacity: .4; }
+  .footer-links { display: flex; gap: 16px; font-size: 12.5px; opacity: .5; font-weight: 600; }
+  .video-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align:center; }
+  .video-placeholder { background: var(--card-bg); border-radius: var(--radius); height: ${isMobile ? '180px' : '320px'}; display: flex; align-items:center;justify-content:center;flex-direction:column;gap:12px; }
+  .play-btn { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); display:flex;align-items:center;justify-content:center;font-size:22px; }
+  .countdown-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; text-align:center; background:var(--card-bg); }
+  .countdown-grid { display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap; }
+  .countdown-unit { background:var(--bg);border-radius:var(--radius);padding:16px 20px;min-width:70px; }
+  .countdown-num { font-size:32px;font-weight:900;color:var(--primary);line-height:1; }
+  .countdown-label { font-size:11px;font-weight:700;opacity:.5;text-transform:uppercase;letter-spacing:.08em;margin-top:4px; }
+  .gallery-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
+  .gallery-grid { display:grid;grid-template-columns:repeat(${isMobile ? 2 : 4},1fr);gap:${isMobile ? '8px' : '12px'}; }
+  .gallery-item { aspect-ratio:1;background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px; }
+  .trust-section { padding: ${isMobile ? '20px 5%' : '32px 5%'}; background:var(--card-bg); }
+  .trust-grid { display:grid;grid-template-columns:repeat(${isMobile ? 2 : 4},1fr);gap:12px;margin-top:16px; }
+  .trust-item { display:flex;align-items:center;gap:10px;padding:14px; }
+  .trust-icon { font-size:22px;flex-shrink:0; }
+  .trust-text { font-size:12.5px;font-weight:700; }
+  .faq-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
+  .faq-item { border-bottom:1px solid rgba(0,0,0,${isLight ? '.08' : '.2'});padding:16px 0; }
+  .faq-q { font-size:15px;font-weight:700;margin-bottom:8px; }
+  .faq-a { font-size:13.5px;opacity:.6;line-height:1.65; }
+  .map-section { padding: ${isMobile ? '28px 5%' : '48px 5%'}; }
+  .map-placeholder { background:var(--card-bg);border-radius:var(--radius);height:200px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-top:16px; }
+</style>
+</head>
+<body>
+${sectionsHTML}
+</body>
+</html>`
+
+  const iframe = document.getElementById('preview-iframe')
+  const doc = iframe.contentDocument || iframe.contentWindow.document
+  doc.open(); doc.write(html); doc.close()
+}
+
+function buildSection(sec, s, isMobile) {
+  const d = sec.data || {}
+  switch (sec.id) {
+    case 'announcement': return `<div class="announcement">${s.announcement || '✨ Free shipping on orders over ₹999!'}</div>`
+    case 'navbar': return `
+      <nav class="navbar">
+        <div class="navbar-logo">e<span>K</span>art</div>
+        ${!isMobile ? `<div class="navbar-links"><a href="#">Home</a><a href="#">Products</a><a href="#">Categories</a><a href="#">About</a></div>` : ''}
+        <div class="navbar-right">
+          <div class="navbar-cart">🛒 Cart (0)</div>
+        </div>
+      </nav>`
+    case 'hero': return `
+      <section class="hero">
+        <h1>${(d.heading || 'Welcome to our <em>Store</em>').replace(/(.*)(store|shop)(.*)/i, '$1<em>$2</em>$3')}</h1>
+        <p>${d.subheading || 'Discover amazing products at great prices. Shop now and enjoy fast delivery.'}</p>
+        <a href="${d.ctaLink || '#products'}" class="btn-cta">${d.ctaText || 'Shop Now'} →</a>
+      </section>`
+    case 'featured': return `
+      <section class="section" id="products">
+        <h2 class="section-title">${d.title || 'Featured Products'}</h2>
+        <div class="products-grid">
+          ${['👟','👗','🎧','📱','⌚','👜','🕶️','💻'].slice(0, parseInt(d.count)||8).map((emoji, i) => `
+          <div class="product-card">
+            <div class="product-img">${emoji}</div>
+            <div class="product-info">
+              <div class="product-name">Product Name ${i+1}</div>
+              <div style="display:flex;align-items:center;">
+                <span class="product-price">₹${(499 + i * 200).toLocaleString()}</span>
+                <span class="product-old">₹${(799 + i * 300).toLocaleString()}</span>
+              </div>
+              <button class="product-btn">Add to Cart</button>
+            </div>
+          </div>`).join('')}
+        </div>
+      </section>`
+    case 'categories': return `
+      <section class="section">
+        <h2 class="section-title">${d.title || 'Browse Categories'}</h2>
+        <div class="cats-grid">
+          ${[['👟','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty']].map(([emoji, name]) => `
+          <div class="cat-card"><div class="cat-icon">${emoji}</div><div class="cat-name">${name}</div></div>`).join('')}
+        </div>
+      </section>`
+    case 'banner': return `
+      <section class="promo-banner" style="${d.bgColor ? 'background:'+d.bgColor+';' : ''}">
+        <h2>${d.heading || 'Special Offer'}</h2>
+        <p>${d.subtext || 'Get 20% off your first order. Use code WELCOME20'}</p>
+        <button class="btn-white">${d.ctaText || 'Claim Offer'}</button>
+      </section>`
+    case 'testimonials': return `
+      <section class="testimonials">
+        <h2 class="section-title">${d.title || 'What Our Customers Say'}</h2>
+        <div class="testimonials-grid">
+          ${[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality.'],['R','Rahul K.','Best shopping experience ever. Will definitely come back!'],['A','Anita P.','Great products and excellent customer service. Highly recommended!']].map(([a,n,t]) => `
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <div class="testimonial-text">"${t}"</div>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">${a}</div>
+              <div class="testimonial-name">${n}</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </section>`
+    case 'newsletter': return `
+      <section class="newsletter">
+        <h2>${d.heading || 'Stay in the loop'}</h2>
+        <p>${d.subtext || 'Get exclusive deals and new arrivals straight to your inbox.'}</p>
+        <div class="newsletter-form">
+          <input class="newsletter-input" type="email" placeholder="Enter your email address">
+          <button class="btn-cta" style="white-space:nowrap;">Subscribe →</button>
+        </div>
+      </section>`
+    case 'footer': return `
+      <footer class="footer">
+        <div class="footer-logo">e<span>K</span>art</div>
+        <div class="footer-text">${s.footerText || '© 2025 My Store. All rights reserved.'}</div>
+        <div class="footer-links"><a>Privacy</a><a>Terms</a><a>Contact</a></div>
+      </footer>`
+    case 'video': return `
+      <section class="video-section">
+        <h2 class="section-title">Watch Our Story</h2>
+        <div class="video-placeholder">
+          <div class="play-btn">▶</div>
+          <div style="font-size:14px;font-weight:600;opacity:.5;">Click to Play Video</div>
+        </div>
+      </section>`
+    case 'countdown': return `
+      <section class="countdown-section">
+        <h2 class="section-title">⏳ Deal Ends In</h2>
+        <div class="countdown-grid">
+          ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l]) => `
+          <div class="countdown-unit"><div class="countdown-num">${n}</div><div class="countdown-label">${l}</div></div>`).join('')}
+        </div>
+      </section>`
+    case 'gallery': return `
+      <section class="gallery-section">
+        <h2 class="section-title">Our Gallery</h2>
+        <div class="gallery-grid">
+          ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0,isMobile?4:8).map(e => `<div class="gallery-item">${e}</div>`).join('')}
+        </div>
+      </section>`
+    case 'trustbadges': return `
+      <section class="trust-section">
+        <div class="trust-grid">
+          ${[['🚚','Free Shipping'],['🔒','Secure Payment'],['↩️','Easy Returns'],['⭐','Top Rated']].map(([ic,tx]) => `
+          <div class="trust-item"><span class="trust-icon">${ic}</span><span class="trust-text">${tx}</span></div>`).join('')}
+        </div>
+      </section>`
+    case 'faq': return `
+      <section class="faq-section">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        ${[['How long does shipping take?','We deliver within 3-7 business days across India. Express shipping available at checkout.'],['What is your return policy?','We offer a hassle-free 30-day return policy. No questions asked.'],['Do you offer cash on delivery?','Yes! COD is available on all orders across India.']].map(([q,a]) => `
+        <div class="faq-item"><div class="faq-q">${q}</div><div class="faq-a">${a}</div></div>`).join('')}
+      </section>`
+    case 'map': return `
+      <section class="map-section">
+        <h2 class="section-title">Find Us</h2>
+        <div class="map-placeholder">📍</div>
+      </section>`
+    default: return ''
+  }
+}
+
+function isLightColor(hex) {
+  const c = hex.replace('#','')
+  if (c.length !== 6) return true
+  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16)
+  return (r*299 + g*587 + b*114) / 1000 > 128
+}
+
+</script>
+</body>
+</html>
