@@ -126,16 +126,18 @@
         <div class="sidebar-user-email" id="nav-user-email">…</div>
       </div>
     </div>
-    <div class="nav-section"><div class="nav-section-label">Merchant</div>
+        <div class="nav-section"><div class="nav-section-label">Merchant</div>
       <a class="nav-item active" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
       <a class="nav-item" href="products.html"><span class="nav-icon">📦</span>Products</a>
       <a class="nav-item" href="categories.html"><span class="nav-icon">🗂️</span>Categories</a>
       <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
       <a class="nav-item" href="coupons.html"><span class="nav-icon">🎟️</span>Coupons</a>
       <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+      <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
       <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-    </div><div class="nav-section"><div class="nav-section-label">AI Tools</div>
+      <a class="nav-item" href="inventory.html"><span class="nav-icon">📋</span>Inventory</a>
+    </div>
+    <div class="nav-section"><div class="nav-section-label">AI Tools</div>
       <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
     </div>
     <div class="sidebar-bottom">
@@ -208,6 +210,11 @@
         <img id="storeLogoImg" src="" style="height:52px;border-radius:8px;object-fit:contain;border:1px solid var(--border2);padding:4px;">
       </div>
       <input type="hidden" id="storeLogoExisting">
+    </div>
+    <div class="field">
+      <label>Custom Domain (optional)</label>
+      <input type="text" id="storeCustomDomain" placeholder="e.g. shop.yourbrand.com">
+      <div class="field-hint">Point your domain's CNAME to <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;">ekart.aasaitech.in</code> first</div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
@@ -299,7 +306,10 @@ function renderStores() {
       <div class="store-banner" style="background:linear-gradient(135deg,${bg}ee,${bg}88);">${logo}</div>
       <div class="store-card-body">
         <div class="store-name">${s.name}</div>
-        <div class="store-slug">/${s.slug}</div>
+        <div class="store-slug">/${s.slug}
+          <button onclick="copyStoreUrl('${s.slug}')" title="Copy store URL" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 4px;vertical-align:middle;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">📋</button>
+        </div>
+        ${s.custom_domain ? `<div style="font-size:11px;color:var(--accent2);font-family:'DM Mono',monospace;margin-bottom:6px;">🌐 ${s.custom_domain}</div>` : ''}
         <div class="store-badges">
           <span class="badge ${s.published ? 'badge-green' : 'badge-gray'}">${s.published ? '● Live' : '○ Draft'}</span>
           <span class="badge badge-gray">📦 ${s.product_count || 0}</span>
@@ -334,6 +344,7 @@ function openCreateStore() {
   document.getElementById('storeLogoFile').value = ''
   document.getElementById('storeLogoExisting').value = ''
   document.getElementById('storeLogoPreview').style.display = 'none'
+  document.getElementById('storeCustomDomain').value = ''
   selectCardStyle('grid', document.querySelector('[data-style="grid"]'))
   openModal('storeModal')
 }
@@ -353,6 +364,7 @@ function openEditStore(id) {
   selectCardStyle(cs, document.querySelector(`[data-style="${cs}"]`))
   document.getElementById('storeLogoFile').value = ''
   document.getElementById('storeLogoExisting').value = s.logo_url || ''
+  document.getElementById('storeCustomDomain').value = s.custom_domain || ''
   if (s.logo_url) {
     document.getElementById('storeLogoImg').src = s.logo_url
     document.getElementById('storeLogoPreview').style.display = 'block'
@@ -373,6 +385,7 @@ async function saveStore() {
   fd.append('currency', document.getElementById('storeCurrency').value)
   fd.append('brand_color', document.getElementById('storeBrandColor').value)
   fd.append('card_style', document.getElementById('storeCardStyle').value || 'grid')
+  fd.append('custom_domain', document.getElementById('storeCustomDomain').value.trim())
   const logoFile = document.getElementById('storeLogoFile').files[0]
   if (logoFile) fd.append('logo', logoFile)
   else fd.append('logo_url', document.getElementById('storeLogoExisting').value || '')
@@ -388,6 +401,11 @@ async function saveStore() {
     await loadStores()
     toast(id ? 'Store updated!' : 'Store created!', 'success')
   } catch (e) { toast(e.message, 'error') }
+}
+
+function copyStoreUrl(slug) {
+  const url = `https://ekart.aasaitech.in/${slug}`
+  navigator.clipboard.writeText(url).then(() => toast('Store URL copied!', 'success')).catch(() => toast(url, 'info'))
 }
 
 async function publishStore(id) {
