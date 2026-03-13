@@ -204,7 +204,7 @@
     .add-section-drawer-title{font-size:14px;font-weight:800;color:var(--text)}
     .asd-close{width:26px;height:26px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .12s}
     .asd-close:hover{border-color:var(--border3);color:var(--text)}
-    .add-section-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+    .add-section-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
     .add-section-type{display:flex;flex-direction:column;align-items:center;gap:6px;padding:13px 10px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center}
     .add-section-type:hover{border-color:var(--accent);background:rgba(91,92,246,.06);transform:translateY(-2px)}
     .add-section-type-icon{font-size:20px}
@@ -284,6 +284,28 @@
     .field-toggle.on{background:var(--accent)}
     .field-toggle::after{content:'';position:absolute;width:14px;height:14px;background:white;border-radius:50%;top:3px;left:3px;transition:left .15s}
     .field-toggle.on::after{left:19px}
+
+    /* ── Reset Colors Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:24px;width:360px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+    .modal-title{font-size:15px;font-weight:800;margin-bottom:8px}
+    .modal-sub{font-size:12.5px;color:var(--text3);line-height:1.6;margin-bottom:20px}
+    .modal-footer{display:flex;gap:8px;justify-content:flex-end}
+    .modal-btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
+    .modal-btn-cancel{background:var(--surface3);color:var(--text2)}
+    .modal-btn-cancel:hover{color:var(--text)}
+    .modal-btn-danger{background:var(--accent);color:white}
+    .modal-btn-danger:hover{background:#4f4de0}
+
+    /* Palette presets */
+    .palette-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+    .palette-preset{border:1.5px solid var(--border2);border-radius:8px;padding:6px;cursor:pointer;transition:all .15s;text-align:center}
+    .palette-preset:hover{border-color:var(--accent)}
+    .palette-preset.selected{border-color:var(--accent);background:rgba(91,92,246,.1)}
+    .palette-swatches{display:flex;gap:2px;margin-bottom:4px;justify-content:center}
+    .palette-sw{width:16px;height:16px;border-radius:3px}
+    .palette-name{font-size:9px;font-weight:700;color:var(--text3)}
   </style>
 </head>
 <body>
@@ -365,6 +387,19 @@
     <div class="add-section-types" id="add-section-types"></div>
   </div>
 
+  <!-- Reset Colors Modal -->
+  <div class="modal-overlay" id="reset-modal">
+    <div class="modal">
+      <div class="modal-title">🎨 Reset Color Scheme</div>
+      <div class="modal-sub">Choose a preset color palette to apply, or reset to the default light theme.</div>
+      <div class="palette-presets" id="palette-presets-grid"></div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeResetModal()">Cancel</button>
+        <button class="modal-btn modal-btn-danger" onclick="applySelectedPalette()">✓ Apply Palette</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
   <script>
@@ -373,6 +408,7 @@
   ═══════════════════════════════════════ */
   let currentUser=null, allStores=[], currentStoreId=null
   let currentDevice='desktop', activeLeftTab='sections', activeSectionId=null, hasUnsaved=false
+  let selectedPaletteId=null
 
   let themeData={
     themeId:'modern',primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',
@@ -382,6 +418,30 @@
     footerText:'© 2025 eKart Store. All rights reserved.'
   }
   let sections=[]
+
+  /* ═══════════════════════════════════════
+     COLOR PALETTES
+  ═══════════════════════════════════════ */
+  const COLOR_PALETTES=[
+    {id:'light-clean',name:'Clean Light',colors:['#ffffff','#f8f9fa','#111111','#5b5cf6'],
+      settings:{primaryColor:'#5b5cf6',bgColor:'#ffffff',textColor:'#111111',cardBg:'#f8f9fa',navBg:'#ffffff'}},
+    {id:'soft-cream',name:'Soft Cream',colors:['#fef9f0','#fff4e0','#3d2a1a','#e8843a'],
+      settings:{primaryColor:'#e8843a',bgColor:'#fef9f0',textColor:'#3d2a1a',cardBg:'#fff4e0',navBg:'#fef9f0'}},
+    {id:'mint-fresh',name:'Mint Fresh',colors:['#f0fdf4','#dcfce7','#14532d','#16a34a'],
+      settings:{primaryColor:'#16a34a',bgColor:'#f0fdf4',textColor:'#14532d',cardBg:'#dcfce7',navBg:'#f0fdf4'}},
+    {id:'sky-blue',name:'Sky Blue',colors:['#f0f9ff','#e0f2fe','#0c4a6e','#0284c7'],
+      settings:{primaryColor:'#0284c7',bgColor:'#f0f9ff',textColor:'#0c4a6e',cardBg:'#e0f2fe',navBg:'#f0f9ff'}},
+    {id:'rose-soft',name:'Rose Pink',colors:['#fff1f2','#ffe4e6','#4c0519','#e11d48'],
+      settings:{primaryColor:'#e11d48',bgColor:'#fff1f2',textColor:'#4c0519',cardBg:'#ffe4e6',navBg:'#fff1f2'}},
+    {id:'lavender',name:'Lavender',colors:['#faf5ff','#f3e8ff','#3b0764','#9333ea'],
+      settings:{primaryColor:'#9333ea',bgColor:'#faf5ff',textColor:'#3b0764',cardBg:'#f3e8ff',navBg:'#faf5ff'}},
+    {id:'dark-modern',name:'Dark Modern',colors:['#09090f','#13131e','#f1f5f9','#5b5cf6'],
+      settings:{primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',cardBg:'#13131e',navBg:'#0e0e17'}},
+    {id:'dark-teal',name:'Dark Teal',colors:['#042f2e','#0f3d3d','#ccfbf1','#14b8a6'],
+      settings:{primaryColor:'#14b8a6',bgColor:'#042f2e',textColor:'#ccfbf1',cardBg:'#0f3d3d',navBg:'#021f1e'}},
+    {id:'charcoal',name:'Charcoal',colors:['#18181b','#27272a','#fafafa','#f59e0b'],
+      settings:{primaryColor:'#f59e0b',bgColor:'#18181b',textColor:'#fafafa',cardBg:'#27272a',navBg:'#18181b'}},
+  ]
 
   /* ═══════════════════════════════════════
      CARD STYLES
@@ -409,29 +469,44 @@
     promo_banner:'banner',promotional_banner:'banner',
     image_gallery:'gallery',photo_gallery:'gallery',
     countdown_timer:'countdown',faq_section:'faq',
+    social_proof:'testimonials',reviews:'testimonials',
+    contact_form:'contact',about_us:'about',team_section:'team',
+    rich_text:'richtext',text_block:'richtext',
+    image_text:'imagetext',split_section:'imagetext',
   }
   function resolveFrontendType(bt){if(SECTION_DEFS[bt])return bt;return BACKEND_TYPE_ALIASES[bt]||bt}
   function getSectionDef(type){return SECTION_DEFS[type]||SECTION_DEFS[resolveFrontendType(type)]||{icon:'📦',label:type,groups:[]}}
 
   /* ═══════════════════════════════════════
-     SECTION DEFINITIONS
+     SECTION DEFINITIONS — EXPANDED
   ═══════════════════════════════════════ */
   const SECTION_DEFS={
     announcement:{icon:'📢',label:'Announcement Bar',groups:[
       {label:'Content',fields:[
         {key:'text',label:'Message',type:'text',placeholder:'✨ Free shipping on orders over ₹999!'},
+        {key:'linkText',label:'Link Text (optional)',type:'text',placeholder:'Shop Now'},
+        {key:'linkUrl',label:'Link URL',type:'text',placeholder:'#products'},
       ]},
       {label:'Style',fields:[
         {key:'bgColor',label:'Background Color',type:'color'},
         {key:'textColor',label:'Text Color',type:'color'},
         {key:'textSize',label:'Text Size',type:'select',opts:['small','normal','large']},
         {key:'bold',label:'Bold Text',type:'select',opts:['yes','no']},
+        {key:'closable',label:'Allow Dismiss',type:'select',opts:['no','yes']},
       ]},
     ]},
     navbar:{icon:'🔝',label:'Navigation Bar',groups:[
       {label:'Branding',fields:[
         {key:'logoText',label:'Logo Text',type:'text',placeholder:'My Store'},
         {key:'logoColor',label:'Logo Color',type:'color'},
+        {key:'tagline',label:'Tagline (optional)',type:'text',placeholder:'Quality Products'},
+      ]},
+      {label:'Navigation Links',fields:[
+        {key:'link1Text',label:'Link 1',type:'text',placeholder:'Home'},
+        {key:'link2Text',label:'Link 2',type:'text',placeholder:'Products'},
+        {key:'link3Text',label:'Link 3',type:'text',placeholder:'Categories'},
+        {key:'link4Text',label:'Link 4',type:'text',placeholder:'About'},
+        {key:'link5Text',label:'Link 5 (optional)',type:'text',placeholder:'Blog'},
       ]},
       {label:'Appearance',fields:[
         {key:'bgColor',label:'Background',type:'color'},
@@ -440,6 +515,7 @@
       {label:'Options',fields:[
         {key:'showSearch',label:'Show Search Button',type:'select',opts:['yes','no']},
         {key:'showCart',label:'Show Cart Button',type:'select',opts:['yes','no']},
+        {key:'cartText',label:'Cart Button Text',type:'text',placeholder:'Cart'},
         {key:'sticky',label:'Sticky on Scroll',type:'select',opts:['yes','no']},
       ]},
     ]},
@@ -451,6 +527,7 @@
         {key:'ctaLink',label:'Primary Button URL',type:'text',placeholder:'#products'},
         {key:'cta2Text',label:'Secondary Button',type:'text',placeholder:'Learn More (optional)'},
         {key:'cta2Link',label:'Secondary URL',type:'text',placeholder:'#about'},
+        {key:'badge',label:'Top Badge Text (optional)',type:'text',placeholder:'🔥 New Collection 2025'},
       ]},
       {label:'Appearance',fields:[
         {key:'bgColor',label:'Background Color',type:'color'},
@@ -468,6 +545,8 @@
       {label:'Content',fields:[
         {key:'title',label:'Section Title',type:'text',placeholder:'Featured Products'},
         {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Handpicked just for you'},
+        {key:'viewAllText',label:'"View All" Button Text',type:'text',placeholder:'View All Products'},
+        {key:'viewAllLink',label:'"View All" URL',type:'text',placeholder:'#'},
       ]},
       {label:'Card Style',fields:[
         {key:'cardStyle',label:'Card Style',type:'card_style_picker'},
@@ -480,19 +559,23 @@
         {key:'cardBg',label:'Card Background',type:'color'},
         {key:'priceColor',label:'Price Color',type:'color'},
         {key:'btnText',label:'Add to Cart Label',type:'text',placeholder:'Add to Cart'},
+        {key:'wishlistText',label:'Wishlist Tooltip',type:'text',placeholder:'Add to Wishlist'},
         {key:'showOldPrice',label:'Show Original Price',type:'select',opts:['yes','no']},
         {key:'showRating',label:'Show Rating Stars',type:'select',opts:['no','yes']},
         {key:'showBadge',label:'Show Product Badge',type:'select',opts:['no','yes']},
         {key:'badgeText',label:'Badge Label',type:'text',placeholder:'New'},
+        {key:'outOfStockText',label:'Out of Stock Text',type:'text',placeholder:'Out of Stock'},
       ]},
     ]},
     categories:{icon:'🗂️',label:'Category Grid',groups:[
       {label:'Content',fields:[
         {key:'title',label:'Section Title',type:'text',placeholder:'Browse by Category'},
+        {key:'subtitle',label:'Subtitle (optional)',type:'text',placeholder:'Shop by your favourite categories'},
       ]},
       {label:'Layout',fields:[
         {key:'columns',label:'Columns',type:'select',opts:['2','3','4','6']},
         {key:'style',label:'Card Style',type:'select',opts:['card','minimal','circle']},
+        {key:'showCount',label:'Show Item Count',type:'select',opts:['no','yes']},
       ]},
     ]},
     banner:{icon:'📣',label:'Promo Banner',groups:[
@@ -501,17 +584,29 @@
         {key:'subtext',label:'Sub Text',type:'textarea',placeholder:'Get 20% off your first order'},
         {key:'ctaText',label:'Button Text',type:'text',placeholder:'Claim Offer'},
         {key:'ctaLink',label:'Button URL',type:'text',placeholder:'#'},
+        {key:'badgeText',label:'Badge (optional)',type:'text',placeholder:'🔥 Today Only'},
+        {key:'couponCode',label:'Coupon Code (optional)',type:'text',placeholder:'WELCOME20'},
       ]},
       {label:'Style',fields:[
         {key:'bgColor',label:'Background',type:'color'},
         {key:'textColor',label:'Text Color',type:'color'},
         {key:'layout',label:'Layout',type:'select',opts:['center','left','split']},
+        {key:'bgImage',label:'Background Image URL',type:'text',placeholder:'https://...'},
       ]},
     ]},
     testimonials:{icon:'💬',label:'Testimonials',groups:[
       {label:'Content',fields:[
         {key:'title',label:'Section Title',type:'text',placeholder:'What Customers Say'},
         {key:'subtitle',label:'Subtitle',type:'text',placeholder:"Don't just take our word for it"},
+        {key:'t1name',label:'Review 1 — Name',type:'text',placeholder:'Sarah M.'},
+        {key:'t1text',label:'Review 1 — Text',type:'textarea',placeholder:'Absolutely love this store!'},
+        {key:'t1stars',label:'Review 1 — Stars',type:'select',opts:['5','4','3']},
+        {key:'t2name',label:'Review 2 — Name',type:'text',placeholder:'Rahul K.'},
+        {key:'t2text',label:'Review 2 — Text',type:'textarea',placeholder:'Best shopping experience!'},
+        {key:'t2stars',label:'Review 2 — Stars',type:'select',opts:['5','4','3']},
+        {key:'t3name',label:'Review 3 — Name',type:'text',placeholder:'Anita P.'},
+        {key:'t3text',label:'Review 3 — Text',type:'textarea',placeholder:'Great products and customer service.'},
+        {key:'t3stars',label:'Review 3 — Stars',type:'select',opts:['5','4','3']},
       ]},
       {label:'Layout',fields:[
         {key:'columns',label:'Columns',type:'select',opts:['1','2','3']},
@@ -524,36 +619,58 @@
         {key:'subtext',label:'Sub Text',type:'textarea',placeholder:'Get exclusive deals straight to your inbox'},
         {key:'btnText',label:'Button Text',type:'text',placeholder:'Subscribe'},
         {key:'inputPlaceholder',label:'Input Placeholder',type:'text',placeholder:'Enter your email…'},
+        {key:'successMsg',label:'Success Message',type:'text',placeholder:'🎉 You\'re in! Check your inbox.'},
+        {key:'privacyText',label:'Privacy Note',type:'text',placeholder:'No spam, unsubscribe anytime.'},
       ]},
       {label:'Style',fields:[
         {key:'bgColor',label:'Background',type:'color'},
         {key:'textColor',label:'Text Color',type:'color'},
         {key:'btnColor',label:'Button Color',type:'color'},
+        {key:'layout',label:'Layout',type:'select',opts:['center','left','inline']},
       ]},
     ]},
     footer:{icon:'📄',label:'Footer',groups:[
       {label:'Content',fields:[
+        {key:'logoText',label:'Logo / Brand Name',type:'text',placeholder:'My Store'},
+        {key:'tagline',label:'Footer Tagline',type:'text',placeholder:'Quality products delivered fast'},
         {key:'footerText',label:'Copyright Text',type:'text',placeholder:'© 2025 My Store. All rights reserved.'},
+        {key:'col1Title',label:'Column 1 Title',type:'text',placeholder:'Quick Links'},
+        {key:'col1Links',label:'Column 1 Links (comma-sep)',type:'text',placeholder:'Home,Products,About,Contact'},
+        {key:'col2Title',label:'Column 2 Title',type:'text',placeholder:'Customer Care'},
+        {key:'col2Links',label:'Column 2 Links (comma-sep)',type:'text',placeholder:'Shipping,Returns,FAQ,Track Order'},
+        {key:'email',label:'Contact Email',type:'text',placeholder:'hello@mystore.com'},
+        {key:'phone',label:'Contact Phone',type:'text',placeholder:'+91 98765 43210'},
       ]},
       {label:'Style & Options',fields:[
         {key:'bgColor',label:'Background',type:'color'},
         {key:'textColor',label:'Text Color',type:'color'},
         {key:'showSocial',label:'Social Media Links',type:'select',opts:['yes','no']},
+        {key:'instagramUrl',label:'Instagram URL',type:'text',placeholder:'https://instagram.com/...'},
+        {key:'facebookUrl',label:'Facebook URL',type:'text',placeholder:'https://facebook.com/...'},
+        {key:'twitterUrl',label:'Twitter/X URL',type:'text',placeholder:'https://x.com/...'},
       ]},
     ]},
     video:{icon:'🎬',label:'Video Section',groups:[
       {label:'Content',fields:[
         {key:'heading',label:'Heading',type:'text',placeholder:'Our Story'},
         {key:'subtext',label:'Sub Text',type:'text',placeholder:'Watch how we do it'},
-        {key:'videoUrl',label:'Video URL (YouTube/Vimeo)',type:'text',placeholder:'https://youtube.com/embed/...'},
+        {key:'videoUrl',label:'Video URL (YouTube/Vimeo embed)',type:'text',placeholder:'https://youtube.com/embed/...'},
+        {key:'thumbnailUrl',label:'Thumbnail Image URL',type:'text',placeholder:'https://...'},
+        {key:'playBtnText',label:'Play Button Label',type:'text',placeholder:'Watch Video'},
       ]},
-      {label:'Style',fields:[{key:'bgColor',label:'Background',type:'color'}]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+      ]},
     ]},
     countdown:{icon:'⏳',label:'Countdown Timer',groups:[
       {label:'Content',fields:[
         {key:'heading',label:'Heading',type:'text',placeholder:'Deal Ends In'},
         {key:'subtext',label:'Sub Text',type:'text',placeholder:'Hurry — limited time offer!'},
         {key:'endDate',label:'End Date / Time',type:'text',placeholder:'2025-12-31T23:59:59'},
+        {key:'ctaText',label:'CTA Button Text',type:'text',placeholder:'Grab the Deal'},
+        {key:'ctaLink',label:'CTA URL',type:'text',placeholder:'#products'},
+        {key:'expiredText',label:'Expired Message',type:'text',placeholder:'This offer has ended.'},
       ]},
       {label:'Style',fields:[
         {key:'bgColor',label:'Background',type:'color'},
@@ -565,18 +682,33 @@
       {label:'Content',fields:[
         {key:'title',label:'Section Title',type:'text',placeholder:'Our Gallery'},
         {key:'subtitle',label:'Subtitle',type:'text',placeholder:'A peek inside our world'},
+        {key:'img1',label:'Image 1 URL',type:'text',placeholder:'https://...'},
+        {key:'img2',label:'Image 2 URL',type:'text',placeholder:'https://...'},
+        {key:'img3',label:'Image 3 URL',type:'text',placeholder:'https://...'},
+        {key:'img4',label:'Image 4 URL',type:'text',placeholder:'https://...'},
+        {key:'img5',label:'Image 5 URL',type:'text',placeholder:'https://...'},
+        {key:'img6',label:'Image 6 URL',type:'text',placeholder:'https://...'},
       ]},
       {label:'Layout',fields:[
         {key:'columns',label:'Columns',type:'select',opts:['2','3','4']},
         {key:'imgAspect',label:'Image Ratio',type:'select',opts:['square','landscape','portrait']},
+        {key:'style',label:'Style',type:'select',opts:['grid','masonry','carousel']},
       ]},
     ]},
     trustbadges:{icon:'🛡️',label:'Trust Badges',groups:[
       {label:'Badges',fields:[
-        {key:'badge1',label:'Badge 1 Text',type:'text',placeholder:'Free Shipping'},
-        {key:'badge2',label:'Badge 2 Text',type:'text',placeholder:'Secure Payment'},
-        {key:'badge3',label:'Badge 3 Text',type:'text',placeholder:'Easy Returns'},
-        {key:'badge4',label:'Badge 4 Text',type:'text',placeholder:'24/7 Support'},
+        {key:'badge1Icon',label:'Badge 1 Icon',type:'text',placeholder:'🚚'},
+        {key:'badge1',label:'Badge 1 Title',type:'text',placeholder:'Free Shipping'},
+        {key:'badge1sub',label:'Badge 1 Subtitle',type:'text',placeholder:'On orders above ₹499'},
+        {key:'badge2Icon',label:'Badge 2 Icon',type:'text',placeholder:'🔒'},
+        {key:'badge2',label:'Badge 2 Title',type:'text',placeholder:'Secure Payment'},
+        {key:'badge2sub',label:'Badge 2 Subtitle',type:'text',placeholder:'100% safe & encrypted'},
+        {key:'badge3Icon',label:'Badge 3 Icon',type:'text',placeholder:'↩️'},
+        {key:'badge3',label:'Badge 3 Title',type:'text',placeholder:'Easy Returns'},
+        {key:'badge3sub',label:'Badge 3 Subtitle',type:'text',placeholder:'30-day return policy'},
+        {key:'badge4Icon',label:'Badge 4 Icon',type:'text',placeholder:'💬'},
+        {key:'badge4',label:'Badge 4 Title',type:'text',placeholder:'24/7 Support'},
+        {key:'badge4sub',label:'Badge 4 Subtitle',type:'text',placeholder:'Always here to help'},
       ]},
       {label:'Style',fields:[
         {key:'bgColor',label:'Background',type:'color'},
@@ -596,20 +728,154 @@
         {key:'a2',label:'Answer 2',type:'textarea',placeholder:'30 days hassle-free returns.'},
         {key:'q3',label:'Question 3',type:'text',placeholder:'Do you offer Cash on Delivery?'},
         {key:'a3',label:'Answer 3',type:'textarea',placeholder:'Yes! COD available across India.'},
+        {key:'q4',label:'Question 4',type:'text',placeholder:'How do I track my order?'},
+        {key:'a4',label:'Answer 4',type:'textarea',placeholder:'Use the tracking link in your email.'},
+        {key:'q5',label:'Question 5 (optional)',type:'text',placeholder:'Do you ship internationally?'},
+        {key:'a5',label:'Answer 5',type:'textarea',placeholder:'Currently we ship within India only.'},
+      ]},
+    ]},
+    contact:{icon:'📞',label:'Contact Section',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Section Title',type:'text',placeholder:'Get in Touch'},
+        {key:'subtitle',label:'Subtitle',type:'text',placeholder:"We'd love to hear from you"},
+        {key:'email',label:'Email Address',type:'text',placeholder:'hello@mystore.com'},
+        {key:'phone',label:'Phone Number',type:'text',placeholder:'+91 98765 43210'},
+        {key:'address',label:'Address',type:'textarea',placeholder:'123 Main Street, Mumbai, India 400001'},
+        {key:'mapUrl',label:'Google Maps Embed URL',type:'text',placeholder:'https://maps.google.com/...'},
+        {key:'btnText',label:'Submit Button',type:'text',placeholder:'Send Message'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+        {key:'layout',label:'Layout',type:'select',opts:['side-by-side','stacked','form-only']},
+      ]},
+    ]},
+    about:{icon:'ℹ️',label:'About Us',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Heading',type:'text',placeholder:'Our Story'},
+        {key:'subtitle',label:'Sub Heading',type:'text',placeholder:'Built with passion, driven by quality'},
+        {key:'body',label:'Main Text',type:'textarea',placeholder:'We started in 2020 with a simple mission...'},
+        {key:'body2',label:'Second Paragraph',type:'textarea',placeholder:'Today we serve thousands of happy customers...'},
+        {key:'stat1num',label:'Stat 1 Number',type:'text',placeholder:'10K+'},
+        {key:'stat1label',label:'Stat 1 Label',type:'text',placeholder:'Happy Customers'},
+        {key:'stat2num',label:'Stat 2 Number',type:'text',placeholder:'500+'},
+        {key:'stat2label',label:'Stat 2 Label',type:'text',placeholder:'Products'},
+        {key:'stat3num',label:'Stat 3 Number',type:'text',placeholder:'50+'},
+        {key:'stat3label',label:'Stat 3 Label',type:'text',placeholder:'Cities Delivered'},
+        {key:'imageUrl',label:'Image URL',type:'text',placeholder:'https://...'},
+        {key:'ctaText',label:'CTA Button Text',type:'text',placeholder:'Shop Now'},
+        {key:'ctaLink',label:'CTA URL',type:'text',placeholder:'#products'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+        {key:'layout',label:'Layout',type:'select',opts:['image-right','image-left','no-image']},
+      ]},
+    ]},
+    team:{icon:'👥',label:'Team Section',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Section Title',type:'text',placeholder:'Meet Our Team'},
+        {key:'subtitle',label:'Subtitle',type:'text',placeholder:'The people behind the magic'},
+        {key:'m1name',label:'Member 1 Name',type:'text',placeholder:'Priya Sharma'},
+        {key:'m1role',label:'Member 1 Role',type:'text',placeholder:'Founder & CEO'},
+        {key:'m1img',label:'Member 1 Photo URL',type:'text',placeholder:'https://...'},
+        {key:'m2name',label:'Member 2 Name',type:'text',placeholder:'Rahul Verma'},
+        {key:'m2role',label:'Member 2 Role',type:'text',placeholder:'Head of Operations'},
+        {key:'m2img',label:'Member 2 Photo URL',type:'text',placeholder:'https://...'},
+        {key:'m3name',label:'Member 3 Name',type:'text',placeholder:'Anita Patel'},
+        {key:'m3role',label:'Member 3 Role',type:'text',placeholder:'Customer Success'},
+        {key:'m3img',label:'Member 3 Photo URL',type:'text',placeholder:'https://...'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'columns',label:'Columns',type:'select',opts:['2','3','4']},
+      ]},
+    ]},
+    richtext:{icon:'📝',label:'Rich Text Block',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Title (optional)',type:'text',placeholder:'Our Promise'},
+        {key:'body',label:'Text Content',type:'textarea',placeholder:'Write your content here...'},
+        {key:'align',label:'Alignment',type:'select',opts:['left','center','right']},
+        {key:'maxWidth',label:'Width',type:'select',opts:['narrow','normal','wide','full']},
+        {key:'ctaText',label:'Button Text (optional)',type:'text',placeholder:'Learn More'},
+        {key:'ctaLink',label:'Button URL',type:'text',placeholder:'#'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+        {key:'titleSize',label:'Title Size',type:'select',opts:['small','medium','large','xlarge']},
+      ]},
+    ]},
+    imagetext:{icon:'🖼️',label:'Image + Text',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Heading',type:'text',placeholder:'Why Choose Us'},
+        {key:'subtitle',label:'Sub Heading',type:'text',placeholder:'Quality you can trust'},
+        {key:'body',label:'Body Text',type:'textarea',placeholder:'We believe in providing only the best...'},
+        {key:'imageUrl',label:'Image URL',type:'text',placeholder:'https://...'},
+        {key:'ctaText',label:'Button Text',type:'text',placeholder:'Learn More'},
+        {key:'ctaLink',label:'Button URL',type:'text',placeholder:'#'},
+        {key:'bullet1',label:'Bullet Point 1',type:'text',placeholder:'✓ 100% Authentic Products'},
+        {key:'bullet2',label:'Bullet Point 2',type:'text',placeholder:'✓ Fast Delivery Nationwide'},
+        {key:'bullet3',label:'Bullet Point 3',type:'text',placeholder:'✓ Easy Returns & Refunds'},
+      ]},
+      {label:'Layout',fields:[
+        {key:'layout',label:'Image Position',type:'select',opts:['image-right','image-left']},
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+      ]},
+    ]},
+    brands:{icon:'🏷️',label:'Brand Logos',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Title',type:'text',placeholder:'Trusted Brands We Carry'},
+        {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Shop from top brands'},
+        {key:'brand1',label:'Brand 1 Name',type:'text',placeholder:'Nike'},
+        {key:'brand2',label:'Brand 2 Name',type:'text',placeholder:'Adidas'},
+        {key:'brand3',label:'Brand 3 Name',type:'text',placeholder:'Apple'},
+        {key:'brand4',label:'Brand 4 Name',type:'text',placeholder:'Samsung'},
+        {key:'brand5',label:'Brand 5 Name',type:'text',placeholder:'Sony'},
+        {key:'brand6',label:'Brand 6 Name',type:'text',placeholder:'Boat'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'style',label:'Style',type:'select',opts:['pill','card','minimal']},
+      ]},
+    ]},
+    offers:{icon:'🎁',label:'Offers & Deals',groups:[
+      {label:'Content',fields:[
+        {key:'title',label:'Section Title',type:'text',placeholder:'Hot Deals'},
+        {key:'subtitle',label:'Subtitle',type:'text',placeholder:'Limited time offers just for you'},
+        {key:'offer1title',label:'Offer 1 Title',type:'text',placeholder:'Flat 30% Off'},
+        {key:'offer1desc',label:'Offer 1 Description',type:'text',placeholder:'On all Electronics'},
+        {key:'offer1code',label:'Offer 1 Code',type:'text',placeholder:'ELEC30'},
+        {key:'offer1bg',label:'Offer 1 Color',type:'color'},
+        {key:'offer2title',label:'Offer 2 Title',type:'text',placeholder:'Buy 2 Get 1 Free'},
+        {key:'offer2desc',label:'Offer 2 Description',type:'text',placeholder:'On selected Fashion items'},
+        {key:'offer2code',label:'Offer 2 Code',type:'text',placeholder:'B2G1'},
+        {key:'offer2bg',label:'Offer 2 Color',type:'color'},
+        {key:'offer3title',label:'Offer 3 Title',type:'text',placeholder:'Free Delivery'},
+        {key:'offer3desc',label:'Offer 3 Description',type:'text',placeholder:'On orders above ₹499'},
+        {key:'offer3code',label:'Offer 3 Code',type:'text',placeholder:'FREEDEL'},
+        {key:'offer3bg',label:'Offer 3 Color',type:'color'},
+      ]},
+      {label:'Style',fields:[
+        {key:'bgColor',label:'Background',type:'color'},
+        {key:'textColor',label:'Text Color',type:'color'},
+        {key:'columns',label:'Columns',type:'select',opts:['2','3']},
       ]},
     ]},
   }
 
   const DEFAULT_SECTIONS=[
     {id:'sec_announcement',type:'announcement',enabled:true,data:{text:'✨ Free shipping on all orders above ₹999!',bgColor:'#5b5cf6',textColor:'#ffffff'}},
-    {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showSearch:'yes',showCart:'yes',sticky:'yes'}},
+    {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showSearch:'yes',showCart:'yes',sticky:'yes',link1Text:'Home',link2Text:'Products',link3Text:'Categories',link4Text:'About',cartText:'Cart'}},
     {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
-    {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',cardStyle:'classic',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart'}},
+    {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',cardStyle:'classic',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
     {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'card'}},
     {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
-    {id:'sec_testimonials',type:'testimonials',enabled:false,data:{title:'What Customers Say',columns:'3',style:'card'}},
-    {id:'sec_newsletter',type:'newsletter',enabled:true,data:{heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address'}},
-    {id:'sec_footer',type:'footer',enabled:true,data:{footerText:'© 2025 My Store. All rights reserved.',showSocial:'yes'}},
+    {id:'sec_trustbadges',type:'trustbadges',enabled:true,data:{badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}},
+    {id:'sec_testimonials',type:'testimonials',enabled:false,data:{title:'What Customers Say',columns:'3',style:'card',t1name:'Sarah M.',t1text:'Absolutely love this store! Fast shipping and great quality.',t1stars:'5',t2name:'Rahul K.',t2text:'Best shopping experience. Will definitely order again!',t2stars:'5',t3name:'Anita P.',t3text:'Great products and excellent customer service. Five stars!',t3stars:'5'}},
+    {id:'sec_newsletter',type:'newsletter',enabled:true,data:{heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address',privacyText:'No spam. Unsubscribe anytime.'}},
+    {id:'sec_footer',type:'footer',enabled:true,data:{footerText:'© 2025 My Store. All rights reserved.',showSocial:'yes',logoText:'My Store',col1Title:'Quick Links',col1Links:'Home,Products,Categories,About',col2Title:'Customer Care',col2Links:'Shipping,Returns,FAQ,Track Order'}},
   ]
 
   const THEMES=[
@@ -635,6 +901,13 @@
     {type:'faq',icon:'❓',name:'FAQ'},
     {type:'banner',icon:'📣',name:'Promo Banner'},
     {type:'testimonials',icon:'💬',name:'Testimonials'},
+    {type:'contact',icon:'📞',name:'Contact'},
+    {type:'about',icon:'ℹ️',name:'About Us'},
+    {type:'team',icon:'👥',name:'Team'},
+    {type:'richtext',icon:'📝',name:'Text Block'},
+    {type:'imagetext',icon:'🖼️',name:'Image + Text'},
+    {type:'brands',icon:'🏷️',name:'Brands'},
+    {type:'offers',icon:'🎁',name:'Offers & Deals'},
   ]
 
   const COLOR_PALETTE=['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#8b5cf6','#f97316','#c9a84c','#111111']
@@ -835,22 +1108,14 @@
     activeSectionId=id
     highlightSectionInPreview(id)
     openSectionEditor(id)
-    if(activeLeftTab!=='sections'){
-      // switch to sections tab
-      document.querySelectorAll('.panel-tab')[0].click()
-    }
+    if(activeLeftTab!=='sections'){document.querySelectorAll('.panel-tab')[0].click()}
   }
 
   function toggleSection(id){
     const s=sections.find(x=>x.id===id);if(!s)return
     s.enabled=!s.enabled;markUnsaved(true)
-    // Always re-render the list and preview; if we're in the editor for this section and it got hidden, go back
-    if(activeSectionId===id&&!s.enabled){
-      activeSectionId=null
-      showSectionsListView()
-    }else{
-      renderSectionsList()
-    }
+    if(activeSectionId===id&&!s.enabled){activeSectionId=null;showSectionsListView()}
+    else{renderSectionsList()}
     renderPreview()
   }
 
@@ -871,7 +1136,6 @@
     const s=sections.find(x=>x.id===id);if(!s)return
     activeSectionId=id
     const def=getSectionDef(s.type)
-    // Make sure sections tab is visible
     const tabSections=document.getElementById('tab-sections')
     tabSections.style.display=''
     document.getElementById('tab-themes').style.display='none'
@@ -988,11 +1252,54 @@
   }
 
   /* ═══════════════════════════════════════
+     RESET COLORS MODAL
+  ═══════════════════════════════════════ */
+  function openResetModal(){
+    selectedPaletteId=null
+    const grid=document.getElementById('palette-presets-grid')
+    grid.innerHTML=COLOR_PALETTES.map(p=>`
+      <div class="palette-preset" id="pp_${p.id}" onclick="selectPalette('${p.id}')">
+        <div class="palette-swatches">
+          ${p.colors.map(c=>`<div class="palette-sw" style="background:${c}"></div>`).join('')}
+        </div>
+        <div class="palette-name">${p.name}</div>
+      </div>`).join('')
+    document.getElementById('reset-modal').classList.add('open')
+  }
+  function closeResetModal(){
+    document.getElementById('reset-modal').classList.remove('open')
+    selectedPaletteId=null
+  }
+  function selectPalette(id){
+    selectedPaletteId=id
+    document.querySelectorAll('.palette-preset').forEach(p=>p.classList.remove('selected'))
+    document.getElementById('pp_'+id)?.classList.add('selected')
+  }
+  function applySelectedPalette(){
+    if(!selectedPaletteId){toast('Please select a palette first','error');return}
+    const p=COLOR_PALETTES.find(x=>x.id===selectedPaletteId)
+    if(!p)return
+    Object.assign(themeData,p.settings)
+    markUnsaved(true);renderSettingsPanel();renderPreview()
+    closeResetModal()
+    toast(`"${p.name}" palette applied!`,'success')
+  }
+  // Close modal on overlay click
+  document.getElementById('reset-modal').addEventListener('click',e=>{
+    if(e.target===document.getElementById('reset-modal'))closeResetModal()
+  })
+
+  /* ═══════════════════════════════════════
      SETTINGS PANEL
   ═══════════════════════════════════════ */
   function renderSettingsPanel(){
     document.getElementById('settings-panel-content').innerHTML=`
-    <span class="panel-group-label">Brand Colors</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span class="panel-group-label" style="margin:0">Brand Colors</span>
+      <button onclick="openResetModal()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">
+        🎨 Reset Colors
+      </button>
+    </div>
     ${colorField('Primary Color','primaryColor',themeData.primaryColor,true)}
     ${colorField('Background','bgColor',themeData.bgColor)}
     ${colorField('Text Color','textColor',themeData.textColor)}
@@ -1090,48 +1397,37 @@
       toast(`"${name}" section added`,'success')
     }
     closeAddDrawer();markUnsaved(true)
-    // Always go back to list view so user sees the updated list with the new section
     activeSectionId=null
     showSectionsListView()
     renderPreview()
   }
 
   /* ═══════════════════════════════════════
-     DRAG & DROP — FIXED
-     Uses pointer position to determine above/below
-     Works in both the enabled and disabled lists
+     DRAG & DROP
   ═══════════════════════════════════════ */
   let dragSrcId=null
 
   function initDragDrop(){
     document.querySelectorAll('.section-row[draggable]').forEach(row=>{
       row.addEventListener('dragstart',e=>{
-        dragSrcId=row.dataset.id
-        e.dataTransfer.effectAllowed='move'
-        // slight delay so the ghost renders before we hide it
+        dragSrcId=row.dataset.id;e.dataTransfer.effectAllowed='move'
         setTimeout(()=>row.classList.add('drag-ghost'),0)
       })
       row.addEventListener('dragend',()=>{
         dragSrcId=null
-        document.querySelectorAll('.section-row').forEach(r=>{
-          r.classList.remove('drag-ghost','drag-over-top','drag-over-bottom')
-        })
+        document.querySelectorAll('.section-row').forEach(r=>r.classList.remove('drag-ghost','drag-over-top','drag-over-bottom'))
       })
       row.addEventListener('dragover',e=>{
         e.preventDefault()
         if(!dragSrcId||row.dataset.id===dragSrcId)return
         e.dataTransfer.dropEffect='move'
-        // Determine if cursor is in top or bottom half
         const rect=row.getBoundingClientRect()
         const midY=rect.top+rect.height/2
         document.querySelectorAll('.section-row').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'))
-        if(e.clientY<midY) row.classList.add('drag-over-top')
-        else row.classList.add('drag-over-bottom')
+        if(e.clientY<midY)row.classList.add('drag-over-top');else row.classList.add('drag-over-bottom')
       })
       row.addEventListener('dragleave',e=>{
-        // Only remove if leaving to an element that's not a child
-        if(!row.contains(e.relatedTarget))
-          row.classList.remove('drag-over-top','drag-over-bottom')
+        if(!row.contains(e.relatedTarget))row.classList.remove('drag-over-top','drag-over-bottom')
       })
       row.addEventListener('drop',e=>{
         e.preventDefault()
@@ -1139,22 +1435,14 @@
         const srcIdx=sections.findIndex(s=>s.id===dragSrcId)
         const tgtIdx=sections.findIndex(s=>s.id===row.dataset.id)
         if(srcIdx===-1||tgtIdx===-1)return
-        // Determine insert position based on which half they dropped on
         const rect=row.getBoundingClientRect()
         const insertAfter=e.clientY>=rect.top+rect.height/2
         const moved=sections.splice(srcIdx,1)[0]
-        // Recalculate tgtIdx since array changed
         const newTgtIdx=sections.findIndex(s=>s.id===row.dataset.id)
         const insertAt=insertAfter?newTgtIdx+1:newTgtIdx
         sections.splice(insertAt,0,moved)
-        dragSrcId=null
-        markUnsaved(true)
-        // Re-render list AND preview so order is reflected immediately
-        if(activeSectionId){
-          showSectionsListView()
-        }else{
-          renderSectionsList()
-        }
+        dragSrcId=null;markUnsaved(true)
+        if(activeSectionId){showSectionsListView()}else{renderSectionsList()}
         renderPreview()
       })
     })
@@ -1171,7 +1459,6 @@
     const iframe=document.getElementById('preview-iframe')
     shell.className='device-shell '+device
     iframe.height=device==='desktop'?720:device==='tablet'?900:800
-    // Re-render so the layout adapts to the new viewport width
     renderPreview()
   }
   function previewLive(){
@@ -1187,7 +1474,6 @@
     const isLight=isLightColor(themeData.bgColor||'#ffffff')
     const btnRadius=themeData.btnStyle==='pill'?'999px':themeData.btnStyle==='square'?'3px':(themeData.radius||'12px')
     const fontEnc=encodeURIComponent(themeData.font||'Outfit')
-    // Render sections in current order — only enabled ones
     const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
     const borderRgb=isLight?'0,0,0':'255,255,255'
 
@@ -1210,59 +1496,23 @@
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}
 
-/* Announcement */
-.announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.01em}
+.announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:10px}
+.ann-link{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
+.ann-close{margin-left:auto;background:none;border:none;color:white;cursor:pointer;font-size:16px;opacity:.6;padding:0 8px}
 
-/* ── NAVBAR FIX: logo left, links truly centered absolute, actions right ── */
-.navbar{
-  background:var(--nav-bg);
-  height:${isMobile?'52px':'62px'};
-  display:flex;
-  align-items:center;
-  padding:0 5%;
-  border-bottom:1px solid rgba(${borderRgb},.06);
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-.nav-logo{
-  font-size:${isMobile?'18px':'22px'};
-  font-weight:900;
-  letter-spacing:-.03em;
-  flex-shrink:0;
-  white-space:nowrap;
-}
-/* True center using absolute positioning so links don't shift with logo/button size */
-.nav-links-center{
-  position:absolute;
-  left:0; right:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:${isMobile?'12px':'28px'};
-  font-size:${isMobile?'12px':'13.5px'};
-  font-weight:600;
-  opacity:.65;
-  pointer-events:none;/* let clicks pass through to logo/buttons if needed */
-}
+.navbar{background:var(--nav-bg);height:${isMobile?'52px':'62px'};display:flex;align-items:center;padding:0 5%;border-bottom:1px solid rgba(${borderRgb},.06);position:sticky;top:0;z-index:100;}
+.nav-logo{font-size:${isMobile?'18px':'22px'};font-weight:900;letter-spacing:-.03em;flex-shrink:0;white-space:nowrap;}
+.nav-links-center{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65;pointer-events:none;}
 .nav-links-center a{pointer-events:all}
-.nav-right{
-  margin-left:auto;
-  display:flex;
-  align-items:center;
-  gap:${isMobile?'8px':'14px'};
-  flex-shrink:0;
-  position:relative;
-  z-index:1;
-}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:${isMobile?'8px':'14px'};flex-shrink:0;position:relative;z-index:1;}
 .nav-search{width:34px;height:34px;border-radius:8px;background:rgba(${borderRgb},.06);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
 .nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
 
-/* Hero */
 .hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg);position:relative;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
 .hero-overlay{position:absolute;inset:0;z-index:1}
 .hero-content{position:relative;z-index:2}
+.hero-badge{display:inline-block;background:rgba(${borderRgb},.08);border:1px solid rgba(${borderRgb},.15);padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:18px;letter-spacing:.02em}
 .hero h1{font-size:${isMobile?'28px':'54px'};font-weight:900;line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
 .hero h1 em{font-style:normal;color:var(--primary)}
 .hero p{font-size:${isMobile?'14px':'17px'};opacity:.65;max-width:520px;margin:0 auto 32px;line-height:1.7}
@@ -1271,18 +1521,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .btn-cta:hover{opacity:.88}
 .btn-cta-ghost{background:transparent;color:var(--text);border:1.5px solid rgba(${borderRgb},.2)}
 
-/* Section base */
 .section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .section-header{margin-bottom:${isMobile?'18px':'28px'}}
 .section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;letter-spacing:-.02em}
 .section-subtitle{font-size:${isMobile?'12px':'14px'};opacity:.55;margin-top:6px}
+.section-header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;transition:all .15s}
+.view-all-btn:hover{opacity:1;border-color:var(--primary);color:var(--primary)}
 
-/* ─── PRODUCT CARDS ─── */
 .themed-products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:${isMobile?'10px':'18px'}}
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all .22s;display:block;color:inherit;text-decoration:none}
 .tc-img{width:100%;aspect-ratio:1;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;position:relative;flex-shrink:0}
 .tc-img img{width:100%;height:100%;object-fit:cover;display:block}
 .tc-badge{position:absolute;top:10px;left:10px;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.04em;z-index:2}
+.tc-wishlist{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(${borderRgb},.1);backdrop-filter:blur(4px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;opacity:0;transition:opacity .15s}
+.tc:hover .tc-wishlist{opacity:1}
 .tc-info{padding:${isMobile?'10px':'14px'}}
 .tc-cat{font-size:10px;font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .tc-name{font-size:${isMobile?'12.5px':'13.5px'};font-weight:700;line-height:1.4;margin-bottom:6px}
@@ -1293,44 +1546,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .tc-disc{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 .tc-btn{width:100%;padding:${isMobile?'8px':'10px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s;display:block}
 .tc-btn:hover{opacity:.88}
-/* 1. Classic */
-.classic-grid .tc{box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.18)}
-/* 2. Minimal */
-.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12)}
-.minimal-grid .tc:hover{border-color:var(--primary)}
-/* 3. Overlay */
+.classic-grid .tc{box-shadow:0 2px 10px rgba(0,0,0,.08)}.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12)}.minimal-grid .tc:hover{border-color:var(--primary)}
 .overlay-grid .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.3) 60%,transparent 100%);padding:20px 14px 14px;color:white;z-index:3}
 .overlay-grid .tc-overlay .tc-name{color:white;font-size:${isMobile?'12px':'14px'};margin-bottom:4px}
 .overlay-grid .tc-overlay .tc-price{color:white}
 .overlay-grid .tc-overlay .tc-btn{background:white;color:var(--primary);margin-top:8px}
 .overlay-grid .tc-info{display:none}
-/* 4. Bold */
-.bold-grid .tc{border-top:4px solid var(--primary)}
-.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-/* 5. List */
-.list-grid{grid-template-columns:1fr!important}
-.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}
-.list-grid .tc-img{width:${isMobile?'100px':'150px'};min-width:${isMobile?'100px':'150px'};aspect-ratio:auto;height:auto;min-height:130px}
-.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'18px'}}
-/* 6. Magazine */
-.magazine-grid .tc:first-child{grid-column:span 2}
-.magazine-grid .tc:first-child .tc-img{aspect-ratio:${isMobile?'16/9':'2/1'}}
-.magazine-grid .tc{box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.magazine-grid .tc:hover{transform:translateY(-3px)}
-/* 7. Compact */
-.compact-grid{gap:${isMobile?'7px':'12px'}!important}
-.compact-grid .tc-info{padding:8px 10px 10px}
-.compact-grid .tc-name{font-size:${isMobile?'11px':'12px'};margin-bottom:3px}
-.compact-grid .tc-price{font-size:${isMobile?'12px':'14px'}}
-.compact-grid .tc-price-row{margin-bottom:0}
-.compact-grid .tc-btn{display:none}
-.compact-grid .tc:hover{opacity:.85}
-/* 8. Elevated */
-.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.12);border-radius:calc(var(--radius)*1.5)}
-.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.bold-grid .tc{border-top:4px solid var(--primary)}.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.list-grid{grid-template-columns:1fr!important}.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}.list-grid .tc-img{width:${isMobile?'100px':'150px'};min-width:${isMobile?'100px':'150px'};aspect-ratio:auto;height:auto;min-height:130px}.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'18px'}}
+.magazine-grid .tc:first-child{grid-column:span 2}.magazine-grid .tc:first-child .tc-img{aspect-ratio:${isMobile?'16/9':'2/1'}}.magazine-grid .tc{box-shadow:0 2px 8px rgba(0,0,0,.08)}.magazine-grid .tc:hover{transform:translateY(-3px)}
+.compact-grid{gap:${isMobile?'7px':'12px'}!important}.compact-grid .tc-info{padding:8px 10px 10px}.compact-grid .tc-name{font-size:${isMobile?'11px':'12px'};margin-bottom:3px}.compact-grid .tc-price{font-size:${isMobile?'12px':'14px'}}.compact-grid .tc-price-row{margin-bottom:0}.compact-grid .tc-btn{display:none}.compact-grid .tc:hover{opacity:.85}
+.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.12);border-radius:calc(var(--radius)*1.5)}.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.2)}
 
-/* Categories */
 .cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}
 .cat-card{background:var(--card-bg);border-radius:var(--radius);padding:${isMobile?'20px 12px':'32px 20px'};text-align:center;cursor:pointer;transition:transform .2s}
 .cat-card:hover{transform:translateY(-2px)}
@@ -1338,15 +1566,16 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .cat-card.minimal-style{background:transparent;border:1.5px solid rgba(${borderRgb},.1)}
 .cat-icon{font-size:${isMobile?'28px':'36px'};margin-bottom:10px}
 .cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}
+.cat-count{font-size:11px;opacity:.45;margin-top:3px}
 
-/* Promo Banner */
-.promo-banner{color:white;padding:${isMobile?'40px 5%':'68px 5%'};text-align:center}
+.promo-banner{color:white;padding:${isMobile?'40px 5%':'68px 5%'};text-align:center;position:relative;overflow:hidden}
 .promo-banner.left-layout{text-align:left;display:flex;align-items:center;gap:40px;flex-wrap:wrap}
 .promo-content h2{font-size:${isMobile?'22px':'36px'};font-weight:900;margin-bottom:10px}
-.promo-content p{opacity:.8;margin-bottom:24px;font-size:${isMobile?'13px':'16px'}}
+.promo-content p{opacity:.8;margin-bottom:20px;font-size:${isMobile?'13px':'16px'}}
+.promo-coupon{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px dashed rgba(255,255,255,.5);padding:6px 14px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;margin-bottom:20px;cursor:pointer}
 .btn-white{background:white;color:var(--primary);padding:${isMobile?'10px 22px':'12px 28px'};border-radius:var(--btn-r);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
+.promo-badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px}
 
-/* Testimonials */
 .testimonials{padding:${isMobile?'32px 5%':'56px 5%'};background:var(--card-bg)}
 .testimonials-grid{display:grid;gap:16px;margin-top:24px}
 .testimonial{background:var(--bg);border-radius:var(--radius);padding:20px}
@@ -1358,50 +1587,113 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .t-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px}
 .t-name{font-size:13px;font-weight:700}
 
-/* Newsletter */
 .newsletter{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
+.newsletter.left-layout{text-align:left}
 .newsletter h2{font-size:${isMobile?'22px':'30px'};font-weight:800;margin-bottom:10px}
 .newsletter p{opacity:.6;margin-bottom:24px;font-size:${isMobile?'13px':'15px'}}
 .newsletter-form{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap}
+.newsletter.left-layout .newsletter-form{margin:0}
 .newsletter-input{flex:1;min-width:180px;padding:11px 16px;border:1.5px solid rgba(${borderRgb},.1);border-radius:var(--btn-r);font-size:14px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
+.newsletter-privacy{font-size:11px;opacity:.4;margin-top:10px}
 
-/* Footer */
-.footer{padding:${isMobile?'24px 5%':'40px 5%'};border-top:1px solid rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
-.footer-logo{font-size:17px;font-weight:900}
-.footer-copy{font-size:12px;opacity:.4}
-.footer-links{display:flex;gap:18px;font-size:12.5px;opacity:.45;font-weight:600}
+.footer{padding:${isMobile?'24px 5% 16px':'48px 5% 24px'};background:var(--nav-bg);border-top:1px solid rgba(${borderRgb},.06)}
+.footer-top{display:grid;grid-template-columns:${isMobile?'1fr':'2fr 1fr 1fr'};gap:32px;margin-bottom:32px}
+.footer-brand{}
+.footer-logo{font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
+.footer-tagline{font-size:13px;opacity:.5;line-height:1.6;margin-bottom:16px}
+.footer-contact{font-size:12px;opacity:.45;line-height:1.8}
+.footer-col-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.5;margin-bottom:12px}
+.footer-col-links{display:flex;flex-direction:column;gap:8px}
+.footer-col-links a{font-size:13px;opacity:.55;font-weight:600;cursor:pointer;transition:opacity .15s}
+.footer-col-links a:hover{opacity:1}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:20px;border-top:1px solid rgba(${borderRgb},.06)}
+.footer-copy{font-size:12px;opacity:.35}
+.footer-social{display:flex;gap:10px}
+.social-btn{width:32px;height:32px;border-radius:8px;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:background .15s}
+.social-btn:hover{background:rgba(${borderRgb},.12)}
 
-/* Video */
 .video-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .video-box{border-radius:var(--radius);height:${isMobile?'200px':'340px'};overflow:hidden;position:relative;background:var(--card-bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;margin-top:20px}
 .play-circle{width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
+.play-label{font-size:13px;font-weight:600;opacity:.5}
 
-/* Countdown */
 .countdown-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .countdown-row{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap}
 .cd-unit{border-radius:var(--radius);padding:${isMobile?'12px 16px':'18px 24px'};min-width:72px;background:var(--card-bg)}
 .cd-num{font-size:${isMobile?'28px':'38px'};font-weight:900;line-height:1}
 .cd-label{font-size:11px;font-weight:700;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.countdown-cta{margin-top:28px}
 
-/* Gallery */
 .gallery-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .gallery-grid{display:grid;gap:${isMobile?'8px':'12px'}}
-.gallery-item{background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px}
+.gallery-item{background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
 
-/* Trust */
 .trust-section{padding:${isMobile?'20px 5%':'32px 5%'}}
 .trust-grid{display:grid;gap:12px}
-.trust-item{display:flex;align-items:center;gap:12px;padding:10px}
-.trust-icon{font-size:20px}
-.trust-label{font-size:13px;font-weight:700}
+.trust-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card-bg);border-radius:var(--radius)}
+.trust-icon{font-size:24px;flex-shrink:0}
+.trust-label{font-size:13.5px;font-weight:700}
+.trust-sub{font-size:11.5px;opacity:.5;margin-top:2px}
 
-/* FAQ */
 .faq-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.faq-item{border-bottom:1px solid rgba(${borderRgb},.08);padding:18px 0}
-.faq-q{font-size:15px;font-weight:700;margin-bottom:8px}
+.faq-item{border-bottom:1px solid rgba(${borderRgb},.08);padding:18px 0;cursor:pointer}
+.faq-q{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.faq-q::after{content:'▾';opacity:.4;font-size:12px}
 .faq-a{font-size:13.5px;opacity:.6;line-height:1.65}
 
-/* Hover outline for click-to-edit */
+.contact-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.contact-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:40px}
+.contact-info-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
+.contact-info-icon{width:38px;height:38px;border-radius:10px;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.contact-form{display:flex;flex-direction:column;gap:12px}
+.contact-input{width:100%;padding:11px 14px;border:1.5px solid rgba(${borderRgb},.1);border-radius:var(--radius);font-size:13.5px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
+.contact-textarea{min-height:100px;resize:vertical}
+
+.about-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.about-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:48px;align-items:center}
+.about-img{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:60px}
+.about-img img{width:100%;height:100%;object-fit:cover}
+.about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.about-stat{text-align:center;padding:14px;background:var(--card-bg);border-radius:var(--radius)}
+.about-stat-num{font-size:22px;font-weight:900;color:var(--primary)}
+.about-stat-label{font-size:11px;opacity:.5;font-weight:600;margin-top:4px}
+
+.team-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.team-grid{display:grid;gap:20px;margin-top:24px}
+.team-card{background:var(--card-bg);border-radius:var(--radius);padding:20px;text-align:center}
+.team-avatar{width:72px;height:72px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;overflow:hidden}
+.team-avatar img{width:100%;height:100%;object-fit:cover}
+.team-name{font-size:15px;font-weight:800;margin-bottom:4px}
+.team-role{font-size:12px;opacity:.5;font-weight:600}
+
+.richtext-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.richtext-inner{margin:0 auto;line-height:1.75}
+.richtext-title{font-weight:800;letter-spacing:-.02em;margin-bottom:16px}
+.richtext-body{opacity:.7;font-size:${isMobile?'14px':'16px'}}
+
+.imagetext-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.imagetext-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:48px;align-items:center}
+.imagetext-img{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:60px}
+.imagetext-img img{width:100%;height:100%;object-fit:cover}
+.imagetext-bullets{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.imagetext-bullet{font-size:14px;font-weight:600;opacity:.8}
+
+.brands-section{padding:${isMobile?'24px 5%':'40px 5%'}}
+.brands-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.brand-item-pill{padding:10px 20px;background:var(--card-bg);border-radius:999px;font-size:13px;font-weight:700;opacity:.6;cursor:pointer;transition:opacity .15s}
+.brand-item-pill:hover{opacity:1}
+.brand-item-card{padding:14px 20px;background:var(--card-bg);border-radius:var(--radius);font-size:14px;font-weight:700;opacity:.6;min-width:100px;text-align:center}
+.brand-item-minimal{font-size:16px;font-weight:900;opacity:.35;padding:8px 16px}
+
+.offers-section{padding:${isMobile?'32px 5%':'56px 5%'}}
+.offers-grid{display:grid;gap:16px;margin-top:24px}
+.offer-card{border-radius:var(--radius);padding:${isMobile?'20px':'28px'};color:white;position:relative;overflow:hidden}
+.offer-card::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.1);border-radius:50%}
+.offer-title{font-size:${isMobile?'18px':'22px'};font-weight:900;margin-bottom:6px}
+.offer-desc{font-size:13px;opacity:.8;margin-bottom:14px}
+.offer-code-box{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px dashed rgba(255,255,255,.5);padding:6px 14px;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700}
+
 [data-section-id]{cursor:pointer;transition:outline .1s}
 [data-section-id]:hover{outline:2px dashed rgba(91,92,246,.4);outline-offset:-2px}
 [data-section-id].sec-active{outline:2px solid rgba(91,92,246,.8)!important;outline-offset:-2px}
@@ -1429,18 +1721,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
       case 'announcement':{
         const sz=d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px'
         const fw=d.bold==='no'?'500':'700'
-        return wrap('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};">${escHtmlInner(d.text||themeData.announcementText)}</div>`)
+        return wrap('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};">
+          <span>${escHtmlInner(d.text||themeData.announcementText)}</span>
+          ${d.linkText?`<span class="ann-link">${escHtmlInner(d.linkText)}</span>`:''}
+          ${d.closable==='yes'?`<button class="ann-close" onclick="this.closest('.announcement-bar').parentElement.style.display='none'">✕</button>`:''}
+        </div>`)
       }
       case 'navbar':{
         const logoStyle=d.logoColor?`color:${d.logoColor};`:''
         const navStyle=d.bgColor?`background:${d.bgColor};`:''
         const pos=d.sticky!=='no'?'sticky':'relative'
+        const links=[d.link1Text||'Home',d.link2Text||'Products',d.link3Text||'Categories',d.link4Text||'About',d.link5Text].filter(Boolean)
         return wrap('',`<nav class="navbar" style="${navStyle}position:${pos};top:0;z-index:100;">
           <div class="nav-logo" style="${logoStyle}">${escHtmlInner(d.logoText||'My Store')}</div>
-          ${!isMobile?`<div class="nav-links-center" style="${d.linkColor?'color:'+d.linkColor+';':''}"><a>Home</a><a>Products</a><a>Categories</a><a>About</a></div>`:''}
+          ${!isMobile?`<div class="nav-links-center" style="${d.linkColor?'color:'+d.linkColor+';':''}">${links.map(l=>`<a>${escHtmlInner(l)}</a>`).join('')}</div>`:''}
           <div class="nav-right">
             ${d.showSearch!=='no'?`<button class="nav-search">🔍</button>`:''}
-            ${d.showCart!=='no'?`<button class="nav-cart">🛒 Cart (0)</button>`:''}
+            ${d.showCart!=='no'?`<button class="nav-cart">🛒 ${escHtmlInner(d.cartText||'Cart')} (0)</button>`:''}
           </div>
         </nav>`)
       }
@@ -1456,6 +1753,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           ${d.bgImage?`<div class="hero-bg" style="background-image:url('${d.bgImage}')"></div>`:''}
           <div class="hero-overlay" style="${overlayStyle}"></div>
           <div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">
+            ${d.badge?`<div class="hero-badge">${escHtmlInner(d.badge)}</div>`:''}
             <h1>${heading}</h1>
             <p>${escHtmlInner(d.subheading||'Discover amazing products at the best prices. Fast delivery across India.')}</p>
             <div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}">
@@ -1476,13 +1774,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         const showRating=d.showRating==='yes'
         const showBadge=d.showBadge==='yes'
         const badge=escHtmlInner(d.badgeText||'New')
-        const emojis=['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠','🎒','🧴','🏃','⚽','🎮','🖥️','📷','🎵']
+        const emojis=['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠','🎒','🧴','🏃','⚽','🎮','🖥️','📷','🎵','🌿','✨','💎','🔥']
         const cards=emojis.slice(0,count).map((e,i)=>{
           const disc=i%3===0&&i>0?20:0
           const price=499+i*197
           const comparePrice=disc?Math.round(price/(1-disc/100)):0
           const imgArea=`<div class="tc-img">
             ${showBadge&&i<3?`<div class="tc-badge">${badge}</div>`:''}
+            <button class="tc-wishlist">♡</button>
             ${e}
           </div>`
           const infoArea=cardStyle==='overlay'?`
@@ -1505,22 +1804,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         }).join('')
         return wrap('',`<section class="section" id="products">
           <div class="section-header">
-            <h2 class="section-title">${escHtmlInner(d.title||'Featured Products')}</h2>
-            ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
+            <div class="section-header-row">
+              <div><h2 class="section-title">${escHtmlInner(d.title||'Featured Products')}</h2>${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}</div>
+              ${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}
+            </div>
           </div>
-          <div class="themed-products-grid ${cardStyle}-grid" style="--cols:${fCols}">
-            ${cards}
-          </div>
+          <div class="themed-products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div>
         </section>`)
       }
       case 'categories':{
         const cCols=isMobile?2:(parseInt(d.columns)||4)
         const style=d.style||'card'
-        const cats=[['👗','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty'],['🎮','Gaming'],['🍕','Food'],['⌚','Watches'],['👟','Footwear']]
+        const cats=[['👗','Fashion','240 items'],['📱','Electronics','180 items'],['🏠','Home & Living','320 items'],['💄','Beauty','150 items'],['🎮','Gaming','90 items'],['🍕','Food','200 items'],['⌚','Watches','75 items'],['👟','Footwear','130 items']]
         return wrap('',`<section class="section">
-          <div class="section-header"><h2 class="section-title">${escHtmlInner(d.title||'Browse by Category')}</h2></div>
+          <div class="section-header">
+            <h2 class="section-title">${escHtmlInner(d.title||'Browse by Category')}</h2>
+            ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
+          </div>
           <div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">
-            ${cats.slice(0,cCols).map(([e,n])=>`<div class="cat-card ${style}-style"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div></div>`).join('')}
+            ${cats.slice(0,cCols*2).map(([e,n,count])=>`<div class="cat-card ${style}-style"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div>${d.showCount==='yes'?`<div class="cat-count">${count}</div>`:''}</div>`).join('')}
           </div>
         </section>`)
       }
@@ -1528,10 +1830,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         const bg=d.bgColor||themeData.primaryColor||'#5b5cf6'
         const tc=d.textColor||'#ffffff'
         const layout=d.layout||'center'
-        return wrap('',`<section class="promo-banner ${layout}-layout" style="background:${bg};color:${tc}">
+        const bgStyle=d.bgImage?`background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${d.bgImage}') center/cover;`:`background:${bg};`
+        return wrap('',`<section class="promo-banner ${layout}-layout" style="${bgStyle}color:${tc}">
           <div class="promo-content">
+            ${d.badgeText?`<div class="promo-badge">${escHtmlInner(d.badgeText)}</div>`:''}
             <h2>${escHtmlInner(d.heading||'Limited Time Offer')}</h2>
             <p>${escHtmlInner(d.subtext||'Get 20% off your first order. Use code WELCOME20')}</p>
+            ${d.couponCode?`<div class="promo-coupon">🎫 ${escHtmlInner(d.couponCode)} <span style="opacity:.5;font-size:11px">tap to copy</span></div>`:''}
             <button class="btn-white" style="color:${bg}">${escHtmlInner(d.ctaText||'Claim Offer')}</button>
           </div>
         </section>`)
@@ -1539,16 +1844,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
       case 'testimonials':{
         const tCols=isMobile?1:(parseInt(d.columns)||3)
         const style=d.style||'card'
-        const ts=[['S','Sarah M.','Absolutely love this store! Fast shipping and great quality. Highly recommend!'],
-          ['R','Rahul K.','Best shopping experience. Will definitely order again!'],
-          ['A','Anita P.','Great products and excellent customer service. Five stars!']]
+        const ts=[
+          [d.t1name||'Sarah M.',d.t1text||'Absolutely love this store! Fast shipping and great quality. Highly recommend!',parseInt(d.t1stars||5)],
+          [d.t2name||'Rahul K.',d.t2text||'Best shopping experience. Will definitely order again!',parseInt(d.t2stars||5)],
+          [d.t3name||'Anita P.',d.t3text||'Great products and excellent customer service. Five stars!',parseInt(d.t3stars||5)],
+        ]
         return wrap('',`<section class="testimonials">
           <div class="section-header">
             <h2 class="section-title">${escHtmlInner(d.title||'What Customers Say')}</h2>
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
           <div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">
-            ${ts.map(([av,n,t])=>`<div class="testimonial ${style}-style"><div class="t-stars">★★★★★</div><div class="t-text">"${t}"</div><div class="t-author"><div class="t-avatar">${av}</div><div class="t-name">${n}</div></div></div>`).join('')}
+            ${ts.map(([n,t,stars])=>`<div class="testimonial ${style}-style">
+              <div class="t-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+              <div class="t-text">"${escHtmlInner(t)}"</div>
+              <div class="t-author"><div class="t-avatar">${n[0]}</div><div class="t-name">${escHtmlInner(n)}</div></div>
+            </div>`).join('')}
           </div>
         </section>`)
       }
@@ -1556,30 +1867,59 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
         const btnBg=d.btnColor||themeData.primaryColor||'#5b5cf6'
-        return wrap('',`<section class="newsletter" style="${bg}${tc}">
+        const layout=d.layout||'center'
+        return wrap('',`<section class="newsletter ${layout==='left'?'left-layout':''}" style="${bg}${tc}">
           <h2>${escHtmlInner(d.heading||'Stay in the loop')}</h2>
           <p>${escHtmlInner(d.subtext||'Get exclusive deals and offers straight to your inbox.')}</p>
-          <div class="newsletter-form">
+          <div class="newsletter-form" style="${layout==='left'?'':''}">
             <input class="newsletter-input" type="email" placeholder="${escHtmlInner(d.inputPlaceholder||'Enter your email address')}">
             <button class="btn-cta" style="background:${btnBg};white-space:nowrap">${escHtmlInner(d.btnText||'Subscribe')} →</button>
           </div>
+          ${d.privacyText?`<div class="newsletter-privacy">${escHtmlInner(d.privacyText)}</div>`:''}
         </section>`)
       }
       case 'footer':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
+        const col1Links=(d.col1Links||'Home,Products,Categories,About').split(',').filter(Boolean)
+        const col2Links=(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').filter(Boolean)
         return wrap('',`<footer class="footer" style="${bg}${tc}">
-          <div class="footer-logo">${escHtmlInner(d.logoText||(sections.find(s=>s.type==='navbar')?.data?.logoText)||'My Store')}</div>
-          <div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>
-          ${d.showSocial!=='no'?`<div class="footer-links"><a>Instagram</a><a>Facebook</a><a>Twitter</a></div>`:''}
+          <div class="footer-top">
+            <div class="footer-brand">
+              <div class="footer-logo">${escHtmlInner(d.logoText||(sections.find(s=>s.type==='navbar')?.data?.logoText)||'My Store')}</div>
+              ${d.tagline?`<div class="footer-tagline">${escHtmlInner(d.tagline)}</div>`:''}
+              <div class="footer-contact">
+                ${d.email?`<div>✉️ ${escHtmlInner(d.email)}</div>`:''}
+                ${d.phone?`<div>📞 ${escHtmlInner(d.phone)}</div>`:''}
+              </div>
+            </div>
+            ${!isMobile?`
+            <div>
+              <div class="footer-col-title">${escHtmlInner(d.col1Title||'Quick Links')}</div>
+              <div class="footer-col-links">${col1Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div>
+            </div>
+            <div>
+              <div class="footer-col-title">${escHtmlInner(d.col2Title||'Customer Care')}</div>
+              <div class="footer-col-links">${col2Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div>
+            </div>`:''}
+          </div>
+          <div class="footer-bottom">
+            <div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>
+            ${d.showSocial!=='no'?`<div class="footer-social">
+              <div class="social-btn">📸</div>
+              <div class="social-btn">📘</div>
+              <div class="social-btn">🐦</div>
+            </div>`:''}
+          </div>
         </footer>`)
       }
       case 'video':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
-        return wrap('',`<section class="video-section" style="${bg}">
+        const tc=d.textColor?`color:${d.textColor};`:''
+        return wrap('',`<section class="video-section" style="${bg}${tc}">
           <div class="section-header"><h2 class="section-title">${escHtmlInner(d.heading||'Our Story')}</h2>${d.subtext?`<p class="section-subtitle">${escHtmlInner(d.subtext)}</p>`:''}</div>
-          <div class="video-box">
-            ${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div style="font-size:13px;font-weight:600;opacity:.5">Add video URL to embed</div>`}
+          <div class="video-box" style="${d.thumbnailUrl?`background-image:url('${d.thumbnailUrl}');background-size:cover;background-position:center;`:``}">
+            ${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div class="play-label">${escHtmlInner(d.playBtnText||'Watch Video')}</div>`}
           </div>
         </section>`)
       }
@@ -1595,18 +1935,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           <div class="countdown-row">
             ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l])=>`<div class="cd-unit"><div class="cd-num" style="color:${ac}">${n}</div><div class="cd-label">${l}</div></div>`).join('')}
           </div>
+          ${d.ctaText?`<div class="countdown-cta"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}
         </section>`)
       }
       case 'gallery':{
         const gCols=isMobile?2:(parseInt(d.columns)||4)
         const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1'
+        const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean)
+        const emojis=['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡']
         return wrap('',`<section class="gallery-section">
           <div class="section-header">
             <h2 class="section-title">${escHtmlInner(d.title||'Our Gallery')}</h2>
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
           <div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">
-            ${['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡'].slice(0,isMobile?4:8).map(e=>`<div class="gallery-item" style="aspect-ratio:${ratio}">${e}</div>`).join('')}
+            ${(isMobile?4:8) > 0 ? emojis.slice(0,isMobile?4:8).map((e,i)=>`<div class="gallery-item" style="aspect-ratio:${ratio}">${imgs[i]?`<img src="${imgs[i]}" alt="Gallery">`:e}</div>`).join('') : ''}
           </div>
         </section>`)
       }
@@ -1617,16 +1960,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         const gridCols=layout==='2x2'?2:layout==='column'?1:(isMobile?2:4)
         return wrap('',`<section class="trust-section" style="${bg}${tc}">
           <div class="trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">
-            ${[[d.badge1||'Free Shipping','🚚'],[d.badge2||'Secure Payment','🔒'],[d.badge3||'Easy Returns','↩️'],[d.badge4||'24/7 Support','💬']].map(([label,icon])=>`<div class="trust-item"><span class="trust-icon">${icon}</span><span class="trust-label">${escHtmlInner(label)}</span></div>`).join('')}
+            ${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],
+               [d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe & encrypted'],
+               [d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day return policy'],
+               [d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here to help']].map(([icon,label,sub])=>
+              `<div class="trust-item"><span class="trust-icon">${escHtmlInner(icon)}</span><div><div class="trust-label">${escHtmlInner(label)}</div><div class="trust-sub">${escHtmlInner(sub)}</div></div></div>`).join('')}
           </div>
         </section>`)
       }
       case 'faq':{
-        const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3]].filter(([q])=>q)
+        const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4],[d.q5,d.a5]].filter(([q])=>q)
         const defaults=pairs.length?pairs:[
           ['How long does shipping take?','Typically 3-7 business days across India. Express delivery available at checkout.'],
           ['What is your return policy?','Hassle-free 30-day returns. No questions asked, full refund guaranteed.'],
           ['Do you offer Cash on Delivery?','Yes! COD available across India on all orders.'],
+          ['How do I track my order?','You will receive a tracking link via email and SMS after your order is shipped.'],
         ]
         return wrap('',`<section class="faq-section">
           <div class="section-header">
@@ -1634,6 +1982,141 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
           ${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtmlInner(q)}</div><div class="faq-a">${escHtmlInner(a)}</div></div>`).join('')}
+        </section>`)
+      }
+      case 'contact':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tc=d.textColor?`color:${d.textColor};`:''
+        const layout=d.layout||'side-by-side'
+        return wrap('',`<section class="contact-section" style="${bg}${tc}">
+          <div class="section-header">
+            <h2 class="section-title">${escHtmlInner(d.title||'Get in Touch')}</h2>
+            ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
+          </div>
+          <div class="contact-grid" style="grid-template-columns:${layout==='form-only'?'1fr':isMobile?'1fr':'1fr 1fr'}">
+            ${layout!=='form-only'?`<div>
+              ${d.email?`<div class="contact-info-item"><div class="contact-info-icon">✉️</div><div><div style="font-weight:700;margin-bottom:3px">Email</div><div style="opacity:.55;font-size:13px">${escHtmlInner(d.email)}</div></div></div>`:''}
+              ${d.phone?`<div class="contact-info-item"><div class="contact-info-icon">📞</div><div><div style="font-weight:700;margin-bottom:3px">Phone</div><div style="opacity:.55;font-size:13px">${escHtmlInner(d.phone)}</div></div></div>`:''}
+              ${d.address?`<div class="contact-info-item"><div class="contact-info-icon">📍</div><div><div style="font-weight:700;margin-bottom:3px">Address</div><div style="opacity:.55;font-size:13px;line-height:1.5">${escHtmlInner(d.address)}</div></div></div>`:''}
+            </div>`:''}
+            <div class="contact-form">
+              <input class="contact-input" placeholder="Your Name">
+              <input class="contact-input" placeholder="Email Address">
+              <textarea class="contact-input contact-textarea" placeholder="Your message..."></textarea>
+              <button class="btn-cta">${escHtmlInner(d.btnText||'Send Message')}</button>
+            </div>
+          </div>
+        </section>`)
+      }
+      case 'about':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tc=d.textColor?`color:${d.textColor};`:''
+        const layout=d.layout||'image-right'
+        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="About">`:' 🏪'
+        const textSide=`<div>
+          <h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;letter-spacing:-.02em;margin-bottom:12px">${escHtmlInner(d.title||'Our Story')}</h2>
+          ${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px">${escHtmlInner(d.subtitle)}</p>`:''}
+          ${d.body?`<p style="opacity:.65;line-height:1.75;margin-bottom:12px">${escHtmlInner(d.body)}</p>`:'<p style="opacity:.65;line-height:1.75;margin-bottom:12px">We started with a simple mission: to bring quality products to every household across India. From humble beginnings to serving thousands of happy customers, our journey has been driven by your trust.</p>'}
+          ${d.body2?`<p style="opacity:.65;line-height:1.75;margin-bottom:20px">${escHtmlInner(d.body2)}</p>`:''}
+          ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}
+          ${(d.stat1num||d.stat2num)?`<div class="about-stats">
+            ${d.stat1num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat1num)}</div><div class="about-stat-label">${escHtmlInner(d.stat1label||'')}</div></div>`:''}
+            ${d.stat2num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat2num)}</div><div class="about-stat-label">${escHtmlInner(d.stat2label||'')}</div></div>`:''}
+            ${d.stat3num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat3num)}</div><div class="about-stat-label">${escHtmlInner(d.stat3label||'')}</div></div>`:''}
+          </div>`:''}
+        </div>`
+        const imgSide=layout!=='no-image'?`<div class="about-img">${imgEl}</div>`:''
+        return wrap('',`<section class="about-section" style="${bg}${tc}">
+          <div class="about-grid" style="grid-template-columns:${layout==='no-image'||isMobile?'1fr':'1fr 1fr'}">
+            ${layout==='image-right'?textSide+imgSide:imgSide+textSide}
+          </div>
+        </section>`)
+      }
+      case 'team':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tCols=isMobile?2:(parseInt(d.columns)||3)
+        const members=[[d.m1name||'Priya Sharma',d.m1role||'Founder & CEO',d.m1img],[d.m2name||'Rahul Verma',d.m2role||'Head of Operations',d.m2img],[d.m3name||'Anita Patel',d.m3role||'Customer Success',d.m3img]].filter(([n])=>n)
+        return wrap('',`<section class="team-section" style="${bg}">
+          <div class="section-header">
+            <h2 class="section-title">${escHtmlInner(d.title||'Meet Our Team')}</h2>
+            ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
+          </div>
+          <div class="team-grid" style="grid-template-columns:repeat(${tCols},1fr)">
+            ${members.map(([n,r,img])=>`<div class="team-card">
+              <div class="team-avatar">${img?`<img src="${img}" alt="${n}">`:n[0]}</div>
+              <div class="team-name">${escHtmlInner(n)}</div>
+              <div class="team-role">${escHtmlInner(r)}</div>
+            </div>`).join('')}
+          </div>
+        </section>`)
+      }
+      case 'richtext':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tc=d.textColor?`color:${d.textColor};`:''
+        const maxWidths={narrow:'480px',normal:'680px',wide:'900px',full:'100%'}
+        const mw=maxWidths[d.maxWidth||'normal']
+        const titleSizes={small:'20px',medium:'28px',large:'36px',xlarge:'48px'}
+        const ts=titleSizes[d.titleSize||'large']
+        return wrap('',`<section class="richtext-section" style="${bg}${tc}">
+          <div class="richtext-inner" style="max-width:${mw};text-align:${d.align||'left'}">
+            ${d.title?`<h2 class="richtext-title" style="font-size:${ts}">${escHtmlInner(d.title)}</h2>`:''}
+            ${d.body?`<div class="richtext-body">${escHtmlInner(d.body).replace(/\n/g,'<br>')}</div>`:''}
+            ${d.ctaText?`<div style="margin-top:24px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}
+          </div>
+        </section>`)
+      }
+      case 'imagetext':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tc=d.textColor?`color:${d.textColor};`:''
+        const layout=d.layout||'image-right'
+        const bullets=[d.bullet1,d.bullet2,d.bullet3].filter(Boolean)
+        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="">`:' 🖼️'
+        const textSide=`<div>
+          <h2 style="font-size:${isMobile?'22px':'30px'};font-weight:900;letter-spacing:-.02em;margin-bottom:8px">${escHtmlInner(d.title||'Why Choose Us')}</h2>
+          ${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:14px">${escHtmlInner(d.subtitle)}</p>`:''}
+          ${d.body?`<p style="opacity:.65;line-height:1.75;margin-bottom:16px">${escHtmlInner(d.body)}</p>`:''}
+          ${bullets.length?`<div class="imagetext-bullets">${bullets.map(b=>`<div class="imagetext-bullet">${escHtmlInner(b)}</div>`).join('')}</div>`:''}
+          ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}
+        </div>`
+        const imgSide=`<div class="imagetext-img">${imgEl}</div>`
+        return wrap('',`<section class="imagetext-section" style="${bg}${tc}">
+          <div class="imagetext-grid" style="grid-template-columns:${isMobile?'1fr':'1fr 1fr'}">
+            ${layout==='image-right'?textSide+imgSide:imgSide+textSide}
+          </div>
+        </section>`)
+      }
+      case 'brands':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const style=d.style||'pill'
+        const brands=[d.brand1||'Nike',d.brand2||'Adidas',d.brand3||'Apple',d.brand4||'Samsung',d.brand5||'Sony',d.brand6||'Boat'].filter(Boolean)
+        return wrap('',`<section class="brands-section" style="${bg}">
+          ${d.title?`<div class="section-header" style="text-align:center"><h2 class="section-title">${escHtmlInner(d.title)}</h2>${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}</div>`:''}
+          <div class="brands-grid">
+            ${brands.map(b=>`<div class="brand-item-${style}">${escHtmlInner(b)}</div>`).join('')}
+          </div>
+        </section>`)
+      }
+      case 'offers':{
+        const bg=d.bgColor?`background:${d.bgColor};`:''
+        const tc=d.textColor?`color:${d.textColor};`:''
+        const oCols=isMobile?1:(parseInt(d.columns)||3)
+        const offers=[
+          {title:d.offer1title||'Flat 30% Off',desc:d.offer1desc||'On all Electronics',code:d.offer1code||'ELEC30',bg:d.offer1bg||'#5b5cf6'},
+          {title:d.offer2title||'Buy 2 Get 1 Free',desc:d.offer2desc||'On selected Fashion items',code:d.offer2code||'B2G1',bg:d.offer2bg||'#ec4899'},
+          {title:d.offer3title||'Free Delivery',desc:d.offer3desc||'On orders above ₹499',code:d.offer3code||'FREEDEL',bg:d.offer3bg||'#10b981'},
+        ]
+        return wrap('',`<section class="offers-section" style="${bg}${tc}">
+          <div class="section-header">
+            <h2 class="section-title">${escHtmlInner(d.title||'Hot Deals')}</h2>
+            ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
+          </div>
+          <div class="offers-grid" style="grid-template-columns:repeat(${oCols},1fr)">
+            ${offers.map(o=>`<div class="offer-card" style="background:${o.bg}">
+              <div class="offer-title">${escHtmlInner(o.title)}</div>
+              <div class="offer-desc">${escHtmlInner(o.desc)}</div>
+              <div class="offer-code-box">🎫 ${escHtmlInner(o.code)}</div>
+            </div>`).join('')}
+          </div>
         </section>`)
       }
       default:return''
@@ -1646,7 +2129,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
   function setupPreviewClicks(iframe){
     try{
       const doc=iframe.contentDocument;if(!doc)return
-      // Re-apply active highlight
       if(activeSectionId){
         const el=doc.querySelector(`[data-section-id="${activeSectionId}"]`)
         if(el)el.classList.add('sec-active')
@@ -1683,9 +2165,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
     const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16)
     return(r*299+g*587+b*114)/1000>128
   }
-  // Use in panel HTML (attribute context) - full escaping
   function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-  // Use inside preview innerHTML - only escape <> to avoid XSS but allow & and quotes in text
   function escHtmlInner(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
   function toast(msg,type='success'){
