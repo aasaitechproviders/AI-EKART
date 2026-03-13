@@ -1272,44 +1272,61 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (token) { localStorage.setItem('ekart_token', token); history.replaceState({}, '', '/website-builder.html') }
 
   const t = localStorage.getItem('ekart_token')
-  if (!t) { window.location = '/'; return }
 
-  try {
-    setLoading('Loading user…', 30)
-    const user = await api('/auth/me')
-    currentUser = user
+  // ── Try to load real data; on any failure, fall back to demo mode ──
+  let authOk = false
+  if (t) {
+    try {
+      setLoading('Loading user…', 30)
+      currentUser = await api('/auth/me')
+      authOk = true
+    } catch (e) {
+      console.warn('Auth check failed, running in demo mode:', e.message)
+    }
+  }
 
-    setLoading('Fetching stores…', 55)
-    const stores = await api('/stores')
-    allStores = stores || []
+  if (authOk) {
+    try {
+      setLoading('Fetching stores…', 55)
+      const stores = await api('/stores')
+      allStores = stores || []
+    } catch (e) {
+      console.warn('Could not fetch stores:', e.message)
+      allStores = []
+    }
 
     currentStoreId = localStorage.getItem('ekart_store_id')
     if (!currentStoreId || !allStores.find(s => s._id === currentStoreId)) {
       currentStoreId = allStores[0]?._id || null
     }
-
-    setLoading('Building UI…', 75)
-    renderStorePill()
-    renderStoreDropdown()
-    renderThemesGrid()
-    renderSettingsPanel()
-    renderAddSectionTypes()
-
-    setLoading('Loading theme…', 90)
-    await loadThemeForStore(currentStoreId)
-
-    setLoading('Ready!', 100)
-    setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 400)
-
-  } catch (e) {
-    console.error(e)
-    if (e.message?.includes('401') || e.message?.includes('Unauthorized')) {
-      window.location = '/'
-    } else {
-      toast('Failed to load: ' + e.message, 'error')
-      document.getElementById('loading-overlay').classList.add('hidden')
-    }
+  } else {
+    // Demo mode — show builder with default content, no API calls
+    allStores = [{ _id: 'demo', name: 'Demo Store', slug: 'demo-store' }]
+    currentStoreId = 'demo'
   }
+
+  setLoading('Building UI…', 75)
+  renderStorePill()
+  renderStoreDropdown()
+  renderThemesGrid()
+  renderSettingsPanel()
+  renderAddSectionTypes()
+
+  setLoading('Loading theme…', 90)
+  if (authOk && currentStoreId && currentStoreId !== 'demo') {
+    await loadThemeForStore(currentStoreId)
+  } else {
+    // Demo mode: just use defaults
+    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+    renderSectionsList()
+    renderPreview()
+    markThemeActive('modern')
+    markUnsaved(false)
+    if (!t) toast('No auth token — running in preview mode', 'error')
+  }
+
+  setLoading('Ready!', 100)
+  setTimeout(() => document.getElementById('loading-overlay').classList.add('hidden'), 400)
 })
 
 /* ════════════════════════════════════════════════════
@@ -1317,19 +1334,29 @@ window.addEventListener('DOMContentLoaded', async () => {
 ════════════════════════════════════════════════════ */
 async function api(path, opts = {}) {
   const token = localStorage.getItem('ekart_token')
-  const res = await fetch(path, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...(opts.headers || {})
-    }
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(err.error || res.statusText)
+  let res
+  try {
+    res = await fetch(path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...(opts.headers || {})
+      }
+    })
+  } catch (netErr) {
+    throw new Error('Network error — is the server running?')
   }
-  return res.json()
+  // Read as text first to detect HTML error pages (avoids "Unexpected token <" crash)
+  const text = await res.text()
+  const looksJSON = text.trimStart()[0] === '{' || text.trimStart()[0] === '['
+  if (!res.ok) {
+    let msg = res.statusText
+    if (looksJSON) { try { msg = JSON.parse(text).error || msg } catch(_) {} }
+    throw new Error(`${res.status}: ${msg}`)
+  }
+  if (!looksJSON) throw new Error(`Server error ${res.status} (non-JSON response)`)
+  return JSON.parse(text)
 }
 
 /* ════════════════════════════════════════════════════
@@ -1482,7 +1509,9 @@ function buildBackendPayload() {
 }
 
 async function saveAndPublish() {
-  if (!currentStoreId) { toast('Please select a store first', 'error'); return }
+  if (!currentStoreId || currentStoreId === 'demo') {
+    toast('Connect your store to save — running in preview mode', 'error'); return
+  }
   const btn = document.getElementById('save-btn')
   btn.disabled = true
   btn.innerHTML = '<span>⌛</span> Saving…'
@@ -1529,6 +1558,7 @@ function switchLeftTab(tab, el) {
 ════════════════════════════════════════════════════ */
 function renderSectionsList() {
   const wrap = document.getElementById('sections-list-wrap')
+  if (!wrap) return  // editor panel is open — nothing to render into
   const enabledSections  = sections.filter(s => s.enabled)
   const disabledSections = sections.filter(s => !s.enabled)
 
@@ -1584,27 +1614,35 @@ function renderSectionRow(s, def, idx, isActive, isEnabled) {
 
 function selectSection(id) {
   activeSectionId = id
-  renderSectionsList()
   highlightSectionInPreview(id)
-  // Auto-open editor
   openSectionEditor(id)
 }
 
 function toggleSection(id) {
   const s = sections.find(x => x.id === id)
-  if (s) { s.enabled = !s.enabled; markUnsaved(true); renderSectionsList(); renderPreview() }
+  if (!s) return
+  s.enabled = !s.enabled
+  markUnsaved(true)
+  // If editor is open for this section and we just disabled it, go back to list
+  if (activeSectionId === id && !s.enabled) {
+    showSectionsListView()
+  } else {
+    renderSectionsList()
+  }
+  renderPreview()
 }
 
 function removeSection(id) {
   const idx = sections.findIndex(x => x.id === id)
   if (idx > -1) {
     sections.splice(idx, 1)
+    markUnsaved(true)
     if (activeSectionId === id) {
       activeSectionId = null
-      showSectionsListView()
+      showSectionsListView()   // this already calls renderSectionsList()
+    } else {
+      renderSectionsList()
     }
-    markUnsaved(true)
-    renderSectionsList()
     renderPreview()
     toast('Section removed', 'success')
   }
@@ -1639,7 +1677,6 @@ function openSectionEditor(id) {
 
   // Highlight in preview
   highlightSectionInPreview(id)
-  renderSectionsList()
 }
 
 function showSectionsListView() {
@@ -1931,7 +1968,9 @@ function initDragDrop() {
       sections.splice(dropIdx, 0, moved)
       dragSrcIdx = null
       markUnsaved(true)
-      renderSectionsList()
+      // If editor is open, close it first so sections-list-wrap exists
+      if (activeSectionId) showSectionsListView()
+      else renderSectionsList()
       renderPreview()
     })
   })
