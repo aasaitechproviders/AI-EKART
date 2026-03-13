@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme Store — eKart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080f;
+  --surface: #0d0e1a;
+  --surface2: #12141f;
+  --surface3: #181a28;
+  --border: rgba(255,255,255,.06);
+  --border2: rgba(255,255,255,.1);
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --accent3: #4f46e5;
+  --green: #34d399;
+  --text: #f0f2ff;
+  --text2: #b4b8d4;
+  --text3: #5a5f7d;
+  --gold: #f59e0b;
+  --red: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Top Nav ── */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,8,15,.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 28px; height: 58px; gap: 16px;
+}
+.nav-logo {
+  font-size: 20px; font-weight: 800; letter-spacing: -.04em;
+  color: var(--text); text-decoration: none; margin-right: 8px;
+}
+.nav-logo .k { color: var(--accent2); }
+.nav-logo .dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; display: inline-block; vertical-align: middle; margin-left: 2px; }
+.nav-divider { width: 1px; height: 20px; background: var(--border2); }
+.nav-title { font-size: 15px; font-weight: 700; color: var(--text2); }
+.nav-spacer { flex: 1; }
+.nav-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 8px 14px;
+  width: 240px; transition: all .2s;
+}
+.nav-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,.12); }
+.nav-search input { background: none; border: none; outline: none; font-family: 'Outfit', sans-serif; font-size: 13.5px; color: var(--text); width: 100%; }
+.nav-search input::placeholder { color: var(--text3); }
+.nav-search-icon { font-size: 14px; color: var(--text3); }
+.btn { font-family: 'Outfit', sans-serif; font-weight: 700; cursor: pointer; border: none; border-radius: 10px; transition: all .15s; }
+.btn-primary { background: var(--accent); color: white; padding: 9px 20px; font-size: 13.5px; }
+.btn-primary:hover { background: #5b52f0; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(108,99,255,.4); }
+.btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); padding: 8px 16px; font-size: 13px; }
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ── Hero Banner ── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 64px 28px 56px;
+  background: linear-gradient(135deg, #0a0b15 0%, #0f0f20 50%, #0a0b15 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero-glow {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(108,99,255,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0; opacity: .04;
+  background-image: linear-gradient(var(--border2) 1px, transparent 1px), linear-gradient(90deg, var(--border2) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.hero-content { position: relative; text-align: center; max-width: 680px; margin: 0 auto; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(108,99,255,.12); border: 1px solid rgba(108,99,255,.25);
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
+  font-size: 12px; font-weight: 700; color: var(--accent2); letter-spacing: .06em;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 52px; font-weight: 800; line-height: 1.05;
+  letter-spacing: -.04em; margin-bottom: 16px;
+}
+.hero h1 em { font-style: normal; color: var(--accent2); }
+.hero p { font-size: 16px; color: var(--text3); line-height: 1.7; margin-bottom: 32px; }
+.hero-stats { display: flex; align-items: center; justify-content: center; gap: 32px; }
+.hero-stat-val { font-size: 22px; font-weight: 800; color: var(--text); }
+.hero-stat-label { font-size: 12px; color: var(--text3); font-weight: 600; margin-top: 2px; }
+
+/* ── Layout ── */
+.page-layout {
+  display: flex;
+  min-height: calc(100vh - 58px - 200px);
+}
+
+/* ── Filters Sidebar ── */
+.filters-sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+  position: sticky; top: 58px;
+  height: calc(100vh - 58px);
+  overflow-y: auto;
+}
+.filters-sidebar::-webkit-scrollbar { width: 3px; }
+.filters-sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.filter-group { margin-bottom: 24px; }
+.filter-group-label {
+  font-size: 9.5px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 12px; display: block;
+}
+.filter-option {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: 8px;
+  cursor: pointer; transition: all .12s;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  margin-bottom: 2px; user-select: none;
+}
+.filter-option:hover { background: var(--surface2); color: var(--text); }
+.filter-option.active { background: rgba(108,99,255,.1); color: var(--accent2); }
+.filter-checkbox {
+  width: 16px; height: 16px; border-radius: 4px;
+  border: 1.5px solid var(--border2);
+  display: grid; place-items: center;
+  transition: all .12s; flex-shrink: 0;
+  background: transparent;
+}
+.filter-option.active .filter-checkbox {
+  background: var(--accent); border-color: var(--accent);
+}
+.filter-option.active .filter-checkbox::after {
+  content: '✓'; font-size: 10px; color: white; font-weight: 700;
+}
+.filter-count { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--text3); }
+.filter-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+.price-tag-row { display: flex; gap: 6px; margin-bottom: 4px; }
+.price-tag {
+  flex: 1; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  font-size: 12.5px; font-weight: 700; color: var(--text2);
+  cursor: pointer; text-align: center; transition: all .12s;
+}
+.price-tag.active { border-color: var(--accent); color: var(--accent2); background: rgba(108,99,255,.1); }
+.price-tag:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+
+/* ── Theme Grid ── */
+.themes-main {
+  flex: 1; padding: 24px 24px 48px;
+  overflow: hidden;
+}
+.themes-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; gap: 12px;
+}
+.themes-count { font-size: 13px; color: var(--text3); font-weight: 600; }
+.themes-count strong { color: var(--text2); }
+.sort-select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 9px; padding: 8px 14px;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  font-family: 'Outfit', sans-serif; outline: none; cursor: pointer;
+}
+.sort-select:focus { border-color: var(--accent); }
+
+.themes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* ── Theme Card ── */
+.theme-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  transition: all .25s cubic-bezier(.2,.8,.2,1);
+  cursor: pointer; position: relative;
+}
+.theme-card:hover {
+  border-color: rgba(108,99,255,.35);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(108,99,255,.15);
+}
+.theme-preview-wrap {
+  position: relative; overflow: hidden;
+  height: 220px; background: var(--surface2);
+}
+.theme-preview-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,.5));
+  opacity: 0; transition: opacity .25s;
+}
+.theme-card:hover .theme-preview-wrap::after { opacity: 1; }
+.theme-preview-actions {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%) translateY(8px);
+  display: flex; gap: 8px; z-index: 2; transition: all .25s; opacity: 0; white-space: nowrap;
+}
+.theme-card:hover .theme-preview-actions { transform: translateX(-50%) translateY(0); opacity: 1; }
+.preview-action-btn {
+  padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Outfit', sans-serif; border: none; transition: all .15s;
+}
+.preview-action-btn.preview { background: rgba(255,255,255,.95); color: #111; }
+.preview-action-btn.apply { background: var(--accent); color: white; }
+.preview-action-btn:hover { transform: scale(1.04); }
+
+/* Badge */
+.theme-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 1;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 800; letter-spacing: .03em;
+}
+.theme-badge.free { background: rgba(52,211,153,.18); color: #34d399; border: 1px solid rgba(52,211,153,.3); }
+.theme-badge.new { background: rgba(251,191,36,.15); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+.theme-badge.popular { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+
+.theme-info {
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.theme-name { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+.theme-by { font-size: 11.5px; color: var(--text3); font-weight: 600; margin-top: 2px; }
+.theme-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.theme-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: var(--gold); }
+.theme-price { font-size: 15px; font-weight: 800; color: var(--text); }
+.theme-price.free-price { color: var(--green); }
+
+/* ── Live Theme Previews (CSS Art) ── */
+
+/* HORIZON - Minimal editorial */
+.tp-horizon {
+  width: 100%; height: 100%; background: #f8f7f4;
+  font-family: 'Georgia', serif;
+}
+.tp-h-bar { height: 8px; background: #111; }
+.tp-h-nav {
+  height: 42px; background: #f8f7f4; border-bottom: 1px solid #e0ddd8;
+  display: flex; align-items: center; padding: 0 16px; gap: 10px;
+}
+.tp-h-logo { font-size: 14px; font-weight: 900; color: #111; letter-spacing: -.05em; }
+.tp-h-links { display: flex; gap: 10px; margin-left: auto; }
+.tp-h-links span { width: 28px; height: 2px; background: #999; border-radius: 1px; }
+.tp-h-hero {
+  height: 100px; background: linear-gradient(135deg, #2d2d2d 0%, #111 100%);
+  display: flex; align-items: center; padding: 0 16px; gap: 16px; overflow: hidden; position: relative;
+}
+.tp-h-hero-img {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 45%;
+  background: linear-gradient(135deg, #5a4a3a, #3d2e20);
+  clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.tp-h-hero-text { z-index: 1; }
+.tp-h-hero-label { font-size: 7px; letter-spacing: .15em; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+.tp-h-hero-h { width: 80px; height: 9px; background: white; border-radius: 1px; margin-bottom: 5px; }
+.tp-h-hero-sub { width: 55px; height: 5px; background: rgba(255,255,255,.35); border-radius: 1px; margin-bottom: 10px; }
+.tp-h-hero-btn { width: 50px; height: 16px; background: white; border-radius: 1px; display: flex; align-items: center; justify-content: center; }
+.tp-h-hero-btn-text { width: 30px; height: 4px; background: #111; border-radius: 1px; }
+.tp-h-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; padding: 10px 12px; }
+.tp-h-card { background: white; border-radius: 2px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.tp-h-card-img { height: 28px; background: linear-gradient(135deg, #e8e0d5, #d4c9b8); }
+.tp-h-card-info { padding: 5px 6px; }
+.tp-h-card-name { width: 30px; height: 4px; background: #222; border-radius: 1px; margin-bottom: 3px; }
+.tp-h-card-price { width: 18px; height: 4px; background: #999; border-radius: 1px; }
+
+/* SAVOR - Bold food brand */
+.tp-savor { background: #0a0a0a; }
+.tp-s-nav { height: 36px; background: #c0392b; display: flex; align-items: center; padding: 0 12px; justify-content: space-between; }
+.tp-s-logo { font-size: 12px; font-weight: 900; color: white; letter-spacing: -.03em; text-transform: uppercase; }
+.tp-s-nav-r { display: flex; gap: 6px; align-items: center; }
+.tp-s-nav-r span { width: 20px; height: 2px; background: rgba(255,255,255,.6); border-radius: 1px; }
+.tp-s-hero {
+  height: 110px; background: #111;
+  position: relative; overflow: hidden; display: flex; align-items: center; padding: 0 14px;
+}
+.tp-s-hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(192,57,43,.6) 0%, transparent 60%);
+}
+.tp-s-hero-img {
+  position: absolute; right: -10px; top: -10px; width: 140px; height: 140px;
+  background: radial-gradient(circle at 60% 40%, #e74c3c 0%, #c0392b 40%, transparent 70%);
+  opacity: .8;
+}
+.tp-s-hero-content { position: relative; z-index: 1; }
+.tp-s-tagline { font-size: 7px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+.tp-s-h { width: 90px; height: 11px; background: white; border-radius: 1px; margin-bottom: 4px; }
+.tp-s-sub { width: 60px; height: 6px; background: rgba(255,255,255,.3); border-radius: 1px; margin-bottom: 12px; }
+.tp-s-cta { display: inline-flex; align-items: center; gap: 4px; }
+.tp-s-cta-btn { width: 60px; height: 18px; background: #c0392b; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+.tp-s-cta-txt { width: 36px; height: 4px; background: white; border-radius: 1px; }
+.tp-s-products { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 10px; }
+.tp-s-prod { background: #1a1a1a; border-radius: 4px; overflow: hidden; }
+.tp-s-prod-img { height: 30px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.tp-s-prod-info { padding: 5px 7px; }
+.tp-s-prod-name { width: 35px; height: 4px; background: rgba(255,255,255,.5); border-radius: 1px; margin-bottom: 3px; }
+.tp-s-prod-price { width: 22px; height: 4px; background: #c0392b; border-radius: 1px; }
+
+/* AURORA - Luxury beauty */
+.tp-aurora { background: #faf7f4; }
+.tp-a-nav { height: 40px; background: #faf7f4; border-bottom: 1px solid #ede8e2; display: flex; align-items: center; justify-content: center; padding: 0 12px; position: relative; }
+.tp-a-logo { font-size: 13px; font-weight: 300; letter-spacing: .15em; text-transform: uppercase; color: #2d2d2d; }
+.tp-a-logo strong { font-weight: 800; }
+.tp-a-nav-links { display: flex; gap: 10px; position: absolute; right: 12px; }
+.tp-a-nav-links span { width: 22px; height: 1px; background: #999; }
+.tp-a-hero { height: 108px; background: linear-gradient(135deg, #f5ede6 0%, #ead5c4 100%); display: flex; overflow: hidden; }
+.tp-a-hero-left { flex: 1; padding: 16px 14px; display: flex; flex-direction: column; justify-content: center; }
+.tp-a-hero-tag { font-size: 6px; letter-spacing: .2em; text-transform: uppercase; color: #b8967a; margin-bottom: 8px; }
+.tp-a-hero-h { width: 70px; height: 8px; background: #2d2d2d; border-radius: 1px; margin-bottom: 4px; }
+.tp-a-hero-h2 { width: 50px; height: 8px; background: #2d2d2d; border-radius: 1px; margin-bottom: 10px; opacity: .5; }
+.tp-a-hero-sub { width: 75px; height: 4px; background: #c9a88a; border-radius: 1px; margin-bottom: 12px; }
+.tp-a-hero-btn { width: 55px; height: 18px; border: 1.5px solid #2d2d2d; border-radius: 1px; display: flex; align-items: center; justify-content: center; }
+.tp-a-hero-btn-txt { width: 35px; height: 3px; background: #2d2d2d; border-radius: 1px; }
+.tp-a-hero-right { width: 100px; background: linear-gradient(180deg, #e8c9b5, #c9a887); position: relative; overflow: hidden; }
+.tp-a-hero-right::after { content: '✿'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 36px; opacity: .3; color: #fff; }
+.tp-a-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 8px 10px; }
+.tp-a-card { background: white; border-radius: 4px; overflow: hidden; border: 1px solid #ede8e2; }
+.tp-a-card-img { height: 26px; background: linear-gradient(135deg, #f5ede6, #ead5c4); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.tp-a-card-info { padding: 5px 6px; }
+.tp-a-card-name { width: 32px; height: 3px; background: #2d2d2d; border-radius: 1px; margin-bottom: 3px; }
+.tp-a-card-price { width: 20px; height: 3px; background: #b8967a; border-radius: 1px; }
+
+/* SPARK - Tech/Electronics */
+.tp-spark { background: #03091a; }
+.tp-sk-bar { height: 3px; background: linear-gradient(90deg, #00d4ff, #7c3aed, #00d4ff); background-size: 200%; animation: shimbar 2s linear infinite; }
+@keyframes shimbar { 0%{background-position:0%} 100%{background-position:200%} }
+.tp-sk-nav { height: 38px; background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(0,212,255,.15); display: flex; align-items: center; padding: 0 12px; gap: 8px; }
+.tp-sk-logo { font-size: 13px; font-weight: 900; color: #00d4ff; letter-spacing: -.03em; }
+.tp-sk-links { display: flex; gap: 8px; margin-left: auto; }
+.tp-sk-links span { width: 22px; height: 2px; background: rgba(0,212,255,.3); border-radius: 1px; }
+.tp-sk-search { width: 60px; height: 22px; background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2); border-radius: 4px; }
+.tp-sk-hero { height: 100px; background: linear-gradient(135deg, #03091a, #06142e); display: flex; align-items: center; padding: 0 14px; gap: 14px; position: relative; overflow: hidden; }
+.tp-sk-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,212,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,.05) 1px, transparent 1px); background-size: 18px 18px; }
+.tp-sk-hero-glow { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 100px; height: 100px; background: radial-gradient(circle, rgba(0,212,255,.25) 0%, transparent 70%); }
+.tp-sk-content { z-index: 1; }
+.tp-sk-eyebrow { display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+.tp-sk-eyebrow span { width: 16px; height: 1.5px; background: #00d4ff; }
+.tp-sk-eyebrow small { font-size: 6px; letter-spacing: .15em; text-transform: uppercase; color: #00d4ff; font-weight: 700; }
+.tp-sk-h { width: 85px; height: 9px; background: rgba(255,255,255,.9); border-radius: 2px; margin-bottom: 4px; }
+.tp-sk-sub { width: 65px; height: 5px; background: rgba(0,212,255,.4); border-radius: 1px; margin-bottom: 10px; }
+.tp-sk-btns { display: flex; gap: 6px; }
+.tp-sk-btn1 { width: 52px; height: 16px; background: #00d4ff; border-radius: 2px; }
+.tp-sk-btn2 { width: 40px; height: 16px; background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.4); border-radius: 2px; }
+.tp-sk-device { position: absolute; right: 14px; z-index: 1; }
+.tp-sk-device-img { width: 60px; height: 70px; background: linear-gradient(135deg, #1a2a4a, #0a1a3a); border-radius: 8px; border: 2px solid rgba(0,212,255,.3); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px rgba(0,212,255,.2); }
+.tp-sk-products { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; padding: 8px 10px; }
+.tp-sk-prod { background: rgba(255,255,255,.04); border: 1px solid rgba(0,212,255,.1); border-radius: 4px; overflow: hidden; }
+.tp-sk-prod-img { height: 22px; background: rgba(0,212,255,.08); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.tp-sk-prod-info { padding: 4px 5px; }
+.tp-sk-prod-n { width: 28px; height: 3px; background: rgba(255,255,255,.4); border-radius: 1px; margin-bottom: 3px; }
+.tp-sk-prod-p { width: 18px; height: 3px; background: #00d4ff; border-radius: 1px; }
+
+/* RITUAL - Bold typography */
+.tp-ritual { background: #e8341c; }
+.tp-r-nav { height: 40px; background: #e8341c; display: flex; align-items: center; padding: 0 12px; border-bottom: 2px solid rgba(0,0,0,.15); }
+.tp-r-logo { font-size: 18px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: -.04em; }
+.tp-r-nav-r { margin-left: auto; display: flex; gap: 6px; }
+.tp-r-nav-r span { width: 22px; height: 2px; background: rgba(255,255,255,.6); }
+.tp-r-hero { height: 100px; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; position: relative; overflow: hidden; }
+.tp-r-bg-text { position: absolute; font-size: 80px; font-weight: 900; color: rgba(0,0,0,.04); text-transform: uppercase; letter-spacing: -.1em; top: -10px; }
+.tp-r-hero-h { font-size: 24px; font-weight: 900; color: #111; text-transform: uppercase; letter-spacing: -.04em; }
+.tp-r-hero-sub { width: 70px; height: 4px; background: #e8341c; border-radius: 1px; }
+.tp-r-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 10px; }
+.tp-r-card { background: #111; border-radius: 4px; overflow: hidden; }
+.tp-r-card-img { height: 36px; background: linear-gradient(135deg, #1a1a1a, #333); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.tp-r-card-info { padding: 5px 8px; display: flex; justify-content: space-between; align-items: center; }
+.tp-r-card-n { width: 40px; height: 4px; background: rgba(255,255,255,.5); border-radius: 1px; }
+.tp-r-card-p { width: 25px; height: 4px; background: #e8341c; border-radius: 1px; }
+
+/* BLOOM - Pastel/lifestyle */
+.tp-bloom { background: #fdf6ff; }
+.tp-bl-nav { height: 38px; background: white; border-bottom: 1px solid #f0e8f5; display: flex; align-items: center; padding: 0 12px; }
+.tp-bl-logo { font-size: 13px; font-weight: 800; color: #7c3aed; letter-spacing: -.03em; }
+.tp-bl-logo span { color: #db2777; }
+.tp-bl-nav-r { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.tp-bl-nav-r span { width: 20px; height: 2px; background: #c4b5d4; border-radius: 2px; }
+.tp-bl-hero { height: 106px; background: linear-gradient(135deg, #fce7f3, #ede9fe, #fdf2ff); display: flex; align-items: center; padding: 0 14px; gap: 12px; overflow: hidden; position: relative; }
+.tp-bl-decor { position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(219,39,119,.15), transparent); }
+.tp-bl-decor2 { position: absolute; bottom: -30px; right: 50px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,.12), transparent); }
+.tp-bl-content { z-index: 1; }
+.tp-bl-tag { font-size: 7px; letter-spacing: .15em; text-transform: uppercase; color: #db2777; margin-bottom: 8px; font-weight: 700; }
+.tp-bl-h { width: 75px; height: 8px; background: #3d1a6e; border-radius: 10px; margin-bottom: 4px; }
+.tp-bl-sub { width: 55px; height: 4px; background: #c4b5d4; border-radius: 10px; margin-bottom: 12px; }
+.tp-bl-btn { width: 58px; height: 18px; background: #7c3aed; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+.tp-bl-btn-txt { width: 38px; height: 3px; background: white; border-radius: 10px; }
+.tp-bl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 8px 10px; }
+.tp-bl-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #f0e8f5; }
+.tp-bl-card-img { height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.tp-bl-card-info { padding: 5px 7px; }
+.tp-bl-card-n { width: 32px; height: 3px; background: #3d1a6e; border-radius: 10px; margin-bottom: 3px; }
+.tp-bl-card-p { width: 20px; height: 3px; background: #db2777; border-radius: 10px; }
+
+/* XTRA - Marketplace */
+.tp-xtra { background: #fff; }
+.tp-x-top { height: 6px; background: linear-gradient(90deg, #ffd700, #ff6b35); }
+.tp-x-nav { height: 36px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 10px; gap: 8px; }
+.tp-x-logo { font-size: 14px; font-weight: 900; color: #1f2937; }
+.tp-x-logo span { color: #f59e0b; }
+.tp-x-search { flex: 1; height: 22px; background: #f3f4f6; border-radius: 4px; border: 1px solid #e5e7eb; margin: 0 8px; }
+.tp-x-cats { display: flex; gap: 4px; overflow: hidden; }
+.tp-x-cat { padding: 0 8px; height: 22px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; flex-shrink: 0; }
+.tp-x-cat-dot { width: 16px; height: 2px; background: #999; border-radius: 1px; }
+.tp-x-hero { height: 36px; background: linear-gradient(90deg, #1f2937, #374151); display: flex; align-items: center; padding: 0 10px; gap: 10px; }
+.tp-x-hero-txt { display: flex; flex-direction: column; gap: 3px; }
+.tp-x-hero-h { width: 70px; height: 6px; background: white; border-radius: 1px; }
+.tp-x-hero-sub { width: 45px; height: 4px; background: rgba(255,255,255,.4); border-radius: 1px; }
+.tp-x-hero-btn { margin-left: auto; width: 42px; height: 18px; background: #f59e0b; border-radius: 3px; }
+.tp-x-collections { padding: 6px 10px; }
+.tp-x-coll-title { width: 60px; height: 4px; background: #111; border-radius: 1px; margin-bottom: 6px; }
+.tp-x-coll-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.tp-x-coll-item { background: #f3f4f6; border-radius: 4px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.tp-x-prods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 0 10px 8px; }
+.tp-x-prod { background: #f9f9f9; border-radius: 4px; overflow: hidden; border: 1px solid #e5e7eb; }
+.tp-x-prod-img { height: 24px; background: linear-gradient(135deg, #e5e7eb, #d1d5db); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.tp-x-prod-i { padding: 4px 5px; }
+.tp-x-prod-n { width: 28px; height: 3px; background: #374151; border-radius: 1px; margin-bottom: 2px; }
+.tp-x-prod-p { width: 18px; height: 3px; background: #f59e0b; border-radius: 1px; }
+
+/* ENTERPRISE - B2B/Corporate */
+.tp-ent { background: #0a1628; }
+.tp-e-nav { height: 40px; background: #0a1628; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; padding: 0 12px; }
+.tp-e-logo { font-size: 13px; font-weight: 800; color: white; letter-spacing: -.02em; }
+.tp-e-logo span { color: #3b82f6; }
+.tp-e-links { display: flex; gap: 10px; margin-left: 16px; }
+.tp-e-links span { width: 24px; height: 2px; background: rgba(255,255,255,.2); border-radius: 1px; }
+.tp-e-nav-r { margin-left: auto; width: 50px; height: 20px; background: #3b82f6; border-radius: 4px; }
+.tp-e-hero { height: 100px; background: linear-gradient(135deg, #0a1628, #1e3a5f); display: flex; align-items: center; padding: 0 14px; gap: 14px; position: relative; overflow: hidden; }
+.tp-e-grid-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(59,130,246,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,.06) 1px, transparent 1px); background-size: 16px 16px; }
+.tp-e-content { z-index: 1; }
+.tp-e-badge { display: inline-flex; padding: 2px 8px; border-radius: 2px; background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3); margin-bottom: 8px; }
+.tp-e-badge-txt { width: 40px; height: 4px; background: #3b82f6; border-radius: 1px; }
+.tp-e-h { width: 85px; height: 8px; background: white; border-radius: 1px; margin-bottom: 4px; }
+.tp-e-sub { width: 65px; height: 5px; background: rgba(255,255,255,.3); border-radius: 1px; margin-bottom: 12px; }
+.tp-e-btns { display: flex; gap: 5px; }
+.tp-e-btn1 { width: 50px; height: 16px; background: #3b82f6; border-radius: 3px; }
+.tp-e-btn2 { width: 40px; height: 16px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 3px; }
+.tp-e-products { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 8px 10px; }
+.tp-e-prod { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-radius: 4px; overflow: hidden; }
+.tp-e-prod-img { height: 28px; background: rgba(59,130,246,.08); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.tp-e-prod-i { padding: 5px 6px; }
+.tp-e-prod-n { width: 32px; height: 3px; background: rgba(255,255,255,.4); border-radius: 1px; margin-bottom: 3px; }
+.tp-e-prod-p { width: 22px; height: 3px; background: #3b82f6; border-radius: 1px; }
+
+/* CRAFT - Artisan/Handmade */
+.tp-craft { background: #faf8f5; }
+.tp-c-bar { height: 5px; background: linear-gradient(90deg, #8b5e3c, #c4956a, #8b5e3c); }
+.tp-c-nav { height: 38px; background: #faf8f5; border-bottom: 1px solid #e8e0d5; display: flex; align-items: center; justify-content: center; padding: 0 12px; position: relative; }
+.tp-c-logo { font-size: 14px; font-weight: 700; color: #3d2b1f; letter-spacing: .1em; text-transform: uppercase; }
+.tp-c-nav-r { position: absolute; right: 12px; display: flex; gap: 6px; }
+.tp-c-nav-r span { width: 18px; height: 2px; background: #8b5e3c; border-radius: 1px; }
+.tp-c-hero { height: 108px; background: linear-gradient(135deg, #e8ddd0, #d4c4b0); display: flex; overflow: hidden; }
+.tp-c-hero-l { flex: 1; padding: 14px; display: flex; flex-direction: column; justify-content: center; }
+.tp-c-hero-tag { font-size: 6px; letter-spacing: .2em; text-transform: uppercase; color: #8b5e3c; margin-bottom: 8px; }
+.tp-c-hero-h { width: 75px; height: 8px; background: #3d2b1f; border-radius: 1px; margin-bottom: 4px; }
+.tp-c-hero-sub { width: 55px; height: 4px; background: rgba(61,43,31,.4); border-radius: 1px; margin-bottom: 12px; }
+.tp-c-hero-btn { width: 54px; height: 18px; background: #8b5e3c; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+.tp-c-hero-btn-t { width: 34px; height: 3px; background: white; border-radius: 1px; }
+.tp-c-hero-r { width: 90px; position: relative; overflow: hidden; }
+.tp-c-hero-r::before { content: '🏺'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 40px; }
+.tp-c-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 8px 10px; }
+.tp-c-card { background: white; border-radius: 4px; overflow: hidden; border: 1px solid #e8e0d5; }
+.tp-c-card-img { height: 28px; background: linear-gradient(135deg, #e8ddd0, #d4c4b0); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.tp-c-card-i { padding: 5px 6px; }
+.tp-c-card-n { width: 34px; height: 3px; background: #3d2b1f; border-radius: 1px; margin-bottom: 3px; }
+.tp-c-card-p { width: 20px; height: 3px; background: #8b5e3c; border-radius: 1px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.8); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px; overflow: hidden;
+  width: 90vw; max-width: 860px;
+  max-height: 90vh; display: flex; flex-direction: column;
+  transform: scale(.95) translateY(10px); transition: transform .25s;
+  box-shadow: 0 40px 80px rgba(0,0,0,.6);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
+.modal-subtitle { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
+.modal-close { background: var(--surface2); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; color: var(--text2); display: grid; place-items: center; transition: all .15s; }
+.modal-close:hover { background: var(--surface3); color: var(--text); }
+.modal-body { flex: 1; overflow: auto; display: flex; gap: 0; }
+.modal-preview { flex: 1; background: #0a0b12; padding: 20px; overflow: auto; border-right: 1px solid var(--border); }
+.modal-preview-frame { width: 100%; border-radius: 10px; overflow: hidden; border: 1px solid var(--border2); min-height: 360px; }
+.modal-sidebar { width: 240px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal-theme-name { font-size: 20px; font-weight: 800; color: var(--text); }
+.modal-theme-desc { font-size: 13px; color: var(--text3); line-height: 1.65; }
+.modal-features { display: flex; flex-direction: column; gap: 6px; }
+.modal-feature { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text2); font-weight: 600; }
+.modal-feature-icon { color: var(--green); font-size: 12px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; justify-content: space-between; flex-shrink: 0; }
+.modal-price { font-size: 22px; font-weight: 900; color: var(--text); }
+.modal-price.free-p { color: var(--green); }
+.modal-actions { display: flex; gap: 8px; }
+.btn-apply {
+  padding: 11px 28px; background: var(--accent); color: white;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 800;
+  cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s;
+}
+.btn-apply:hover { background: #5b52f0; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(108,99,255,.4); }
+.btn-preview-full {
+  padding: 11px 20px; background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--border2); border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s;
+}
+.btn-preview-full:hover { border-color: var(--border2); color: var(--text); }
+
+/* Success Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--surface2); border: 1px solid var(--green);
+  border-radius: 12px; padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s cubic-bezier(.2,.8,.2,1);
+  max-width: 360px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { font-size: 20px; }
+.toast-text { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.toast-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* Inactive themes */
+.theme-card.applied {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(108,99,255,.4), 0 12px 32px rgba(108,99,255,.15);
+}
+.applied-badge {
+  position: absolute; top: 10px; right: 10px; z-index: 1;
+  background: var(--accent); color: white;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 800;
+}
+
+/* ── Featured strip ── */
+.featured-strip {
+  background: linear-gradient(90deg, rgba(108,99,255,.08), rgba(108,99,255,.04), rgba(108,99,255,.08));
+  border: 1px solid rgba(108,99,255,.2); border-radius: 14px;
+  padding: 18px 22px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+.featured-strip-icon { font-size: 28px; }
+.featured-strip-text { flex: 1; }
+.featured-strip-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.featured-strip-sub { font-size: 12.5px; color: var(--text3); }
+
+/* Scroll animation */
+.theme-card { animation: fadeUp .4s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.theme-card:nth-child(1) { animation-delay: .05s; }
+.theme-card:nth-child(2) { animation-delay: .10s; }
+.theme-card:nth-child(3) { animation-delay: .15s; }
+.theme-card:nth-child(4) { animation-delay: .20s; }
+.theme-card:nth-child(5) { animation-delay: .25s; }
+.theme-card:nth-child(6) { animation-delay: .30s; }
+.theme-card:nth-child(7) { animation-delay: .35s; }
+.theme-card:nth-child(8) { animation-delay: .40s; }
+
+</style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="topnav">
+  <a class="nav-logo" href="#">e<span class="k">K</span>art<span class="dot"></span></a>
+  <div class="nav-divider"></div>
+  <span class="nav-title">Theme Store</span>
+  <div class="nav-spacer"></div>
+  <div class="nav-search">
+    <span class="nav-search-icon">🔍</span>
+    <input type="text" placeholder="Search themes…" id="search-input" oninput="filterThemes()">
+  </div>
+  <button class="btn btn-secondary" onclick="window.location='website-builder.html'">← Back to Builder</button>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">✦ THEME STORE</div>
+    <h1>Beautiful themes for<br><em>every store</em></h1>
+    <p>Professionally designed themes built for eKart. One click to apply — no coding needed.</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-val">24+</div>
+        <div class="hero-stat-label">Themes</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border2);"></div>
+      <div>
+        <div class="hero-stat-val">8</div>
+        <div class="hero-stat-label">Free Themes</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border2);"></div>
+      <div>
+        <div class="hero-stat-val">100%</div>
+        <div class="hero-stat-label">Mobile Ready</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border2);"></div>
+      <div>
+        <div class="hero-stat-val">1-click</div>
+        <div class="hero-stat-label">Apply Instantly</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Page Layout -->
+<div class="page-layout">
+
+  <!-- Filters -->
+  <aside class="filters-sidebar">
+    <div class="filter-group">
+      <span class="filter-group-label">Price</span>
+      <div class="price-tag-row">
+        <div class="price-tag active" id="price-all" onclick="setPriceFilter('all')">All</div>
+        <div class="price-tag" id="price-free" onclick="setPriceFilter('free')">Free</div>
+        <div class="price-tag" id="price-paid" onclick="setPriceFilter('paid')">Paid</div>
+      </div>
+    </div>
+
+    <div class="filter-divider"></div>
+
+    <div class="filter-group">
+      <span class="filter-group-label">Industry</span>
+      <div class="filter-option active" onclick="setIndustryFilter('all', this)">
+        <div class="filter-checkbox"></div>
+        All Industries
+        <span class="filter-count">24</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('fashion', this)">
+        <div class="filter-checkbox"></div>
+        👗 Fashion & Apparel
+        <span class="filter-count">6</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('electronics', this)">
+        <div class="filter-checkbox"></div>
+        📱 Electronics
+        <span class="filter-count">4</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('beauty', this)">
+        <div class="filter-checkbox"></div>
+        💄 Beauty
+        <span class="filter-count">4</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('food', this)">
+        <div class="filter-checkbox"></div>
+        🍕 Food & Drink
+        <span class="filter-count">3</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('home', this)">
+        <div class="filter-checkbox"></div>
+        🏠 Home & Living
+        <span class="filter-count">4</span>
+      </div>
+      <div class="filter-option" onclick="setIndustryFilter('artisan', this)">
+        <div class="filter-checkbox"></div>
+        🏺 Artisan & Craft
+        <span class="filter-count">3</span>
+      </div>
+    </div>
+
+    <div class="filter-divider"></div>
+
+    <div class="filter-group">
+      <span class="filter-group-label">Style</span>
+      <div class="filter-option active" onclick="setStyleFilter('all', this)">
+        <div class="filter-checkbox"></div>
+        All Styles
+      </div>
+      <div class="filter-option" onclick="setStyleFilter('minimal', this)">
+        <div class="filter-checkbox"></div>
+        Minimal
+      </div>
+      <div class="filter-option" onclick="setStyleFilter('bold', this)">
+        <div class="filter-checkbox"></div>
+        Bold
+      </div>
+      <div class="filter-option" onclick="setStyleFilter('dark', this)">
+        <div class="filter-checkbox"></div>
+        Dark Mode
+      </div>
+      <div class="filter-option" onclick="setStyleFilter('luxury', this)">
+        <div class="filter-checkbox"></div>
+        Luxury
+      </div>
+    </div>
+
+    <div class="filter-divider"></div>
+
+    <div class="filter-group">
+      <span class="filter-group-label">Features</span>
+      <div class="filter-option" onclick="this.classList.toggle('active')">
+        <div class="filter-checkbox"></div>
+        Countdown Timer
+      </div>
+      <div class="filter-option" onclick="this.classList.toggle('active')">
+        <div class="filter-checkbox"></div>
+        Video Hero
+      </div>
+      <div class="filter-option" onclick="this.classList.toggle('active')">
+        <div class="filter-checkbox"></div>
+        Mega Menu
+      </div>
+      <div class="filter-option" onclick="this.classList.toggle('active')">
+        <div class="filter-checkbox"></div>
+        Lookbook
+      </div>
+      <div class="filter-option" onclick="this.classList.toggle('active')">
+        <div class="filter-checkbox"></div>
+        Quick Buy
+      </div>
+    </div>
+  </aside>
+
+  <!-- Themes Main -->
+  <main class="themes-main">
+    <div class="featured-strip">
+      <div class="featured-strip-icon">⚡</div>
+      <div class="featured-strip-text">
+        <div class="featured-strip-title">New: AI-powered theme generation</div>
+        <div class="featured-strip-sub">Describe your business and we'll create a custom theme in seconds</div>
+      </div>
+      <button class="btn btn-primary">Try AI Themes →</button>
+    </div>
+
+    <div class="themes-toolbar">
+      <div class="themes-count">Showing <strong id="theme-count">8</strong> themes</div>
+      <select class="sort-select" onchange="sortThemes(this.value)">
+        <option value="relevance">Sort: Relevance</option>
+        <option value="popular">Most Popular</option>
+        <option value="newest">Newest</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+
+    <div class="themes-grid" id="themes-grid">
+      <!-- Injected by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Theme Name</div>
+        <div class="modal-subtitle" id="modal-subtitle">by eKart</div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-preview">
+        <div class="modal-preview-frame" id="modal-preview"></div>
+      </div>
+      <div class="modal-sidebar">
+        <div class="modal-theme-name" id="modal-theme-name"></div>
+        <div class="modal-theme-desc" id="modal-theme-desc"></div>
+        <div class="filter-divider"></div>
+        <div class="modal-features" id="modal-features"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-price" id="modal-price">Free</div>
+      <div class="modal-actions">
+        <button class="btn-preview-full">🔗 Full Preview</button>
+        <button class="btn-apply" id="modal-apply-btn">Apply to Store</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon">🚀</div>
+  <div>
+    <div class="toast-text" id="toast-text">Theme applied!</div>
+    <div class="toast-sub" id="toast-sub">Your store is being updated…</div>
+  </div>
+</div>
+
+<script>
+const THEMES = [
+  {
+    id: 'horizon',
+    name: 'Horizon',
+    by: 'eKart',
+    price: 0,
+    badge: 'free',
+    rating: 4.9,
+    reviews: 1842,
+    industry: ['fashion','home'],
+    style: ['minimal'],
+    features: ['Quick Buy','Mega Menu','Lookbook','Announcement Bar'],
+    desc: 'A refined, editorial theme with bold typography and clean layouts. Perfect for fashion brands and lifestyle stores.',
+    previewClass: 'tp-horizon',
+    previewHTML: `<div class="tp-horizon">
+      <div class="tp-h-bar"></div>
+      <div class="tp-h-nav"><div class="tp-h-logo">HORIZON</div><div class="tp-h-links"><span></span><span></span><span></span><span></span></div></div>
+      <div class="tp-h-hero">
+        <div class="tp-h-hero-img"></div>
+        <div class="tp-h-hero-text">
+          <div class="tp-h-hero-label">NEW ARRIVALS</div>
+          <div class="tp-h-hero-h"></div>
+          <div class="tp-h-hero-sub"></div>
+          <div class="tp-h-hero-btn"><div class="tp-h-hero-btn-text"></div></div>
+        </div>
+      </div>
+      <div class="tp-h-grid">
+        <div class="tp-h-card"><div class="tp-h-card-img"></div><div class="tp-h-card-info"><div class="tp-h-card-name"></div><div class="tp-h-card-price"></div></div></div>
+        <div class="tp-h-card"><div class="tp-h-card-img"></div><div class="tp-h-card-info"><div class="tp-h-card-name"></div><div class="tp-h-card-price"></div></div></div>
+        <div class="tp-h-card"><div class="tp-h-card-img"></div><div class="tp-h-card-info"><div class="tp-h-card-name"></div><div class="tp-h-card-price"></div></div></div>
+        <div class="tp-h-card"><div class="tp-h-card-img"></div><div class="tp-h-card-info"><div class="tp-h-card-name"></div><div class="tp-h-card-price"></div></div></div>
+      </div>
+    </div>`,
+    applied: true
+  },
+  {
+    id: 'savor',
+    name: 'Savor',
+    by: 'eKart',
+    price: 0,
+    badge: 'free',
+    rating: 4.8,
+    reviews: 1204,
+    industry: ['food'],
+    style: ['bold','dark'],
+    features: ['Video Hero','Countdown Timer','Quick Buy'],
+    desc: 'Bold, appetite-inducing design for food & beverage brands. Dark and vibrant with strong visual hierarchy.',
+    previewHTML: `<div class="tp-savor">
+      <div class="tp-s-nav"><div class="tp-s-logo">SAVOR</div><div class="tp-s-nav-r"><span></span><span></span></div></div>
+      <div class="tp-s-hero">
+        <div class="tp-s-hero-bg"></div>
+        <div class="tp-s-hero-img"></div>
+        <div class="tp-s-hero-content">
+          <div class="tp-s-tagline">SAVOR EVERY LAST BITE</div>
+          <div class="tp-s-h"></div>
+          <div class="tp-s-sub"></div>
+          <div class="tp-s-cta"><div class="tp-s-cta-btn"><div class="tp-s-cta-txt"></div></div></div>
+        </div>
+      </div>
+      <div class="tp-s-products">
+        <div class="tp-s-prod"><div class="tp-s-prod-img">🍕</div><div class="tp-s-prod-info"><div class="tp-s-prod-name"></div><div class="tp-s-prod-price"></div></div></div>
+        <div class="tp-s-prod"><div class="tp-s-prod-img">🍜</div><div class="tp-s-prod-info"><div class="tp-s-prod-name"></div><div class="tp-s-prod-price"></div></div></div>
+        <div class="tp-s-prod"><div class="tp-s-prod-img">🧁</div><div class="tp-s-prod-info"><div class="tp-s-prod-name"></div><div class="tp-s-prod-price"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    by: 'eKart Studio',
+    price: 290,
+    badge: 'popular',
+    rating: 4.9,
+    reviews: 2410,
+    industry: ['beauty','fashion'],
+    style: ['luxury','minimal'],
+    features: ['Lookbook','Video Hero','Quick Buy','Mega Menu','Wishlist'],
+    desc: 'Luxury beauty and fashion theme with warm tones, editorial layouts, and immersive product storytelling.',
+    previewHTML: `<div class="tp-aurora">
+      <div class="tp-a-nav">
+        <div class="tp-a-logo"><strong>AURORA</strong> Beauty</div>
+        <div class="tp-a-nav-links"><span></span><span></span></div>
+      </div>
+      <div class="tp-a-hero">
+        <div class="tp-a-hero-left">
+          <div class="tp-a-hero-tag">NEW COLLECTION</div>
+          <div class="tp-a-hero-h"></div>
+          <div class="tp-a-hero-h2"></div>
+          <div class="tp-a-hero-sub"></div>
+          <div class="tp-a-hero-btn"><div class="tp-a-hero-btn-txt"></div></div>
+        </div>
+        <div class="tp-a-hero-right"></div>
+      </div>
+      <div class="tp-a-grid">
+        <div class="tp-a-card"><div class="tp-a-card-img">💄</div><div class="tp-a-card-info"><div class="tp-a-card-name"></div><div class="tp-a-card-price"></div></div></div>
+        <div class="tp-a-card"><div class="tp-a-card-img">🌸</div><div class="tp-a-card-info"><div class="tp-a-card-name"></div><div class="tp-a-card-price"></div></div></div>
+        <div class="tp-a-card"><div class="tp-a-card-img">✨</div><div class="tp-a-card-info"><div class="tp-a-card-name"></div><div class="tp-a-card-price"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'spark',
+    name: 'Spark',
+    by: 'eKart',
+    price: 0,
+    badge: 'new',
+    rating: 4.7,
+    reviews: 318,
+    industry: ['electronics'],
+    style: ['dark','bold'],
+    features: ['Countdown Timer','Quick Buy','Mega Menu'],
+    desc: 'Neon-accented tech store theme with grid backgrounds and product-focused layouts. Built for electronics and gadgets.',
+    previewHTML: `<div class="tp-spark">
+      <div class="tp-sk-bar"></div>
+      <div class="tp-sk-nav">
+        <div class="tp-sk-logo">SPARK⚡</div>
+        <div class="tp-sk-links"><span></span><span></span><span></span></div>
+        <div class="tp-sk-search"></div>
+      </div>
+      <div class="tp-sk-hero">
+        <div class="tp-sk-grid-bg"></div>
+        <div class="tp-sk-hero-glow"></div>
+        <div class="tp-sk-content">
+          <div class="tp-sk-eyebrow"><span></span><small>LATEST TECH</small></div>
+          <div class="tp-sk-h"></div>
+          <div class="tp-sk-sub"></div>
+          <div class="tp-sk-btns"><div class="tp-sk-btn1"></div><div class="tp-sk-btn2"></div></div>
+        </div>
+        <div class="tp-sk-device"><div class="tp-sk-device-img">📱</div></div>
+      </div>
+      <div class="tp-sk-products">
+        <div class="tp-sk-prod"><div class="tp-sk-prod-img">🎧</div><div class="tp-sk-prod-info"><div class="tp-sk-prod-n"></div><div class="tp-sk-prod-p"></div></div></div>
+        <div class="tp-sk-prod"><div class="tp-sk-prod-img">⌚</div><div class="tp-sk-prod-info"><div class="tp-sk-prod-n"></div><div class="tp-sk-prod-p"></div></div></div>
+        <div class="tp-sk-prod"><div class="tp-sk-prod-img">💻</div><div class="tp-sk-prod-info"><div class="tp-sk-prod-n"></div><div class="tp-sk-prod-p"></div></div></div>
+        <div class="tp-sk-prod"><div class="tp-sk-prod-img">📷</div><div class="tp-sk-prod-info"><div class="tp-sk-prod-n"></div><div class="tp-sk-prod-p"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'ritual',
+    name: 'Ritual',
+    by: 'eKart Studio',
+    price: 320,
+    badge: 'popular',
+    rating: 4.9,
+    reviews: 890,
+    industry: ['fashion'],
+    style: ['bold'],
+    features: ['Video Hero','Lookbook','Mega Menu','Quick Buy'],
+    desc: 'Typography-first design with bold uppercase headlines and high-contrast layouts. Unmistakable brand presence.',
+    previewHTML: `<div class="tp-ritual">
+      <div class="tp-r-nav">
+        <div class="tp-r-logo">RITUAL</div>
+        <div class="tp-r-nav-r"><span></span><span></span></div>
+      </div>
+      <div class="tp-r-hero">
+        <div class="tp-r-bg-text">R</div>
+        <div class="tp-r-hero-h">THE HERITAGE<br>COLLECTION</div>
+        <div class="tp-r-hero-sub"></div>
+      </div>
+      <div class="tp-r-grid">
+        <div class="tp-r-card"><div class="tp-r-card-img">👟</div><div class="tp-r-card-info"><div class="tp-r-card-n"></div><div class="tp-r-card-p"></div></div></div>
+        <div class="tp-r-card"><div class="tp-r-card-img">👜</div><div class="tp-r-card-info"><div class="tp-r-card-n"></div><div class="tp-r-card-p"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'bloom',
+    name: 'Bloom',
+    by: 'eKart',
+    price: 0,
+    badge: 'free',
+    rating: 4.8,
+    reviews: 1560,
+    industry: ['beauty','home'],
+    style: ['minimal'],
+    features: ['Wishlist','Quick Buy','Announcement Bar'],
+    desc: 'Soft, feminine theme with pastel gradients and rounded forms. Ideal for beauty, wellness, and lifestyle brands.',
+    previewHTML: `<div class="tp-bloom">
+      <div class="tp-bl-nav">
+        <div class="tp-bl-logo">bloom<span>.</span></div>
+        <div class="tp-bl-nav-r"><span></span><span></span></div>
+      </div>
+      <div class="tp-bl-hero">
+        <div class="tp-bl-decor"></div>
+        <div class="tp-bl-decor2"></div>
+        <div class="tp-bl-content">
+          <div class="tp-bl-tag">NEW SEASON</div>
+          <div class="tp-bl-h"></div>
+          <div class="tp-bl-sub"></div>
+          <div class="tp-bl-btn"><div class="tp-bl-btn-txt"></div></div>
+        </div>
+      </div>
+      <div class="tp-bl-grid">
+        <div class="tp-bl-card"><div class="tp-bl-card-img">🌸</div><div class="tp-bl-card-info"><div class="tp-bl-card-n"></div><div class="tp-bl-card-p"></div></div></div>
+        <div class="tp-bl-card"><div class="tp-bl-card-img">🕯️</div><div class="tp-bl-card-info"><div class="tp-bl-card-n"></div><div class="tp-bl-card-p"></div></div></div>
+        <div class="tp-bl-card"><div class="tp-bl-card-img">🌿</div><div class="tp-bl-card-info"><div class="tp-bl-card-n"></div><div class="tp-bl-card-p"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'xtra',
+    name: 'Xtra',
+    by: 'eKart Studio',
+    price: 100,
+    badge: 'popular',
+    rating: 4.9,
+    reviews: 4820,
+    industry: ['fashion','home','electronics'],
+    style: ['bold','minimal'],
+    features: ['Mega Menu','Quick Buy','Countdown Timer','Announcement Bar','Wishlist','Lookbook'],
+    desc: 'The ultimate multi-purpose marketplace theme. Handles large catalogs with ease. Feature-packed and conversion-optimized.',
+    previewHTML: `<div class="tp-xtra">
+      <div class="tp-x-top"></div>
+      <div class="tp-x-nav">
+        <div class="tp-x-logo">X<span>tra</span></div>
+        <div class="tp-x-search"></div>
+        <div class="tp-x-cats">
+          <div class="tp-x-cat"><div class="tp-x-cat-dot"></div></div>
+          <div class="tp-x-cat"><div class="tp-x-cat-dot"></div></div>
+          <div class="tp-x-cat"><div class="tp-x-cat-dot"></div></div>
+        </div>
+      </div>
+      <div class="tp-x-hero">
+        <div class="tp-x-hero-txt"><div class="tp-x-hero-h"></div><div class="tp-x-hero-sub"></div></div>
+        <div class="tp-x-hero-btn"></div>
+      </div>
+      <div class="tp-x-collections">
+        <div class="tp-x-coll-title"></div>
+        <div class="tp-x-coll-grid">
+          <div class="tp-x-coll-item">👗</div>
+          <div class="tp-x-coll-item">📱</div>
+          <div class="tp-x-coll-item">🏠</div>
+          <div class="tp-x-coll-item">💄</div>
+          <div class="tp-x-coll-item">🎮</div>
+          <div class="tp-x-coll-item">📚</div>
+        </div>
+      </div>
+      <div class="tp-x-prods">
+        <div class="tp-x-prod"><div class="tp-x-prod-img">👟</div><div class="tp-x-prod-i"><div class="tp-x-prod-n"></div><div class="tp-x-prod-p"></div></div></div>
+        <div class="tp-x-prod"><div class="tp-x-prod-img">⌚</div><div class="tp-x-prod-i"><div class="tp-x-prod-n"></div><div class="tp-x-prod-p"></div></div></div>
+        <div class="tp-x-prod"><div class="tp-x-prod-img">🎒</div><div class="tp-x-prod-i"><div class="tp-x-prod-n"></div><div class="tp-x-prod-p"></div></div></div>
+        <div class="tp-x-prod"><div class="tp-x-prod-img">💻</div><div class="tp-x-prod-i"><div class="tp-x-prod-n"></div><div class="tp-x-prod-p"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  },
+  {
+    id: 'craft',
+    name: 'Craft',
+    by: 'eKart',
+    price: 0,
+    badge: 'free',
+    rating: 4.7,
+    reviews: 724,
+    industry: ['artisan','home'],
+    style: ['minimal'],
+    features: ['Lookbook','Announcement Bar','Wishlist'],
+    desc: 'Warm, artisanal theme for handmade and craft businesses. Natural textures, earthy palettes, and story-driven layouts.',
+    previewHTML: `<div class="tp-craft">
+      <div class="tp-c-bar"></div>
+      <div class="tp-c-nav">
+        <div class="tp-c-logo">CRAFT & CO.</div>
+        <div class="tp-c-nav-r"><span></span><span></span></div>
+      </div>
+      <div class="tp-c-hero">
+        <div class="tp-c-hero-l">
+          <div class="tp-c-hero-tag">HANDCRAFTED</div>
+          <div class="tp-c-hero-h"></div>
+          <div class="tp-c-hero-sub"></div>
+          <div class="tp-c-hero-btn"><div class="tp-c-hero-btn-t"></div></div>
+        </div>
+        <div class="tp-c-hero-r"></div>
+      </div>
+      <div class="tp-c-grid">
+        <div class="tp-c-card"><div class="tp-c-card-img">🏺</div><div class="tp-c-card-i"><div class="tp-c-card-n"></div><div class="tp-c-card-p"></div></div></div>
+        <div class="tp-c-card"><div class="tp-c-card-img">🧵</div><div class="tp-c-card-i"><div class="tp-c-card-n"></div><div class="tp-c-card-p"></div></div></div>
+        <div class="tp-c-card"><div class="tp-c-card-img">🕯️</div><div class="tp-c-card-i"><div class="tp-c-card-n"></div><div class="tp-c-card-p"></div></div></div>
+      </div>
+    </div>`,
+    applied: false
+  }
+]
+
+let appliedTheme = 'horizon'
+let priceFilter = 'all'
+let industryFilter = 'all'
+let styleFilter = 'all'
+
+function renderThemes() {
+  const searchVal = document.getElementById('search-input').value.toLowerCase()
+  let filtered = THEMES.filter(t => {
+    if (priceFilter === 'free' && t.price > 0) return false
+    if (priceFilter === 'paid' && t.price === 0) return false
+    if (industryFilter !== 'all' && !t.industry.includes(industryFilter)) return false
+    if (styleFilter !== 'all' && !t.style.includes(styleFilter)) return false
+    if (searchVal && !t.name.toLowerCase().includes(searchVal) && !t.desc.toLowerCase().includes(searchVal)) return false
+    return true
+  })
+
+  document.getElementById('theme-count').textContent = filtered.length
+
+  const grid = document.getElementById('themes-grid')
+  grid.innerHTML = filtered.map(t => `
+    <div class="theme-card ${t.id === appliedTheme ? 'applied' : ''}" onclick="openModal('${t.id}')">
+      ${t.id === appliedTheme ? '<div class="applied-badge">✓ Applied</div>' : ''}
+      <div class="theme-badge ${t.badge}">${t.badge === 'free' ? '🎁 Free' : t.badge === 'new' ? '✦ New' : '🔥 Popular'}</div>
+      <div class="theme-preview-wrap">
+        ${t.previewHTML}
+        <div class="theme-preview-actions">
+          <button class="preview-action-btn preview" onclick="event.stopPropagation(); openModal('${t.id}')">👁 Preview</button>
+          <button class="preview-action-btn apply" onclick="event.stopPropagation(); applyTheme('${t.id}')">→ Apply Theme</button>
+        </div>
+      </div>
+      <div class="theme-info">
+        <div>
+          <div class="theme-name">${t.name}</div>
+          <div class="theme-by">by ${t.by}</div>
+        </div>
+        <div class="theme-meta">
+          <div class="theme-rating">★ ${t.rating} <span style="color:var(--text3);font-weight:500;">(${t.reviews.toLocaleString()})</span></div>
+          <div class="theme-price ${t.price === 0 ? 'free-price' : ''}">${t.price === 0 ? 'Free' : '₹' + (t.price * 83).toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  `).join('')
+}
+
+function openModal(id) {
+  const t = THEMES.find(x => x.id === id)
+  if (!t) return
+  document.getElementById('modal-title').textContent = t.name
+  document.getElementById('modal-subtitle').textContent = `by ${t.by} · ★ ${t.rating} (${t.reviews.toLocaleString()} reviews)`
+  document.getElementById('modal-theme-name').textContent = t.name
+  document.getElementById('modal-theme-desc').textContent = t.desc
+  document.getElementById('modal-price').textContent = t.price === 0 ? 'Free' : '₹' + (t.price * 83).toLocaleString()
+  document.getElementById('modal-price').className = 'modal-price' + (t.price === 0 ? ' free-p' : '')
+  document.getElementById('modal-preview').innerHTML = `<div style="transform-origin:top left;transform:scale(1.5);width:66.7%;height:460px;overflow:hidden;">${t.previewHTML}</div>`
+  document.getElementById('modal-features').innerHTML = t.features.map(f =>
+    `<div class="modal-feature"><span class="modal-feature-icon">✓</span>${f}</div>`
+  ).join('')
+  const applyBtn = document.getElementById('modal-apply-btn')
+  if (t.id === appliedTheme) {
+    applyBtn.textContent = '✓ Currently Applied'
+    applyBtn.style.background = 'var(--green)'
+  } else {
+    applyBtn.textContent = 'Apply to Store'
+    applyBtn.style.background = ''
+    applyBtn.onclick = () => { applyTheme(id); closeModalDirect() }
+  }
+  document.getElementById('modal').classList.add('open')
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalDirect()
+}
+function closeModalDirect() {
+  document.getElementById('modal').classList.remove('open')
+}
+
+function applyTheme(id) {
+  const t = THEMES.find(x => x.id === id)
+  if (!t) return
+  appliedTheme = id
+  renderThemes()
+  const toast = document.getElementById('toast')
+  document.getElementById('toast-text').textContent = `"${t.name}" theme applied!`
+  document.getElementById('toast-sub').textContent = 'Your storefront is being updated…'
+  toast.classList.add('show')
+  setTimeout(() => toast.classList.remove('show'), 3500)
+}
+
+function setPriceFilter(val) {
+  priceFilter = val
+  document.querySelectorAll('.price-tag').forEach(el => el.classList.remove('active'))
+  document.getElementById('price-' + val).classList.add('active')
+  renderThemes()
+}
+
+function setIndustryFilter(val, el) {
+  industryFilter = val
+  document.querySelectorAll('.filter-option').forEach(o => {
+    if (o.closest('.filter-group') === el.closest('.filter-group')) o.classList.remove('active')
+  })
+  el.classList.add('active')
+  renderThemes()
+}
+
+function setStyleFilter(val, el) {
+  styleFilter = val
+  // find the group and deactivate others in same group
+  const group = el.parentElement
+  group.querySelectorAll('.filter-option').forEach(o => o.classList.remove('active'))
+  el.classList.add('active')
+  renderThemes()
+}
+
+function filterThemes() { renderThemes() }
+
+function sortThemes(val) {
+  if (val === 'popular') THEMES.sort((a,b) => b.reviews - a.reviews)
+  else if (val === 'newest') THEMES.sort((a,b) => (b.badge === 'new') - (a.badge === 'new'))
+  else if (val === 'price-asc') THEMES.sort((a,b) => a.price - b.price)
+  else if (val === 'price-desc') THEMES.sort((a,b) => b.price - a.price)
+  renderThemes()
+}
+
+// Init
+renderThemes()
+</script>
+</body>
+</html>
