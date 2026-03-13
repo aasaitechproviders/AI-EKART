@@ -250,7 +250,7 @@
     .tp-ps-logo{width:14px;height:3px;background:#e8847a;border-radius:4px}
     .tp-ps-hero{height:30px;background:linear-gradient(135deg,#fde8e0,#fef0fa);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px}
     .tp-ps-h{width:34px;height:3px;background:#d47a8f;border-radius:4px}
-    .tp-ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 4px 4px}
+    .tp-ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
     .tp-ps-card{height:13px;background:#fde8e0;border-radius:4px}
     .tp-tech{background:#020d1a;height:68px}
     .tp-tc-nav{height:9px;background:#020d1a;border-bottom:1px solid #0a3a5a;display:flex;align-items:center;padding:0 5px}
@@ -420,6 +420,50 @@
   let sections=[]
 
   /* ═══════════════════════════════════════
+     REAL SAMPLE PRODUCTS (with Unsplash images)
+  ═══════════════════════════════════════ */
+  const SAMPLE_PRODUCTS = [
+    { name:'Nike Air Max 270', price:7999, compare:11999, disc:33, cat:'Footwear', img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop', badge:'Bestseller' },
+    { name:'Samsung Galaxy Buds Pro', price:8499, compare:12999, disc:35, cat:'Electronics', img:'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=400&fit=crop', badge:'New' },
+    { name:'Floral Summer Dress', price:1299, compare:2499, disc:48, cat:'Fashion', img:'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop', badge:'Trending' },
+    { name:'Apple Watch Series 9', price:38999, compare:45999, disc:15, cat:'Electronics', img:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', badge:'Hot' },
+    { name:'Minimalist Backpack', price:2499, compare:3999, disc:38, cat:'Accessories', img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop', badge:'' },
+    { name:'Botanical Face Serum', price:899, compare:1499, disc:40, cat:'Beauty', img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop', badge:'New' },
+    { name:'Ceramic Dinner Set', price:3499, compare:5999, disc:42, cat:'Home', img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop', badge:'' },
+    { name:'Wireless Mechanical Keyboard', price:4999, compare:7999, disc:38, cat:'Electronics', img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=400&fit=crop', badge:'Sale' },
+    { name:'Yoga Mat Premium', price:1799, compare:2999, disc:40, cat:'Sports', img:'https://images.unsplash.com/photo-1601925228560-f0507a1a4cf4?w=400&h=400&fit=crop', badge:'' },
+    { name:'Linen Throw Pillow Set', price:1199, compare:1999, disc:40, cat:'Home', img:'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=400&fit=crop', badge:'' },
+    { name:'Sunglasses Aviator Gold', price:1599, compare:2999, disc:47, cat:'Accessories', img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=400&fit=crop', badge:'Trending' },
+    { name:'Protein Shaker Bottle', price:599, compare:999, disc:40, cat:'Sports', img:'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&h=400&fit=crop', badge:'' },
+    { name:'Leather Wallet Slim', price:999, compare:1799, disc:44, cat:'Accessories', img:'https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=400&fit=crop', badge:'' },
+    { name:'Scented Candle Set', price:749, compare:1299, disc:42, cat:'Home', img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=400&h=400&fit=crop', badge:'Gift' },
+    { name:'Adidas Running Shoes', price:5999, compare:8999, disc:33, cat:'Footwear', img:'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop', badge:'' },
+    { name:'Stainless Steel Water Bottle', price:799, compare:1299, disc:38, cat:'Sports', img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&h=400&fit=crop', badge:'Eco' },
+    { name:'Oversized Hoodie', price:1899, compare:3499, disc:46, cat:'Fashion', img:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&h=400&fit=crop', badge:'' },
+    { name:'Gaming Headset RGB', price:3299, compare:5499, disc:40, cat:'Electronics', img:'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&h=400&fit=crop', badge:'New' },
+    { name:'Tote Canvas Bag', price:699, compare:1199, disc:42, cat:'Accessories', img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop', badge:'' },
+    { name:'Indoor Plant Succulent', price:349, compare:599, disc:42, cat:'Home', img:'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=400&h=400&fit=crop', badge:'Popular' },
+    { name:'Vitamin C Moisturizer', price:649, compare:1099, disc:41, cat:'Beauty', img:'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop', badge:'' },
+    { name:'Dumbbell Set 5kg Pair', price:2499, compare:3999, disc:38, cat:'Sports', img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop', badge:'' },
+    { name:'Printed Cushion Cover', price:499, compare:899, disc:44, cat:'Home', img:'https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=400&h=400&fit=crop', badge:'' },
+    { name:'Smart Fitness Band', price:2999, compare:4999, disc:40, cat:'Electronics', img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&h=400&fit=crop', badge:'Popular' },
+  ]
+
+  /* ═══════════════════════════════════════
+     REAL SAMPLE CATEGORIES (with images)
+  ═══════════════════════════════════════ */
+  const SAMPLE_CATEGORIES = [
+    { name:'Fashion', count:'1,240+', img:'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=300&fit=crop', emoji:'👗' },
+    { name:'Electronics', count:'980+', img:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&h=300&fit=crop', emoji:'📱' },
+    { name:'Home & Living', count:'2,100+', img:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop', emoji:'🏠' },
+    { name:'Beauty', count:'750+', img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=300&fit=crop', emoji:'💄' },
+    { name:'Sports', count:'620+', img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=300&h=300&fit=crop', emoji:'🏃' },
+    { name:'Footwear', count:'430+', img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop', emoji:'👟' },
+    { name:'Accessories', count:'890+', img:'https://images.unsplash.com/photo-1523779105320-d1cd346ff52b?w=300&h=300&fit=crop', emoji:'👜' },
+    { name:'Gaming', count:'310+', img:'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=300&h=300&fit=crop', emoji:'🎮' },
+  ]
+
+  /* ═══════════════════════════════════════
      COLOR PALETTES
   ═══════════════════════════════════════ */
   const COLOR_PALETTES=[
@@ -478,7 +522,7 @@
   function getSectionDef(type){return SECTION_DEFS[type]||SECTION_DEFS[resolveFrontendType(type)]||{icon:'📦',label:type,groups:[]}}
 
   /* ═══════════════════════════════════════
-     SECTION DEFINITIONS — EXPANDED
+     SECTION DEFINITIONS
   ═══════════════════════════════════════ */
   const SECTION_DEFS={
     announcement:{icon:'📢',label:'Announcement Bar',groups:[
@@ -563,7 +607,7 @@
         {key:'showOldPrice',label:'Show Original Price',type:'select',opts:['yes','no']},
         {key:'showRating',label:'Show Rating Stars',type:'select',opts:['no','yes']},
         {key:'showBadge',label:'Show Product Badge',type:'select',opts:['no','yes']},
-        {key:'badgeText',label:'Badge Label',type:'text',placeholder:'New'},
+        {key:'badgeText',label:'Badge Label (override)',type:'text',placeholder:'New'},
         {key:'outOfStockText',label:'Out of Stock Text',type:'text',placeholder:'Out of Stock'},
       ]},
     ]},
@@ -574,8 +618,8 @@
       ]},
       {label:'Layout',fields:[
         {key:'columns',label:'Columns',type:'select',opts:['2','3','4','6']},
-        {key:'style',label:'Card Style',type:'select',opts:['card','minimal','circle']},
-        {key:'showCount',label:'Show Item Count',type:'select',opts:['no','yes']},
+        {key:'style',label:'Card Style',type:'select',opts:['image','card','minimal','circle']},
+        {key:'showCount',label:'Show Item Count',type:'select',opts:['yes','no']},
       ]},
     ]},
     banner:{icon:'📣',label:'Promo Banner',groups:[
@@ -870,7 +914,7 @@
     {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showSearch:'yes',showCart:'yes',sticky:'yes',link1Text:'Home',link2Text:'Products',link3Text:'Categories',link4Text:'About',cartText:'Cart'}},
     {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
     {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',cardStyle:'classic',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
-    {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'card'}},
+    {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'image',showCount:'yes'}},
     {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
     {id:'sec_trustbadges',type:'trustbadges',enabled:true,data:{badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}},
     {id:'sec_testimonials',type:'testimonials',enabled:false,data:{title:'What Customers Say',columns:'3',style:'card',t1name:'Sarah M.',t1text:'Absolutely love this store! Fast shipping and great quality.',t1stars:'5',t2name:'Rahul K.',t2text:'Best shopping experience. Will definitely order again!',t2stars:'5',t3name:'Anita P.',t3text:'Great products and excellent customer service. Five stars!',t3stars:'5'}},
@@ -1183,9 +1227,9 @@
     let input=''
     const esc=escHtml(String(value))
     if(f.type==='text'||f.type==='number'){
-      input=`<input type="${f.type}" class="field-input" id="${id}" value="${esc}" placeholder="${f.placeholder||''}" ${f.min!==undefined?'min="'+f.min+'"':''} ${f.max!==undefined?'max="'+f.max+'"':''} oninput="liveUpdateField('${f.key}',this.value)">`
+      input=`<input type="${f.type}" class="field-input" id="${id}" value="${esc}" placeholder="${escHtml(f.placeholder||'')}" ${f.min!==undefined?'min="'+f.min+'"':''} ${f.max!==undefined?'max="'+f.max+'"':''} oninput="liveUpdateField('${f.key}',this.value)">`
     }else if(f.type==='textarea'){
-      input=`<textarea class="field-input field-textarea" id="${id}" placeholder="${f.placeholder||''}" oninput="liveUpdateField('${f.key}',this.value)">${esc}</textarea>`
+      input=`<textarea class="field-input field-textarea" id="${id}" placeholder="${escHtml(f.placeholder||'')}" oninput="liveUpdateField('${f.key}',this.value)">${esc}</textarea>`
     }else if(f.type==='color'){
       const v=value||'#5b5cf6'
       input=`<div class="field-color-row">
@@ -1284,7 +1328,6 @@
     closeResetModal()
     toast(`"${p.name}" palette applied!`,'success')
   }
-  // Close modal on overlay click
   document.getElementById('reset-modal').addEventListener('click',e=>{
     if(e.target===document.getElementById('reset-modal'))closeResetModal()
   })
@@ -1495,6 +1538,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
 
 .announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:10px}
 .ann-link{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer}
@@ -1505,7 +1549,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .nav-links-center{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65;pointer-events:none;}
 .nav-links-center a{pointer-events:all}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:${isMobile?'8px':'14px'};flex-shrink:0;position:relative;z-index:1;}
-.nav-search{width:34px;height:34px;border-radius:8px;background:rgba(${borderRgb},.06);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.nav-search{width:34px;height:34px;border-radius:8px;background:rgba(${borderRgb},.06);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text)}
 .nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
 
 .hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg);position:relative;overflow:hidden}
@@ -1517,7 +1561,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .hero h1 em{font-style:normal;color:var(--primary)}
 .hero p{font-size:${isMobile?'14px':'17px'};opacity:.65;max-width:520px;margin:0 auto 32px;line-height:1.7}
 .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'13px 30px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'15px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'13px 30px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'15px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font);transition:opacity .15s;text-decoration:none}
 .btn-cta:hover{opacity:.88}
 .btn-cta-ghost{background:transparent;color:var(--text);border:1.5px solid rgba(${borderRgb},.2)}
 
@@ -1526,47 +1570,58 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;letter-spacing:-.02em}
 .section-subtitle{font-size:${isMobile?'12px':'14px'};opacity:.55;margin-top:6px}
 .section-header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;transition:all .15s}
+.view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text)}
 .view-all-btn:hover{opacity:1;border-color:var(--primary);color:var(--primary)}
 
+/* ── PRODUCT CARDS ── */
 .themed-products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:${isMobile?'10px':'18px'}}
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all .22s;display:block;color:inherit;text-decoration:none}
-.tc-img{width:100%;aspect-ratio:1;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;position:relative;flex-shrink:0}
-.tc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.tc-img{width:100%;aspect-ratio:1;background:rgba(${borderRgb},.06);overflow:hidden;position:relative;flex-shrink:0}
+.tc-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;display:block}
+.tc:hover .tc-img img{transform:scale(1.04)}
 .tc-badge{position:absolute;top:10px;left:10px;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.04em;z-index:2}
-.tc-wishlist{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(${borderRgb},.1);backdrop-filter:blur(4px);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;opacity:0;transition:opacity .15s}
+.tc-wishlist{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2;opacity:0;transition:opacity .15s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tc:hover .tc-wishlist{opacity:1}
 .tc-info{padding:${isMobile?'10px':'14px'}}
 .tc-cat{font-size:10px;font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .tc-name{font-size:${isMobile?'12.5px':'13.5px'};font-weight:700;line-height:1.4;margin-bottom:6px}
-.tc-stars{font-size:11px;color:#f59e0b;margin-bottom:5px}
+.tc-stars{font-size:11px;color:#f59e0b;margin-bottom:5px;letter-spacing:1px}
 .tc-price-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .tc-price{font-size:${isMobile?'14px':'16px'};font-weight:800;color:var(--primary)}
 .tc-compare{font-size:11.5px;text-decoration:line-through;opacity:.38}
 .tc-disc{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 .tc-btn{width:100%;padding:${isMobile?'8px':'10px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s;display:block}
 .tc-btn:hover{opacity:.88}
-.classic-grid .tc{box-shadow:0 2px 10px rgba(0,0,0,.08)}.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.18)}
-.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12)}.minimal-grid .tc:hover{border-color:var(--primary)}
-.overlay-grid .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.3) 60%,transparent 100%);padding:20px 14px 14px;color:white;z-index:3}
+
+/* Card style variants */
+.classic-grid .tc{box-shadow:0 1px 6px rgba(0,0,0,.06)}.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.14)}
+.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.1)}.minimal-grid .tc:hover{border-color:var(--primary)}
+.overlay-grid .tc-img{aspect-ratio:3/4}
+.overlay-grid .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.3) 60%,transparent 100%);padding:20px 14px 14px;color:white;z-index:3}
 .overlay-grid .tc-overlay .tc-name{color:white;font-size:${isMobile?'12px':'14px'};margin-bottom:4px}
 .overlay-grid .tc-overlay .tc-price{color:white}
-.overlay-grid .tc-overlay .tc-btn{background:white;color:var(--primary);margin-top:8px}
+.overlay-grid .tc-overlay .tc-btn{background:rgba(255,255,255,.2);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.3);color:white;margin-top:8px}
 .overlay-grid .tc-info{display:none}
-.bold-grid .tc{border-top:4px solid var(--primary)}.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.list-grid{grid-template-columns:1fr!important}.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}.list-grid .tc-img{width:${isMobile?'100px':'150px'};min-width:${isMobile?'100px':'150px'};aspect-ratio:auto;height:auto;min-height:130px}.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'18px'}}
+.bold-grid .tc{border-top:3px solid var(--primary)}.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.list-grid{grid-template-columns:1fr!important}.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}.list-grid .tc-img{width:${isMobile?'100px':'160px'};min-width:${isMobile?'100px':'160px'};aspect-ratio:auto;height:auto;min-height:140px}.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'20px'}}
 .magazine-grid .tc:first-child{grid-column:span 2}.magazine-grid .tc:first-child .tc-img{aspect-ratio:${isMobile?'16/9':'2/1'}}.magazine-grid .tc{box-shadow:0 2px 8px rgba(0,0,0,.08)}.magazine-grid .tc:hover{transform:translateY(-3px)}
 .compact-grid{gap:${isMobile?'7px':'12px'}!important}.compact-grid .tc-info{padding:8px 10px 10px}.compact-grid .tc-name{font-size:${isMobile?'11px':'12px'};margin-bottom:3px}.compact-grid .tc-price{font-size:${isMobile?'12px':'14px'}}.compact-grid .tc-price-row{margin-bottom:0}.compact-grid .tc-btn{display:none}.compact-grid .tc:hover{opacity:.85}
-.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.12);border-radius:calc(var(--radius)*1.5)}.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.1);border-radius:calc(var(--radius)*1.5)}.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.18)}
 
+/* ── CATEGORIES ── */
 .cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}
-.cat-card{background:var(--card-bg);border-radius:var(--radius);padding:${isMobile?'20px 12px':'32px 20px'};text-align:center;cursor:pointer;transition:transform .2s}
-.cat-card:hover{transform:translateY(-2px)}
-.cat-card.circle-style{border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cat-card.minimal-style{background:transparent;border:1.5px solid rgba(${borderRgb},.1)}
-.cat-icon{font-size:${isMobile?'28px':'36px'};margin-bottom:10px}
+.cat-card{border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.cat-card:hover{transform:translateY(-3px)}
+.cat-card:hover .cat-img img{transform:scale(1.06)}
+.cat-img{width:100%;aspect-ratio:1;overflow:hidden;background:rgba(${borderRgb},.06)}
+.cat-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;display:block}
+.cat-info{padding:${isMobile?'10px 8px':'14px 12px'};background:var(--card-bg)}
+.cat-info.overlay-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,transparent 100%);padding:${isMobile?'16px 12px':'22px 16px'};color:white}
 .cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}
-.cat-count{font-size:11px;opacity:.45;margin-top:3px}
+.cat-count{font-size:11px;opacity:.45;margin-top:2px}
+.cat-card.minimal-style{background:transparent;border:1.5px solid rgba(${borderRgb},.1)}.cat-card.minimal-style .cat-info{background:transparent}
+.cat-card.circle-style{border-radius:50%;overflow:hidden}.cat-card.circle-style .cat-img{aspect-ratio:1}
+.cat-card.card-style .cat-info{background:var(--card-bg)}
 
 .promo-banner{color:white;padding:${isMobile?'40px 5%':'68px 5%'};text-align:center;position:relative;overflow:hidden}
 .promo-banner.left-layout{text-align:left;display:flex;align-items:center;gap:40px;flex-wrap:wrap}
@@ -1598,7 +1653,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 
 .footer{padding:${isMobile?'24px 5% 16px':'48px 5% 24px'};background:var(--nav-bg);border-top:1px solid rgba(${borderRgb},.06)}
 .footer-top{display:grid;grid-template-columns:${isMobile?'1fr':'2fr 1fr 1fr'};gap:32px;margin-bottom:32px}
-.footer-brand{}
 .footer-logo{font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
 .footer-tagline{font-size:13px;opacity:.5;line-height:1.6;margin-bottom:16px}
 .footer-contact{font-size:12px;opacity:.45;line-height:1.8}
@@ -1626,8 +1680,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 
 .gallery-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .gallery-grid{display:grid;gap:${isMobile?'8px':'12px'}}
-.gallery-item{background:var(--card-bg);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
-.gallery-item img{width:100%;height:100%;object-fit:cover}
+.gallery-item{background:var(--card-bg);border-radius:var(--radius);overflow:hidden}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block}
 
 .trust-section{padding:${isMobile?'20px 5%':'32px 5%'}}
 .trust-grid{display:grid;gap:12px}
@@ -1643,7 +1697,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .faq-a{font-size:13.5px;opacity:.6;line-height:1.65}
 
 .contact-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.contact-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:40px}
+.contact-grid{display:grid;gap:40px}
 .contact-info-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px}
 .contact-info-icon{width:38px;height:38px;border-radius:10px;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .contact-form{display:flex;flex-direction:column;gap:12px}
@@ -1651,7 +1705,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .contact-textarea{min-height:100px;resize:vertical}
 
 .about-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.about-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:48px;align-items:center}
+.about-grid{display:grid;gap:48px;align-items:center}
 .about-img{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:60px}
 .about-img img{width:100%;height:100%;object-fit:cover}
 .about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
@@ -1673,7 +1727,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 .richtext-body{opacity:.7;font-size:${isMobile?'14px':'16px'}}
 
 .imagetext-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-.imagetext-grid{display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:48px;align-items:center}
+.imagetext-grid{display:grid;gap:48px;align-items:center}
 .imagetext-img{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:60px}
 .imagetext-img img{width:100%;height:100%;object-fit:cover}
 .imagetext-bullets{display:flex;flex-direction:column;gap:8px;margin:16px 0}
@@ -1697,9 +1751,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
 [data-section-id]{cursor:pointer;transition:outline .1s}
 [data-section-id]:hover{outline:2px dashed rgba(91,92,246,.4);outline-offset:-2px}
 [data-section-id].sec-active{outline:2px solid rgba(91,92,246,.8)!important;outline-offset:-2px}
+
+/* Image skeleton loader */
+.img-placeholder{background:linear-gradient(90deg,rgba(${borderRgb},.06) 25%,rgba(${borderRgb},.1) 50%,rgba(${borderRgb},.06) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(${borderRgb},.15)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
-<body>${sectionsHTML}</body>
+<body>${sectionsHTML}
+<script>
+// Live countdown timer
+document.querySelectorAll('[data-countdown]').forEach(function(el){
+  var endDate=new Date(el.getAttribute('data-countdown'));
+  function update(){
+    var now=new Date(),diff=endDate-now;
+    if(diff<=0){el.querySelector('.cd-days').textContent='00';el.querySelector('.cd-hrs').textContent='00';el.querySelector('.cd-min').textContent='00';el.querySelector('.cd-sec').textContent='00';return;}
+    el.querySelector('.cd-days').textContent=String(Math.floor(diff/86400000)).padStart(2,'0');
+    el.querySelector('.cd-hrs').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    el.querySelector('.cd-min').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    el.querySelector('.cd-sec').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  }
+  update();setInterval(update,1000);
+});
+<\/script>
+</body>
 </html>`
 
     try{
@@ -1763,8 +1837,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'featured':{
-        const count=parseInt(d.count)||8
+        const count=Math.min(parseInt(d.count)||8, SAMPLE_PRODUCTS.length)
         const cardStyle=d.cardStyle||themeData.cardStyle||'classic'
         const fCols=cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3))
         const cBg=d.cardBg||themeData.cardBg||'#13131e'
@@ -1773,35 +1848,38 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         const showOld=d.showOldPrice!=='no'
         const showRating=d.showRating==='yes'
         const showBadge=d.showBadge==='yes'
-        const badge=escHtmlInner(d.badgeText||'New')
-        const emojis=['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠','🎒','🧴','🏃','⚽','🎮','🖥️','📷','🎵','🌿','✨','💎','🔥']
-        const cards=emojis.slice(0,count).map((e,i)=>{
-          const disc=i%3===0&&i>0?20:0
-          const price=499+i*197
-          const comparePrice=disc?Math.round(price/(1-disc/100)):0
+
+        const cards=SAMPLE_PRODUCTS.slice(0,count).map((p,i)=>{
+          const badgeLabel=escHtmlInner(d.badgeText||p.badge||'')
           const imgArea=`<div class="tc-img">
-            ${showBadge&&i<3?`<div class="tc-badge">${badge}</div>`:''}
-            <button class="tc-wishlist">♡</button>
-            ${e}
+            ${(showBadge||p.badge)&&badgeLabel?`<div class="tc-badge">${badgeLabel}</div>`:''}
+            <button class="tc-wishlist" title="Wishlist">♡</button>
+            <img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML+='<div class=\\'img-placeholder\\'>${p.emoji||'🛍️'}</div>'">
           </div>`
+
+          const ratingStars='★★★★' + (i%3===0?'★':'☆')
+          const ratingCount=42+i*13
+
           const infoArea=cardStyle==='overlay'?`
             <div class="tc-overlay">
-              ${showRating?`<div class="tc-stars">★★★★☆</div>`:''}
-              <div class="tc-name">Premium Product ${i+1}</div>
-              <div class="tc-price-row"><span class="tc-price" style="color:white">₹${price.toLocaleString('en-IN')}</span></div>
+              ${showRating?`<div class="tc-stars">${ratingStars}</div>`:''}
+              <div class="tc-name">${escHtmlInner(p.name)}</div>
+              <div class="tc-price-row"><span class="tc-price" style="color:white">₹${p.price.toLocaleString('en-IN')}</span></div>
               <button class="tc-btn">${btnTxt}</button>
             </div>`:`
             <div class="tc-info">
-              ${showRating?`<div class="tc-stars">★★★★☆ <span style="opacity:.4;font-size:10px">(${12+i*7})</span></div>`:''}
-              <div class="tc-name">Premium Product ${i+1}</div>
+              <div class="tc-cat">${escHtmlInner(p.cat)}</div>
+              ${showRating?`<div class="tc-stars">${ratingStars} <span style="opacity:.4;font-size:10px">(${ratingCount})</span></div>`:''}
+              <div class="tc-name">${escHtmlInner(p.name)}</div>
               <div class="tc-price-row">
-                <span class="tc-price" style="color:${pColor}">₹${price.toLocaleString('en-IN')}</span>
-                ${showOld&&disc?`<span class="tc-compare">₹${comparePrice.toLocaleString('en-IN')}</span><span class="tc-disc">-${disc}%</span>`:''}
+                <span class="tc-price" style="color:${pColor}">₹${p.price.toLocaleString('en-IN')}</span>
+                ${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}
               </div>
               ${cardStyle!=='compact'?`<button class="tc-btn">${btnTxt}</button>`:''}
             </div>`
           return`<a class="tc" style="background:${cBg}">${imgArea}${infoArea}</a>`
         }).join('')
+
         return wrap('',`<section class="section" id="products">
           <div class="section-header">
             <div class="section-header-row">
@@ -1812,20 +1890,64 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           <div class="themed-products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div>
         </section>`)
       }
+
       case 'categories':{
         const cCols=isMobile?2:(parseInt(d.columns)||4)
-        const style=d.style||'card'
-        const cats=[['👗','Fashion','240 items'],['📱','Electronics','180 items'],['🏠','Home & Living','320 items'],['💄','Beauty','150 items'],['🎮','Gaming','90 items'],['🍕','Food','200 items'],['⌚','Watches','75 items'],['👟','Footwear','130 items']]
+        const style=d.style||'image'
+        const showCount=d.showCount!=='no'
+        const catCount=cCols*2
+
+        const catCards=SAMPLE_CATEGORIES.slice(0,catCount).map(cat=>{
+          const imgHtml=`<div class="cat-img">
+            <img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'img-placeholder\\'>${cat.emoji}</div>'">
+          </div>`
+
+          if(style==='image'){
+            return`<div class="cat-card" style="overflow:hidden;border-radius:var(--radius);position:relative;cursor:pointer">
+              ${imgHtml}
+              <div class="cat-info overlay-info">
+                <div class="cat-name" style="color:white">${escHtmlInner(cat.name)}</div>
+                ${showCount?`<div class="cat-count" style="color:rgba(255,255,255,.6)">${cat.count} items</div>`:''}
+              </div>
+            </div>`
+          }else if(style==='circle'){
+            return`<div style="text-align:center;cursor:pointer">
+              <div style="width:${isMobile?'70px':'90px'};height:${isMobile?'70px':'90px'};border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid rgba(var(--border-rgb),.1)">
+                <img src="${cat.img}" alt="${escHtmlInner(cat.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+              </div>
+              <div class="cat-name" style="font-size:${isMobile?'11px':'13px'}">${escHtmlInner(cat.name)}</div>
+              ${showCount?`<div class="cat-count">${cat.count}</div>`:''}
+            </div>`
+          }else if(style==='minimal'){
+            return`<div class="cat-card minimal-style" style="border-radius:var(--radius)">
+              ${imgHtml}
+              <div class="cat-info">
+                <div class="cat-name">${cat.emoji} ${escHtmlInner(cat.name)}</div>
+                ${showCount?`<div class="cat-count">${cat.count} items</div>`:''}
+              </div>
+            </div>`
+          }else{
+            return`<div class="cat-card card-style" style="border-radius:var(--radius)">
+              ${imgHtml}
+              <div class="cat-info">
+                <div class="cat-name">${escHtmlInner(cat.name)}</div>
+                ${showCount?`<div class="cat-count">${cat.count} items</div>`:''}
+              </div>
+            </div>`
+          }
+        }).join('')
+
         return wrap('',`<section class="section">
           <div class="section-header">
             <h2 class="section-title">${escHtmlInner(d.title||'Browse by Category')}</h2>
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
-          <div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">
-            ${cats.slice(0,cCols*2).map(([e,n,count])=>`<div class="cat-card ${style}-style"><div class="cat-icon">${e}</div><div class="cat-name">${n}</div>${d.showCount==='yes'?`<div class="cat-count">${count}</div>`:''}</div>`).join('')}
+          <div style="display:grid;grid-template-columns:repeat(${cCols},1fr);gap:${isMobile?'10px':'16px'}">
+            ${catCards}
           </div>
         </section>`)
       }
+
       case 'banner':{
         const bg=d.bgColor||themeData.primaryColor||'#5b5cf6'
         const tc=d.textColor||'#ffffff'
@@ -1841,6 +1963,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'testimonials':{
         const tCols=isMobile?1:(parseInt(d.columns)||3)
         const style=d.style||'card'
@@ -1863,6 +1986,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'newsletter':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -1871,13 +1995,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
         return wrap('',`<section class="newsletter ${layout==='left'?'left-layout':''}" style="${bg}${tc}">
           <h2>${escHtmlInner(d.heading||'Stay in the loop')}</h2>
           <p>${escHtmlInner(d.subtext||'Get exclusive deals and offers straight to your inbox.')}</p>
-          <div class="newsletter-form" style="${layout==='left'?'':''}">
+          <div class="newsletter-form">
             <input class="newsletter-input" type="email" placeholder="${escHtmlInner(d.inputPlaceholder||'Enter your email address')}">
             <button class="btn-cta" style="background:${btnBg};white-space:nowrap">${escHtmlInner(d.btnText||'Subscribe')} →</button>
           </div>
           ${d.privacyText?`<div class="newsletter-privacy">${escHtmlInner(d.privacyText)}</div>`:''}
         </section>`)
       }
+
       case 'footer':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -1906,13 +2031,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           <div class="footer-bottom">
             <div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>
             ${d.showSocial!=='no'?`<div class="footer-social">
-              <div class="social-btn">📸</div>
-              <div class="social-btn">📘</div>
-              <div class="social-btn">🐦</div>
+              ${d.instagramUrl?`<a href="${d.instagramUrl}" class="social-btn" target="_blank">📸</a>`:`<div class="social-btn">📸</div>`}
+              ${d.facebookUrl?`<a href="${d.facebookUrl}" class="social-btn" target="_blank">📘</a>`:`<div class="social-btn">📘</div>`}
+              ${d.twitterUrl?`<a href="${d.twitterUrl}" class="social-btn" target="_blank">🐦</a>`:`<div class="social-btn">🐦</div>`}
             </div>`:''}
           </div>
         </footer>`)
       }
+
       case 'video':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -1923,36 +2049,45 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'countdown':{
         const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
         const tc=d.textColor?`color:${d.textColor};`:''
         const ac=d.accentColor||themeData.primaryColor||'#5b5cf6'
-        return wrap('',`<section class="countdown-section" style="${bg}${tc}">
+        const endDate=d.endDate||new Date(Date.now()+7*24*3600*1000).toISOString()
+        return wrap('',`<section class="countdown-section" style="${bg}${tc}" data-countdown="${endDate}">
           <div class="section-header">
             <h2 class="section-title">⏳ ${escHtmlInner(d.heading||'Deal Ends In')}</h2>
             ${d.subtext?`<p class="section-subtitle">${escHtmlInner(d.subtext)}</p>`:''}
           </div>
           <div class="countdown-row">
-            ${[['02','Days'],['14','Hours'],['37','Mins'],['52','Secs']].map(([n,l])=>`<div class="cd-unit"><div class="cd-num" style="color:${ac}">${n}</div><div class="cd-label">${l}</div></div>`).join('')}
+            ${[['cd-days','Days'],['cd-hrs','Hours'],['cd-min','Mins'],['cd-sec','Secs']].map(([cls,l])=>`<div class="cd-unit"><div class="cd-num ${cls}" style="color:${ac}">00</div><div class="cd-label">${l}</div></div>`).join('')}
           </div>
           ${d.ctaText?`<div class="countdown-cta"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}
         </section>`)
       }
+
       case 'gallery':{
         const gCols=isMobile?2:(parseInt(d.columns)||4)
-        const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1'
+        const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1'
         const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean)
-        const emojis=['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡']
+        // Use product images as gallery defaults
+        const defaultImgs=SAMPLE_PRODUCTS.slice(0,8).map(p=>p.img)
+        const displayImgs=imgs.length?imgs:defaultImgs
+        const displayCount=isMobile?4:Math.min(gCols*2,displayImgs.length||8)
         return wrap('',`<section class="gallery-section">
           <div class="section-header">
             <h2 class="section-title">${escHtmlInner(d.title||'Our Gallery')}</h2>
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
           <div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">
-            ${(isMobile?4:8) > 0 ? emojis.slice(0,isMobile?4:8).map((e,i)=>`<div class="gallery-item" style="aspect-ratio:${ratio}">${imgs[i]?`<img src="${imgs[i]}" alt="Gallery">`:e}</div>`).join('') : ''}
+            ${displayImgs.slice(0,displayCount).map(imgUrl=>`<div class="gallery-item" style="aspect-ratio:${ratio};overflow:hidden">
+              <img src="${imgUrl}" alt="Gallery" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+            </div>`).join('')}
           </div>
         </section>`)
       }
+
       case 'trustbadges':{
         const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -1968,6 +2103,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'faq':{
         const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4],[d.q5,d.a5]].filter(([q])=>q)
         const defaults=pairs.length?pairs:[
@@ -1984,16 +2120,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           ${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtmlInner(q)}</div><div class="faq-a">${escHtmlInner(a)}</div></div>`).join('')}
         </section>`)
       }
+
       case 'contact':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
         const layout=d.layout||'side-by-side'
+        const gridCols=layout==='form-only'?'1fr':isMobile?'1fr':'1fr 1fr'
         return wrap('',`<section class="contact-section" style="${bg}${tc}">
           <div class="section-header">
             <h2 class="section-title">${escHtmlInner(d.title||'Get in Touch')}</h2>
             ${d.subtitle?`<p class="section-subtitle">${escHtmlInner(d.subtitle)}</p>`:''}
           </div>
-          <div class="contact-grid" style="grid-template-columns:${layout==='form-only'?'1fr':isMobile?'1fr':'1fr 1fr'}">
+          <div class="contact-grid" style="grid-template-columns:${gridCols}">
             ${layout!=='form-only'?`<div>
               ${d.email?`<div class="contact-info-item"><div class="contact-info-icon">✉️</div><div><div style="font-weight:700;margin-bottom:3px">Email</div><div style="opacity:.55;font-size:13px">${escHtmlInner(d.email)}</div></div></div>`:''}
               ${d.phone?`<div class="contact-info-item"><div class="contact-info-icon">📞</div><div><div style="font-weight:700;margin-bottom:3px">Phone</div><div style="opacity:.55;font-size:13px">${escHtmlInner(d.phone)}</div></div></div>`:''}
@@ -2008,11 +2146,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'about':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
         const layout=d.layout||'image-right'
-        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="About">`:' 🏪'
+        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="About us" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🏪</span>'
         const textSide=`<div>
           <h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;letter-spacing:-.02em;margin-bottom:12px">${escHtmlInner(d.title||'Our Story')}</h2>
           ${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px">${escHtmlInner(d.subtitle)}</p>`:''}
@@ -2032,6 +2171,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'team':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tCols=isMobile?2:(parseInt(d.columns)||3)
@@ -2043,13 +2183,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
           <div class="team-grid" style="grid-template-columns:repeat(${tCols},1fr)">
             ${members.map(([n,r,img])=>`<div class="team-card">
-              <div class="team-avatar">${img?`<img src="${img}" alt="${n}">`:n[0]}</div>
+              <div class="team-avatar">${img?`<img src="${img}" alt="${escHtmlInner(n)}" style="width:100%;height:100%;object-fit:cover">`:n[0]}</div>
               <div class="team-name">${escHtmlInner(n)}</div>
               <div class="team-role">${escHtmlInner(r)}</div>
             </div>`).join('')}
           </div>
         </section>`)
       }
+
       case 'richtext':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -2065,12 +2206,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'imagetext':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
         const layout=d.layout||'image-right'
         const bullets=[d.bullet1,d.bullet2,d.bullet3].filter(Boolean)
-        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="">`:' 🖼️'
+        const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🖼️</span>'
         const textSide=`<div>
           <h2 style="font-size:${isMobile?'22px':'30px'};font-weight:900;letter-spacing:-.02em;margin-bottom:8px">${escHtmlInner(d.title||'Why Choose Us')}</h2>
           ${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:14px">${escHtmlInner(d.subtitle)}</p>`:''}
@@ -2085,6 +2227,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'brands':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const style=d.style||'pill'
@@ -2096,6 +2239,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       case 'offers':{
         const bg=d.bgColor?`background:${d.bgColor};`:''
         const tc=d.textColor?`color:${d.textColor};`:''
@@ -2119,6 +2263,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
           </div>
         </section>`)
       }
+
       default:return''
     }
   }
@@ -2135,6 +2280,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
       }
       doc.querySelectorAll('[data-section-id]').forEach(el=>{
         el.addEventListener('click',e=>{
+          // Don't trigger click on interactive elements inside sections
+          if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'||e.target.tagName==='A')return
           e.stopPropagation()
           selectSection(el.getAttribute('data-section-id'))
         })
@@ -2171,7 +2318,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inhe
   function toast(msg,type='success'){
     const el=document.createElement('div')
     el.className=`toast ${type}`
-    el.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'❌'}</span><span class="toast-text">${msg}</span>`
+    el.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'❌'}</span><span class="toast-text">${escHtml(msg)}</span>`
     document.getElementById('toast-container').appendChild(el)
     requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')))
     setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200)
