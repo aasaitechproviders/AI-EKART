@@ -6,7 +6,7 @@
   <title>eKart Shop</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ... (all your existing styles remain exactly the same) ... */
+    /* ... (all existing styles remain exactly the same) ... */
     :root {
       --accent: #6c63ff;
       --primary: #6c63ff;
@@ -209,11 +209,54 @@
     .product-compare { font-size: 12px; text-decoration: line-through; color: var(--text3); }
     .product-discount { font-size: 11px; font-weight: 700; color: var(--green); background: #f0fdf4; padding: 2px 6px; border-radius: 4px; }
     .out-badge { text-align: center; font-size: 12px; color: #ef4444; font-weight: 700; padding: 7px; background: #fef2f2; border-radius: 8px; }
+
+    /* New quantity control styles */
+    .cart-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .15s;
+    }
+    .qty-btn:hover { opacity: 0.85; }
+    .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .qty-value {
+      font-size: 14px;
+      font-weight: 700;
+      min-width: 24px;
+      text-align: center;
+    }
     .btn-add {
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      width: 100%; padding: 9px; background: var(--accent); color: white;
-      border: none; border-radius: 9px; font-size: 13px; font-weight: 700;
-      cursor: pointer; font-family: var(--font); transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 9px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: all .15s;
     }
     .btn-add:hover { background: #7c74ff; }
     .btn-add.added { background: var(--green); }
@@ -361,14 +404,8 @@
     .tc-price-row { display: flex; align-items: center; gap: 6px; }
     .tc-product-price { font-size: 16px; font-weight: 800; color: var(--primary); }
     .tc-product-old { font-size: 11px; text-decoration: line-through; opacity: .38; }
-    .tc-product-btn {
-      width: 100%; margin-top: 10px; padding: 9px; background: var(--primary);
-      color: white; border: none; border-radius: var(--btn-r); font-size: 12.5px;
-      font-weight: 700; cursor: pointer; font-family: var(--font); transition: opacity .15s;
-    }
-    .tc-product-btn:hover { opacity: .88; }
 
-    /* Categories */
+    /* Category cards */
     .tc-cats-grid { display: grid; gap: 16px; }
     .tc-cat-card {
       background: var(--card-bg); border-radius: var(--radius);
@@ -721,6 +758,123 @@
       }
     }
 
+    // ========== CART FUNCTIONS (with quantity controls) ==========
+    function getCart() { return JSON.parse(localStorage.getItem('cart_' + slug) || '[]') }
+    function saveCart(cart) { localStorage.setItem('cart_' + slug, JSON.stringify(cart)) }
+
+    function getCartItemQty(productId) {
+      const cart = getCart()
+      const item = cart.find(i => i.product_id === productId && !i.variant)
+      return item ? item.qty : 0
+    }
+
+    function updateCartItem(productId, change) {
+      let cart = getCart()
+      const index = cart.findIndex(i => i.product_id === productId && !i.variant)
+      if (index === -1 && change > 0) {
+        // Need product details to add - but we don't have them here.
+        // This function is called from increment, so we need product details.
+        // We'll store product name, price, image in data attributes or fetch from store.
+        // For simplicity, we'll pass them from the button click.
+        // But here we only have productId. So we'll rely on addToCart for first addition,
+        // and for increment/decrement we'll use separate functions that already have details.
+        // We'll call incrementCartItem and decrementCartItem from the buttons.
+      } else if (index !== -1) {
+        const newQty = cart[index].qty + change
+        if (newQty <= 0) {
+          cart.splice(index, 1)
+        } else {
+          cart[index].qty = newQty
+        }
+        saveCart(cart)
+        updateCartUI()
+        // Update the specific product card's controls
+        updateProductCardControls(productId)
+        toast(change > 0 ? '➕ Item added' : '➖ Item removed')
+      }
+    }
+
+    function incrementCartItem(productId, name, price, image) {
+      let cart = getCart()
+      const item = cart.find(i => i.product_id === productId && !i.variant)
+      if (item) {
+        item.qty++
+      } else {
+        cart.push({ product_id: productId, name, price, image, qty: 1 })
+      }
+      saveCart(cart)
+      updateCartUI()
+      updateProductCardControls(productId)
+      toast('➕ Item added')
+    }
+
+    function decrementCartItem(productId) {
+      let cart = getCart()
+      const index = cart.findIndex(i => i.product_id === productId && !i.variant)
+      if (index !== -1) {
+        if (cart[index].qty > 1) {
+          cart[index].qty--
+        } else {
+          cart.splice(index, 1)
+        }
+        saveCart(cart)
+        updateCartUI()
+        updateProductCardControls(productId)
+        toast('➖ Item removed')
+      }
+    }
+
+    // Update the controls area of a single product card (both main grid and featured)
+    function updateProductCardControls(productId) {
+      const qty = getCartItemQty(productId)
+      const containers = document.querySelectorAll(`.cart-controls[data-product-id="${productId}"]`)
+      containers.forEach(container => {
+        if (qty === 0) {
+          // Show "Add to Cart" button
+          container.innerHTML = `<button class="btn-add" onclick="event.preventDefault(); addToCart('${productId}', this.dataset.name, this.dataset.price, this.dataset.image)" data-name="${container.dataset.name}" data-price="${container.dataset.price}" data-image="${container.dataset.image}">🛒 Add to Cart</button>`
+        } else {
+          // Show quantity controls
+          container.innerHTML = `
+            <div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
+              <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${productId}')">−</button>
+              <span class="qty-value">${qty}</span>
+              <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${productId}', '${container.dataset.name}', ${container.dataset.price}, '${container.dataset.image}')">+</button>
+            </div>
+          `
+        }
+      })
+    }
+
+    // Original addToCart now just calls increment
+    function addToCart(id, name, price, image) {
+      incrementCartItem(id, name, price, image)
+    }
+
+    function updateCartUI() {
+      const cart = getCart()
+      const qty  = cart.reduce((s,x) => s + x.qty, 0)
+      const amt  = cart.reduce((s,x) => s + x.price * x.qty, 0)
+      const el   = document.getElementById('cartCount')
+      el.textContent = qty
+      el.className   = 'cart-count' + (qty > 0 ? ' has-items' : '')
+      const bar = document.getElementById('cartBar')
+      if (qty > 0) {
+        bar.classList.add('show')
+        document.getElementById('cartBarQty').textContent    = `${qty} item${qty!==1?'s':''} — `
+        document.getElementById('cartBarTotal').textContent  = `${currency}${amt.toFixed(2)}`
+      } else {
+        bar.classList.remove('show')
+      }
+      updateThemeNavCart()
+    }
+
+    // Update theme navbar cart count
+    function updateThemeNavCart() {
+      const cart = getCart()
+      const qty = cart.reduce((s,x) => s + x.qty, 0)
+      document.querySelectorAll('.theme-cart-qty').forEach(el => el.textContent = qty)
+    }
+
     // ========== THEME LOADING & RENDERING ==========
     async function loadTheme() {
       try {
@@ -811,14 +965,12 @@
           if (id === 'mainProducts' || id === 'catPills') {
             scrollToElement(id)
           } else {
-            // try to find any element with that id
             const target = document.getElementById(id)
             if (target) scrollToElement(id)
           }
         })
       })
 
-      // Also handle navbar links that might not be hash links
       const navHome = document.querySelector('.nav-links a[href*="home"]') || document.querySelector('.nav-links a:first-child')
       if (navHome) {
         navHome.addEventListener('click', (e) => {
@@ -841,7 +993,6 @@
         })
       }
 
-      // Logo click
       const logo = document.querySelector('.nav-logo')
       if (logo) {
         logo.style.cursor = 'pointer'
@@ -849,7 +1000,6 @@
       }
     }
 
-    // ... (getSectionData function remains exactly the same as before) ...
     function getSectionData(sec) {
       const d = sec.data || {}
       const s = sec.settings || {}
@@ -946,7 +1096,6 @@
       }
     }
 
-    // ... (buildSectionHTML modified for banner, newsletter, video, footer) ...
     function buildSectionHTML(sec, settings, isMobile) {
       const d = getSectionData(sec)
       const sid = escHtml(sec.id || '')
@@ -1236,7 +1385,6 @@
       }
     }
 
-    // Countdown with expired message
     function startCountdown(secId, targetDate) {
       const target = new Date(targetDate).getTime()
       function tick() {
@@ -1262,13 +1410,6 @@
       }
       tick()
       setInterval(tick, 1000)
-    }
-
-    // Update theme navbar cart count
-    function updateThemeNavCart() {
-      const cart = getCart()
-      const qty = cart.reduce((s,x) => s + x.qty, 0)
-      document.querySelectorAll('.theme-cart-qty').forEach(el => el.textContent = qty)
     }
 
     // ========== STORE INIT ==========
@@ -1319,18 +1460,16 @@
 
         await loadTheme()
 
-        // Hide loader after everything is done
         hideLoader()
 
       } catch(e) {
         document.body.innerHTML = `<div style="text-align:center;padding:80px;font-family:sans-serif;">
           <h2>Store not found</h2><p style="color:#888;margin-top:8px;">${e.message}</p>
         </div>`
-        hideLoader() // also hide loader in case of error
+        hideLoader()
       }
     }
 
-    // ... (loadCategories, selectCatPill, loadProducts, renderProducts, etc. remain exactly the same as before) ...
     let storeCategories = []
     async function loadCategories() {
       try {
@@ -1395,6 +1534,12 @@
         return
       }
       grid.innerHTML = products.map(p => renderGridCard(p)).join('')
+      // After inserting cards, update controls for any products already in cart
+      products.forEach(p => {
+        if (getCartItemQty(p._id) > 0) {
+          updateProductCardControls(p._id)
+        }
+      })
     }
 
     function discountPct(p) {
@@ -1409,6 +1554,10 @@
       const img = p.images?.[0]
         ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
         : '<span style="font-size:48px;">📦</span>'
+
+      // Get current cart quantity for this product
+      const qty = getCartItemQty(p._id)
+
       return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}" style="background:var(--card-bg);border-radius:var(--radius);">
         ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
         <div class="product-img">${img}</div>
@@ -1422,7 +1571,16 @@
           </div>
           ${oos
             ? `<div class="out-badge">Out of Stock</div>`
-            : `<button class="btn-add" id="btn-${p._id}" onclick="event.preventDefault();addToCart('${p._id}','${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 Add to Cart</button>`
+            : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${p.images?.[0]||''}">
+                ${qty === 0
+                  ? `<button class="btn-add" onclick="event.preventDefault(); addToCart('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">🛒 Add to Cart</button>`
+                  : `<div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
+                      <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
+                      <span class="qty-value">${qty}</span>
+                      <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">+</button>
+                    </div>`
+                }
+              </div>`
           }
         </div>
       </a>`
@@ -1451,45 +1609,6 @@
       currentCat = id; currentPage = 1; loadProducts()
     }
 
-    // ========== CART ==========
-    function getCart()     { return JSON.parse(localStorage.getItem('cart_'+slug) || '[]') }
-    function saveCart(c)   { localStorage.setItem('cart_'+slug, JSON.stringify(c)) }
-
-    function addToCart(id, name, price, image) {
-      const cart = getCart()
-      const ex   = cart.find(x => x.product_id === id && !x.variant)
-      if (ex) ex.qty++
-      else cart.push({ product_id: id, name, price, image, qty: 1 })
-      saveCart(cart)
-      updateCartUI()
-      const btn = document.getElementById('btn-'+id)
-      if (btn) {
-        btn.textContent = '✅ Added!'
-        btn.classList.add('added')
-        setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('added') }, 1200)
-      }
-      toast('Added to cart! 🛒')
-    }
-
-    function updateCartUI() {
-      const cart = getCart()
-      const qty  = cart.reduce((s,x) => s+x.qty, 0)
-      const amt  = cart.reduce((s,x) => s+x.price*x.qty, 0)
-      const el   = document.getElementById('cartCount')
-      el.textContent = qty
-      el.className   = 'cart-count' + (qty > 0 ? ' has-items' : '')
-      const bar = document.getElementById('cartBar')
-      if (qty > 0) {
-        bar.classList.add('show')
-        document.getElementById('cartBarQty').textContent    = `${qty} item${qty!==1?'s':''} — `
-        document.getElementById('cartBarTotal').textContent  = `${currency}${amt.toFixed(2)}`
-      } else {
-        bar.classList.remove('show')
-      }
-      updateThemeNavCart()
-    }
-
-    // ... (fillFeaturedSection and fillCategoriesSection remain the same) ...
     async function fillFeaturedSection(secId, count, d) {
       const grid = document.getElementById(`${secId}-grid`)
       if (!grid) return
@@ -1508,25 +1627,37 @@
           const img  = p.images?.[0]
             ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
             : '<span style="font-size:48px">📦</span>'
-          return `<a class="tc-product-card" href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:var(--text);">
-            <div class="tc-product-img" style="position:relative;">
-              ${disc >= 5 ? `<div class="tc-product-badge">−${disc}%</div>` : ''}
-              ${img}
-            </div>
-            <div class="tc-product-info">
-              ${p.category_name ? `<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${escHtml(p.category_name)}</div>` : ''}
-              <div class="tc-product-name">${escHtml(p.name)}</div>
-              <div class="tc-price-row">
-                <span class="tc-product-price">${currency}${p.price.toFixed(2)}</span>
-                ${p.compare_at_price ? `<span class="tc-product-old">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
-                ${disc ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;">${disc}% off</span>` : ''}
+          const qty = getCartItemQty(p._id)
+          return `<div class="tc-product-card" style="text-decoration:none;color:var(--text);">
+            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;">
+              <div class="tc-product-img" style="position:relative;">
+                ${disc >= 5 ? `<div class="tc-product-badge">−${disc}%</div>` : ''}
+                ${img}
               </div>
-              ${oos
-                ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px;">Out of Stock</div>`
-                : `<button class="tc-product-btn" onclick="event.preventDefault();addToCart('${p._id}','${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 ${escHtml(d.btnText||'Add to Cart')}</button>`
-              }
-            </div>
-          </a>`
+              <div class="tc-product-info">
+                ${p.category_name ? `<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${escHtml(p.category_name)}</div>` : ''}
+                <div class="tc-product-name">${escHtml(p.name)}</div>
+                <div class="tc-price-row">
+                  <span class="tc-product-price">${currency}${p.price.toFixed(2)}</span>
+                  ${p.compare_at_price ? `<span class="tc-product-old">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                  ${disc ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;">${disc}% off</span>` : ''}
+                </div>
+            </a>
+                ${oos
+                  ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px;">Out of Stock</div>`
+                  : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${p.images?.[0]||''}">
+                      ${qty === 0
+                        ? `<button class="tc-product-btn" onclick="event.preventDefault(); addToCart('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">🛒 ${escHtml(d.btnText||'Add to Cart')}</button>`
+                        : `<div class="cart-controls" style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px;">
+                            <button class="qty-btn" onclick="event.preventDefault(); decrementCartItem('${p._id}')">−</button>
+                            <span class="qty-value">${qty}</span>
+                            <button class="qty-btn" onclick="event.preventDefault(); incrementCartItem('${p._id}', '${escHtml(p.name)}', ${p.price}, '${p.images?.[0]||''}')">+</button>
+                          </div>`
+                      }
+                    </div>`
+                }
+              </div>
+          </div>`
         }).join('')
       } catch(e) {
         console.error('[featured section]', e)
@@ -1585,13 +1716,11 @@
       scrollToElement('mainProducts')
     }
 
-    // Start the whole process
     if (slug) {
-      // Also set a safety timeout to hide loader after 3 seconds in case init hangs
       setTimeout(hideLoader, 3000)
       init()
     } else {
-      hideLoader() // if no slug, hide loader anyway
+      hideLoader()
     }
   </script>
 </body>
