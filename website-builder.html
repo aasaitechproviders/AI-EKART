@@ -890,16 +890,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   updatePreviewUrl()
   initThemesGrid()
-  loadThemeForStore(currentStoreId)
   initSectionsPanel()
   initSettingsPanel()
-  renderPreview()
+  await loadThemeForStore(currentStoreId)
 })
 
-function onStoreSwitch(id) {
+async function onStoreSwitch(id) {
   currentStoreId = id
   updatePreviewUrl()
-  loadThemeForStore(id)
+  await loadThemeForStore(id)
 }
 
 function updatePreviewUrl() {
@@ -908,21 +907,96 @@ function updatePreviewUrl() {
   document.getElementById('preview-url').textContent = `ekart.aasaitech.in/${slug}`
 }
 
-// ── Theme Storage (localStorage per store) ────────────────────────────────────
-function getStorageKey(storeId) { return `ekart_theme_${storeId}` }
+// ── Theme Storage (API-backed) ────────────────────────────────────────────────
+function setDefaultTheme() {
+  selectedThemeId = 'modern'
+  themeSettings = { ...THEMES[0].settings }
+  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+}
 
-function loadThemeForStore(storeId) {
-  const saved = localStorage.getItem(getStorageKey(storeId))
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved)
-      selectedThemeId = parsed.themeId || 'modern'
-      themeSettings = { ...THEMES.find(t => t.id === selectedThemeId)?.settings, ...parsed.settings }
-      sections = parsed.sections || JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-    } catch {
-      setDefaultTheme()
-    }
+// Map backend theme settings → our internal themeSettings + sections
+function applyBackendTheme(themeDoc) {
+  if (!themeDoc) return setDefaultTheme()
+  const s = themeDoc.settings || {}
+  // Detect which preset theme best matches by primary color, or use stored themeId
+  selectedThemeId = s.themeId || 'modern'
+  themeSettings = {
+    primaryColor:  s.primary_color  || THEMES[0].settings.primaryColor,
+    bgColor:       s.secondary_color || THEMES[0].settings.bgColor,
+    textColor:     s.accent_color   || THEMES[0].settings.textColor,
+    font:          s.font_heading   || THEMES[0].settings.font,
+    cardStyle:     s.card_style     || 'rounded',
+    borderRadius:  s.border_radius  || 12,
+    buttonStyle:   s.button_style   || 'filled',
+    announcementText: s.announcement_bar?.text || 'Free shipping on orders above ₹499! 🎉',
+    footerText:    s.footer_text    || '',
+    themeId:       selectedThemeId,
+  }
+  // Map backend sections format → our internal format
+  if (themeDoc.sections && themeDoc.sections.length) {
+    sections = themeDoc.sections.map(bs => {
+      const def = DEFAULT_SECTIONS.find(d => d.id === bs.type) ||
+                  { id: bs.type, icon: '📦', label: bs.type, data: {} }
+      return {
+        id:      bs.type,
+        icon:    def.icon,
+        label:   bs.settings?.label || def.label,
+        enabled: bs.is_visible !== false,
+        data:    bs.settings || def.data || {}
+      }
+    })
+    // ensure all default sections exist
+    DEFAULT_SECTIONS.forEach(def => {
+      if (!sections.find(s => s.id === def.id)) {
+        sections.push({ ...def, enabled: false })
+      }
+    })
   } else {
+    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  }
+}
+
+// Build backend payload from current UI state
+function buildBackendSettings() {
+  return {
+    primary_color:   themeSettings.primaryColor,
+    secondary_color: themeSettings.bgColor,
+    accent_color:    themeSettings.textColor,
+    font_heading:    themeSettings.font,
+    font_body:       themeSettings.font,
+    card_style:      themeSettings.cardStyle,
+    border_radius:   themeSettings.borderRadius,
+    button_style:    themeSettings.buttonStyle,
+    footer_text:     themeSettings.footerText || '',
+    themeId:         selectedThemeId,
+    announcement_bar: {
+      enabled: sections.find(s => s.id === 'announcement')?.enabled || false,
+      text:    themeSettings.announcementText,
+      bg_color: themeSettings.primaryColor,
+      text_color: '#ffffff'
+    }
+  }
+}
+
+function buildBackendSections() {
+  return sections.map((s, i) => ({
+    id:         `${s.id}-1`,
+    type:       s.id,
+    order:      i + 1,
+    is_visible: s.enabled,
+    settings:   { ...s.data, label: s.label }
+  }))
+}
+
+async function loadThemeForStore(storeId) {
+  if (!storeId) return
+  try {
+    const data = await apiFetch(`/stores/${storeId}/theme`)
+    // Use draft if exists, otherwise use published
+    const themeDoc = data.draft || data.published || null
+    applyBackendTheme(themeDoc)
+  } catch (e) {
+    console.warn('Theme load failed, using defaults:', e.message)
     setDefaultTheme()
   }
   syncUIToSettings()
@@ -932,19 +1006,31 @@ function loadThemeForStore(storeId) {
   markUnsaved(false)
 }
 
-function setDefaultTheme() {
-  selectedThemeId = 'modern'
-  themeSettings = { ...THEMES[0].settings }
-  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-}
-
-function saveTheme() {
+async function saveTheme() {
   if (!currentStoreId) return toast('Select a store first', 'error')
-  const data = { themeId: selectedThemeId, settings: themeSettings, sections }
-  localStorage.setItem(getStorageKey(currentStoreId), JSON.stringify(data))
-  markUnsaved(false)
-  toast('Theme saved & published! 🚀', 'success')
-  renderPreview()
+  const btn = document.getElementById('save-btn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…' }
+  try {
+    // 1. Save settings (creates/updates draft)
+    await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
+      method: 'PUT',
+      body: JSON.stringify(buildBackendSettings())
+    })
+    // 2. Save sections
+    await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
+      method: 'PUT',
+      body: JSON.stringify({ sections: buildBackendSections() })
+    })
+    // 3. Publish draft → live
+    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method: 'POST' })
+    markUnsaved(false)
+    toast('Theme saved & published! 🚀', 'success')
+    renderPreview()
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error')
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save & Publish' }
+  }
 }
 
 function markUnsaved(val) {
