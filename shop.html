@@ -192,6 +192,9 @@
     </div>
     <!-- Payment badge — shown only when Razorpay is enabled -->
     <div class="pay-badge" id="payBadge" style="display:none;">⚡ Online Payments</div>
+    <a href="javascript:void(0)" id="accountBtn" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:700;color:var(--text2);text-decoration:none;white-space:nowrap;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+      👤 <span id="accountBtnLabel">Account</span>
+    </a>
     <a href="cart.html" class="cart-btn" id="cartBtn">
       🛒 Cart <span class="cart-count" id="cartCount">0</span>
     </a>
@@ -298,6 +301,25 @@ async function init() {
     sessionStorage.setItem('ekart_currency',     currency)
     sessionStorage.setItem('ekart_store_name',   storeConfig.name)
     sessionStorage.setItem('ekart_pay_enabled',  storeConfig.payment_enabled ? '1' : '0')
+
+    // Fix cart link to include store slug
+    const cartBtnEl = document.getElementById('cartBtn')
+    if (cartBtnEl) cartBtnEl.href = `cart.html?store=${slug}`
+
+    // Wire account button — show name if logged in, else go to login
+    const custToken = localStorage.getItem(`cust_token_${slug}`)
+    const custName  = localStorage.getItem(`cust_name_${slug}`)
+    const acctBtn   = document.getElementById('accountBtn')
+    const acctLabel = document.getElementById('accountBtnLabel')
+    if (acctBtn) {
+      if (custToken && custName) {
+        acctBtn.href = `customer-account.html?store=${slug}`
+        if (acctLabel) acctLabel.textContent = custName.split(' ')[0]
+      } else {
+        acctBtn.href = `customer-login.html?store=${slug}`
+        if (acctLabel) acctLabel.textContent = 'Login'
+      }
+    }
 
     await loadCategories()
     await loadProducts()
