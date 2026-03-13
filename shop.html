@@ -449,6 +449,15 @@
     .tc-faq-q { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .tc-faq-a { font-size: 13.5px; opacity: .6; line-height: 1.65; }
 
+    /* Skeleton shimmer */
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .tc-skeleton {
+      background: linear-gradient(90deg, #e8eaf0 25%, #f1f5f9 50%, #e8eaf0 75%) !important;
+      background-size: 400px 100% !important;
+      animation: shimmer 1.2s ease-in-out infinite !important;
+      border-radius: var(--radius);
+    }
+
     /* ── MOBILE ── */
     @media (max-width: 768px) {
       .layout { grid-template-columns: 1fr; padding: 16px; }
@@ -509,6 +518,7 @@
 
   <!-- Product layout -->
   <div class="layout" id="mainLayout">
+    <a id="mainProducts" style="position:absolute;top:-80px;visibility:hidden;"></a>
     <div class="filters">
       <div class="filter-section">
         <div class="filter-title">Categories</div>
@@ -845,29 +855,26 @@
 
         case 'featured': {
           const count = parseInt(d.count) || 8
-          const cols = isMobile ? 2 : (parseInt(d.columns) || 3)
-          const pColor = d.priceColor || 'var(--primary)'
-          const btnTxt = d.btnText || 'Add to Cart'
-          const emojis = ['👟','👗','🎧','📱','⌚','👜','🕶️','💻','🎮','🛍️','💄','🏠']
-          return `<section class="tc-section" id="products">
-            <div class="tc-section-header">
-              <h2 class="tc-section-title">${escHtml(d.title || 'Featured Products')}</h2>
-              ${d.subtitle ? `<p class="tc-section-subtitle">${escHtml(d.subtitle)}</p>` : ''}
+          const cols  = isMobile ? 2 : (parseInt(d.columns) || 3)
+          const secId = `featured-sec-${sec.id}`
+          // Render placeholder shell — JS will fill with real products after load
+          setTimeout(() => fillFeaturedSection(secId, count, d), 0)
+          return `<section class="tc-section" id="${secId}">
+            <div class="tc-section-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <h2 class="tc-section-title">${escHtml(d.title || 'Featured Products')}</h2>
+                ${d.subtitle ? `<p class="tc-section-subtitle">${escHtml(d.subtitle)}</p>` : ''}
+              </div>
+              <a href="#mainProducts" class="tc-viewall-btn" style="font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:7px 16px;border:1.5px solid var(--primary);border-radius:var(--btn-r);">${escHtml(d.viewAllText||'View All →')}</a>
             </div>
-            <div class="tc-products-grid" style="--cols:${cols}">
-              ${emojis.slice(0,count).map((e,i) => `
-                <div class="tc-product-card">
-                  <div class="tc-product-img">
-                    ${d.showBadge==='yes' && i<3 ? `<div class="tc-product-badge">${escHtml(d.badgeText||'New')}</div>` : ''}
-                    ${e}
-                  </div>
+            <div class="tc-products-grid" id="${secId}-grid" style="--cols:${cols}">
+              ${Array.from({length:Math.min(count,3)}).map(()=>`
+                <div class="tc-product-card tc-skeleton">
+                  <div class="tc-product-img" style="background:#e8eaf0;"></div>
                   <div class="tc-product-info">
-                    <div class="tc-product-name">Premium Product ${i+1}</div>
-                    <div class="tc-price-row">
-                      <span class="tc-product-price" style="color:${pColor}">₹${(499+i*200).toLocaleString()}</span>
-                      ${d.showOldPrice!=='no' ? `<span class="tc-product-old">₹${(799+i*300).toLocaleString()}</span>` : ''}
-                    </div>
-                    <button class="tc-product-btn">${escHtml(btnTxt)}</button>
+                    <div style="height:14px;background:#e8eaf0;border-radius:6px;margin-bottom:8px;"></div>
+                    <div style="height:18px;background:#e8eaf0;border-radius:6px;width:60%;margin-bottom:8px;"></div>
+                    <div style="height:34px;background:#e8eaf0;border-radius:9px;"></div>
                   </div>
                 </div>`).join('')}
             </div>
@@ -875,19 +882,17 @@
         }
 
         case 'categories': {
-          const cols = isMobile ? 2 : (parseInt(d.columns) || 4)
-          const cats = [['👗','Fashion'],['📱','Electronics'],['🏠','Home & Living'],['💄','Beauty'],['🎮','Gaming'],['🍕','Food'],['⌚','Watches'],['👟','Footwear']]
-          return `<section class="tc-section" id="categories">
+          const cols  = isMobile ? 2 : (parseInt(d.columns) || 4)
+          const secId = `categories-sec-${sec.id}`
+          setTimeout(() => fillCategoriesSection(secId, cols, d), 0)
+          return `<section class="tc-section" id="${secId}">
             <div class="tc-section-header">
               <h2 class="tc-section-title">${escHtml(d.title||'Browse by Category')}</h2>
               ${d.subtitle ? `<p class="tc-section-subtitle">${escHtml(d.subtitle)}</p>` : ''}
             </div>
-            <div class="tc-cats-grid" style="grid-template-columns:repeat(${cols},1fr)">
-              ${cats.slice(0,cols*2).map(([e,n]) => `
-                <div class="tc-cat-card">
-                  <div class="tc-cat-icon">${e}</div>
-                  <div class="tc-cat-name">${n}</div>
-                </div>`).join('')}
+            <div class="tc-cats-grid" id="${secId}-grid" style="grid-template-columns:repeat(${cols},1fr)">
+              ${Array.from({length:cols}).map(()=>`
+                <div class="tc-cat-card tc-skeleton" style="background:#e8eaf0;height:110px;"></div>`).join('')}
             </div>
           </section>`
         }
@@ -1158,12 +1163,15 @@
     // ══════════════════════════════════════════════
     // CATEGORIES & PRODUCTS
     // ══════════════════════════════════════════════
+    let storeCategories = []  // global cache
+
     async function loadCategories() {
       try {
         const cats = await fetch(`${API}/shop/${slug}/categories`).then(r => r.json())
+        storeCategories = Array.isArray(cats) ? cats : []
         const list = document.getElementById('catList')
         list.innerHTML = `<div class="cat-item active" data-cat="" onclick="selectCat(this,'')">🛍 All</div>` +
-          (Array.isArray(cats) ? cats : []).map(c =>
+          storeCategories.map(c =>
             `<div class="cat-item" data-cat="${c._id}" onclick="selectCat(this,'${c._id}')">${escHtml(c.name)}</div>`
           ).join('')
       } catch(e) { console.error('[categories]', e) }
@@ -1308,6 +1316,112 @@
       t.textContent = msg
       t.classList.add('show')
       setTimeout(() => t.classList.remove('show'), 2000)
+    }
+
+    // ══════════════════════════════════════════════
+    // FILL THEME SECTIONS WITH REAL DATA
+    // ══════════════════════════════════════════════
+
+    // Called after theme renders — fills featured section with real products
+    async function fillFeaturedSection(secId, count, d) {
+      const grid = document.getElementById(`${secId}-grid`)
+      if (!grid) return
+      try {
+        const data = await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r => r.json())
+        const products = (data.products || []).slice(0, count)
+        if (!products.length) { grid.closest('section').style.display = 'none'; return }
+
+        const cols = parseInt(grid.closest('.tc-section').querySelector('.tc-products-grid')?.style.getPropertyValue('--cols')) ||
+                     (window.innerWidth <= 768 ? 2 : parseInt(d.columns) || 3)
+
+        grid.innerHTML = products.map(p => {
+          const disc = p.compare_at_price && p.compare_at_price > p.price
+            ? Math.round((1 - p.price / p.compare_at_price) * 100) : 0
+          const oos  = p.track_inventory && p.stock_qty <= 0
+          const img  = p.images?.[0]
+            ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
+            : '<span style="font-size:48px">📦</span>'
+          return `<a class="tc-product-card" href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:var(--text);">
+            <div class="tc-product-img" style="position:relative;">
+              ${disc >= 5 ? `<div class="tc-product-badge">−${disc}%</div>` : ''}
+              ${img}
+            </div>
+            <div class="tc-product-info">
+              ${p.category_name ? `<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${escHtml(p.category_name)}</div>` : ''}
+              <div class="tc-product-name">${escHtml(p.name)}</div>
+              <div class="tc-price-row">
+                <span class="tc-product-price">${currency}${p.price.toFixed(2)}</span>
+                ${p.compare_at_price ? `<span class="tc-product-old">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                ${disc ? `<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;">${disc}% off</span>` : ''}
+              </div>
+              ${oos
+                ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px;">Out of Stock</div>`
+                : `<button class="tc-product-btn" onclick="event.preventDefault();addToCart('${p._id}','${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${p.images?.[0]||''}')">🛒 ${escHtml(d.btnText||'Add to Cart')}</button>`
+              }
+            </div>
+          </a>`
+        }).join('')
+      } catch(e) {
+        console.error('[featured section]', e)
+        const sec = document.getElementById(secId)
+        if (sec) sec.style.display = 'none'
+      }
+    }
+
+    // Called after theme renders — fills categories section with real categories
+    async function fillCategoriesSection(secId, cols, d) {
+      const grid = document.getElementById(`${secId}-grid`)
+      if (!grid) return
+      try {
+        const cats = await fetch(`${API}/shop/${slug}/categories`).then(r => r.json())
+        const list = Array.isArray(cats) ? cats : []
+        if (!list.length) { grid.closest('section').style.display = 'none'; return }
+
+        // Emoji map for common category names
+        const emojiMap = {
+          fashion:'👗', clothing:'👕', apparel:'👔', dress:'👗',
+          electronics:'📱', tech:'💻', gadgets:'🎧', mobile:'📱',
+          home:'🏠', living:'🛋️', furniture:'🪑', kitchen:'🍳',
+          beauty:'💄', cosmetics:'💋', skincare:'✨', makeup:'💅',
+          gaming:'🎮', games:'🕹️', toys:'🧸',
+          food:'🍕', grocery:'🛒', beverages:'☕',
+          watches:'⌚', jewellery:'💎', jewelry:'💎', accessories:'👜',
+          footwear:'👟', shoes:'👠', sports:'⚽', fitness:'💪',
+          books:'📚', stationery:'✏️', office:'💼',
+          travel:'✈️', outdoors:'🏕️', garden:'🌿',
+        }
+        const getEmoji = name => {
+          const lc = (name||'').toLowerCase()
+          for (const [k,v] of Object.entries(emojiMap)) if (lc.includes(k)) return v
+          return '🛍️'
+        }
+
+        grid.innerHTML = list.map(c => `
+          <div class="tc-cat-card" onclick="filterByCat('${c._id}','${escHtml(c.name)}')">
+            <div class="tc-cat-icon">${c.icon || getEmoji(c.name)}</div>
+            <div class="tc-cat-name">${escHtml(c.name)}</div>
+            ${d.showCount === 'yes' && c.product_count != null
+              ? `<div style="font-size:11px;opacity:.45;margin-top:3px;">${c.product_count} items</div>` : ''}
+          </div>`).join('')
+      } catch(e) {
+        console.error('[categories section]', e)
+        const sec = document.getElementById(secId)
+        if (sec) sec.style.display = 'none'
+      }
+    }
+
+    // Click on a theme category card → scroll to products grid and filter
+    function filterByCat(catId, catName) {
+      currentCat = catId
+      currentPage = 1
+      // Highlight in sidebar
+      document.querySelectorAll('.cat-item').forEach(x => {
+        x.classList.toggle('active', x.dataset.cat === catId)
+      })
+      loadProducts()
+      // Scroll to the real products section
+      const target = document.getElementById('mainProducts') || document.getElementById('mainLayout')
+      if (target) target.scrollIntoView({ behavior:'smooth', block:'start' })
     }
 
     if (slug) init()
