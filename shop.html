@@ -946,8 +946,11 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const priceColor   = cardOpts.priceColor    || ''
   const showOriginal = cardOpts.showOriginal !== 'no'
   const showBadge    = cardOpts.showBadge    !== 'no'
-  // Use per-card style if provided, else fall back to global activeStyle
-  const style        = cardOpts.cardStyle     || activeStyle || 'classic'
+  // Use per-card style if provided, else fall back to global activeStyle.
+  // CRITICAL: main grid (ctx==='main') NEVER uses overlay style.
+  // Overlay is only valid for featured sections (ctx==='featured').
+  const rawStyle = cardOpts.cardStyle || activeStyle || 'classic'
+  const style = (ctx==='main' && rawStyle==='overlay') ? 'classic' : rawStyle
 
   const oos=isOOS(p),qty=getQty(p._id),imgUrl=p.images?.[0]||''
   const si=esa(imgUrl),sn=esa(p.name),d=discPct(p)
@@ -1048,16 +1051,15 @@ function initCartButtons(){
 
 function applyStyleToGrid(){
   const grid=document.getElementById('productsGrid');if(!grid)return
-  // activeStyle is ONLY for the main products grid.
-  // Featured sections have their own independent style via cardOpts.cardStyle
+  // Main products grid never gets overlay-grid — overlay is featured-section only
+  const safeStyle=(activeStyle==='overlay')?'classic':activeStyle
   const styleMap={
     classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',
-    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',
-    magazine:'magazine-grid',overlay:'overlay-grid'
+    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',magazine:'magazine-grid'
   }
-  const cls=styleMap[activeStyle]||'classic-grid'
+  const cls=styleMap[safeStyle]||'classic-grid'
   grid.className=`products-grid ${cls}`
-  grid.style.gridTemplateColumns=activeStyle==='list'?'1fr':''
+  grid.style.gridTemplateColumns=safeStyle==='list'?'1fr':''
 }
 
 // ─────────────── DATA EXTRACTOR ──────────────────────────────
@@ -1219,12 +1221,16 @@ function buildSec(sec, isMobile){
       const featCols=d.featuredCols||d.columns||0
       const colsStyle=featCols?`--cols:${featCols};`:''
       const skCount=isMobile?2:(featCols||4)
-      // The featured section has its OWN card style from its data
-      // We pass it via cardOpts so it NEVER bleeds into the global activeStyle
-      const featCardStyle=
+      // The featured section has its OWN card style from its section data.
+      // We NEVER fall back to activeStyle='overlay' — that would break the layout.
+      // Overlay is valid for featured only when explicitly set per-section.
+      const VALID_FEAT_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','overlay'])
+      const rawFeatStyle=
         sec.data?.cardStyle||sec.data?.card_style||
-        sec.settings?.cardStyle||sec.settings?.card_style||
-        activeStyle  // fallback to global only if section has no own style
+        sec.settings?.cardStyle||sec.settings?.card_style||''
+      // Only use overlay if explicitly set; otherwise use activeStyle or classic
+      const featCardStyle=VALID_FEAT_STYLES.has(rawFeatStyle)?rawFeatStyle:
+        (activeStyle==='overlay'?'classic':activeStyle||'classic')
       const cardOpts={
         btnLabel:d.btnText,
         cardBg:d.cardBg,
@@ -1878,7 +1884,12 @@ async function loadProducts(){
 function renderProducts(products){
   const grid=document.getElementById('productsGrid')
   if(!products.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`;return}
-  grid.innerHTML=products.map(p=>renderCard(p,'main','Add to cart')).join('')
+  // Main grid ALWAYS uses classic-style rendering regardless of activeStyle.
+  // Overlay is a featured-section-only style; it makes no sense for the
+  // all-products grid where images are real product photos (not art cards).
+  // We pass an explicit cardOpts with cardStyle:'classic' to guarantee this.
+  const mainOpts={cardStyle:'classic'}
+  grid.innerHTML=products.map(p=>renderCard(p,'main','Add to Cart',mainOpts)).join('')
   applyStyleToGrid()
   initCartButtons()
   products.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)})
