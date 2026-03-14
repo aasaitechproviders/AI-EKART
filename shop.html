@@ -14,8 +14,6 @@
       --card-bg: #ffffff; --nav-bg: #ffffff;
       --radius: 12px; --btn-r: 12px;
       --font: 'Outfit', sans-serif; --navbar-h: 62px; --cols: 3;
-      
-      /* Card size variables - these will be overridden by theme */
       --card-img-min-h: 200px;
       --card-name-fs: 14px;
       --card-price-fs: 16px;
@@ -56,174 +54,252 @@
 
     #mainLayout { padding: 48px 5%; }
 
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(var(--cols, 3), 1fr);
-      gap: var(--grid-gap, 18px);
+    /* ═══════════════════════════════════════════════════════
+       UNIFIED PRODUCT CARD SYSTEM
+       Both .product-card (main grid) and .tc-product-card (featured)
+       share the same visual card structure via shared CSS.
+       The only difference is the wrapper class name.
+    ═══════════════════════════════════════════════════════ */
+
+    /* Shared card base */
+    .product-card,
+    .tc-product-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+      transition: all .2s;
+      position: relative;
     }
-    
-    /* Base product card styles - will be modified by card size */
-    .product-card {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden; text-decoration: none;
-      color: var(--text); display: block; transition: all .2s; position: relative;
-    }
-    .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.1); }
-    
-    /* Card image - size controlled by aspect ratio */
-    .product-img {
+    .product-card:hover,
+    .tc-product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.1); }
+
+    /* Shared card image */
+    .product-img,
+    .tc-product-img {
       width: 100%;
       aspect-ratio: var(--card-img-aspect, 1/1);
       min-height: var(--card-img-min-h, 200px);
-      background: var(--surface2); display: flex; align-items: center; justify-content: center;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
       font-size: 48px; overflow: hidden; position: relative;
     }
-    .product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    
-    .product-badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-    .product-badge.sale { background: #ef4444; color: white; }
-    
-    /* Product info - padding controlled by card size */
-    .product-info { padding: var(--card-info-pad, 14px); }
-    .product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-    .product-name { 
-      font-size: var(--card-name-fs, 14px); 
-      font-weight: 700; 
-      margin-bottom: 8px; 
+    .product-img img,
+    .tc-product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Shared discount badge */
+    .product-badge,
+    .tc-product-badge {
+      position: absolute; top: 10px; left: 10px; z-index: 2;
+      font-size: 11px; font-weight: 800; padding: 3px 8px;
+      border-radius: 6px; background: #ef4444; color: white;
+    }
+
+    /* Shared product info */
+    .product-info,
+    .tc-product-info { padding: var(--card-info-pad, 14px); }
+
+    .product-cat,
+    .tc-product-cat { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+
+    .product-name,
+    .tc-product-name {
+      font-size: var(--card-name-fs, 14px);
+      font-weight: 700;
+      margin-bottom: 8px;
       line-height: 1.4;
-      /* Ensure text truncates properly for small cards */
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      text-overflow: ellipsis;
     }
-    .product-price-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .product-price { font-size: var(--card-price-fs, 16px); font-weight: 800; color: var(--accent); }
-    .product-compare { font-size: 12px; text-decoration: line-through; color: var(--text3); }
+
+    .product-price-row,
+    .tc-price-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    .product-price,
+    .tc-product-price { font-size: var(--card-price-fs, 16px); font-weight: 800; color: var(--accent); }
+
+    .product-compare,
+    .tc-product-old { font-size: 12px; text-decoration: line-through; color: var(--text3); }
+
     .product-discount { font-size: 11px; font-weight: 700; color: var(--green); background: #f0fdf4; padding: 2px 6px; border-radius: 4px; }
     .out-badge { text-align: center; font-size: 12px; color: #ef4444; font-weight: 700; padding: 7px; background: #fef2f2; border-radius: 8px; }
 
-    /* Cart controls - size adjustments based on card size */
-    .cart-controls { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 8px; }
-    .qty-btn { 
-      width: 32px; height: 32px; border: none; background: var(--accent); color: white; 
-      font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; display: flex; 
-      align-items: center; justify-content: center; transition: opacity .15s; flex-shrink: 0; 
+    /* Shared cart controls */
+    .cart-controls-wrap,
+    .tc-btn-wrap { padding: 0 0 0; }
+
+    .cart-controls { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+
+    .qty-btn {
+      width: 32px; height: 32px; border: none; background: var(--accent); color: white;
+      font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: opacity .15s; flex-shrink: 0;
     }
     .qty-btn:hover { opacity: 0.85; }
     .qty-value { font-size: 14px; font-weight: 700; min-width: 24px; text-align: center; }
-    .btn-add { 
-      display: flex !important; align-items: center !important; justify-content: center !important; 
-      gap: 6px; width: 100%; padding: 9px; background: var(--accent); color: white !important; 
-      border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; 
-      font-family: var(--font); transition: all .15s; text-decoration: none; 
-    }
-    .btn-add:hover { opacity: 0.88; }
-    .btn-add.added { background: var(--green); }
 
-    /* Featured products section */
+    .btn-add,
+    .tc-product-btn {
+      display: flex !important; align-items: center !important; justify-content: center !important;
+      gap: 6px; width: 100%; padding: 9px; background: var(--accent); color: white !important;
+      border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: var(--font); transition: all .15s; text-decoration: none;
+    }
+    .btn-add:hover,
+    .tc-product-btn:hover { opacity: 0.88; }
+    .btn-add.added,
+    .tc-product-btn.added { background: var(--green); }
+
+    /* ═══════════════════════════════════════════════════════
+       GRID CONTAINERS
+    ═══════════════════════════════════════════════════════ */
+    .products-grid,
     .tc-products-grid {
       display: grid;
       grid-template-columns: repeat(var(--cols, 3), 1fr);
       gap: var(--grid-gap, 18px);
     }
-    .tc-product-card { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; transition: transform .2s, box-shadow .2s; position: relative; border: 1px solid var(--border); }
-    .tc-product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.15); }
-    .tc-product-img { 
-      width: 100%; 
-      aspect-ratio: var(--card-img-aspect, 1/1); 
-      min-height: var(--card-img-min-h, 200px); 
-      background: rgba(0,0,0,.04); display: flex; align-items: center; justify-content: center; 
-      font-size: 38px; position: relative; overflow: hidden; 
-    }
-    .tc-product-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .tc-product-badge { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: .04em; z-index: 2; }
-    .tc-product-info { padding: var(--card-info-pad, 14px); }
-    .tc-product-name { 
-      font-size: var(--card-name-fs, 13.5px); 
-      font-weight: 700; 
-      margin-bottom: 6px; 
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .tc-price-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-    .tc-product-price { font-size: var(--card-price-fs, 16px); font-weight: 800; color: var(--primary); }
-    .tc-product-old { font-size: 11px; text-decoration: line-through; opacity: .38; }
-    .tc-product-btn { 
-      display: flex !important; align-items: center !important; justify-content: center !important; 
-      gap: 6px; width: 100%; padding: 10px; background: var(--primary); color: white !important; 
-      border: none; border-radius: var(--btn-r, 9px); font-size: 13px; font-weight: 700; 
-      cursor: pointer; font-family: var(--font); transition: all .15s; margin-top: 8px; 
-    }
-    .tc-product-btn:hover { opacity: 0.88; }
 
-    /* Card style variations - now using CSS variables for size */
-    .featured-minimal .tc-product-card { background: transparent; border: 1.5px solid var(--border); }
+    /* ═══════════════════════════════════════════════════════
+       CARD STYLE VARIANTS
+       Applied via wrapper class on the grid container
+    ═══════════════════════════════════════════════════════ */
+
+    /* ── MINIMAL ── */
+    .minimal-grid .product-card,
+    .featured-minimal .tc-product-card {
+      background: transparent; border: 1.5px solid var(--border);
+    }
+    .minimal-grid .product-card:hover,
     .featured-minimal .tc-product-card:hover { border-color: var(--accent); box-shadow: none; }
-    .featured-bold .tc-product-card { border-top: 3px solid var(--primary); border-left: none; border-right: none; border-bottom: none; }
-    .featured-overlay .tc-product-img { aspect-ratio: 3/4; min-height: 0; }
-    .featured-overlay .tc-product-info { display: none; }
-    .featured-overlay .tc-btn-wrap { display: none; }
-    .featured-overlay .tc-product-card .tc-overlay { padding: var(--card-info-pad, 14px); }
-    .featured-overlay .tc-product-card .tc-overlay .tc-name { font-size: var(--card-name-fs, 13.5px); }
-    .featured-overlay .tc-product-card .tc-overlay .tc-price { font-size: var(--card-price-fs, 16px); }
-    .featured-compact .tc-product-info { padding: var(--card-info-pad, 8px 10px 10px) !important; }
-    .featured-compact .tc-product-name { font-size: var(--card-name-fs, 12px) !important; }
-    .featured-compact .tc-btn-wrap { display: none; }
-    .featured-elevated .tc-product-card { border: none; box-shadow: 0 8px 28px rgba(0,0,0,.1); border-radius: calc(var(--radius) * 1.3); }
-    .featured-elevated .tc-product-card:hover { transform: translateY(-7px); box-shadow: 0 20px 50px rgba(0,0,0,.18); }
-    .featured-list .tc-products-grid { grid-template-columns: 1fr !important; }
-    .featured-list .tc-product-card { display: flex; flex-direction: row; align-items: stretch; }
-    .featured-list .tc-product-img { width: 200px; min-width: 200px; aspect-ratio: auto; height: auto; min-height: 150px; }
-    .featured-list .tc-product-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--card-info-pad, 24px); }
-    .featured-list .tc-product-name { font-size: var(--card-name-fs, 14px); }
-    .featured-magazine .tc-product-card:first-child { grid-column: span 2; }
-    .featured-magazine .tc-product-card:first-child .tc-product-img { aspect-ratio: 2/1; min-height: 0; }
-    .featured-magazine .tc-product-card { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-    .featured-magazine .tc-product-card:hover { transform: translateY(-3px); }
 
-    /* Main grid style variations - using CSS variables for size */
-    .minimal-grid .product-card { background: transparent; border: 1.5px solid var(--border); }
-    .minimal-grid .product-card:hover { border-color: var(--accent); box-shadow: none; }
-    .overlay-grid .product-card { border: none; }
-    .overlay-grid .product-img { aspect-ratio: 3/4; min-height: 0; }
-    .overlay-grid .product-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(0deg, rgba(0,0,0,.90) 0%, rgba(0,0,0,.4) 55%, transparent 100%);
-      padding: var(--card-info-pad, 20px 14px 14px); color: white; z-index: 3; display: flex; flex-direction: column; gap: 5px;
+    /* ── BOLD ── */
+    .bold-grid .product-card,
+    .featured-bold .tc-product-card {
+      border: none; border-top: 3px solid var(--accent);
     }
-    .overlay-grid .product-overlay .ov-name { font-size: var(--card-name-fs, 13px); font-weight: 700; color: white; }
-    .overlay-grid .product-overlay .ov-price { font-size: var(--card-price-fs, 15px); font-weight: 800; color: white; }
-    .overlay-grid .product-overlay .ov-compare { font-size: 11px; color: rgba(255,255,255,.55); text-decoration: line-through; }
-    .overlay-grid .product-overlay .btn-add { background: rgba(255,255,255,.18) !important; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.35) !important; color: white !important; margin-top: 4px; }
-    .overlay-grid .product-info { display: none; }
-    .overlay-grid .cart-controls-wrap { display: none; }
-    .bold-grid .product-card { border: none; border-top: 3px solid var(--accent); }
-    .bold-grid .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .bold-grid .product-card:hover,
+    .featured-bold .tc-product-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+
+    /* ── ELEVATED ── */
+    .elevated-grid .product-card,
+    .featured-elevated .tc-product-card {
+      border: none; box-shadow: 0 8px 28px rgba(0,0,0,.08);
+      border-radius: calc(var(--radius) * 1.3);
+    }
+    .elevated-grid .product-card:hover,
+    .featured-elevated .tc-product-card:hover {
+      transform: translateY(-7px); box-shadow: 0 20px 50px rgba(0,0,0,.15);
+    }
+
+    /* ── COMPACT ── */
+    .compact-grid .product-info,
+    .featured-compact .tc-product-info { padding: var(--card-info-pad, 8px 10px 10px) !important; }
+    .compact-grid .product-name,
+    .featured-compact .tc-product-name { font-size: var(--card-name-fs, 12px) !important; margin-bottom: 3px; }
+    .compact-grid .product-price,
+    .featured-compact .tc-product-price { font-size: var(--card-price-fs, 13px) !important; }
+    .compact-grid .product-price-row,
+    .featured-compact .tc-price-row { margin-bottom: 0; }
+    .compact-grid .cart-controls-wrap,
+    .featured-compact .tc-btn-wrap { display: none; }
+    .compact-grid .product-card:hover,
+    .featured-compact .tc-product-card:hover { transform: none; opacity: .85; }
+    .compact-grid { gap: 10px !important; }
+
+    /* ── LIST ── */
     .list-grid { grid-template-columns: 1fr !important; }
     .list-grid .product-card { display: flex; flex-direction: row; align-items: stretch; }
-    .list-grid .product-img { width: 200px; min-width: 200px; aspect-ratio: auto; height: auto; min-height: 150px; }
+    .list-grid .product-img { width: 200px; min-width: 200px; aspect-ratio: auto !important; height: auto; min-height: 150px; }
     .list-grid .product-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--card-info-pad, 24px); }
-    .list-grid .product-name { font-size: var(--card-name-fs, 14px); }
     .list-grid .btn-add { width: auto; padding: 8px 20px; }
+
+    .featured-list .tc-products-grid { grid-template-columns: 1fr !important; }
+    .featured-list .tc-product-card { display: flex; flex-direction: row; align-items: stretch; }
+    .featured-list .tc-product-img { width: 200px; min-width: 200px; aspect-ratio: auto !important; height: auto; min-height: 150px; }
+    .featured-list .tc-product-info { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--card-info-pad, 24px); }
+    .featured-list .tc-btn-wrap { padding: 0 var(--card-info-pad); padding-bottom: var(--card-info-pad); }
+    .featured-list .tc-product-btn { width: auto; padding: 8px 20px; }
+
+    /* ── MAGAZINE ── */
     .magazine-grid .product-card:first-child { grid-column: span 2; }
     .magazine-grid .product-card:first-child .product-img { aspect-ratio: 2/1; min-height: 0; }
     .magazine-grid .product-card { box-shadow: 0 2px 8px rgba(0,0,0,.06); border: none; }
     .magazine-grid .product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,.12); }
-    .compact-grid .product-info { padding: var(--card-info-pad, 8px 10px 10px) !important; }
-    .compact-grid .product-name { font-size: var(--card-name-fs, 12px) !important; margin-bottom: 3px; }
-    .compact-grid .product-price { font-size: var(--card-price-fs, 13px) !important; }
-    .compact-grid .product-price-row { margin-bottom: 0; }
-    .compact-grid .cart-controls-wrap { display: none; }
-    .compact-grid .product-card:hover { transform: none; opacity: .85; }
-    .compact-grid { gap: 10px !important; }
-    .elevated-grid .product-card { border: none; box-shadow: 0 8px 28px rgba(0,0,0,.08); border-radius: calc(var(--radius) * 1.3); }
-    .elevated-grid .product-card:hover { transform: translateY(-7px); box-shadow: 0 20px 50px rgba(0,0,0,.15); }
 
+    .featured-magazine .tc-product-card:first-child { grid-column: span 2; }
+    .featured-magazine .tc-product-card:first-child .tc-product-img { aspect-ratio: 2/1; min-height: 0; }
+    .featured-magazine .tc-product-card { box-shadow: 0 2px 8px rgba(0,0,0,.06); border: none; }
+    .featured-magazine .tc-product-card:hover { transform: translateY(-3px); }
+
+    /* ═══════════════════════════════════════════════════════
+       OVERLAY CARD STYLE
+       Special case: text/buttons appear on top of image
+    ═══════════════════════════════════════════════════════ */
+    .overlay-grid .product-card,
+    .featured-overlay .tc-product-card { border: none; }
+
+    /* In overlay mode, image fills a taller ratio */
+    .overlay-grid .product-img,
+    .featured-overlay .tc-product-img {
+      aspect-ratio: 3/4 !important;
+      min-height: 0 !important;
+    }
+
+    /* Hide normal info sections in overlay mode */
+    .overlay-grid .product-info,
+    .overlay-grid .cart-controls-wrap,
+    .featured-overlay .tc-product-info,
+    .featured-overlay .tc-btn-wrap { display: none; }
+
+    /* The overlay gradient div */
+    .product-overlay,
+    .tc-overlay-inner {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+      background: linear-gradient(0deg, rgba(0,0,0,.92) 0%, rgba(0,0,0,.45) 55%, transparent 100%);
+      padding: 20px 14px 14px;
+      color: white;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .product-overlay .ov-name,
+    .tc-overlay-inner .ov-name {
+      font-size: var(--card-name-fs, 13px); font-weight: 700; color: white;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .product-overlay .ov-price,
+    .tc-overlay-inner .ov-price { font-size: var(--card-price-fs, 15px); font-weight: 800; color: white; }
+    .product-overlay .ov-compare,
+    .tc-overlay-inner .ov-compare { font-size: 11px; color: rgba(255,255,255,.55); text-decoration: line-through; }
+
+    /* Add to cart button inside overlay */
+    .product-overlay .btn-add,
+    .tc-overlay-inner .btn-add {
+      background: rgba(255,255,255,.18) !important;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.35) !important;
+      color: white !important;
+      margin-top: 4px;
+    }
+    .product-overlay .btn-add:hover,
+    .tc-overlay-inner .btn-add:hover { background: rgba(255,255,255,.30) !important; }
+
+    /* Qty buttons inside overlay */
+    .product-overlay .qty-btn,
+    .tc-overlay-inner .qty-btn {
+      background: rgba(255,255,255,.25);
+      border: 1px solid rgba(255,255,255,.4);
+    }
+    .product-overlay .qty-value,
+    .tc-overlay-inner .qty-value { color: white; }
+
+    /* ═══════════════════════════════════════════════════════
+       PAGINATION
+    ═══════════════════════════════════════════════════════ */
     .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
     .page-btn { padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text2); cursor: pointer; font-family: var(--font); font-size: 13.5px; font-weight: 600; transition: all .15s; }
     .page-btn:hover, .page-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
@@ -292,7 +368,6 @@
     .tc-footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 32px; }
     .tc-footer-logo { font-size: 20px; font-weight: 900; margin-bottom: 8px; cursor: pointer; }
     .tc-footer-tagline { font-size: 13px; opacity: .5; line-height: 1.6; margin-bottom: 16px; }
-    .tc-footer-contact { font-size: 12px; opacity: .4; line-height: 1.8; }
     .tc-footer-col-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; opacity: .45; margin-bottom: 14px; }
     .tc-footer-col-links { display: flex; flex-direction: column; gap: 10px; }
     .tc-footer-col-links a { font-size: 13px; opacity: .55; font-weight: 600; cursor: pointer; text-decoration: none; color: inherit; transition: opacity .15s; }
@@ -469,62 +544,37 @@
     let activeCardStyle = 'classic'
     let activeCardSize = 'medium'
 
-    // FIXED: Card size variables properly defined with all CSS properties
     const CARD_SIZE_VARS = {
-      small: { 
+      small: {
         '--card-img-min-h': '120px',
         '--card-img-aspect': '1/1',
-        '--card-name-fs': '11px',   
-        '--card-price-fs': '12px', 
-        '--card-info-pad': '6px', 
+        '--card-name-fs': '11px',
+        '--card-price-fs': '12px',
+        '--card-info-pad': '6px',
         '--grid-gap': '8px',
-        // Additional overrides for compact display
-        '--product-cat-fs': '9px',
-        '--product-badge-fs': '9px',
-        '--qty-btn-size': '24px'
       },
-      medium: { 
+      medium: {
         '--card-img-min-h': '180px',
         '--card-img-aspect': '1/1',
-        '--card-name-fs': '14px',   
-        '--card-price-fs': '16px', 
-        '--card-info-pad': '12px', 
+        '--card-name-fs': '14px',
+        '--card-price-fs': '16px',
+        '--card-info-pad': '12px',
         '--grid-gap': '16px',
-        '--product-cat-fs': '11px',
-        '--product-badge-fs': '11px',
-        '--qty-btn-size': '32px'
       },
-      large: {  
+      large: {
         '--card-img-min-h': '260px',
         '--card-img-aspect': '1/1',
-        '--card-name-fs': '16px', 
-        '--card-price-fs': '20px', 
-        '--card-info-pad': '18px', 
+        '--card-name-fs': '16px',
+        '--card-price-fs': '20px',
+        '--card-info-pad': '18px',
         '--grid-gap': '24px',
-        '--product-cat-fs': '12px',
-        '--product-badge-fs': '12px',
-        '--qty-btn-size': '36px'
       },
     }
 
     function applyCardSize(size) {
       activeCardSize = size || 'medium'
       const vars = CARD_SIZE_VARS[activeCardSize] || CARD_SIZE_VARS.medium
-      Object.entries(vars).forEach(([k, v]) => {
-        root.style.setProperty(k, v)
-      })
-      
-      // Also update quantity button sizes if needed
-      const qtyBtns = document.querySelectorAll('.qty-btn')
-      if (qtyBtns.length) {
-        const btnSize = vars['--qty-btn-size'] || '32px'
-        qtyBtns.forEach(btn => {
-          btn.style.width = btnSize
-          btn.style.height = btnSize
-        })
-      }
-      
-      console.log(`Applied card size: ${size}`, vars)
+      Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))
     }
 
     function escHtml(s) {
@@ -586,30 +636,38 @@
     function incrementCartItem(productId, name, price, image) {
       let cart = getCart(); const item = cart.find(i => i.product_id === productId && !i.variant)
       if (item) item.qty++; else cart.push({ product_id: productId, name, price, image, qty: 1 })
-      saveCart(cart); updateCartUI(); updateProductCardControls(productId); toast('➕ Added to cart')
+      saveCart(cart); updateCartUI(); updateAllProductCardControls(productId); toast('➕ Added to cart')
     }
     function decrementCartItem(productId) {
       let cart = getCart(); const index = cart.findIndex(i => i.product_id === productId && !i.variant)
       if (index !== -1) {
         if (cart[index].qty > 1) cart[index].qty--; else cart.splice(index, 1)
-        saveCart(cart); updateCartUI(); updateProductCardControls(productId); toast('➖ Item removed')
+        saveCart(cart); updateCartUI(); updateAllProductCardControls(productId); toast('➖ Item removed')
       }
     }
-    function updateProductCardControls(productId) {
+
+    // Updates ALL .cart-controls containers for a given product ID (covers both main grid & featured)
+    function updateAllProductCardControls(productId) {
       const qty = getCartItemQty(productId)
       document.querySelectorAll(`.cart-controls[data-product-id="${productId}"]`).forEach(container => {
-        const name = container.dataset.name || '', price = container.dataset.price || 0, image = container.dataset.image || ''
+        const name = container.dataset.name || ''
+        const price = container.dataset.price || 0
+        const image = container.dataset.image || ''
+        const safeName = name.replace(/'/g, "\\'")
+        const safeImg  = image.replace(/'/g, "\\'")
         if (qty === 0) {
-          container.innerHTML = `<button class="btn-add" onclick="event.preventDefault();addToCart('${productId}','${name.replace(/'/g,"\\'")}',${price},'${image}')">🛒 Add to Cart</button>`
+          container.innerHTML = `<button class="btn-add" onclick="event.preventDefault();addToCart('${productId}','${safeName}',${price},'${safeImg}')">🛒 Add to Cart</button>`
         } else {
           container.innerHTML = `
             <button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${productId}')">−</button>
             <span class="qty-value">${qty}</span>
-            <button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${productId}','${name.replace(/'/g,"\\'")}',${price},'${image}')">+</button>`
+            <button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${productId}','${safeName}',${price},'${safeImg}')">+</button>`
         }
       })
     }
+
     function addToCart(id, name, price, image) { incrementCartItem(id, name, price, image) }
+
     function updateCartUI() {
       const cart = getCart(), qty = cart.reduce((s,x) => s + x.qty, 0), amt = cart.reduce((s,x) => s + x.price * x.qty, 0)
       const el = document.getElementById('cartCount'); el.textContent = qty; el.className = 'cart-count' + (qty > 0 ? ' has-items' : '')
@@ -617,6 +675,137 @@
       if (qty > 0) { bar.classList.add('show'); document.getElementById('cartBarQty').textContent = `${qty} item${qty!==1?'s':''} — `; document.getElementById('cartBarTotal').textContent = `${currency}${amt.toFixed(2)}` }
       else bar.classList.remove('show')
       document.querySelectorAll('.theme-cart-qty').forEach(el => el.textContent = qty)
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       UNIFIED CARD RENDERER
+       Used by BOTH the main products grid AND the featured section.
+       context: 'main' | 'featured'
+       btnLabel: custom add-to-cart button text (for featured section config)
+    ═══════════════════════════════════════════════════════ */
+    function renderCard(p, context, btnLabel) {
+      context  = context  || 'main'
+      btnLabel = btnLabel || 'Add to Cart'
+
+      const d    = discountPct(p)
+      const oos  = isOOS(p)
+      const qty  = getCartItemQty(p._id)
+      const safeImg  = (p.images?.[0] || '').replace(/'/g, "\\'")
+      const safeName = escHtml(p.name).replace(/'/g, "\\'")
+      const imgTag   = p.images?.[0]
+        ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
+        : '<span style="font-size:48px">📦</span>'
+
+      // Choose CSS class names based on context so unified CSS applies
+      const cardClass = context === 'featured' ? 'tc-product-card' : 'product-card'
+      const imgClass  = context === 'featured' ? 'tc-product-img'  : 'product-img'
+      const infoClass = context === 'featured' ? 'tc-product-info' : 'product-info'
+      const catClass  = context === 'featured' ? 'tc-product-cat'  : 'product-cat'
+      const nameClass = context === 'featured' ? 'tc-product-name' : 'product-name'
+      const rowClass  = context === 'featured' ? 'tc-price-row'    : 'product-price-row'
+      const priceClass= context === 'featured' ? 'tc-product-price': 'product-price'
+      const oldClass  = context === 'featured' ? 'tc-product-old'  : 'product-compare'
+      const wrapClass = context === 'featured' ? 'tc-btn-wrap'     : 'cart-controls-wrap'
+
+      // ── OVERLAY STYLE ──
+      if (activeCardStyle === 'overlay') {
+        const cartHTML = oos
+          ? `<div style="font-size:12px;color:#ef4444;font-weight:700;margin-top:4px">Out of Stock</div>`
+          : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
+              ${qty === 0
+                ? `<button class="btn-add" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 ${escHtml(btnLabel)}</button>`
+                : `<button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button>
+                   <span class="qty-value">${qty}</span>
+                   <button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button>`}
+            </div>`
+
+        if (context === 'featured') {
+          return `<div class="${cardClass}">
+            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block">
+              <div class="${imgClass}" style="position:relative">
+                ${d >= 5 ? `<div class="tc-product-badge">−${d}%</div>` : ''}
+                ${imgTag}
+                <div class="tc-overlay-inner">
+                  ${p.category_name ? `<div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${escHtml(p.category_name)}</div>` : ''}
+                  <div class="ov-name">${escHtml(p.name)}</div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
+                    ${p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                  </div>
+                  ${cartHTML}
+                </div>
+              </div>
+            </a>
+          </div>`
+        } else {
+          return `<a class="${cardClass}" href="product.html?store=${slug}&id=${p._id}">
+            ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
+            <div class="${imgClass}">
+              ${imgTag}
+              <div class="product-overlay">
+                ${p.category_name ? `<div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${escHtml(p.category_name)}</div>` : ''}
+                <div class="ov-name">${escHtml(p.name)}</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
+                  ${p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                </div>
+                ${cartHTML}
+              </div>
+            </div>
+          </a>`
+        }
+      }
+
+      // ── STANDARD STYLES (classic, minimal, bold, elevated, compact, list, magazine) ──
+      const cartControlsHTML = oos
+        ? `<div class="out-badge">Out of Stock</div>`
+        : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
+            ${qty === 0
+              ? `<button class="btn-add" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 ${escHtml(btnLabel)}</button>`
+              : `<button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button>
+                 <span class="qty-value">${qty}</span>
+                 <button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button>`}
+          </div>`
+
+      if (context === 'featured') {
+        return `<div class="${cardClass}">
+          <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block">
+            <div class="${imgClass}" style="position:relative">
+              ${d >= 5 ? `<div class="tc-product-badge">−${d}%</div>` : ''}
+              ${imgTag}
+            </div>
+            <div class="${infoClass}">
+              ${p.category_name ? `<div class="${catClass}">${escHtml(p.category_name)}</div>` : ''}
+              <div class="${nameClass}">${escHtml(p.name)}</div>
+              <div class="${rowClass}">
+                <span class="${priceClass}">${currency}${p.price.toFixed(2)}</span>
+                ${p.compare_at_price ? `<span class="${oldClass}">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                ${d ? `<span class="product-discount">${d}% off</span>` : ''}
+              </div>
+            </div>
+          </a>
+          <div class="${wrapClass}" style="padding:0 var(--card-info-pad) var(--card-info-pad)">
+            ${cartControlsHTML}
+          </div>
+        </div>`
+      } else {
+        return `<a class="${cardClass}" href="product.html?store=${slug}&id=${p._id}">
+          ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
+          <div class="${imgClass}">${imgTag}</div>
+          <div class="${infoClass}">
+            ${p.category_name ? `<div class="${catClass}">${escHtml(p.category_name)}</div>` : ''}
+            <div class="${nameClass}">${escHtml(p.name)}</div>
+            <div class="${rowClass}">
+              <span class="${priceClass}">${currency}${p.price.toFixed(2)}</span>
+              ${p.compare_at_price ? `<span class="${oldClass}">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+              ${d ? `<span class="product-discount">${d}% off</span>` : ''}
+            </div>
+            <div class="${wrapClass}">
+              ${cartControlsHTML}
+            </div>
+          </div>
+        </a>`
+      }
     }
 
     /* ── THEME ── */
@@ -631,14 +820,14 @@
 
     function applyThemeSettings(s) {
       const primary   = s.primaryColor   || s.primary_color   || '#6c63ff'
-      const secondary = s.bgColor        || s.secondary_color  || '#f8f9fc'
-      const navBg     = s.navBg          || s.nav_bg           || '#ffffff'
-      const cardBg    = s.cardBg         || s.card_bg          || '#ffffff'
-      const textColor = s.textColor      || s.text_color       || '#1a1a2e'
+      const secondary = s.bgColor        || s.secondary_color || '#f8f9fc'
+      const navBg     = s.navBg          || s.nav_bg          || '#ffffff'
+      const cardBg    = s.cardBg         || s.card_bg         || '#ffffff'
+      const textColor = s.textColor      || s.text_color      || '#1a1a2e'
       const radius    = s.radius         || '12px'
-      const font      = s.fontHeading    || s.font_heading     || 'Outfit'
-      const btnStyle  = s.buttonStyle    || s.button_style     || 'rounded'
-      const cols      = s.cols           || s.columns          || 3
+      const font      = s.fontHeading    || s.font_heading    || 'Outfit'
+      const btnStyle  = s.buttonStyle    || s.button_style    || 'rounded'
+      const cols      = s.cols           || s.columns         || 3
 
       root.style.setProperty('--primary', primary)
       root.style.setProperty('--accent', primary)
@@ -665,14 +854,9 @@
       const hero = document.getElementById('heroBanner')
       if (hero) hero.style.background = `linear-gradient(135deg,${primary},${primary}cc)`
 
-      // Get card style and size from settings
       activeCardStyle = s.card_style || s.cardStyle || 'classic'
       applyCardStyleToMainGrid()
-
-      // FIXED: Apply card size with proper variable mapping
-      const cardSizeRaw = s.card_size || s.cardSize || 'medium'
-      console.log('Applying card size from theme:', cardSizeRaw)
-      applyCardSize(cardSizeRaw)
+      applyCardSize(s.card_size || s.cardSize || 'medium')
     }
 
     function applyCardStyleToMainGrid() {
@@ -680,8 +864,7 @@
       const grid = document.getElementById('productsGrid')
       if (!wrap || !grid) return
       wrap.className = `${activeCardStyle}-grid`
-      if (activeCardStyle === 'list') grid.style.gridTemplateColumns = '1fr'
-      else grid.style.gridTemplateColumns = ''
+      grid.style.gridTemplateColumns = activeCardStyle === 'list' ? '1fr' : ''
     }
 
     function renderThemeSections(sections) {
@@ -796,13 +979,11 @@
         case 'announcement': {
           const sz = d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px'
           const fw = d.bold==='no'?'500':'700'
-          const bg = d.bgColor, tc = d.textColor
-          return `<div class="announcement-bar" style="${bg?'background:'+bg+';':''}${tc?'color:'+tc+';':''}font-size:${sz};font-weight:${fw}">${escHtml(d.text||'✨ Free shipping on all orders above ₹499!')}</div>`
+          return `<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw}">${escHtml(d.text||'✨ Free shipping on all orders above ₹499!')}</div>`
         }
 
         case 'navbar': {
           const pos = d.sticky!=='no'?'sticky':'relative'
-          const navBg = d.bgColor||'', logoColor = d.logoColor||''
           const logoText = d.logoText || storeConfig.name || 'My Store'
           let links = []
           if (d.navLinks && d.navLinks.length) {
@@ -824,8 +1005,8 @@
               : ''
             return `<a href="${escHtml(url)}" ${onclick}>${escHtml(l.text || l.txt || '')}</a>`
           }).join('')
-          return `<nav class="tc-navbar" style="${navBg?'background:'+navBg+';':''}position:${pos};top:0;z-index:200" id="themeNavbar">
-            <div class="nav-logo" style="${logoColor?'color:'+logoColor+';':''}" onclick="scrollToTop()">
+          return `<nav class="tc-navbar" style="${d.bgColor?'background:'+d.bgColor+';':''}position:${pos};top:0;z-index:200" id="themeNavbar">
+            <div class="nav-logo" style="${d.logoColor?'color:'+d.logoColor+';':''}" onclick="scrollToTop()">
               ${d.logoUrl?`<img src="${d.logoUrl}" class="nav-logo-img" alt="${escHtml(logoText)}">`:`${escHtml(logoText)}`}
             </div>
             ${!isMobile && links.length ? `<div class="nav-links" style="${d.linkColor?'color:'+d.linkColor+';':''}">${linkHTML}</div>` : ''}
@@ -859,12 +1040,12 @@
         }
 
         case 'featured': {
-          const count = parseInt(d.count)||8
-          const cardStyle = activeCardStyle
-          const cols = cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||3))
+          const count = parseInt(d.count) || 8
+          const cols  = activeCardStyle === 'list' ? 1 : (isMobile ? 2 : (parseInt(d.columns) || 3))
           const secId = `featured-sec-${sec.id}`
-          setTimeout(() => fillFeaturedSection(secId, count, d, cardStyle), 0)
-          return `<section class="tc-section featured-${cardStyle}" id="${secId}">
+          // Defer fill after DOM is ready
+          setTimeout(() => fillFeaturedSection(secId, count, d), 0)
+          return `<section class="tc-section featured-${activeCardStyle}" id="${secId}">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:28px">
               <div>
                 <h2 class="tc-section-title">${escHtml(d.title||'Featured Products')}</h2>
@@ -874,8 +1055,12 @@
             </div>
             <div class="tc-products-grid" id="${secId}-grid" style="--cols:${cols}">
               ${Array.from({length:Math.min(count,3)}).map(()=>`
-                <div class="tc-product-card tc-skeleton"><div class="tc-product-img" style="background:#e8eaf0;min-height:var(--card-img-min-h)"></div>
-                  <div class="tc-product-info"><div style="height:14px;background:#e8eaf0;border-radius:6px;margin-bottom:8px"></div><div style="height:18px;background:#e8eaf0;border-radius:6px;width:60%;margin-bottom:8px"></div></div>
+                <div class="tc-product-card tc-skeleton">
+                  <div class="tc-product-img" style="background:#e8eaf0;min-height:var(--card-img-min-h)"></div>
+                  <div class="tc-product-info">
+                    <div style="height:14px;background:#e8eaf0;border-radius:6px;margin-bottom:8px"></div>
+                    <div style="height:18px;background:#e8eaf0;border-radius:6px;width:60%;margin-bottom:8px"></div>
+                  </div>
                 </div>`).join('')}
             </div>
           </section>`
@@ -1129,73 +1314,19 @@
         grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`
         return
       }
-      grid.innerHTML = products.map(p => renderGridCard(p)).join('')
+      // Use unified renderCard with context='main'
+      grid.innerHTML = products.map(p => renderCard(p, 'main', 'Add to Cart')).join('')
       applyCardStyleToMainGrid()
-      products.forEach(p => { if (getCartItemQty(p._id) > 0) updateProductCardControls(p._id) })
+      // Sync any products already in cart
+      products.forEach(p => { if (getCartItemQty(p._id) > 0) updateAllProductCardControls(p._id) })
     }
 
-    function discountPct(p) { return p.compare_at_price&&p.compare_at_price>p.price ? Math.round((1-p.price/p.compare_at_price)*100) : 0 }
+    function discountPct(p) {
+      return p.compare_at_price && p.compare_at_price > p.price
+        ? Math.round((1 - p.price / p.compare_at_price) * 100)
+        : 0
+    }
     function isOOS(p) { return p.track_inventory && p.stock_qty <= 0 }
-
-    function renderGridCard(p) {
-      const d = discountPct(p), oos = isOOS(p)
-      const img = p.images?.[0]
-        ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
-        : '<span style="font-size:48px">📦</span>'
-      const qty = getCartItemQty(p._id)
-      const safeImg  = (p.images?.[0]||'').replace(/'/g,"\\'")
-      const safeName = escHtml(p.name).replace(/'/g,"\\'")
-
-      const cartHTML = oos
-        ? `<div class="out-badge">Out of Stock</div>`
-        : `<div class="cart-controls-wrap">
-            <div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
-              ${qty === 0
-                ? `<button class="btn-add" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 Add to Cart</button>`
-                : `<button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button>
-                   <span class="qty-value">${qty}</span>
-                   <button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button>`}
-            </div>
-          </div>`
-
-      if (activeCardStyle === 'overlay') {
-        return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
-          ${d>=5?`<div class="product-badge sale">−${d}%</div>`:''}
-          <div class="product-img">
-            ${img}
-            <div class="product-overlay">
-              ${p.category_name?`<div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${escHtml(p.category_name)}</div>`:''}
-              <div class="ov-name">${escHtml(p.name)}</div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
-                ${p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-              </div>
-              ${oos?`<div style="font-size:12px;color:#ef4444;font-weight:700">Out of Stock</div>`:`
-                <div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
-                  ${qty===0
-                    ? `<button class="btn-add" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 Add</button>`
-                    : `<button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button>`}
-                </div>`}
-            </div>
-          </div>
-        </a>`
-      }
-
-      return `<a class="product-card" href="product.html?store=${slug}&id=${p._id}">
-        ${d>=5?`<div class="product-badge sale">−${d}%</div>`:''}
-        <div class="product-img">${img}</div>
-        <div class="product-info">
-          ${p.category_name?`<div class="product-cat">${escHtml(p.category_name)}</div>`:''}
-          <div class="product-name">${escHtml(p.name)}</div>
-          <div class="product-price-row">
-            <span class="product-price">${currency}${p.price.toFixed(2)}</span>
-            ${p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-            ${d?`<span class="product-discount">${d}% off</span>`:''}
-          </div>
-          ${cartHTML}
-        </div>
-      </a>`
-    }
 
     /* ── PAGINATION ── */
     function renderPagination(page, pages) {
@@ -1212,75 +1343,20 @@
     }
     function goPage(p) { currentPage=p; loadProducts(); window.scrollTo({top:0,behavior:'smooth'}) }
 
-    /* ── FILL FEATURED SECTION ── */
-    async function fillFeaturedSection(secId, count, d, cardStyle) {
+    /* ── FILL FEATURED SECTION ── Uses unified renderCard with context='featured' ── */
+    async function fillFeaturedSection(secId, count, d) {
       const grid = document.getElementById(`${secId}-grid`); if (!grid) return
       try {
         const data = await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r => r.json())
-        const products = (data.products||[]).slice(0, count)
-        if (!products.length) { const sec = grid.closest('section'); if(sec) sec.style.display='none'; return }
-
-        grid.innerHTML = products.map(p => {
-          const disc = p.compare_at_price&&p.compare_at_price>p.price?Math.round((1-p.price/p.compare_at_price)*100):0
-          const oos  = p.track_inventory&&p.stock_qty<=0
-          const img  = p.images?.[0]
-            ? `<img src="${p.images[0]}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:48px>📦</span>'">`
-            : '<span style="font-size:48px">📦</span>'
-          const qty = getCartItemQty(p._id)
-          const safeImg  = (p.images?.[0]||'').replace(/'/g,"\\'")
-          const safeName = escHtml(p.name).replace(/'/g,"\\'")
-          const btnLabel = escHtml(d.btnText||'Add to Cart')
-
-          if (cardStyle === 'overlay') {
-            return `<div class="tc-product-card">
-              <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block;position:relative">
-                <div class="tc-product-img" style="position:relative">
-                  ${disc>=5?`<div class="tc-product-badge">−${disc}%</div>`:''}
-                  ${img}
-                  <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.4) 55%,transparent 100%);padding:20px 14px 14px;color:white;display:flex;flex-direction:column;gap:5px;z-index:3">
-                    <div style="font-size:13px;font-weight:700">${escHtml(p.name)}</div>
-                    <div style="display:flex;align-items:center;gap:8px">
-                      <span style="font-size:15px;font-weight:800">${currency}${p.price.toFixed(2)}</span>
-                      ${p.compare_at_price?`<span style="font-size:11px;text-decoration:line-through;opacity:.55">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-                    </div>
-                    ${!oos?`<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
-                      ${qty===0
-                        ? `<button class="tc-product-btn" style="margin-top:4px" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 ${btnLabel}</button>`
-                        : `<div style="display:flex;align-items:center;gap:6px;margin-top:4px"><button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button><span class="qty-value" style="color:white">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button></div>`}
-                    </div>`:`<div style="font-size:12px;color:#ef4444;font-weight:700">Out of Stock</div>`}
-                  </div>
-                </div>
-              </a>
-            </div>`
-          }
-
-          return `<div class="tc-product-card">
-            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block">
-              <div class="tc-product-img" style="position:relative">
-                ${disc>=5?`<div class="tc-product-badge">−${disc}%</div>`:''}
-                ${img}
-              </div>
-              <div class="tc-product-info">
-                ${p.category_name?`<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${escHtml(p.category_name)}</div>`:''}
-                <div class="tc-product-name">${escHtml(p.name)}</div>
-                <div class="tc-price-row">
-                  <span class="tc-product-price">${currency}${p.price.toFixed(2)}</span>
-                  ${p.compare_at_price?`<span class="tc-product-old">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-                  ${disc?`<span style="font-size:11px;font-weight:700;color:var(--green);background:#f0fdf4;padding:2px 6px;border-radius:4px;margin-left:2px">${disc}% off</span>`:''}
-                </div>
-              </div>
-            </a>
-            <div class="tc-btn-wrap" style="padding:0 var(--card-info-pad) var(--card-info-pad)">
-              ${oos
-                ? `<div style="text-align:center;font-size:12px;color:#ef4444;font-weight:700;padding:7px;background:#fef2f2;border-radius:8px">Out of Stock</div>`
-                : `<div class="cart-controls" data-product-id="${p._id}" data-name="${escHtml(p.name)}" data-price="${p.price}" data-image="${safeImg}">
-                    ${qty===0
-                      ? `<button class="tc-product-btn" onclick="event.preventDefault();addToCart('${p._id}','${safeName}',${p.price},'${safeImg}')">🛒 ${btnLabel}</button>`
-                      : `<button class="qty-btn" onclick="event.preventDefault();decrementCartItem('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incrementCartItem('${p._id}','${safeName}',${p.price},'${safeImg}')">+</button>`}
-                  </div>`}
-            </div>
-          </div>`
-        }).join('')
+        const products = (data.products || []).slice(0, count)
+        if (!products.length) {
+          const sec = grid.closest('section'); if (sec) sec.style.display='none'; return
+        }
+        const btnLabel = d.btnText || 'Add to Cart'
+        // Use the SAME renderCard function as the main grid, just with context='featured'
+        grid.innerHTML = products.map(p => renderCard(p, 'featured', btnLabel)).join('')
+        // Sync any products already in cart
+        products.forEach(p => { if (getCartItemQty(p._id) > 0) updateAllProductCardControls(p._id) })
       } catch(e) {
         console.error('[featured section]', e)
         const sec = document.getElementById(secId); if (sec) sec.style.display='none'
