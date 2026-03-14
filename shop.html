@@ -274,8 +274,8 @@ a{color:inherit;text-decoration:none}
 .card-atc-overlay{
   position:absolute;bottom:0;left:0;right:0;z-index:4;
   padding:0 12px 12px;
-  transform:translateY(calc(100% + 12px));
-  transition:transform .28s var(--ease);
+  transform:translateY(calc(100% + 4px));
+  transition:transform .3s var(--ease);
   pointer-events:none;
 }
 .product-card:hover .card-atc-overlay,
@@ -283,31 +283,37 @@ a{color:inherit;text-decoration:none}
   transform:translateY(0);
   pointer-events:auto;
 }
-/* Hide overlay if item already in cart */
-.product-card.in-cart .card-atc-overlay{display:none}
+/* Belt-and-suspenders: hide overlay on in-cart cards (both card types) */
+.product-card.in-cart .card-atc-overlay,
+.tc-product-card.in-cart .card-atc-overlay{
+  display:none!important;
+  pointer-events:none!important;
+}
 
 .card-atc-btn{
-  width:100%;padding:11px 16px;
-  background:rgba(15,15,15,.92);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  width:100%;padding:12px 16px;
+  background:rgba(10,10,10,.88);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   color:#fff;border:none;border-radius:10px;
   font-size:13px;font-weight:600;cursor:pointer;
-  font-family:var(--font);letter-spacing:.02em;
-  transition:background .15s;
+  font-family:var(--font);letter-spacing:.03em;
+  transition:background .15s, transform .1s;
   display:flex;align-items:center;justify-content:center;gap:6px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
 }
-.card-atc-btn:hover{background:rgba(15,15,15,1)}
+.card-atc-btn:hover{background:rgba(10,10,10,1)}
+.card-atc-btn:active{transform:scale(.97)}
 
-/* ── Card Info ── */
+/* ── Card Info — polished ── */
 .product-info,.tc-product-info{padding:14px 16px 16px}
 
 .product-cat,.tc-product-cat{
-  font-size:10.5px;color:var(--p3);font-weight:600;
-  text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;
+  font-size:10px;color:var(--p3);font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;
 }
 .product-name,.tc-product-name{
-  font-size:14px;font-weight:500;line-height:1.45;
-  color:var(--p);margin-bottom:8px;
+  font-size:14px;font-weight:500;line-height:1.5;
+  color:var(--p);margin-bottom:10px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   letter-spacing:-.01em;
 }
@@ -315,45 +321,59 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;gap:7px;flex-wrap:wrap;
   margin-bottom:0;
 }
-.product-price,.tc-product-price{font-size:15px;font-weight:700;color:var(--p);letter-spacing:-.01em}
-.product-compare,.tc-product-old{font-size:13px;text-decoration:line-through;color:var(--p3)}
-.product-discount{
-  font-size:10.5px;font-weight:700;color:#ef4444;
-  background:#fef2f2;padding:2px 6px;border-radius:4px;
+.product-price,.tc-product-price{
+  font-size:15px;font-weight:700;color:var(--p);letter-spacing:-.02em;
 }
-.out-of-stock-label{font-size:12px;color:var(--p3);margin-top:6px;font-style:italic}
+.product-compare,.tc-product-old{
+  font-size:12.5px;text-decoration:line-through;color:var(--p3);
+  letter-spacing:-.01em;
+}
+.product-discount{
+  font-size:10px;font-weight:700;color:#16a34a;
+  background:#f0fdf4;padding:2px 7px;border-radius:999px;
+  letter-spacing:.02em;border:1px solid #bbf7d0;
+}
+.out-of-stock-label{
+  font-size:12px;color:var(--p3);margin-top:6px;
+  font-style:italic;letter-spacing:.01em;
+}
 
 /* ── Cart Controls (inline qty) ── */
-.cart-controls-wrap,.tc-btn-wrap{padding:8px 16px 12px}
+.cart-controls-wrap,.tc-btn-wrap{padding:8px 16px 14px}
 .cart-qty-row{
-  display:flex;align-items:center;gap:0;
-  border:1.5px solid var(--border);border-radius:8px;
-  overflow:hidden;width:fit-content;
-  background:#fff;
+  display:inline-flex;align-items:center;
+  border:1.5px solid var(--border);border-radius:10px;
+  overflow:hidden;background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
 }
 .qty-btn{
-  width:36px;height:36px;border:none;background:#fff;
-  color:var(--p);font-size:16px;font-weight:600;
+  width:38px;height:38px;border:none;background:transparent;
+  color:var(--p);font-size:18px;font-weight:400;
   cursor:pointer;transition:background .15s;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
+  line-height:1;
 }
 .qty-btn:hover{background:var(--bg2)}
+.qty-btn:active{background:var(--bg3)}
 .qty-value{
   padding:0 14px;font-size:14px;font-weight:700;color:var(--p);
-  min-width:40px;text-align:center;line-height:36px;
+  min-width:40px;text-align:center;line-height:38px;
   border-left:1.5px solid var(--border);
   border-right:1.5px solid var(--border);
+  letter-spacing:-.01em;
 }
 
-/* Fallback add button (non-hover environments) */
+/* Fallback add button (non-hover, e.g. mobile) */
 .btn-add,.tc-product-btn{
-  width:100%;padding:10px 16px;
-  background:var(--p);color:#fff;border:none;border-radius:8px;
-  font-size:13.5px;font-weight:600;cursor:pointer;
+  width:100%;padding:11px 16px;
+  background:var(--p);color:#fff;border:none;border-radius:9px;
+  font-size:13px;font-weight:600;cursor:pointer;
   transition:.2s var(--ease);font-family:var(--font);
-  display:flex;align-items:center;justify-content:center;gap:7px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  letter-spacing:.02em;
 }
 .btn-add:hover,.tc-product-btn:hover{background:#333}
+.btn-add:active,.tc-product-btn:active{transform:scale(.98)}
 
 /* ════════════════════════════════════════════════
    CARD STYLE VARIANTS
@@ -937,12 +957,28 @@ function updateCC(id){
   document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(el=>{
     const n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
     const card=el.closest('.product-card,.tc-product-card')
+    const ic=card?.querySelector('.product-img,.tc-product-img')
+
     if(qty===0){
+      // Item removed — show add button in info, inject overlay back into image
       el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">Add to cart</button>`
-      if(card)card.classList.remove('in-cart')
+      if(card){
+        card.classList.remove('in-cart')
+        // Re-inject overlay if not already there
+        if(ic && !ic.querySelector('.card-atc-overlay')){
+          const ov=document.createElement('div');ov.className='card-atc-overlay'
+          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">+ Add to cart</button>`
+          ic.appendChild(ov)
+        }
+      }
     }else{
+      // Item in cart — show qty row, remove overlay entirely
       el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
-      if(card)card.classList.add('in-cart')
+      if(card){
+        card.classList.add('in-cart')
+        // Remove overlay from DOM entirely — cleanest approach
+        ic?.querySelector('.card-atc-overlay')?.remove()
+      }
     }
   })
 }
@@ -1030,8 +1066,9 @@ function renderCard(p,ctx,btnLabel){
     ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
   }
 
-  // Hover overlay quick-add
-  const overlayBtn = oos?'':`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">Add to cart</button></div>`
+  // Hover overlay quick-add — only render when item NOT in cart and NOT out of stock
+  // This is the definitive fix: don't emit the HTML at all, not just hide with CSS
+  const overlayBtn = (oos || qty > 0) ? '' : `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">+ Add to cart</button></div>`
 
   // OVERLAY STYLE
   if(activeStyle==='overlay'){
