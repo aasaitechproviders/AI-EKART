@@ -239,7 +239,7 @@
 
     /* ═══════════════════════════════════════════════════════
        OVERLAY CARD STYLE
-       Special case: text/buttons appear on top of image
+       Special case: text appears on top of image, button below image
     ═══════════════════════════════════════════════════════ */
     .overlay-grid .product-card,
     .featured-overlay .tc-product-card { border: none; }
@@ -253,7 +253,7 @@
 
     /* Hide normal info sections in overlay mode */
     .overlay-grid .product-info,
-    .overlay-grid .cart-controls-wrap,
+    .overlay-grid .cart-controls-wrap,   /* originally hidden, but we will override below */
     .featured-overlay .tc-product-info,
     .featured-overlay .tc-btn-wrap { display: none; }
 
@@ -276,26 +276,30 @@
     .product-overlay .ov-compare,
     .tc-overlay-inner .ov-compare { font-size: 11px; color: rgba(255,255,255,.55); text-decoration: line-through; }
 
-    /* Add to cart button inside overlay */
-    .product-overlay .btn-add,
-    .tc-overlay-inner .btn-add {
-      background: rgba(255,255,255,.18) !important;
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,.35) !important;
-      color: white !important;
-      margin-top: 4px;
+    /* Fix for overlay: show button wrapper and give it proper padding */
+    .overlay-grid .cart-controls-wrap,
+    .featured-overlay .tc-btn-wrap {
+      display: block !important;
+      padding: 0 var(--card-info-pad) var(--card-info-pad);
     }
-    .product-overlay .btn-add:hover,
-    .tc-overlay-inner .btn-add:hover { background: rgba(255,255,255,.30) !important; }
 
-    /* Qty buttons inside overlay */
-    .product-overlay .qty-btn,
-    .tc-overlay-inner .qty-btn {
-      background: rgba(255,255,255,.25);
-      border: 1px solid rgba(255,255,255,.4);
+    /* Button styling inside overlay card */
+    .overlay-grid .btn-add,
+    .featured-overlay .btn-add {
+      background: var(--accent) !important;
+      color: white !important;
+      border: none !important;
+      width: 100%;
     }
-    .product-overlay .qty-value,
-    .tc-overlay-inner .qty-value { color: white; }
+
+    /* Qty buttons inside overlay card */
+    .overlay-grid .qty-btn,
+    .featured-overlay .qty-btn {
+      background: var(--accent);
+      border: none;
+    }
+    .overlay-grid .qty-value,
+    .featured-overlay .qty-value { color: var(--text); }
 
     /* ═══════════════════════════════════════════════════════
        PAGINATION
@@ -732,27 +736,33 @@
                     <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
                     ${p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
                   </div>
-                  ${cartHTML}
                 </div>
               </div>
             </a>
+            <div class="${wrapClass}" style="padding:0 var(--card-info-pad) var(--card-info-pad);">
+              ${cartHTML}
+            </div>
           </div>`
         } else {
-          return `<a class="${cardClass}" href="product.html?store=${slug}&id=${p._id}">
-            ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
-            <div class="${imgClass}">
-              ${imgTag}
-              <div class="product-overlay">
-                ${p.category_name ? `<div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${escHtml(p.category_name)}</div>` : ''}
-                <div class="ov-name">${escHtml(p.name)}</div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
-                  ${p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+          return `<div class="${cardClass}">
+            <a href="product.html?store=${slug}&id=${p._id}" style="text-decoration:none;color:inherit;display:block">
+              ${d >= 5 ? `<div class="product-badge sale">−${d}%</div>` : ''}
+              <div class="${imgClass}" style="position:relative">
+                ${imgTag}
+                <div class="product-overlay">
+                  ${p.category_name ? `<div style="font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.06em;font-weight:700">${escHtml(p.category_name)}</div>` : ''}
+                  <div class="ov-name">${escHtml(p.name)}</div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
+                    ${p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+                  </div>
                 </div>
-                ${cartHTML}
               </div>
+            </a>
+            <div class="${wrapClass}" style="padding:0 var(--card-info-pad) var(--card-info-pad);">
+              ${cartHTML}
             </div>
-          </a>`
+          </div>`
         }
       }
 
@@ -1224,11 +1234,13 @@
       tick(); setInterval(tick, 1000)
     }
 
-    /* ── STORE INIT ── */
+    /* ── STORE INIT (FIXED ORDER) ── */
     async function init() {
       try {
         storeConfig = await fetch(`${API}/shop/${slug}/config`).then(r => r.json())
         if (storeConfig.error) throw new Error(storeConfig.error)
+
+        // Apply basic store info to UI
         document.title = storeConfig.name + ' — Shop'
         document.getElementById('storeName').textContent = storeConfig.name
         document.getElementById('heroTitle').textContent = storeConfig.name
@@ -1244,12 +1256,15 @@
         }
         if (storeConfig.currency==='USD') currency='$'; else if (storeConfig.currency==='EUR') currency='€'
         if (storeConfig.payment_enabled) document.getElementById('payBadge').style.display = 'flex'
+
         sessionStorage.setItem('ekart_store', slug)
         sessionStorage.setItem('ekart_currency', currency)
         sessionStorage.setItem('ekart_store_name', storeConfig.name)
         sessionStorage.setItem('ekart_pay_enabled', storeConfig.payment_enabled?'1':'0')
+
         document.getElementById('cartBtn').href = `cart.html?store=${slug}`
         document.getElementById('cartBarBtn').href = `cart.html?store=${slug}`
+
         const custToken = localStorage.getItem(`cust_token_${slug}`)
         const custName  = localStorage.getItem(`cust_name_${slug}`)
         const acctBtn = document.getElementById('accountBtn')
@@ -1257,10 +1272,15 @@
           acctBtn.href = custToken ? `customer-account.html?store=${slug}` : `customer-login.html?store=${slug}`
           document.getElementById('accountBtnLabel').textContent = (custToken&&custName) ? custName.split(' ')[0] : 'Login'
         }
+
+        // 1️⃣ Load theme FIRST – this sets activeCardStyle and card size
+        await loadTheme()
+
+        // 2️⃣ Now load categories and products with the correct style
         await loadCategories()
         await loadProducts()
+
         updateCartUI()
-        await loadTheme()
         hideLoader()
       } catch(e) {
         document.body.innerHTML = `<div style="text-align:center;padding:80px;font-family:sans-serif"><h2>Store not found</h2><p style="color:#888;margin-top:8px">${e.message}</p></div>`
