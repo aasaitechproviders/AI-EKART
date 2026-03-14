@@ -85,10 +85,10 @@ a{color:inherit;text-decoration:none}
 .hero-cta{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;background:var(--p);color:#fff;border-radius:var(--btn-r);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:.2s var(--ease)}
 .hero-cta:hover{background:#333}
 
-/* ─── MAIN LAYOUT ─────────────────────────────────────────── */
-#mainLayout{max-width:1440px;margin:0 auto;padding:48px 48px 0}
+/* ─── SECTION CONTAINER ───────────────────────────────────── */
+#sections-container{max-width:1440px;margin:0 auto;width:100%}
 
-/* ─── TOOLBAR ─────────────────────────────────────────────── */
+/* ─── TOOLBAR (inside product grid section) ───────────────── */
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
 .toolbar-title{font-family:var(--font-display);font-size:26px;font-weight:400;letter-spacing:-.01em}
 .toolbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -110,366 +110,123 @@ a{color:inherit;text-decoration:none}
 .cat-pill.active{background:var(--p);color:#fff;border-color:var(--p)}
 
 /* ─── PRODUCT CARDS ──────────────────────────────────────── */
-:root{
-  --card-bg:#ffffff;
-  --card-border:var(--border);
-  --card-radius:16px;
-}
-.products-grid,.tc-products-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:20px}
-
-/* ── Base Card ── */
-.product-card,.tc-product-card{
-  background:var(--card-bg);
-  border-radius:var(--card-radius);
-  overflow:hidden;
-  color:var(--p);
-  display:flex;
-  flex-direction:column;
-  position:relative;
-  border:1px solid var(--card-border);
-  transition:box-shadow .3s var(--ease),transform .3s var(--ease);
-  cursor:pointer;
-}
-.product-card:hover,.tc-product-card:hover{
-  box-shadow:0 20px 60px rgba(0,0,0,.1),0 4px 20px rgba(0,0,0,.06);
-  transform:translateY(-4px);
-  z-index:2;
-}
-.card-link{text-decoration:none;color:inherit;display:flex;flex-direction:column;flex:1}
-
-/* ── Image ── */
-.product-img,.tc-product-img{
-  position:relative;
-  width:100%;
-  aspect-ratio:1/1;
-  overflow:hidden;
-  background:var(--bg2);
-  flex-shrink:0;
-}
-.product-img img,.tc-product-img img{
-  width:100%;height:100%;
-  object-fit:cover;
-  transition:transform .5s var(--ease);
-  display:block;
-}
-.product-card:hover .product-img img,
-.tc-product-card:hover .tc-product-img img{transform:scale(1.07)}
+.products-grid,.tc-products-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:24px}
+.product-card,.tc-product-card{background:#fff;border-radius:16px;overflow:hidden;color:var(--p);display:flex;flex-direction:column;position:relative;border:1px solid var(--border);transition:box-shadow .25s var(--ease),transform .25s var(--ease);cursor:pointer}
+.product-card:hover,.tc-product-card:hover{box-shadow:var(--sh2);transform:translateY(-3px);z-index:2}
+.card-link{text-decoration:none;color:inherit;display:block;flex:1}
+.product-img,.tc-product-img{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--bg2);display:flex;align-items:center;justify-content:center}
+.product-img img,.tc-product-img img{width:100%;height:100%;object-fit:cover;transition:transform .45s var(--ease);display:block}
+.product-card:hover .product-img img,.tc-product-card:hover .tc-product-img img{transform:scale(1.06)}
 .product-img.img-error img,.tc-product-img.img-error img{display:none}
-.img-fallback-icon{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  font-size:48px;opacity:.15;pointer-events:none;
-}
-
-/* ── Badges ── */
-.product-badge,.tc-product-badge{
-  position:absolute;top:12px;left:12px;z-index:3;
-  font-size:10px;font-weight:700;
-  padding:4px 10px;border-radius:6px;
-  letter-spacing:.06em;text-transform:uppercase;
-  backdrop-filter:blur(4px);
-}
+.img-fallback-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;opacity:.2;pointer-events:none}
+.product-badge,.tc-product-badge{position:absolute;top:12px;left:12px;z-index:3;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.04em;text-transform:uppercase}
 .badge-sale,.badge-discount{background:#ef4444;color:#fff}
 .badge-new{background:#0ea5e9;color:#fff}
 .badge-bestseller,.badge-hot{background:#f97316;color:#fff}
 .badge-trending{background:#8b5cf6;color:#fff}
-.badge-custom{background:var(--primary);color:#fff}
-
-/* ── Wishlist ── */
-.wish-btn{
-  position:absolute;top:10px;right:10px;z-index:3;
-  width:32px;height:32px;border-radius:50%;
-  background:rgba(255,255,255,.92);
-  border:none;
-  box-shadow:0 2px 10px rgba(0,0,0,.12);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:13px;
-  transition:all .2s var(--ease);
-  opacity:0;transform:scale(.8) translateY(-4px);
-}
-.product-card:hover .wish-btn,
-.tc-product-card:hover .wish-btn{opacity:1;transform:scale(1) translateY(0)}
-.wish-btn:hover{background:#fff;transform:scale(1.12)!important;box-shadow:0 4px 16px rgba(0,0,0,.16)}
-.wish-btn.wished{color:#ef4444;opacity:1;transform:scale(1) translateY(0)}
-
-/* ── Hover Add-to-Cart overlay (slides up from bottom of image) ── */
-/* Only used for non-overlay card styles */
-.card-atc-overlay{
-  position:absolute;bottom:0;left:0;right:0;z-index:4;
-  padding:0 10px 10px;
-  transform:translateY(110%);
-  transition:transform .28s var(--ease);
-  pointer-events:none;
-}
-.product-card:hover .card-atc-overlay,
-.tc-product-card:hover .card-atc-overlay{
-  transform:translateY(0);
-  pointer-events:auto;
-}
-/* When item is in cart, kill the overlay completely */
-.product-card.in-cart .card-atc-overlay,
-.tc-product-card.in-cart .card-atc-overlay{
-  display:none!important;
-}
-/* No overlay for overlay-style cards — handled separately */
-.overlay-grid .card-atc-overlay,
-[class*="featured-overlay"] .card-atc-overlay{display:none!important}
-
-.card-atc-btn{
-  width:100%;padding:11px 16px;
-  background:rgba(10,10,10,.82);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:10px;
-  font-size:11px;font-weight:700;cursor:pointer;
-  font-family:var(--font);letter-spacing:.1em;
-  transition:background .15s,box-shadow .15s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  box-shadow:0 8px 28px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1);
-  text-transform:uppercase;
-}
-.card-atc-btn:hover{
-  background:rgba(10,10,10,.96);
-  box-shadow:0 12px 36px rgba(0,0,0,.35);
-}
-
-/* ── Card Info Section ── */
-.product-info,.tc-product-info{
-  padding:14px 16px 4px;
-  background:var(--card-bg);
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-.product-cat,.tc-product-cat{
-  font-size:9.5px;color:var(--p3);font-weight:700;
-  text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px;
-}
-.product-name,.tc-product-name{
-  font-size:14px;font-weight:500;line-height:1.45;
-  color:var(--p);margin-bottom:8px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  letter-spacing:-.01em;flex:1;
-}
-.product-price-row,.tc-price-row{
-  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
-  margin-bottom:0;
-}
-.product-price,.tc-product-price{
-  font-size:15px;font-weight:700;color:var(--p);letter-spacing:-.02em;
-}
-.product-compare,.tc-product-old{
-  font-size:12px;text-decoration:line-through;color:var(--p3);
-}
-.product-discount{
-  font-size:9.5px;font-weight:800;color:#16a34a;
-  background:#f0fdf4;padding:2px 7px;border-radius:999px;
-  letter-spacing:.04em;border:1px solid #bbf7d0;
-}
-.out-of-stock-label{
-  font-size:12px;color:var(--p3);font-style:italic;
-}
-
-/* ── Cart Controls Wrap ── */
-.cart-controls-wrap,.tc-btn-wrap{
-  padding:10px 14px 14px;
-  background:var(--card-bg);
-}
-
-/* ── Quantity Row ── */
-.cart-qty-row{
-  display:flex;align-items:center;
-  width:100%;height:44px;
-  border-radius:10px;
-  border:1.5px solid var(--border);
-  overflow:hidden;
-  background:var(--card-bg);
-  transition:border-color .2s,box-shadow .2s;
-}
-.cart-qty-row:hover{
-  border-color:rgba(0,0,0,.2);
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-.qty-btn{
-  flex:1;height:100%;border:none;
-  background:transparent;
-  color:var(--p);font-size:20px;font-weight:300;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:background .12s;
-  -webkit-user-select:none;user-select:none;line-height:1;
-}
+.badge-custom{background:var(--p);color:#fff}
+.wish-btn{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.08);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.2s var(--ease);opacity:0;transform:scale(.85)}
+.product-card:hover .wish-btn,.tc-product-card:hover .wish-btn{opacity:1;transform:scale(1)}
+.wish-btn:hover{background:#fff;transform:scale(1.1)!important}
+.wish-btn.wished{color:#ef4444;opacity:1;transform:scale(1)}
+.card-atc-overlay{position:absolute;bottom:0;left:0;right:0;z-index:4;padding:0 12px 12px;transform:translateY(calc(100% + 4px));transition:transform .3s var(--ease);pointer-events:none}
+.product-card:hover .card-atc-overlay,.tc-product-card:hover .card-atc-overlay{transform:translateY(0);pointer-events:auto}
+.product-card.in-cart .card-atc-overlay,.tc-product-card.in-cart .card-atc-overlay{display:none!important;pointer-events:none!important}
+.card-atc-btn{width:100%;padding:13px 16px;background:rgba(8,8,8,.80);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font);letter-spacing:.1em;transition:background .18s var(--ease),transform .12s,box-shadow .18s;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 8px 32px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.08);text-transform:uppercase}
+.card-atc-btn:hover{background:rgba(8,8,8,.95);box-shadow:0 12px 40px rgba(0,0,0,.38),0 4px 12px rgba(0,0,0,.22);transform:translateY(-1px)}
+.product-info,.tc-product-info{padding:14px 16px 0}
+.product-cat,.tc-product-cat{font-size:10px;color:var(--p3);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.product-name,.tc-product-name{font-size:14px;font-weight:500;line-height:1.5;color:var(--p);margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-.01em}
+.product-price-row,.tc-price-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.product-price,.tc-product-price{font-size:15px;font-weight:700;color:var(--p);letter-spacing:-.02em}
+.product-compare,.tc-product-old{font-size:12.5px;text-decoration:line-through;color:var(--p3)}
+.product-discount{font-size:10px;font-weight:700;color:#16a34a;background:#f0fdf4;padding:2px 7px;border-radius:999px;letter-spacing:.02em;border:1px solid #bbf7d0}
+.out-of-stock-label{font-size:12px;color:var(--p3);margin-top:6px;font-style:italic}
+.cart-controls-wrap,.tc-btn-wrap{padding:8px 16px 14px}
+.cart-qty-row{display:flex;align-items:center;width:100%;height:46px;border-radius:12px;border:1.5px solid var(--border);overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);transition:border-color .2s,box-shadow .2s}
+.cart-qty-row:hover{border-color:rgba(0,0,0,.18);box-shadow:0 2px 8px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.06)}
+.qty-btn{flex:1;height:100%;border:none;background:transparent;color:var(--p);font-size:22px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;-webkit-user-select:none;user-select:none;line-height:1}
 .qty-btn:hover{background:var(--bg2)}
 .qty-btn:active{background:var(--bg3)}
-.qty-value{
-  flex:0 0 48px;text-align:center;
-  font-size:14px;font-weight:700;color:var(--p);
-  border-left:1.5px solid var(--border);
-  border-right:1.5px solid var(--border);
-  height:100%;display:flex;align-items:center;justify-content:center;
-  background:var(--card-bg);
-}
-
-/* ── Add to Cart Button ── */
-.btn-add,.tc-product-btn{
-  width:100%;
-  padding:12px 16px;
-  background:var(--primary);
-  color:#fff;border:none;
-  border-radius:10px;
-  font-size:12px;font-weight:700;
-  cursor:pointer;
-  font-family:var(--font);
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  letter-spacing:.06em;text-transform:uppercase;
-  transition:filter .15s,transform .12s,box-shadow .15s;
-  box-shadow:0 2px 8px rgba(0,0,0,.15);
-}
-.btn-add:hover,.tc-product-btn:hover{
-  filter:brightness(1.12);
-  box-shadow:0 6px 20px rgba(0,0,0,.2);
-  transform:translateY(-1px);
-}
-.btn-add:active,.tc-product-btn:active{transform:scale(.97);box-shadow:none}
+.qty-value{flex:0 0 52px;text-align:center;font-size:15px;font-weight:700;color:var(--p);border-left:1.5px solid var(--border);border-right:1.5px solid var(--border);height:100%;display:flex;align-items:center;justify-content:center;letter-spacing:-.02em;background:#fff}
+.btn-add,.tc-product-btn{width:100%;padding:13px 16px;background:var(--p);color:#fff;border:none;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .2s var(--ease),transform .12s,box-shadow .2s var(--ease);font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,.14),0 6px 20px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.08)}
+.btn-add:hover,.tc-product-btn:hover{background:#1a1a1a;box-shadow:0 4px 12px rgba(0,0,0,.2),0 10px 32px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.08);transform:translateY(-1px)}
+.btn-add:active,.tc-product-btn:active{transform:scale(.97) translateY(0);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 
 /* ─── CARD STYLE VARIANTS ─────────────────────────────────── */
-/* CLASSIC */
-.classic-grid{gap:18px!important}
-.classic-grid .product-card{border-radius:14px}
-
-/* MINIMAL */
-.minimal-grid{gap:20px!important}
-.minimal-grid .product-card{background:transparent;border:none;box-shadow:none!important;transform:none!important}
+.classic-grid{gap:20px!important}
+.classic-grid .product-card{border-radius:12px;border:1px solid var(--border)}
+.minimal-grid{gap:24px!important}
+.minimal-grid .product-card{background:transparent;border:none;border-radius:12px}
 .minimal-grid .product-img{border-radius:12px;overflow:hidden}
-.minimal-grid .product-info,.minimal-grid .cart-controls-wrap{background:transparent}
-.minimal-grid .product-card:hover .product-img img{transform:scale(1.05)}
-
-/* BOLD */
-.bold-grid{gap:18px!important}
-.bold-grid .product-card{border-radius:12px;border-top:3px solid var(--primary)}
-
-/* ELEVATED */
-.elevated-grid{gap:24px!important}
-.elevated-grid .product-card{border:none;box-shadow:0 2px 16px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04)}
-.elevated-grid .product-card:hover{box-shadow:0 24px 64px rgba(0,0,0,.13),0 4px 20px rgba(0,0,0,.07);transform:translateY(-6px)}
-
-/* COMPACT — no cart controls, quick ATC only */
-.compact-grid{gap:12px!important}
-.compact-grid .product-card{border-radius:10px}
+.minimal-grid .product-card:hover{box-shadow:none;transform:none}
+.minimal-grid .product-info{padding:12px 0}
+.bold-grid{gap:20px!important}
+.bold-grid .product-card{border-radius:12px;border:1px solid var(--border);border-top:3px solid var(--primary)}
+.elevated-grid{gap:28px!important}
+.elevated-grid .product-card{border-radius:16px;border:none;box-shadow:0 2px 12px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04)}
+.elevated-grid .product-card:hover{box-shadow:0 20px 60px rgba(0,0,0,.14),0 4px 16px rgba(0,0,0,.06);transform:translateY(-5px)}
+.compact-grid{gap:14px!important}
+.compact-grid .product-card{border-radius:10px;border:1px solid var(--border)}
 .compact-grid .product-img{aspect-ratio:1/1}
-.compact-grid .product-info{padding:9px 12px 10px}
+.compact-grid .product-info{padding:10px 12px 12px}
 .compact-grid .product-name{font-size:12.5px;-webkit-line-clamp:1;margin-bottom:5px}
 .compact-grid .product-price{font-size:13px}
-.compact-grid .cart-controls-wrap,.compact-grid .tc-btn-wrap{display:none!important}
-
-/* LIST */
-.list-grid{grid-template-columns:1fr!important;gap:10px!important}
+.compact-grid .cart-controls-wrap,.compact-grid .tc-btn-wrap{display:none}
+.compact-grid .card-atc-overlay{display:none}
+.list-grid{grid-template-columns:1fr!important;gap:12px!important}
 .list-grid .product-card{flex-direction:row;height:150px;border-radius:12px}
-.list-grid .card-link{flex-direction:row;flex:1;min-width:0}
+.list-grid .card-link{display:flex;flex:1;min-width:0}
 .list-grid .product-img{width:150px;min-width:150px;aspect-ratio:auto;height:150px;flex-shrink:0;border-radius:0}
-.list-grid .product-info{flex:1;padding:18px 22px;justify-content:center}
-.list-grid .cart-controls-wrap{padding:0 16px 0;display:flex;align-items:center;align-self:center}
+.list-grid .product-info{flex:1;padding:20px 24px;display:flex;flex-direction:column;justify-content:center}
+.list-grid .cart-controls-wrap{padding:0 16px 16px;display:flex;align-items:center}
 .list-grid .product-card:hover{transform:none;box-shadow:var(--sh1)}
-.list-grid .card-atc-overlay{display:none!important}
-.list-grid .btn-add{width:auto;padding:10px 20px;white-space:nowrap}
-
-/* MAGAZINE */
-.magazine-grid{gap:14px!important}
+.list-grid .card-atc-overlay{display:none}
+.list-grid .btn-add{width:auto;padding:9px 20px}
+.magazine-grid{gap:16px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
 .magazine-grid .product-card:first-child .product-img{aspect-ratio:auto;height:100%}
-
-/* ═══════════════════════════════════════════════════
-   OVERLAY STYLE — full image card, info overlaid
-   The card is image-only; name/price in gradient layer
-   Add to cart is an INLINE bottom button (not hover overlay)
-═══════════════════════════════════════════════════ */
-.overlay-grid{gap:14px!important}
-.overlay-grid .product-card{
-  border-radius:var(--card-radius);
-  border:none;
-  overflow:hidden;
-  background:transparent;
-  box-shadow:0 2px 16px rgba(0,0,0,.1);
-}
-.overlay-grid .product-card:hover{
-  box-shadow:0 16px 48px rgba(0,0,0,.2);
-  transform:translateY(-4px);
-}
-.overlay-grid .card-link{flex-direction:column;position:relative}
-.overlay-grid .product-img{
-  aspect-ratio:3/4!important;
-  border-radius:var(--card-radius)!important;
-}
-/* Hide standard info — shown in ov-layer instead */
-.overlay-grid .product-info{display:none!important}
-/* Cart controls shown below image */
-.overlay-grid .cart-controls-wrap{
-  padding:8px 10px 10px;
-  background:transparent;
-}
-.overlay-grid .btn-add{
-  background:var(--primary);
-  border-radius:8px;
-  font-size:11px;
-}
-
-/* Gradient + text overlay inside image */
-.ov-layer{
-  position:absolute;bottom:0;left:0;right:0;z-index:2;
-  background:linear-gradient(
-    to top,
-    rgba(0,0,0,.88) 0%,
-    rgba(0,0,0,.55) 45%,
-    transparent 100%
-  );
-  padding:28px 14px 14px;
-  color:#fff;
-  pointer-events:none;
-}
-.ov-name{
-  font-size:14px;font-weight:600;
-  color:#fff;margin-bottom:5px;
-  display:-webkit-box;-webkit-line-clamp:2;
-  -webkit-box-orient:vertical;overflow:hidden;
-  line-height:1.4;
-}
-.ov-price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.ov-price{font-size:16px;font-weight:700;color:#fff}
-.ov-compare{font-size:12px;text-decoration:line-through;color:rgba(255,255,255,.5)}
-.ov-discount{font-size:9.5px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.overlay-grid{gap:16px!important}
+.overlay-grid .product-card{border-radius:14px;border:none;overflow:hidden}
+.overlay-grid .product-card .card-link{display:block;position:relative}
+.overlay-grid .product-img{aspect-ratio:3/4!important}
+.overlay-grid .product-img img{object-fit:cover!important;padding:0!important}
+.overlay-grid .product-info{display:none}
+.overlay-grid .cart-controls-wrap{padding:0 12px 12px}
+.ov-layer{position:absolute;bottom:0;left:0;right:0;z-index:2;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.4) 55%,transparent 100%);padding:24px 14px 14px;color:#fff}
+.ov-name{font-size:13.5px;font-weight:600;color:#fff;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ov-price{font-size:15px;font-weight:700;color:#fff}
 
 /* ─── FEATURED SECTION ───────────────────────────────────── */
 [class*="featured-"].tc-section{padding-left:48px!important;padding-right:48px!important;max-width:1440px;margin-left:auto;margin-right:auto;box-sizing:border-box}
-[class*="featured-"] .tc-products-grid{grid-template-columns:repeat(var(--cols,4),1fr)!important;gap:20px!important}
-.tc-product-card{border-radius:var(--card-radius);border:1px solid var(--card-border);background:var(--card-bg)}
-.tc-product-info{padding:14px 16px 4px;background:var(--card-bg)}
-.tc-btn-wrap{padding:10px 14px 14px;background:var(--card-bg)}
-.tc-product-img img{object-fit:cover;width:100%;height:100%}
-.featured-classic .tc-product-card{border-radius:14px}
-.featured-minimal .tc-product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
-.featured-minimal .tc-product-card:hover .tc-product-img img{transform:scale(1.05)}
+[class*="featured-"] .tc-products-grid{grid-template-columns:repeat(var(--cols,4),1fr)!important;gap:24px!important}
+.tc-product-card{border-radius:16px;border:1px solid var(--border);background:#fff}
+.tc-product-info{padding:14px 16px 0}
+.tc-product-img img{object-fit:cover}
+.featured-classic .tc-product-card{border-radius:12px}
+.featured-minimal .tc-product-card{background:transparent;border:none;box-shadow:none}
+.featured-minimal .tc-product-card:hover{box-shadow:none;transform:none}
 .featured-minimal .tc-product-img{border-radius:12px;overflow:hidden}
-.featured-minimal .tc-product-info,.featured-minimal .tc-btn-wrap{background:transparent!important;padding-left:0;padding-right:0}
-.featured-elevated .tc-products-grid{gap:24px!important}
-.featured-elevated .tc-product-card{border:none;box-shadow:0 2px 16px rgba(0,0,0,.07)}
-.featured-elevated .tc-product-card:hover{transform:translateY(-6px);box-shadow:0 24px 64px rgba(0,0,0,.13)}
-.featured-bold .tc-product-card{border-radius:12px;border-top:3px solid var(--primary)}
-.featured-compact .tc-btn-wrap{display:none!important}
+.featured-minimal .tc-product-info{padding:12px 0}
+.featured-elevated .tc-products-grid{gap:28px!important}
+.featured-elevated .tc-product-card{border:none;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.featured-elevated .tc-product-card:hover{transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,.14)}
+.featured-bold .tc-product-card{border-radius:12px;border:1px solid var(--border);border-top:3px solid var(--primary)}
+.featured-compact .tc-btn-wrap{display:none}
 .featured-compact .tc-product-name{-webkit-line-clamp:1}
-.featured-compact .tc-product-info{padding:9px 12px 10px}
-.featured-list .tc-products-grid{grid-template-columns:1fr!important;gap:10px!important}
+.featured-compact .tc-product-info{padding:10px 12px 12px}
+.featured-list .tc-products-grid{grid-template-columns:1fr!important;gap:12px!important}
 .featured-list .tc-product-card{flex-direction:row;height:150px;border-radius:12px}
-.featured-list .card-link{flex-direction:row;flex:1;min-width:0}
+.featured-list .card-link{display:flex;flex:1;min-width:0}
 .featured-list .tc-product-img{width:150px;min-width:150px;aspect-ratio:auto!important;height:150px;flex-shrink:0}
-.featured-list .tc-product-info{flex:1;padding:16px 20px;justify-content:center}
-.featured-list .tc-btn-wrap{padding:0 16px;display:flex;align-items:center}
-/* FEATURED OVERLAY */
-.featured-overlay .tc-products-grid{gap:14px!important}
-.featured-overlay .tc-product-card{overflow:hidden;border-radius:var(--card-radius);border:none;background:transparent}
-.featured-overlay .card-link{flex-direction:column;position:relative}
-.featured-overlay .tc-product-img{aspect-ratio:3/4!important;border-radius:var(--card-radius)!important}
-.featured-overlay .tc-product-info{display:none!important}
-.featured-overlay .tc-btn-wrap{padding:8px 10px 10px;background:transparent}
+.featured-list .tc-product-info{flex:1;padding:16px 20px;display:flex;flex-direction:column;justify-content:center}
+.featured-list .tc-btn-wrap{padding:0 16px 16px}
+.featured-overlay .tc-products-grid{gap:16px!important}
+.featured-overlay .tc-product-card{overflow:hidden;border-radius:14px;border:none}
+.featured-overlay .tc-product-card .card-link{position:relative;display:block}
+.featured-overlay .tc-product-img{aspect-ratio:3/4!important}
+.featured-overlay .tc-product-img img{object-fit:cover!important;padding:0!important}
+.featured-overlay .tc-product-info{display:none}
 
 /* ─── PAGINATION ─────────────────────────────────────────── */
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:56px;flex-wrap:wrap;padding-bottom:56px}
@@ -710,13 +467,19 @@ a{color:inherit;text-decoration:none}
 .contact-field input:focus,.contact-field textarea:focus,.contact-field select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(0,0,0,.05)}
 .contact-field textarea{resize:vertical;min-height:120px}
 
+/* ─── PRODUCT GRID SECTION (custom) ──────────────────────── */
+.product-grid-section{padding:48px 48px 0}
+@media(max-width:768px){
+  .product-grid-section{padding:20px 16px 0}
+}
+
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
 @media(max-width:1200px){
   :root{--cols:3}
   .hdr-inner,.tc-navbar{padding:0 28px}
   .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials{padding-left:28px!important;padding-right:28px!important}
   [class*="featured-"].tc-section{padding-left:28px!important;padding-right:28px!important}
-  #mainLayout{padding:36px 28px 0}
+  .product-grid-section{padding-left:28px!important;padding-right:28px!important}
   .cart-bar{padding:14px 28px}
 }
 @media(max-width:768px){
@@ -725,7 +488,7 @@ a{color:inherit;text-decoration:none}
   .hdr-nav,.hdr-search-wrap{display:none}
   .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials{padding-left:16px!important;padding-right:16px!important}
   [class*="featured-"].tc-section{padding-left:16px!important;padding-right:16px!important}
-  #mainLayout{padding:20px 16px 0}
+  .product-grid-section{padding-left:16px!important;padding-right:16px!important}
   .toolbar{flex-direction:column;align-items:flex-start}
   .toolbar-right{flex-direction:column;align-items:flex-start;width:100%}
   .tb-search-wrap,.tb-search-wrap .tb-input{width:100%}
@@ -742,15 +505,10 @@ a{color:inherit;text-decoration:none}
   .tc-newsletter-form{flex-direction:column!important}
   .tc-newsletter-input{min-width:unset!important;width:100%!important}
   .cart-bar{padding:12px 16px}
-  .tc-products-grid,.products-grid{gap:10px!important}
-  .cart-qty-row{height:40px}
-  .qty-btn{font-size:18px}
-  .qty-value{flex:0 0 42px;font-size:13px}
-  .btn-add,.tc-product-btn{padding:10px 12px;font-size:11px}
-  .cart-controls-wrap,.tc-btn-wrap{padding:8px 10px 10px}
-  .product-info,.tc-product-info{padding:10px 12px 2px}
-  .product-name,.tc-product-name{font-size:13px}
-  .product-price,.tc-product-price{font-size:14px}
+  .products-grid,.tc-products-grid{gap:12px!important}
+  .cart-qty-row{height:42px}
+  .qty-btn{font-size:20px}
+  .qty-value{flex:0 0 44px;font-size:14px}
   .about-grid,.imagetext-grid,.contact-grid{grid-template-columns:1fr!important;gap:32px!important}
   .about-stats{grid-template-columns:repeat(3,1fr)!important}
   .offers-grid,.team-grid{grid-template-columns:repeat(2,1fr)!important}
@@ -797,42 +555,296 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<div id="theme-sections-top"></div>
+<!-- ========== SECTION TEMPLATES ========== -->
+<template id="template-announcement">
+  <div class="announcement-bar section-announcement" data-section-type="announcement">
+    <span class="announcement-text"></span>
+    <span class="announcement-link hidden"></span>
+    <button class="announcement-close hidden">✕</button>
+  </div>
+</template>
 
-<div id="mainLayout">
-  <a id="mainAnchor" style="display:block;visibility:hidden;position:relative"></a>
-  <div class="toolbar">
-    <h2 class="toolbar-title" id="allProductsTitle">Products</h2>
-    <div class="toolbar-right">
-      <div class="tb-search-wrap">
-        <span class="tb-search-ic">🔍</span>
-        <input type="text" class="tb-input" id="mainSearchInput" placeholder="Search…" oninput="updateSearch(this.value)">
-      </div>
-      <select id="sortSelect" class="tb-select" onchange="loadProducts()">
-        <option value="">Newest</option>
-        <option value="price_asc">Price: Low → High</option>
-        <option value="price_desc">Price: High → Low</option>
-        <option value="name_asc">Name: A → Z</option>
-      </select>
-      <div class="price-grp">
-        <input type="number" id="priceMin" class="tb-input" placeholder="Min ₹" min="0">
-        <span style="color:var(--p3);font-size:12px">—</span>
-        <input type="number" id="priceMax" class="tb-input" placeholder="Max ₹" min="0">
-        <button class="tb-btn" onclick="loadProducts()">Go</button>
+<template id="template-navbar">
+  <nav class="tc-navbar section-navbar" data-section-type="navbar" style="position:sticky;top:0;z-index:200">
+    <div class="nav-logo">
+      <img class="nav-logo-img hidden" src="" alt="">
+      <span class="nav-logo-text"></span>
+    </div>
+    <div class="nav-links"></div>
+    <div class="nav-right">
+      <a class="nav-cart-btn hidden" href="#">🛒 <span class="nav-cart-text">Cart</span> <span class="nav-cart-count">0</span></a>
+    </div>
+  </nav>
+</template>
+
+<template id="template-hero">
+  <section class="tc-hero section-hero" data-section-type="hero">
+    <div class="hero-bg-img" style="display:none"></div>
+    <div class="hero-ov" style="display:none"></div>
+    <div class="hero-content">
+      <div class="hero-badge hidden"></div>
+      <h1 class="hero-heading"></h1>
+      <p class="hero-subheading"></p>
+      <div class="hero-btns">
+        <a class="btn-cta hero-cta-primary" href="#"></a>
+        <a class="btn-cta btn-cta-ghost hero-cta-secondary hidden" href="#"></a>
       </div>
     </div>
-  </div>
-  <div id="catPills">
-    <button class="cat-pill active" data-cat="" onclick="selectCat(this,'')">All</button>
-  </div>
-  <span class="results-label" id="resultsCount">Loading…</span>
-  <div id="productsGridWrap">
-    <div class="products-grid classic-grid" id="productsGrid"></div>
-  </div>
-  <div class="pagination" id="pagination"></div>
-</div>
+  </section>
+</template>
 
-<div id="theme-sections-bottom"></div>
+<template id="template-featured">
+  <section class="tc-section featured-{cardStyle}" data-section-type="featured">
+    <div class="tc-section-hd">
+      <div>
+        <div class="tc-section-title"></div>
+        <div class="tc-section-subtitle hidden"></div>
+      </div>
+      <a class="tc-view-all hidden" href="#">View all</a>
+    </div>
+    <div class="tc-products-grid"></div>
+  </section>
+</template>
+
+<template id="template-categories">
+  <section class="tc-section" data-section-type="categories">
+    <div class="tc-section-hd">
+      <div>
+        <div class="tc-section-title"></div>
+        <div class="tc-section-subtitle hidden"></div>
+      </div>
+    </div>
+    <div class="tc-cats-grid"></div>
+  </section>
+</template>
+
+<template id="template-banner">
+  <section class="tc-promo-banner" data-section-type="banner">
+    <div class="tc-promo-content">
+      <h2 class="banner-heading"></h2>
+      <p class="banner-subtext"></p>
+      <div class="banner-coupon hidden"></div>
+      <button class="btn-ghost-white banner-cta hidden"></button>
+    </div>
+  </section>
+</template>
+
+<template id="template-testimonials">
+  <section class="tc-testimonials" data-section-type="testimonials">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="tc-testimonials-grid"></div>
+  </section>
+</template>
+
+<template id="template-newsletter">
+  <section class="tc-newsletter" data-section-type="newsletter">
+    <h2 class="newsletter-heading"></h2>
+    <p class="newsletter-subtext"></p>
+    <div class="tc-newsletter-form">
+      <input class="tc-newsletter-input" type="email" placeholder="">
+      <button class="btn-cta newsletter-btn"></button>
+    </div>
+    <div class="tc-nl-note newsletter-note hidden"></div>
+  </section>
+</template>
+
+<template id="template-footer">
+  <footer class="tc-footer" data-section-type="footer">
+    <div class="tc-footer-grid">
+      <div class="footer-brand">
+        <div class="tc-footer-logo"></div>
+        <div class="tc-footer-tagline hidden"></div>
+        <div class="footer-contact hidden"></div>
+      </div>
+      <div class="footer-col1">
+        <div class="tc-footer-col-title"></div>
+        <div class="tc-footer-col-links"></div>
+      </div>
+      <div class="footer-col2">
+        <div class="tc-footer-col-title"></div>
+        <div class="tc-footer-col-links"></div>
+      </div>
+    </div>
+    <div class="tc-footer-bottom">
+      <div class="tc-footer-copy"></div>
+      <div class="tc-footer-social hidden"></div>
+    </div>
+  </footer>
+</template>
+
+<template id="template-trustbadges">
+  <section class="tc-trust-section" data-section-type="trustbadges">
+    <div class="tc-trust-grid"></div>
+  </section>
+</template>
+
+<template id="template-faq">
+  <section class="tc-faq-section" data-section-type="faq">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="tc-faq-items"></div>
+  </section>
+</template>
+
+<template id="template-video">
+  <section class="tc-video-section" data-section-type="video">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="tc-video-box">
+      <iframe class="video-iframe hidden" allowfullscreen></iframe>
+      <div class="tc-play-circle hidden">▶</div>
+    </div>
+  </section>
+</template>
+
+<template id="template-countdown">
+  <section class="tc-countdown-section" data-section-type="countdown">
+    <div class="tc-section-title"></div>
+    <div class="tc-section-subtitle hidden"></div>
+    <div class="tc-countdown-row">
+      <div class="tc-cd-unit"><div class="tc-cd-num cd-days">00</div><div class="tc-cd-label">Days</div></div>
+      <div class="tc-cd-unit"><div class="tc-cd-num cd-hours">00</div><div class="tc-cd-label">Hours</div></div>
+      <div class="tc-cd-unit"><div class="tc-cd-num cd-mins">00</div><div class="tc-cd-label">Mins</div></div>
+      <div class="tc-cd-unit"><div class="tc-cd-num cd-secs">00</div><div class="tc-cd-label">Secs</div></div>
+    </div>
+    <div class="countdown-cta hidden"><a class="btn-cta" href="#"></a></div>
+  </section>
+</template>
+
+<template id="template-gallery">
+  <section class="tc-gallery-section" data-section-type="gallery">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+    </div>
+    <div class="tc-gallery-grid"></div>
+  </section>
+</template>
+
+<template id="template-about">
+  <section class="tc-about-section" data-section-type="about">
+    <div class="about-grid">
+      <div class="about-text">
+        <h2 class="about-heading"></h2>
+        <p class="about-subheading hidden"></p>
+        <div class="about-body"></div>
+        <a class="btn-cta about-cta hidden" href="#"></a>
+      </div>
+      <div class="about-img-wrap hidden"></div>
+    </div>
+    <div class="about-stats hidden">
+      <div class="stat1 hidden"><div class="about-stat-num"></div><div class="about-stat-label"></div></div>
+      <div class="stat2 hidden"><div class="about-stat-num"></div><div class="about-stat-label"></div></div>
+      <div class="stat3 hidden"><div class="about-stat-num"></div><div class="about-stat-label"></div></div>
+    </div>
+  </section>
+</template>
+
+<template id="template-richtext">
+  <section class="tc-richtext-section" data-section-type="richtext">
+    <div class="richtext-inner">
+      <h2 class="richtext-title hidden"></h2>
+      <div class="richtext-body"></div>
+      <div class="richtext-cta hidden"><a class="btn-cta" href="#"></a></div>
+    </div>
+  </section>
+</template>
+
+<template id="template-imagetext">
+  <section class="tc-imagetext-section" data-section-type="imagetext">
+    <div class="imagetext-grid">
+      <div class="imagetext-img-wrap hidden"></div>
+      <div class="imagetext-text">
+        <h2 class="imagetext-heading"></h2>
+        <p class="imagetext-subheading hidden"></p>
+        <div class="imagetext-body"></div>
+        <div class="imagetext-bullets hidden"></div>
+        <a class="btn-cta imagetext-cta hidden" href="#"></a>
+      </div>
+    </div>
+  </section>
+</template>
+
+<template id="template-brands">
+  <section class="tc-brands-section" data-section-type="brands">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+    </div>
+    <div class="brands-grid"></div>
+  </section>
+</template>
+
+<template id="template-offers">
+  <section class="tc-offers-section" data-section-type="offers">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="offers-grid"></div>
+  </section>
+</template>
+
+<template id="template-team">
+  <section class="tc-team-section" data-section-type="team">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="team-grid"></div>
+  </section>
+</template>
+
+<template id="template-contact">
+  <section class="tc-contact-section" data-section-type="contact">
+    <div class="tc-section-hd">
+      <div class="tc-section-title"></div>
+      <div class="tc-section-subtitle hidden"></div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info"></div>
+      <div class="contact-form-grid"></div>
+    </div>
+  </section>
+</template>
+
+<template id="template-product_grid">
+  <section class="product-grid-section" data-section-type="product_grid">
+    <div class="toolbar">
+      <h2 class="toolbar-title" data-placeholder="title">Products</h2>
+      <div class="toolbar-right">
+        <div class="tb-search-wrap">
+          <span class="tb-search-ic">🔍</span>
+          <input type="text" class="tb-input search-input" placeholder="Search…">
+        </div>
+        <select class="tb-select sort-select">
+          <option value="">Newest</option>
+          <option value="price_asc">Price: Low → High</option>
+          <option value="price_desc">Price: High → Low</option>
+          <option value="name_asc">Name: A → Z</option>
+        </select>
+        <div class="price-grp">
+          <input type="number" class="tb-input price-min" placeholder="Min ₹" min="0">
+          <span style="color:var(--p3);font-size:12px">—</span>
+          <input type="number" class="tb-input price-max" placeholder="Max ₹" min="0">
+          <button class="tb-btn price-go">Go</button>
+        </div>
+      </div>
+    </div>
+    <div class="cat-pills-container"></div>
+    <span class="results-label results-count"></span>
+    <div class="products-grid classic-grid products-grid-container"></div>
+    <div class="pagination pagination-container"></div>
+  </section>
+</template>
+
+<!-- ===== SINGLE CONTAINER FOR ALL SECTIONS ===== -->
+<div id="sections-container"></div>
 
 <div class="cart-bar" id="cartBar">
   <div class="cbar-info"><span id="cbarQty"></span><strong id="cbarTotal"></strong></div>
@@ -849,8 +861,14 @@ const API = 'https://apiv2.aasaitech.in'
 const R = document.documentElement
 let storeConfig={}, themeData=null, currency='₹'
 let activeStyle='classic', activeSize='medium'
-let currentCat='', currentPage=1, searchQ='', searchT=null
 let storeCategories=[]
+
+// Global variables for the active product grid (assuming only one)
+let activeProductGrid = null
+let currentCat = ''
+let currentPage = 1
+let searchQ = ''
+let searchT = null
 
 // ─────────────── UTILS ───────────────────────────────────────
 const esc = s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
@@ -891,24 +909,12 @@ function updateCC(id){
     const n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
     const card=el.closest('.product-card,.tc-product-card')
     const ic=card?.querySelector('.product-img,.tc-product-img')
-    const isOverlay=activeStyle==='overlay'||card?.closest('.overlay-grid,.featured-overlay')
     if(qty===0){
       el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> Add to cart</button>`
-      if(card){
-        card.classList.remove('in-cart')
-        // Re-add hover overlay only for non-overlay styles
-        if(!isOverlay&&ic&&!ic.querySelector('.card-atc-overlay')){
-          const ov=document.createElement('div');ov.className='card-atc-overlay'
-          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')">🛒 Quick Add</button>`
-          ic.appendChild(ov)
-        }
-      }
+      if(card){card.classList.remove('in-cart');if(ic&&!ic.querySelector('.card-atc-overlay')){const ov=document.createElement('div');ov.className='card-atc-overlay';ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">🛒 Add to cart</button>`;ic.appendChild(ov)}}
     }else{
       el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
-      if(card){
-        card.classList.add('in-cart')
-        ic?.querySelector('.card-atc-overlay')?.remove()
-      }
+      if(card){card.classList.add('in-cart');ic?.querySelector('.card-atc-overlay')?.remove()}
     }
   })
 }
@@ -966,70 +972,37 @@ function renderCard(p,ctx,btnLabel){
   const oc=isM?'product-compare':'tc-product-old'
   const wc=isM?'cart-controls-wrap':'tc-btn-wrap'
   const bc=isM?'product-badge':'tc-product-badge'
-
   const colorIdx=(p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0)%colorPairs.length
   const [bg1,bg2c]=colorPairs[colorIdx]
+  const imgTag=imgUrl?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.closest('.${ic}').querySelector('.img-fallback-icon').style.opacity='.4'">`:''
+  const fallbackIcon=`<div class="img-fallback-icon" style="opacity:${imgUrl?'0':'.25'}">🛍️</div>`
   const gradientBg=imgUrl?'':`background:linear-gradient(135deg,${bg1},${bg2c});`
-
-  const imgTag=imgUrl?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">`:''
-  const fallback=`<div class="img-fallback-icon" style="opacity:${imgUrl?'0':'.2'}">🛍️</div>`
   const badge=getBadge(p,bc)
+  const wish=`<button class="wish-btn" onclick="event.preventDefault();toggleWish('${p._id}',this)">♡</button>`
   const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+  const overlayBtn=(oos||qty>0)?'':`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 Add to cart</button></div>`
 
-  // Hover overlay ATC — only for non-overlay styles and when not OOS/in-cart
-  const hoverOverlay=(oos||qty>0||activeStyle==='overlay')?''
-    :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 Quick Add</button></div>`
-
-  // Bottom cart controls HTML
   let ctrlHTML
-  if(oos){
-    ctrlHTML=`<span class="out-of-stock-label">Out of stock</span>`
-  } else if(qty>0){
-    ctrlHTML=`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
-  } else {
-    ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
-  }
+  if(oos) ctrlHTML=`<span class="out-of-stock-label">Out of stock</span>`
+  else if(qty>0) ctrlHTML=`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
+  else ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
 
-  // ── OVERLAY STYLE ──────────────────────────────────────────
-  // Image fills the card, gradient+text overlaid, ATC button below
   if(activeStyle==='overlay'){
-    const compareHtml=p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
-    const discHtml=d?`<span class="ov-discount">−${d}%</span>`:''
     return`<div class="${cc}${qty>0?' in-cart':''}">
-      <a class="card-link" href="product.html?store=${slug}&id=${p._id}" style="position:relative;display:block">
-        <div class="${ic}" style="${gradientBg}">
-          ${badge}
-          ${imgTag}${fallback}
-          <div class="ov-layer">
-            <div class="ov-name">${esc(p.name)}</div>
-            <div class="ov-price-row">
-              <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
-              ${compareHtml}${discHtml}
-            </div>
-          </div>
-        </div>
+      <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
+        <div class="${ic}" style="${gradientBg}">${badge}${imgTag}${fallbackIcon}<div class="ov-layer"><div class="ov-name">${esc(p.name)}</div><div class="ov-price">${currency}${p.price.toFixed(2)}</div></div></div>
       </a>
-      <div class="${wc}">${ctrlHTML}</div>
+      ${overlayBtn}
+      <div class="${wc}">${qty>0?`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`:''}</div>
     </div>`
   }
-
-  // ── STANDARD STYLES (classic, minimal, bold, elevated, compact, list, magazine) ──
-  const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
   return`<div class="${cc}${qty>0?' in-cart':''}">
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
-      <div class="${ic}" style="${gradientBg}">
-        ${badge}${wish}
-        ${imgTag}${fallback}
-        ${hoverOverlay}
-      </div>
+      <div class="${ic}" style="${gradientBg}">${badge}${wish}${imgTag}${fallbackIcon}${overlayBtn}</div>
       <div class="${inf}">
         ${p.category_name?`<div class="${ca}">${esc(p.category_name)}</div>`:''}
         <div class="${nc}">${esc(p.name)}</div>
-        <div class="${rc}">
-          <span class="${pc}">${currency}${p.price.toFixed(2)}</span>
-          ${p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-          ${d?`<span class="product-discount">−${d}%</span>`:''}
-        </div>
+        <div class="${rc}"><span class="${pc}">${currency}${p.price.toFixed(2)}</span>${p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''} ${d?`<span class="product-discount">−${d}%</span>`:''}</div>
       </div>
     </a>
     <div class="${wc}">${ctrlHTML}</div>
@@ -1044,20 +1017,22 @@ function initCartButtons(){
   })
 }
 
-function applyStyleToGrid(){
-  const grid=document.getElementById('productsGrid');if(!grid)return
+function applyStyleToGrid(grid){
+  if(!grid) return
   const styleMap={classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',magazine:'magazine-grid',overlay:'overlay-grid'}
   const cls=styleMap[activeStyle]||'classic-grid'
   grid.className=`products-grid ${cls}`
-  grid.style.gridTemplateColumns=activeStyle==='list'?'1fr':''
+  if(activeStyle==='list') grid.style.gridTemplateColumns='1fr'
+  else grid.style.gridTemplateColumns=''
 }
 
-// ─────────────── DATA EXTRACTOR ──────────────────────────────
+// ─────────────── DATA EXTRACTOR (gd) ─────────────────────────
 function gd(sec){
   const d=sec.data||{},s=sec.settings||{}
   const get=(...keys)=>{for(const k of keys){const v=d[k]??s[k];if(v!==undefined&&v!==null&&v!=='')return v}return undefined}
   const str=(...keys)=>get(...keys)||''
-  return{
+  return {
+    // ... all fields as before, plus product_grid specific ones ...
     text:str('text'),
     heading:str('heading','title'),subheading:str('subheading','subtitle','text'),
     title:str('title','heading'),subtitle:str('subtitle','subheading'),
@@ -1102,395 +1077,44 @@ function gd(sec){
     newsletterNote:str('newsletterNote')||'No spam. Unsubscribe anytime.',
     cardStyle:str('cardStyle','card_style')||'image',
     layout:str('layout'),
-    // About section
     aboutBody:str('body','content','aboutBody'),
     aboutImage:str('image','aboutImage','image_url'),
     stat1num:str('stat1num'),stat1label:str('stat1label'),
     stat2num:str('stat2num'),stat2label:str('stat2label'),
     stat3num:str('stat3num'),stat3label:str('stat3label'),
-    // Image+Text
     imageUrl:str('imageUrl','image','image_url'),imagePosition:str('imagePosition','image_position')||'left',
     bodyText:str('body','content','bodyText'),
     bullet1:str('bullet1'),bullet2:str('bullet2'),bullet3:str('bullet3'),bullet4:str('bullet4'),
-    // Brands
     brand1name:str('brand1name'),brand1logo:str('brand1logo'),
     brand2name:str('brand2name'),brand2logo:str('brand2logo'),
     brand3name:str('brand3name'),brand3logo:str('brand3logo'),
     brand4name:str('brand4name'),brand4logo:str('brand4logo'),
     brand5name:str('brand5name'),brand5logo:str('brand5logo'),
     brand6name:str('brand6name'),brand6logo:str('brand6logo'),
-    // Offers
     offer1title:str('offer1title'),offer1desc:str('offer1desc'),offer1badge:str('offer1badge'),offer1icon:str('offer1icon'),
     offer2title:str('offer2title'),offer2desc:str('offer2desc'),offer2badge:str('offer2badge'),offer2icon:str('offer2icon'),
     offer3title:str('offer3title'),offer3desc:str('offer3desc'),offer3badge:str('offer3badge'),offer3icon:str('offer3icon'),
     offer4title:str('offer4title'),offer4desc:str('offer4desc'),offer4badge:str('offer4badge'),offer4icon:str('offer4icon'),
-    // Team
     team1name:str('team1name'),team1role:str('team1role'),team1bio:str('team1bio'),team1img:str('team1img'),
     team2name:str('team2name'),team2role:str('team2role'),team2bio:str('team2bio'),team2img:str('team2img'),
     team3name:str('team3name'),team3role:str('team3role'),team3bio:str('team3bio'),team3img:str('team3img'),
     team4name:str('team4name'),team4role:str('team4role'),team4bio:str('team4bio'),team4img:str('team4img'),
-    // Contact
     contactEmail:str('contactEmail','email'),contactPhone:str('contactPhone','phone'),contactAddress:str('contactAddress','address'),
     contactHours:str('contactHours'),
     formName:str('formName')||'yes',formPhone:str('formPhone')||'no',formSubject:str('formSubject')||'no',
-    // Rich text
     richContent:str('content','body','richContent'),richAlign:str('align','textAlign')||'center',
-    // Footer
     footerTagline:str('footerTagline','tagline'),footerContact:str('footerContact'),
+    // Product grid specific
+    gridTitle:str('gridTitle','title')||'Products',
+    columns:parseInt(get('columns','cols'))||4,
+    showFilterBar:get('showFilterBar','show_filter')!==false,
+    showCategories:get('showCategories','show_cats')!==false,
+    itemsPerPage:parseInt(get('itemsPerPage','limit'))||24,
+    defaultSort:str('defaultSort','sort')||'',
   }
 }
 
-// ─────────────── BUILD SECTIONS ──────────────────────────────
-function buildSec(sec, isMobile){
-  const d=gd(sec)
-  switch(sec.type){
-
-    case 'announcement':{
-      const closable=d.sticky==='no'||d.closable==='yes'
-      return`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':{}}">
-        <span>${esc(d.text||'✨ Free shipping on orders above ₹999')}</span>
-        ${d.linkText?`<a class="ann-link" href="${esc(d.linkUrl||'#')}">${esc(d.linkText)}</a>`:''}
-        ${closable?`<button class="ann-close" onclick="this.closest('.announcement-bar').remove()">✕</button>`:''}
-      </div>`
-    }
-
-    case 'navbar':{
-      const lt=d.logoText||storeConfig.name||'My Store'
-      let links=d.navLinks?.length?d.navLinks:[1,2,3,4,5].map(i=>d[`link${i}Text`]?{text:d[`link${i}Text`],url:d[`link${i}Url`]}:null).filter(Boolean)
-      const lh=links.map(l=>{
-        const url=l.url||l.href||'#',isA=url.startsWith('#'),sid=isA?url.slice(1):null
-        const oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"` :`onclick="event.preventDefault();scrollToEl('${sid}')"`):''
-        return`<a href="${esc(url)}" ${oc} style="${d.linkColor?'color:'+d.linkColor:''}">${esc(l.text||l.txt||'')}</a>`
-      }).join('')
-      const pos=d.sticky!=='no'?'sticky':'relative'
-      return`<nav class="tc-navbar" id="themeNavbar" style="${d.bgColor?'background:'+d.bgColor+';':''}position:${pos};top:0;z-index:200">
-        <div class="nav-logo" style="${d.logoColor?'color:'+d.logoColor:''}" onclick="scrollTop()">
-          ${d.logoUrl?`<img src="${d.logoUrl}" class="nav-logo-img" alt="${esc(lt)}">`:''}
-          <span ${d.logoUrl?'class="hidden"':''}>${esc(lt)}</span>
-        </div>
-        ${!isMobile&&links.length?`<div class="nav-links">${lh}</div>`:''}
-        <div class="nav-right">${d.showCart!=='no'?`<a href="cart.html?store=${slug}" class="nav-cart-btn">🛒 ${esc(d.cartText)} (<span class="theme-cart-qty">0</span>)</a>`:''}</div>
-      </nav>`
-    }
-
-    case 'hero':{
-      const heading=esc(d.heading||'Welcome to our Store').replace(/(store|shop)/gi,m=>`<em>${m}</em>`)
-      const align=d.textAlign||'center'
-      const pads={compact:isMobile?'48px 5% 40px':'72px 5% 60px',normal:isMobile?'64px 5% 56px':'112px 5% 96px',tall:isMobile?'96px 5% 72px':'160px 5% 128px'}
-      const pad=pads[d.size]||pads.normal
-      const hasBg=!!d.bgImage
-      const bgS=hasBg?'':(d.bgColor?`background:${d.bgColor};`:'background:var(--bg2);')
-      const ovOpacity=(parseInt(d.overlayOpacity)||40)/100
-      const ctaIsAnchor=!d.ctaLink||d.ctaLink.startsWith('#')
-      return`<section class="tc-hero" style="${bgS}padding:${pad};text-align:${align}">
-        ${hasBg?`<div class="hero-bg-img" style="background-image:url('${d.bgImage}')"></div><div class="hero-ov" style="background:${d.overlayColor};opacity:${ovOpacity}"></div>`:''}
-        <div class="hero-content" style="${d.textColor?'color:'+d.textColor:''}">
-          ${d.badgeText?`<div class="hero-badge-pill">${esc(d.badgeText)}</div>`:''}
-          <h1>${heading}</h1>
-          <p>${esc(d.subheading||'Discover amazing products at the best prices.')}</p>
-          <div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}">
-            <a class="btn-cta" ${ctaIsAnchor?'onclick="smoothScroll()" href="javascript:void(0)"':`href="${d.ctaLink}"`}>${esc(d.ctaText||'Shop now')} →</a>
-            ${d.cta2Text?`<a class="btn-cta btn-cta-ghost" href="${esc(d.cta2Link)}">${esc(d.cta2Text)}</a>`:''}
-          </div>
-        </div>
-      </section>`
-    }
-
-    case 'featured':{
-      const count=parseInt(d.count)||8,sid=`ft-${sec.id}`
-      setTimeout(()=>fillFeatured(sid,count,d),0)
-      const skCount=isMobile?2:4
-      return`<section class="tc-section featured-${activeStyle}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto">
-        <div class="tc-section-hd">
-          <div>
-            <div class="tc-section-title">${esc(d.title||'Featured Products')}</div>
-            ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-          </div>
-          <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
-        </div>
-        <div class="tc-products-grid" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="tc-product-card skeleton" style="aspect-ratio:1/1"></div>`).join('')}</div>
-      </section>`
-    }
-
-    case 'categories':{
-      const cols=isMobile?2:(parseInt(d.columns)||4),sid=`cs-${sec.id}`
-      const catStyle=sec.settings?.card_style||sec.data?.cardStyle||d.cardStyle||'image'
-      setTimeout(()=>fillCats(sid,cols,d,catStyle),0)
-      return`<section class="tc-section" id="${sid}">
-        <div class="tc-section-hd">
-          <div>
-            <div class="tc-section-title">${esc(d.title||'Browse Categories')}</div>
-            ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-          </div>
-        </div>
-        <div class="tc-cats-grid" id="${sid}-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${Array(cols).fill(0).map(()=>`<div class="tc-cat-card skeleton" style="height:200px"></div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'banner':{
-      const bg=d.bgColor||'#111'
-      return`<section class="tc-promo-banner" style="background:${bg}">
-        <div class="tc-promo-content">
-          <h2 style="color:${d.textColor||'#fff'}">${esc(d.heading||'Limited Time Offer')}</h2>
-          <p style="color:${d.textColor?d.textColor:'rgba(255,255,255,.7)'}">${esc(d.subtext||d.subheading||'Get 20% off your first order.')}</p>
-          ${d.couponCode?`<div class="banner-coupon-box">${esc(d.couponCode)}</div><br>`:''}
-          ${d.ctaText?`<button class="btn-ghost-white" onclick="smoothScroll()">${esc(d.ctaText)}</button>`:''}
-        </div>
-      </section>`
-    }
-
-    case 'trustbadges':{
-      const gc=d.layout==='2x2'?2:d.layout==='column'?1:(isMobile?2:4)
-      const badges=[{icon:d.badge1Icon,label:d.badge1,sub:d.badge1sub},{icon:d.badge2Icon,label:d.badge2,sub:d.badge2sub},{icon:d.badge3Icon,label:d.badge3,sub:d.badge3sub},{icon:d.badge4Icon,label:d.badge4,sub:d.badge4sub}]
-      return`<section class="tc-trust-section" style="${d.bgColor?'background:'+d.bgColor+';':''}">
-        <div class="tc-trust-grid" style="grid-template-columns:repeat(${gc},1fr)">
-          ${badges.map(b=>`<div class="tc-trust-item"><span class="tc-trust-icon">${b.icon}</span><div><div class="tc-trust-label">${esc(b.label)}</div>${b.sub?`<div class="tc-trust-sub">${esc(b.sub)}</div>`:''}</div></div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'testimonials':{
-      const cols=isMobile?1:(parseInt(d.columns)||3)
-      const stars=n=>'★'.repeat(Math.max(1,Math.min(5,parseInt(n)||5)))
-      const ts=[{n:d.t1name,t:d.t1text,s:d.t1stars},{n:d.t2name,t:d.t2text,s:d.t2stars},{n:d.t3name,t:d.t3text,s:d.t3stars}]
-      return`<section class="tc-testimonials">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.title||'What Our Customers Say')}</div>
-          ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-        </div>
-        <div class="tc-testimonials-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${ts.map(({n,t,s})=>`<div class="tc-testimonial"><div class="tc-t-stars">${stars(s)}</div><div class="tc-t-text">"${esc(t)}"</div><div class="tc-t-author"><div class="tc-t-avatar">${esc((n||'?')[0].toUpperCase())}</div><div class="tc-t-name">${esc(n)}</div></div></div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'newsletter':{
-      const bgS=d.bgColor?`background:${d.bgColor};`:''
-      return`<section class="tc-newsletter" style="${bgS}">
-        <h2>${esc(d.heading||'Stay in the Loop')}</h2>
-        <p>${esc(d.subtext||d.subheading||'Get exclusive deals delivered to your inbox.')}</p>
-        <div class="tc-newsletter-form">
-          <input class="tc-newsletter-input" type="email" placeholder="${esc(d.inputPlaceholder)}">
-          <button class="btn-cta" style="${d.btnColor?'background:'+d.btnColor+';':''}" onclick="subscribeNL()">${esc(d.btnText2)} →</button>
-        </div>
-        <div class="tc-nl-note">${esc(d.newsletterNote)}</div>
-      </section>`
-    }
-
-    case 'footer':{
-      const bg=d.bgColor?`background:${d.bgColor};`:''
-      const tc=d.textColor?`color:${d.textColor};`:''
-      const c1=(d.col1Links||'').split(',').map(l=>l.trim()).filter(Boolean)
-      const c2=(d.col2Links||'').split(',').map(l=>l.trim()).filter(Boolean)
-      const logoText=d.logoText||storeConfig.name||'My Store'
-      return`<footer class="tc-footer" style="${bg}${tc}">
-        <div class="tc-footer-grid" style="grid-template-columns:${isMobile?'1fr':'2fr 1fr 1fr'}">
-          <div>
-            <div class="tc-footer-logo" onclick="scrollTop()">${esc(logoText)}</div>
-            ${d.footerTagline||d.tagline?`<div class="tc-footer-tagline">${esc(d.footerTagline||d.tagline)}</div>`:''}
-            ${d.contactEmail||d.contactPhone?`<div class="tc-footer-contact">${d.contactEmail?`📧 ${esc(d.contactEmail)}<br>`:''}${d.contactPhone?`📞 ${esc(d.contactPhone)}`:''}</div>`:''}
-          </div>
-          <div>${d.col1Title?`<div class="tc-footer-col-title">${esc(d.col1Title)}</div>`:''}<div class="tc-footer-col-links">${c1.map(l=>`<a href="javascript:void(0)">${esc(l)}</a>`).join('')}</div></div>
-          <div>${d.col2Title?`<div class="tc-footer-col-title">${esc(d.col2Title)}</div>`:''}<div class="tc-footer-col-links">${c2.map(l=>`<a href="javascript:void(0)">${esc(l)}</a>`).join('')}</div></div>
-        </div>
-        <div class="tc-footer-bottom">
-          <div class="tc-footer-copy">${esc(d.footerText)}</div>
-          ${d.showSocial!=='no'?`<div class="tc-footer-social"><a href="${esc(d.instagramUrl)}" class="tc-social-btn" target="_blank">📸</a><a href="${esc(d.facebookUrl)}" class="tc-social-btn" target="_blank">📘</a><a href="${esc(d.twitterUrl)}" class="tc-social-btn" target="_blank">🐦</a></div>`:''}
-        </div>
-      </footer>`
-    }
-
-    case 'faq':{
-      const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q)
-      const items=pairs.length?pairs:[['How long does shipping take?','3–7 business days across India.'],['What is your return policy?','30-day hassle-free returns. Full refund guaranteed.'],['Do you offer Cash on Delivery?','Yes! COD available on all orders.'],["How do I track my order?","You'll receive a tracking link via email once your order ships."]]
-      return`<section class="tc-faq-section">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.title||'Frequently Asked Questions')}</div>
-          ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-        </div>
-        ${items.map(([q,a])=>`<div class="tc-faq-item" onclick="this.classList.toggle('open')"><div class="tc-faq-q"><span class="tc-faq-q-text">${esc(q)}</span><span class="tc-faq-icon">+</span></div><div class="tc-faq-a">${esc(a)}</div></div>`).join('')}
-      </section>`
-    }
-
-    case 'video':{
-      return`<section class="tc-video-section">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.heading||d.title||'Our Story')}</div>
-          ${d.subtext||d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtext||d.subtitle)}</div>`:''}
-        </div>
-        <div class="tc-video-box">
-          ${d.videoUrl?`<iframe src="${esc(d.videoUrl)}" allowfullscreen></iframe>`:`<div class="tc-play-circle">▶</div><div style="font-size:13px;color:var(--p3);margin-top:8px">Video not configured</div>`}
-        </div>
-      </section>`
-    }
-
-    case 'countdown':{
-      const ac=d.accentColor||'var(--primary)',sid=`cd-${sec.id}`
-      setTimeout(()=>startCd(sid,d.targetDate),0)
-      return`<section class="tc-countdown-section" id="${sid}" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}">
-        <div class="tc-section-title">${esc(d.heading||d.title||'Deal Ends In')}</div>
-        ${d.subtext?`<div class="tc-section-subtitle" style="margin-top:6px">${esc(d.subtext)}</div>`:''}
-        <div class="tc-countdown-row">
-          ${[['Days','days'],['Hours','hours'],['Mins','mins'],['Secs','secs']].map(([l,k])=>`<div class="tc-cd-unit"><div class="tc-cd-num" id="${sid}-${k}" style="color:${ac}">00</div><div class="tc-cd-label">${l}</div></div>`).join('')}
-        </div>
-        ${d.ctaText?`<div style="margin-top:32px"><a href="javascript:void(0)" class="btn-cta" onclick="smoothScroll()">${esc(d.ctaText)}</a></div>`:''}
-      </section>`
-    }
-
-    case 'gallery':{
-      const cols=isMobile?2:(parseInt(d.columns)||4)
-      const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1'
-      const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean)
-      const placeholders=['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡']
-      const count=isMobile?4:8
-      return`<section class="tc-gallery-section">
-        <div class="tc-section-hd"><div class="tc-section-title">${esc(d.title||'Gallery')}</div></div>
-        <div class="tc-gallery-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${placeholders.slice(0,count).map((e,i)=>`<div class="tc-gallery-item" style="aspect-ratio:${ratio}">${imgs[i]?`<img src="${esc(imgs[i])}" alt="Gallery ${i+1}" loading="lazy">`:e}</div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'about':{
-      const hasStats=d.stat1num||d.stat2num||d.stat3num
-      const hasImg=!!d.aboutImage
-      return`<section class="tc-about-section">
-        <div class="about-grid" style="${!hasImg?'grid-template-columns:1fr':''}">
-          <div class="about-text">
-            <h2 class="about-heading">${esc(d.heading||'About Us')}</h2>
-            ${d.subheading?`<p class="about-subheading">${esc(d.subheading)}</p>`:''}
-            <div class="about-body">${esc(d.aboutBody||d.bodyText||'We are passionate about bringing you the best products.')}</div>
-            ${d.ctaText?`<a class="btn-cta about-cta" href="${esc(d.ctaLink)}">${esc(d.ctaText)}</a>`:''}
-          </div>
-          ${hasImg?`<div class="about-img-wrap"><img src="${esc(d.aboutImage)}" alt="About us" loading="lazy"></div>`:''}
-        </div>
-        ${hasStats?`<div class="about-stats">
-          ${d.stat1num?`<div><div class="about-stat-num">${esc(d.stat1num)}</div><div class="about-stat-label">${esc(d.stat1label)}</div></div>`:''}
-          ${d.stat2num?`<div><div class="about-stat-num">${esc(d.stat2num)}</div><div class="about-stat-label">${esc(d.stat2label)}</div></div>`:''}
-          ${d.stat3num?`<div><div class="about-stat-num">${esc(d.stat3num)}</div><div class="about-stat-label">${esc(d.stat3label)}</div></div>`:''}
-        </div>`:''}
-      </section>`
-    }
-
-    case 'richtext':{
-      const align=d.richAlign||d.textAlign||'center'
-      return`<section class="tc-richtext-section">
-        <div class="richtext-inner" style="text-align:${align}">
-          ${d.title?`<h2 class="richtext-title">${esc(d.title)}</h2>`:''}
-          <div class="richtext-body">${esc(d.richContent||d.bodyText||d.text||'')}</div>
-          ${d.ctaText?`<div class="richtext-cta"><a class="btn-cta" href="${esc(d.ctaLink)}">${esc(d.ctaText)}</a></div>`:''}
-        </div>
-      </section>`
-    }
-
-    case 'imagetext':{
-      const imgPos=d.imagePosition||'left'
-      const hasImg=!!d.imageUrl
-      const bullets=[d.bullet1,d.bullet2,d.bullet3,d.bullet4].filter(Boolean)
-      return`<section class="tc-imagetext-section">
-        <div class="imagetext-grid${imgPos==='right'?' img-right':''}" style="${!hasImg?'grid-template-columns:1fr':''}">
-          ${hasImg?`<div class="imagetext-img-wrap"><img src="${esc(d.imageUrl)}" alt="${esc(d.heading)}" loading="lazy"></div>`:''}
-          <div class="imagetext-text">
-            <h2 class="imagetext-heading">${esc(d.heading||'')}</h2>
-            ${d.subheading?`<p class="imagetext-subheading">${esc(d.subheading)}</p>`:''}
-            ${d.bodyText||d.aboutBody?`<div class="imagetext-body">${esc(d.bodyText||d.aboutBody)}</div>`:''}
-            ${bullets.length?`<div class="imagetext-bullets">${bullets.map(b=>`<div class="imagetext-bullet"><span class="imagetext-bullet-icon">✓</span><span>${esc(b)}</span></div>`).join('')}</div>`:''}
-            ${d.ctaText?`<a class="btn-cta" href="${esc(d.ctaLink)}">${esc(d.ctaText)}</a>`:''}
-          </div>
-        </div>
-      </section>`
-    }
-
-    case 'brands':{
-      const brands=[1,2,3,4,5,6].map(i=>({name:d[`brand${i}name`],logo:d[`brand${i}logo`]})).filter(b=>b.name||b.logo)
-      return`<section class="tc-brands-section">
-        ${d.title?`<div class="tc-section-hd"><div class="tc-section-title">${esc(d.title)}</div></div>`:''}
-        <div class="brands-grid">
-          ${brands.length?brands.map(b=>`<div class="brand-item">${b.logo?`<img src="${esc(b.logo)}" alt="${esc(b.name||'')}">`:`<span class="brand-item-text">${esc(b.name)}</span>`}</div>`).join(''):['Brand 1','Brand 2','Brand 3','Brand 4','Brand 5'].map(n=>`<div class="brand-item"><span class="brand-item-text">${n}</span></div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'offers':{
-      const offers=[1,2,3,4].map(i=>({title:d[`offer${i}title`],desc:d[`offer${i}desc`],badge:d[`offer${i}badge`],icon:d[`offer${i}icon`]})).filter(o=>o.title)
-      const displayOffers=offers.length?offers:[{icon:'🚀',title:'Fast Delivery',desc:'Get your orders in 3-5 days',badge:'Free'},{icon:'🔄',title:'Easy Returns',desc:'Hassle-free 30-day returns',badge:'Free'},{icon:'🔒',title:'Secure Payment',desc:'100% safe transactions',badge:'Safe'},{icon:'🎁',title:'Loyalty Rewards',desc:'Earn points on every purchase',badge:'New'}]
-      const cols=isMobile?2:Math.min(displayOffers.length,4)
-      return`<section class="tc-offers-section">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.title||'Special Offers')}</div>
-          ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-        </div>
-        <div class="offers-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${displayOffers.map(o=>`<div class="offer-card"><div class="offer-icon">${o.icon||'🎁'}</div><div class="offer-title">${esc(o.title)}</div><div class="offer-desc">${esc(o.desc||'')}</div>${o.badge?`<span class="offer-badge">${esc(o.badge)}</span>`:''}</div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'team':{
-      const members=[1,2,3,4].map(i=>({name:d[`team${i}name`],role:d[`team${i}role`],bio:d[`team${i}bio`],img:d[`team${i}img`]})).filter(m=>m.name)
-      if(!members.length)return''
-      const cols=isMobile?2:Math.min(members.length,4)
-      return`<section class="tc-team-section">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.title||'Our Team')}</div>
-          ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-        </div>
-        <div class="team-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${members.map(m=>`<div class="team-card"><div class="team-avatar">${m.img?`<img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy">`:'👤'}</div><div class="team-info"><div class="team-name">${esc(m.name)}</div>${m.role?`<div class="team-role">${esc(m.role)}</div>`:''} ${m.bio?`<div class="team-bio">${esc(m.bio)}</div>`:''}</div></div>`).join('')}
-        </div>
-      </section>`
-    }
-
-    case 'contact':{
-      const hasInfo=d.contactEmail||d.contactPhone||d.contactAddress
-      return`<section class="tc-contact-section">
-        <div class="tc-section-hd">
-          <div class="tc-section-title">${esc(d.title||'Contact Us')}</div>
-          ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
-        </div>
-        <div class="contact-grid" style="${!hasInfo?'grid-template-columns:1fr':''}">
-          ${hasInfo?`<div class="contact-info">
-            ${d.contactEmail?`<div class="contact-info-item"><span class="contact-info-icon">📧</span><div><div class="contact-info-label">Email</div><div class="contact-info-val">${esc(d.contactEmail)}</div></div></div>`:''}
-            ${d.contactPhone?`<div class="contact-info-item"><span class="contact-info-icon">📞</span><div><div class="contact-info-label">Phone</div><div class="contact-info-val">${esc(d.contactPhone)}</div></div></div>`:''}
-            ${d.contactAddress?`<div class="contact-info-item"><span class="contact-info-icon">📍</span><div><div class="contact-info-label">Address</div><div class="contact-info-val">${esc(d.contactAddress)}</div></div></div>`:''}
-            ${d.contactHours?`<div class="contact-info-item"><span class="contact-info-icon">🕐</span><div><div class="contact-info-label">Hours</div><div class="contact-info-val">${esc(d.contactHours)}</div></div></div>`:''}
-          </div>`:''}
-          <div class="contact-form-grid">
-            ${d.formName!=='no'?`<div class="contact-field"><label>Name</label><input type="text" placeholder="Your name"></div>`:''}
-            <div class="contact-field"><label>Email</label><input type="email" placeholder="your@email.com"></div>
-            ${d.formPhone==='yes'?`<div class="contact-field"><label>Phone</label><input type="tel" placeholder="Phone number"></div>`:''}
-            ${d.formSubject==='yes'?`<div class="contact-field"><label>Subject</label><input type="text" placeholder="Subject"></div>`:''}
-            <div class="contact-field"><label>Message</label><textarea placeholder="Your message..."></textarea></div>
-            <button class="btn-add" style="border-radius:10px" onclick="showToast('Message sent! We will get back to you soon.')">Send Message →</button>
-          </div>
-        </div>
-      </section>`
-    }
-
-    default:return''
-  }
-}
-
-function startCd(secId,targetDate){
-  if(!targetDate)return
-  const target=new Date(targetDate).getTime()
-  if(isNaN(target))return
-  const tick=()=>{
-    const diff=target-Date.now()
-    const pad=n=>String(Math.max(0,Math.floor(n))).padStart(2,'0')
-    const get=id=>document.getElementById(`${secId}-${id}`)
-    if(diff<=0){['days','hours','mins','secs'].forEach(k=>{const e=get(k);if(e)e.textContent='00'});return}
-    if(get('days'))get('days').textContent=pad(diff/86400000)
-    if(get('hours'))get('hours').textContent=pad((diff%86400000)/3600000)
-    if(get('mins'))get('mins').textContent=pad((diff%3600000)/60000)
-    if(get('secs'))get('secs').textContent=pad((diff%60000)/1000)
-  }
-  tick();setInterval(tick,1000)
-}
-
-// ─────────────── LOAD THEME ──────────────────────────────────
+// ─────────────── THEME LOADING & RENDERING ───────────────────
 async function loadTheme(){
   try{
     const res=await fetch(`${API}/shop/${slug}/theme`)
@@ -1505,26 +1129,17 @@ function applySettings(s){
   const primary=s.primaryColor||s.primary_color||'#0f0f0f'
   const bg=s.bgColor||s.secondary_color||'#fafafa'
   const text=s.textColor||s.text_color||'#0f0f0f'
-  const radiusVal=s.radius||s.border_radius||'12px'
-  // border_radius from builder may come as a number (px)
-  const radiusPx=typeof radiusVal==='number'?`${radiusVal}px`:radiusVal.toString().includes('px')?radiusVal:`${radiusVal}px`
+  const radius=s.radius||'12px'
   const font=s.fontHeading||s.font_heading||'DM Sans'
   const btnStyle=s.buttonStyle||s.button_style||'rounded'
   const cols=s.cols||s.columns||4
-  // Card background — builder sends cardBg or card_bg; fall back to white
-  const cardBg=s.cardBg||s.card_bg||s.cardBackground||s.card_background||'#ffffff'
-  const cardBorder=s.cardBorder||s.card_border||s.border||''
-
   R.style.setProperty('--primary',primary)
   R.style.setProperty('--brand',primary)
   R.style.setProperty('--p',text)
   R.style.setProperty('--bg',bg)
-  R.style.setProperty('--radius',radiusPx)
-  R.style.setProperty('--card-radius',radiusPx)
-  R.style.setProperty('--card-bg',cardBg)
-  if(cardBorder)R.style.setProperty('--card-border',cardBorder)
+  R.style.setProperty('--radius',radius)
   R.style.setProperty('--font',`'${font}',system-ui,sans-serif`)
-  R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'4px':radiusPx)
+  R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'2px':radius)
   R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
   document.body.style.background=bg
   if(font&&font!=='DM Sans'&&font!=='system-ui'){
@@ -1532,83 +1147,707 @@ function applySettings(s){
     if(!document.getElementById(fid)){const l=document.createElement('link');l.id=fid;l.rel='stylesheet';l.href=`https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700&display=swap`;document.head.appendChild(l)}
   }
   activeStyle=s.card_style||s.cardStyle||'classic'
-  applyStyleToGrid()
   activeSize=s.card_size||s.cardSize||'medium'
 }
 
-function renderSections(sections){
-  const isMobile=window.innerWidth<=768
-  const visible=sections.filter(s=>s.is_visible!==false&&s.enabled!==false).sort((a,b)=>(a.order||0)-(b.order||0))
-  if(!visible.length)return
-  const TOP=new Set(['announcement','navbar','hero','featured','categories'])
-  const te=document.getElementById('theme-sections-top'),be=document.getElementById('theme-sections-bottom')
-  if(te)te.innerHTML=visible.filter(s=>TOP.has(s.type)).map(s=>buildSec(s,isMobile)).join('')
-  if(be)be.innerHTML=visible.filter(s=>!TOP.has(s.type)).map(s=>buildSec(s,isMobile)).join('')
-  const hasNavbar=visible.some(s=>s.type==='navbar'),hasHero=visible.some(s=>s.type==='hero')
-  document.getElementById('origHeader').style.display=hasNavbar?'none':''
-  const hb=document.getElementById('heroBanner')
-  if(hasHero)hb.style.display='none'
-  else hb.classList.add('visible')
-  document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=getCart().reduce((s,x)=>s+x.qty,0))
+const templateMap = {
+  announcement: 'template-announcement',
+  navbar: 'template-navbar',
+  hero: 'template-hero',
+  featured: 'template-featured',
+  categories: 'template-categories',
+  banner: 'template-banner',
+  testimonials: 'template-testimonials',
+  newsletter: 'template-newsletter',
+  footer: 'template-footer',
+  trustbadges: 'template-trustbadges',
+  faq: 'template-faq',
+  video: 'template-video',
+  countdown: 'template-countdown',
+  gallery: 'template-gallery',
+  about: 'template-about',
+  richtext: 'template-richtext',
+  imagetext: 'template-imagetext',
+  brands: 'template-brands',
+  offers: 'template-offers',
+  team: 'template-team',
+  contact: 'template-contact',
+  product_grid: 'template-product_grid'
+}
+
+function renderSections(sections) {
+  const container = document.getElementById('sections-container')
+  container.innerHTML = ''
+
+  const enabled = sections.filter(s => s.is_visible !== false && s.enabled !== false)
+                          .sort((a,b) => (a.order||0) - (b.order||0))
+
+  enabled.forEach(sec => {
+    const tmplId = templateMap[sec.type]
+    if (!tmplId) return
+    const template = document.getElementById(tmplId)
+    if (!template) return
+    const clone = template.content.cloneNode(true)
+    const sectionEl = clone.firstElementChild
+    const data = gd(sec)
+    populateSection(sectionEl, data, sec.type)
+    container.appendChild(sectionEl)
+  })
+
+  // Find the product grid section and initialise it
+  const productGridSection = document.querySelector('[data-section-type="product_grid"]')
+  if (productGridSection) {
+    activeProductGrid = productGridSection
+    loadCategoriesForSection(productGridSection)
+    loadProductsForSection(productGridSection)
+  }
+
+  const hasNavbar = enabled.some(s => s.type === 'navbar')
+  const hasHero = enabled.some(s => s.type === 'hero')
+  document.getElementById('origHeader').style.display = hasNavbar ? 'none' : ''
+  document.getElementById('heroBanner').classList.toggle('visible', !hasHero)
+
+  document.querySelectorAll('.theme-cart-qty').forEach(e => e.textContent = getCart().reduce((s,x)=>s+x.qty,0))
   updateOffset()
-  window.addEventListener('resize',()=>{updateCols();updateOffset()},{passive:true})
+  window.addEventListener('resize', ()=>{ updateCols(); updateOffset() })
 }
 
-// ─────────────── FILL SECTIONS ───────────────────────────────
-async function fillFeatured(secId,count,d){
-  const grid=document.getElementById(`${secId}-grid`);if(!grid)return
-  try{
-    const data=await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json())
-    const prods=(data.products||[]).slice(0,count)
-    if(!prods.length){const s=grid.closest('section');if(s)s.style.display='none';return}
-    grid.innerHTML=prods.map(p=>renderCard(p,'featured',d.btnText||'Add to cart')).join('')
-    initCartButtons()
-    prods.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)})
-    restoreWish()
-  }catch(e){const s=document.getElementById(secId);if(s)s.style.display='none'}
-}
+function populateSection(container, d, type) {
+  const q = sel => container.querySelector(sel)
 
-async function fillCats(secId,cols,d,catStyle){
-  const grid=document.getElementById(`${secId}-grid`);if(!grid)return
-  const resolvedStyle=catStyle||d.cardStyle||'image'
-  try{
-    const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
-    const list=Array.isArray(cats)?cats:[]
-    if(!list.length){const s=grid.closest('section');if(s)s.style.display='none';return}
-    const em={fashion:'👗',clothing:'👕',electronics:'📱',tech:'💻',home:'🏠',living:'🏠',beauty:'💄',gaming:'🎮',food:'🍕',accessories:'👜',footwear:'👟',shoes:'👟',sports:'⚽',furniture:'🛋️',books:'📚',toys:'🧸',jewelry:'💎',watches:'⌚',bags:'👜'}
-    const ge=n=>{const lc=(n||'').toLowerCase();for(const[k,v]of Object.entries(em))if(lc.includes(k))return v;return'🛍️'}
-    const showCount=d.showCount!=='no'
-    grid.innerHTML=list.map(c=>{
-      const countBadge=showCount&&c.product_count!=null?`${c.product_count}+ items`:null
-      if(resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'){
-        return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-          <div class="tc-cat-simple">
-            <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
-            <div class="tc-cat-name-plain">${esc(c.name)}</div>
-            ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${esc(countBadge)}</div>`:''}
-          </div>
-        </div>`
+  switch(type) {
+    case 'announcement':
+      q('.announcement-text').textContent = d.text || ''
+      if (d.linkText) {
+        q('.announcement-link').textContent = d.linkText
+        q('.announcement-link').href = d.linkUrl || '#'
+        q('.announcement-link').classList.remove('hidden')
       }
-      if(c.image_url){
-        return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-          <div class="tc-cat-img-wrap">
-            <img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:32px\\'>${ge(c.name)}</span>'">
-          </div>
-          <div class="tc-cat-footer">
-            <span class="tc-cat-name">${esc(c.name)}</span>
-            ${countBadge?`<span class="tc-cat-count">${esc(countBadge)}</span>`:''}
-          </div>
-        </div>`
+      if (d.closable === 'yes') q('.announcement-close').classList.remove('hidden')
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.textColor) container.style.color = d.textColor
+      break
+
+    case 'navbar':
+      q('.nav-logo-text').textContent = d.logoText || storeConfig.name || 'My Store'
+      if (d.logoUrl) {
+        const img = q('.nav-logo-img')
+        img.src = d.logoUrl
+        img.alt = d.logoText || ''
+        img.classList.remove('hidden')
+        q('.nav-logo-text').classList.add('hidden')
       }
-      return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-        <div class="tc-cat-simple">
-          <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
-          <div class="tc-cat-name-plain">${esc(c.name)}</div>
-          ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${esc(countBadge)}</div>`:''}
+      if (d.logoColor) q('.nav-logo').style.color = d.logoColor
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.sticky !== 'no') container.style.position = 'sticky'
+      const linksContainer = q('.nav-links')
+      const navLinks = d.navLinks || []
+      if (navLinks.length === 0) {
+        for(let i=1; i<=5; i++) {
+          const txt = d[`link${i}Text`]
+          const url = d[`link${i}Url`] || '#'
+          if (txt) {
+            const a = document.createElement('a')
+            a.href = url
+            a.textContent = txt
+            if (url.startsWith('#')) a.onclick = (e) => { e.preventDefault(); scrollToEl(url.slice(1)) }
+            linksContainer.appendChild(a)
+          }
+        }
+      } else {
+        navLinks.forEach(l => {
+          const a = document.createElement('a')
+          a.href = l.url || '#'
+          a.textContent = l.text || ''
+          if (l.url?.startsWith('#')) a.onclick = (e) => { e.preventDefault(); scrollToEl(l.url.slice(1)) }
+          linksContainer.appendChild(a)
+        })
+      }
+      if (d.showCart !== 'no') {
+        const cartBtn = q('.nav-cart-btn')
+        cartBtn.classList.remove('hidden')
+        q('.nav-cart-text').textContent = d.cartText || 'Cart'
+        cartBtn.href = `cart.html?store=${slug}`
+      }
+      break
+
+    case 'hero':
+      q('.hero-heading').innerHTML = (d.heading || 'Welcome').replace(/(store|shop)/gi, m => `<em>${m}</em>`)
+      q('.hero-subheading').textContent = d.subheading || ''
+      q('.hero-cta-primary').textContent = d.ctaText || 'Shop now'
+      q('.hero-cta-primary').href = d.ctaLink || '#'
+      if (d.cta2Text) {
+        q('.hero-cta-secondary').textContent = d.cta2Text
+        q('.hero-cta-secondary').href = d.cta2Link || '#'
+        q('.hero-cta-secondary').classList.remove('hidden')
+      }
+      if (d.badge) {
+        q('.hero-badge').textContent = d.badge
+        q('.hero-badge').classList.remove('hidden')
+      }
+      if (d.bgImage) {
+        q('.hero-bg-img').style.backgroundImage = `url('${d.bgImage}')`
+        q('.hero-bg-img').style.display = 'block'
+      }
+      if (d.overlayColor && d.bgImage) {
+        const ov = q('.hero-ov')
+        ov.style.background = d.overlayColor
+        ov.style.opacity = (parseInt(d.overlayOpacity)||40)/100
+        ov.style.display = 'block'
+      }
+      container.classList.add(`align-${d.textAlign||'center'}`)
+      container.classList.add(`size-${d.size||'normal'}`)
+      if (d.textColor) container.style.color = d.textColor
+      if (d.bgColor && !d.bgImage) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'featured':
+      q('.tc-section-title').textContent = d.title || 'Featured products'
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      if (d.viewAllText) {
+        const viewAll = q('.tc-view-all')
+        viewAll.textContent = d.viewAllText
+        viewAll.href = d.viewAllLink || '#'
+        viewAll.classList.remove('hidden')
+      }
+      container.dataset.count = d.count || 8
+      container.dataset.btnText = d.btnText || 'Add to cart'
+      // fill later
+      break
+
+    case 'categories':
+      q('.tc-section-title').textContent = d.title || 'Browse categories'
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      container.dataset.columns = d.columns || 4
+      container.dataset.catStyle = d.cardStyle || 'image'
+      container.dataset.showCount = d.showCount || 'yes'
+      break
+
+    case 'banner':
+      q('.banner-heading').textContent = d.heading || d.title || 'Special offer'
+      q('.banner-subtext').textContent = d.subtext || d.subheading || ''
+      if (d.couponCode) {
+        q('.banner-coupon').textContent = d.couponCode
+        q('.banner-coupon').classList.remove('hidden')
+      }
+      if (d.ctaText) {
+        q('.banner-cta').textContent = d.ctaText
+        q('.banner-cta').classList.remove('hidden')
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.textColor) container.style.color = d.textColor
+      if (d.layout) container.classList.add(`${d.layout}-layout`)
+      break
+
+    case 'testimonials':
+      q('.tc-section-title').textContent = d.title || 'What customers say'
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      container.dataset.t1name = d.t1name; container.dataset.t1text = d.t1text; container.dataset.t1stars = d.t1stars
+      container.dataset.t2name = d.t2name; container.dataset.t2text = d.t2text; container.dataset.t2stars = d.t2stars
+      container.dataset.t3name = d.t3name; container.dataset.t3text = d.t3text; container.dataset.t3stars = d.t3stars
+      container.dataset.columns = d.columns || 3
+      setTimeout(() => fillTestimonials(container), 0)
+      break
+
+    case 'newsletter':
+      q('.newsletter-heading').textContent = d.heading || 'Stay in the loop'
+      q('.newsletter-subtext').textContent = d.subtext || d.subheading || ''
+      q('.tc-newsletter-input').placeholder = d.inputPlaceholder || 'Your email'
+      q('.newsletter-btn').textContent = d.btnText2 || 'Subscribe'
+      if (d.newsletterNote) {
+        q('.newsletter-note').textContent = d.newsletterNote
+        q('.newsletter-note').classList.remove('hidden')
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.btnColor) q('.newsletter-btn').style.backgroundColor = d.btnColor
+      break
+
+    case 'footer':
+      q('.tc-footer-logo').textContent = d.logoText || storeConfig.name || 'My Store'
+      if (d.footerTagline || d.tagline) {
+        q('.tc-footer-tagline').textContent = d.footerTagline || d.tagline
+        q('.tc-footer-tagline').classList.remove('hidden')
+      }
+      const contactDiv = q('.footer-contact')
+      if (d.contactEmail || d.contactPhone) {
+        contactDiv.innerHTML = ''
+        if (d.contactEmail) contactDiv.innerHTML += `<div>✉️ ${d.contactEmail}</div>`
+        if (d.contactPhone) contactDiv.innerHTML += `<div>📞 ${d.contactPhone}</div>`
+        contactDiv.classList.remove('hidden')
+      }
+      if (d.col1Title) q('.footer-col1 .tc-footer-col-title').textContent = d.col1Title
+      const links1 = d.col1Links ? d.col1Links.split(',').map(l=>l.trim()).filter(Boolean) : []
+      const col1LinksDiv = q('.footer-col1 .tc-footer-col-links')
+      col1LinksDiv.innerHTML = links1.map(l => `<a href="javascript:void(0)">${l}</a>`).join('')
+      if (d.col2Title) q('.footer-col2 .tc-footer-col-title').textContent = d.col2Title
+      const links2 = d.col2Links ? d.col2Links.split(',').map(l=>l.trim()).filter(Boolean) : []
+      const col2LinksDiv = q('.footer-col2 .tc-footer-col-links')
+      col2LinksDiv.innerHTML = links2.map(l => `<a href="javascript:void(0)">${l}</a>`).join('')
+      q('.tc-footer-copy').textContent = d.footerText || ''
+      if (d.showSocial !== 'no') {
+        const social = q('.tc-footer-social')
+        social.innerHTML = ''
+        if (d.instagramUrl) social.innerHTML += `<a href="${d.instagramUrl}" class="tc-social-btn" target="_blank">📸</a>`
+        if (d.facebookUrl) social.innerHTML += `<a href="${d.facebookUrl}" class="tc-social-btn" target="_blank">📘</a>`
+        if (d.twitterUrl) social.innerHTML += `<a href="${d.twitterUrl}" class="tc-social-btn" target="_blank">🐦</a>`
+        social.classList.remove('hidden')
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.textColor) container.style.color = d.textColor
+      break
+
+    case 'trustbadges':
+      container.dataset.layout = d.layout || 'row'
+      for (let i=1;i<=4;i++) {
+        container.dataset[`badge${i}Icon`] = d[`badge${i}Icon`]
+        container.dataset[`badge${i}`] = d[`badge${i}`]
+        container.dataset[`badge${i}sub`] = d[`badge${i}sub`]
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      setTimeout(() => fillTrustBadges(container), 0)
+      break
+
+    case 'faq':
+      q('.tc-section-title').textContent = d.title || 'FAQ'
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      const items = []
+      for (let i=1; i<=5; i++) {
+        const qT = d[`q${i}`], aT = d[`a${i}`]
+        if (qT && aT) items.push([qT, aT])
+      }
+      if (items.length === 0) {
+        items.push(['How long does shipping take?','3–7 business days across India.'])
+        items.push(['What is your return policy?','30-day hassle-free returns. Full refund guaranteed.'])
+        items.push(['Do you offer Cash on Delivery?','Yes! COD available on all orders.'])
+        items.push(["How do I track my order?","You'll receive a tracking link via email once your order ships."])
+      }
+      const faqDiv = q('.tc-faq-items')
+      faqDiv.innerHTML = items.map(([q,a]) => `
+        <div class="tc-faq-item" onclick="this.classList.toggle('open')">
+          <div class="tc-faq-q"><span class="tc-faq-q-text">${esc(q)}</span><span class="tc-faq-icon">+</span></div>
+          <div class="tc-faq-a">${esc(a)}</div>
         </div>
-      </div>`
-    }).join('')
-  }catch(e){const s=document.getElementById(secId);if(s)s.style.display='none'}
+      `).join('')
+      break
+
+    case 'video':
+      q('.tc-section-title').textContent = d.heading || d.title || 'Our story'
+      if (d.subtext || d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtext || d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      if (d.videoUrl) {
+        const iframe = q('.video-iframe')
+        iframe.src = d.videoUrl
+        iframe.classList.remove('hidden')
+        q('.tc-play-circle').classList.add('hidden')
+      } else {
+        q('.tc-play-circle').classList.remove('hidden')
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'countdown':
+      q('.tc-section-title').textContent = d.heading || 'Deal ends in'
+      if (d.subtext) {
+        q('.tc-section-subtitle').textContent = d.subtext
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      if (d.accentColor) {
+        q('.cd-days').style.color = d.accentColor
+        q('.cd-hours').style.color = d.accentColor
+        q('.cd-mins').style.color = d.accentColor
+        q('.cd-secs').style.color = d.accentColor
+      }
+      if (d.ctaText) {
+        const ctaDiv = q('.countdown-cta')
+        ctaDiv.querySelector('a').textContent = d.ctaText
+        ctaDiv.querySelector('a').href = d.ctaLink || '#'
+        ctaDiv.classList.remove('hidden')
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      if (d.textColor) container.style.color = d.textColor
+      container.dataset.targetDate = d.targetDate || ''
+      break
+
+    case 'gallery':
+      q('.tc-section-title').textContent = d.title || 'Gallery'
+      const imgs = [d.img1, d.img2, d.img3, d.img4, d.img5, d.img6].filter(Boolean)
+      container.dataset.images = JSON.stringify(imgs)
+      container.dataset.columns = d.columns || 4
+      container.dataset.aspect = d.imgAspect || 'square'
+      setTimeout(() => fillGallery(container), 0)
+      break
+
+    case 'about':
+      q('.about-heading').textContent = d.heading || d.title || 'About us'
+      if (d.subheading) {
+        q('.about-subheading').textContent = d.subheading
+        q('.about-subheading').classList.remove('hidden')
+      }
+      q('.about-body').innerHTML = (d.aboutBody || d.bodyText || '').replace(/\n/g,'<br>')
+      if (d.ctaText) {
+        q('.about-cta').textContent = d.ctaText
+        q('.about-cta').href = d.ctaLink || '#'
+        q('.about-cta').classList.remove('hidden')
+      }
+      if (d.aboutImage) {
+        const imgWrap = q('.about-img-wrap')
+        imgWrap.innerHTML = `<img src="${d.aboutImage}" alt="${d.heading}">`
+        imgWrap.classList.remove('hidden')
+      }
+      if (d.layout === 'no-image') container.querySelector('.about-grid').style.gridTemplateColumns = '1fr'
+      const stats = [1,2,3].filter(i => d[`stat${i}num`])
+      if (stats.length) {
+        const statsDiv = q('.about-stats')
+        statsDiv.classList.remove('hidden')
+        stats.forEach(i => {
+          const statDiv = q(`.stat${i}`)
+          statDiv.querySelector('.about-stat-num').textContent = d[`stat${i}num`]
+          statDiv.querySelector('.about-stat-label').textContent = d[`stat${i}label`] || ''
+          statDiv.classList.remove('hidden')
+        })
+      }
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'richtext':
+      if (d.title) {
+        q('.richtext-title').textContent = d.title
+        q('.richtext-title').classList.remove('hidden')
+      }
+      q('.richtext-body').innerHTML = (d.richContent || d.bodyText || '').replace(/\n/g,'<br>')
+      if (d.ctaText) {
+        q('.richtext-cta a').textContent = d.ctaText
+        q('.richtext-cta a').href = d.ctaLink || '#'
+        q('.richtext-cta').classList.remove('hidden')
+      }
+      if (d.richAlign) q('.richtext-inner').style.textAlign = d.richAlign
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'imagetext':
+      q('.imagetext-heading').textContent = d.heading || ''
+      if (d.subheading) {
+        q('.imagetext-subheading').textContent = d.subheading
+        q('.imagetext-subheading').classList.remove('hidden')
+      }
+      q('.imagetext-body').innerHTML = (d.bodyText || '').replace(/\n/g,'<br>')
+      if (d.imageUrl) {
+        const imgWrap = q('.imagetext-img-wrap')
+        imgWrap.innerHTML = `<img src="${d.imageUrl}" alt="${d.heading}">`
+        imgWrap.classList.remove('hidden')
+      }
+      const bullets = [d.bullet1,d.bullet2,d.bullet3,d.bullet4].filter(Boolean)
+      if (bullets.length) {
+        const bulletsDiv = q('.imagetext-bullets')
+        bulletsDiv.innerHTML = bullets.map(b => `<div class="imagetext-bullet"><span class="imagetext-bullet-icon">✓</span><span>${esc(b)}</span></div>`).join('')
+        bulletsDiv.classList.remove('hidden')
+      }
+      if (d.ctaText) {
+        q('.imagetext-cta').textContent = d.ctaText
+        q('.imagetext-cta').href = d.ctaLink || '#'
+        q('.imagetext-cta').classList.remove('hidden')
+      }
+      if (d.imagePosition === 'right') container.querySelector('.imagetext-grid').classList.add('img-right')
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'brands':
+      if (d.title) q('.tc-section-title').textContent = d.title
+      const brands = []
+      for (let i=1;i<=6;i++) {
+        const name = d[`brand${i}name`]
+        const logo = d[`brand${i}logo`]
+        if (name || logo) brands.push({name, logo})
+      }
+      if (brands.length === 0) {
+        brands.push({name:'Nike'},{name:'Adidas'},{name:'Apple'},{name:'Samsung'})
+      }
+      const brandsDiv = q('.brands-grid')
+      brandsDiv.innerHTML = brands.map(b => `
+        <div class="brand-item">${b.logo ? `<img src="${b.logo}" alt="${b.name}">` : `<span class="brand-item-text">${b.name}</span>`}</div>
+      `).join('')
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'offers':
+      if (d.title) q('.tc-section-title').textContent = d.title
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      const offers = []
+      for (let i=1;i<=4;i++) {
+        const title = d[`offer${i}title`]
+        if (title) {
+          offers.push({
+            icon: d[`offer${i}icon`] || '🎁',
+            title: title,
+            desc: d[`offer${i}desc`] || '',
+            badge: d[`offer${i}badge`] || ''
+          })
+        }
+      }
+      if (offers.length === 0) {
+        offers.push({icon:'🚀', title:'Fast Delivery', desc:'Get your orders in 3-5 days', badge:'Free'})
+        offers.push({icon:'🔄', title:'Easy Returns', desc:'Hassle-free 30-day returns', badge:'Free'})
+        offers.push({icon:'🔒', title:'Secure Payment', desc:'100% safe transactions', badge:'Safe'})
+      }
+      const offersGrid = q('.offers-grid')
+      offersGrid.style.gridTemplateColumns = `repeat(${Math.min(offers.length, window.innerWidth<=768?2:4)},1fr)`
+      offersGrid.innerHTML = offers.map(o => `
+        <div class="offer-card"><div class="offer-icon">${o.icon}</div><div class="offer-title">${esc(o.title)}</div><div class="offer-desc">${esc(o.desc)}</div>${o.badge?`<span class="offer-badge">${esc(o.badge)}</span>`:''}</div>
+      `).join('')
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'team':
+      if (d.title) q('.tc-section-title').textContent = d.title
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      const members = []
+      for (let i=1;i<=4;i++) {
+        const name = d[`team${i}name`]
+        if (name) {
+          members.push({
+            name,
+            role: d[`team${i}role`] || '',
+            bio: d[`team${i}bio`] || '',
+            img: d[`team${i}img`] || ''
+          })
+        }
+      }
+      if (members.length === 0) {
+        members.push({name:'Priya Sharma', role:'Founder & CEO'})
+        members.push({name:'Rahul Verma', role:'Head of Operations'})
+      }
+      const teamGrid = q('.team-grid')
+      teamGrid.style.gridTemplateColumns = `repeat(${Math.min(members.length, window.innerWidth<=768?2:4)},1fr)`
+      teamGrid.innerHTML = members.map(m => `
+        <div class="team-card">
+          <div class="team-avatar">${m.img?`<img src="${m.img}" alt="${m.name}">`:'👤'}</div>
+          <div class="team-info">
+            <div class="team-name">${esc(m.name)}</div>
+            ${m.role?`<div class="team-role">${esc(m.role)}</div>`:''}
+            ${m.bio?`<div class="team-bio">${esc(m.bio)}</div>`:''}
+          </div>
+        </div>
+      `).join('')
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'contact':
+      if (d.title) q('.tc-section-title').textContent = d.title
+      if (d.subtitle) {
+        q('.tc-section-subtitle').textContent = d.subtitle
+        q('.tc-section-subtitle').classList.remove('hidden')
+      }
+      const infoDiv = q('.contact-info')
+      if (d.contactEmail || d.contactPhone || d.contactAddress || d.contactHours) {
+        infoDiv.innerHTML = ''
+        if (d.contactEmail) infoDiv.innerHTML += `<div class="contact-info-item"><span class="contact-info-icon">📧</span><div><div class="contact-info-label">Email</div><div class="contact-info-val">${d.contactEmail}</div></div></div>`
+        if (d.contactPhone) infoDiv.innerHTML += `<div class="contact-info-item"><span class="contact-info-icon">📞</span><div><div class="contact-info-label">Phone</div><div class="contact-info-val">${d.contactPhone}</div></div></div>`
+        if (d.contactAddress) infoDiv.innerHTML += `<div class="contact-info-item"><span class="contact-info-icon">📍</span><div><div class="contact-info-label">Address</div><div class="contact-info-val">${d.contactAddress}</div></div></div>`
+        if (d.contactHours) infoDiv.innerHTML += `<div class="contact-info-item"><span class="contact-info-icon">🕐</span><div><div class="contact-info-label">Hours</div><div class="contact-info-val">${d.contactHours}</div></div></div>`
+      }
+      const formDiv = q('.contact-form-grid')
+      formDiv.innerHTML = ''
+      if (d.formName !== 'no') formDiv.innerHTML += `<div class="contact-field"><label>Name</label><input type="text" placeholder="Your name"></div>`
+      formDiv.innerHTML += `<div class="contact-field"><label>Email</label><input type="email" placeholder="your@email.com"></div>`
+      if (d.formPhone === 'yes') formDiv.innerHTML += `<div class="contact-field"><label>Phone</label><input type="tel" placeholder="Phone number"></div>`
+      if (d.formSubject === 'yes') formDiv.innerHTML += `<div class="contact-field"><label>Subject</label><input type="text" placeholder="Subject"></div>`
+      formDiv.innerHTML += `<div class="contact-field"><label>Message</label><textarea placeholder="Your message..."></textarea></div>`
+      formDiv.innerHTML += `<button class="btn-add" style="border-radius:10px" onclick="showToast('Message sent! We will get back to you soon.')">Send Message →</button>`
+      if (d.layout === 'form-only') container.querySelector('.contact-grid').style.gridTemplateColumns = '1fr'
+      if (d.bgColor) container.style.backgroundColor = d.bgColor
+      break
+
+    case 'product_grid':
+      q('.toolbar-title').textContent = d.gridTitle || 'Products'
+      // Setup event listeners
+      const searchInput = q('.search-input')
+      const sortSelect = q('.sort-select')
+      const priceMin = q('.price-min')
+      const priceMax = q('.price-max')
+      const priceGo = q('.price-go')
+
+      const loadHandler = () => {
+        currentPage = 1
+        loadProductsForSection(container)
+      }
+
+      searchInput.addEventListener('input', (e) => {
+        searchQ = e.target.value
+        clearTimeout(searchT)
+        searchT = setTimeout(loadHandler, 350)
+      })
+      sortSelect.addEventListener('change', loadHandler)
+      priceGo.addEventListener('click', loadHandler)
+
+      container.dataset.columns = d.columns || 4
+      container.dataset.itemsPerPage = d.itemsPerPage || 24
+      container.dataset.defaultSort = d.defaultSort || ''
+      break
+  }
+}
+
+// ─────────────── ASYNC FILL FUNCTIONS ───────────────────────
+async function fillFeaturedSection(container, d) {
+  // ... similar to before, but using container to find grid
+}
+
+async function fillCategoriesSection(container, d) {
+  // ... similar
+}
+
+function fillTestimonials(container) {
+  const grid = container.querySelector('.tc-testimonials-grid')
+  if (!grid) return
+  const stars = n => '★'.repeat(Math.max(1,Math.min(5,parseInt(n)||5)))
+  const ts = [
+    {n:container.dataset.t1name||'Sarah M.', t:container.dataset.t1text||'Absolutely love this store! Fast shipping and great quality.', s:parseInt(container.dataset.t1stars)||5},
+    {n:container.dataset.t2name||'Rahul K.', t:container.dataset.t2text||'Best shopping experience. Will definitely order again!', s:parseInt(container.dataset.t2stars)||5},
+    {n:container.dataset.t3name||'Anita P.', t:container.dataset.t3text||'Great products and excellent customer service. Five stars!', s:parseInt(container.dataset.t3stars)||5}
+  ]
+  const cols = parseInt(container.dataset.columns) || 3
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`
+  grid.innerHTML = ts.map(({n,t,s}) => `
+    <div class="tc-testimonial"><div class="tc-t-stars">${stars(s)}</div><div class="tc-t-text">"${esc(t)}"</div><div class="tc-t-author"><div class="tc-t-avatar">${esc((n||'?')[0].toUpperCase())}</div><div class="tc-t-name">${esc(n)}</div></div></div>
+  `).join('')
+}
+
+function fillTrustBadges(container) {
+  const grid = container.querySelector('.tc-trust-grid')
+  if (!grid) return
+  const layout = container.dataset.layout || 'row'
+  const gc = layout==='2x2'?2:layout==='column'?1:(window.innerWidth<=768?2:4)
+  grid.style.gridTemplateColumns = `repeat(${gc},1fr)`
+  const badges = [1,2,3,4].map(i => ({
+    icon: container.dataset[`badge${i}Icon`] || (i===1?'🚚':i===2?'🔒':i===3?'↩️':'💬'),
+    label: container.dataset[`badge${i}`] || (i===1?'Free Shipping':i===2?'Secure Payment':i===3?'Easy Returns':'24/7 Support'),
+    sub: container.dataset[`badge${i}sub`] || (i===1?'On orders above ₹499':i===2?'100% safe & encrypted':i===3?'30-day return policy':'Always here to help')
+  }))
+  grid.innerHTML = badges.map(b => `
+    <div class="tc-trust-item"><span class="tc-trust-icon">${b.icon}</span><div><div class="tc-trust-label">${esc(b.label)}</div>${b.sub?`<div class="tc-trust-sub">${esc(b.sub)}</div>`:''}</div></div>
+  `).join('')
+}
+
+function fillGallery(container) {
+  const grid = container.querySelector('.tc-gallery-grid')
+  if (!grid) return
+  const cols = parseInt(container.dataset.columns) || 4
+  const ratio = container.dataset.aspect === 'landscape' ? '16/9' : container.dataset.aspect === 'portrait' ? '3/4' : '1/1'
+  let imgs = []
+  try { imgs = JSON.parse(container.dataset.images) || [] } catch(e) {}
+  const placeholders = ['🌿','✨','🎁','🛍️','💎','🌸','🔥','⚡']
+  const count = window.innerWidth<=768 ? 4 : 8
+  grid.style.gridTemplateColumns = `repeat(${cols},1fr)`
+  grid.innerHTML = placeholders.slice(0,count).map((e,i) => `
+    <div class="tc-gallery-item" style="aspect-ratio:${ratio}">${imgs[i]?`<img src="${imgs[i]}" alt="Gallery ${i+1}" loading="lazy">`:e}</div>
+  `).join('')
+}
+
+// ─────────────── CATEGORIES & PRODUCT LOADING (per section) ──
+async function loadCategoriesForSection(section) {
+  const pillsContainer = section.querySelector('.cat-pills-container')
+  if (!pillsContainer) return
+  try{
+    const cats = await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
+    storeCategories = Array.isArray(cats) ? cats : []
+    pillsContainer.innerHTML = `
+      <div class="catPills">
+        <button class="cat-pill active" data-cat="">All</button>
+        ${storeCategories.map(c => `<button class="cat-pill" data-cat="${c._id}">${esc(c.name)}</button>`).join('')}
+      </div>
+    `
+    pillsContainer.querySelectorAll('.cat-pill').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        pillsContainer.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        currentCat = btn.dataset.cat || ''
+        currentPage = 1
+        loadProductsForSection(section)
+      })
+    })
+  }catch(e){}
+}
+
+async function loadProductsForSection(section) {
+  const grid = section.querySelector('.products-grid-container')
+  const resultsSpan = section.querySelector('.results-count')
+  const paginationDiv = section.querySelector('.pagination-container')
+  if (!grid) return
+
+  const params = new URLSearchParams({page: currentPage})
+  if (searchQ) params.set('q', searchQ)
+  if (currentCat) params.set('category', currentCat)
+
+  const sortSelect = section.querySelector('.sort-select')
+  if (sortSelect && sortSelect.value) params.set('sort', sortSelect.value)
+
+  const priceMin = section.querySelector('.price-min')
+  const priceMax = section.querySelector('.price-max')
+  if (priceMin && priceMin.value) params.set('min_price', priceMin.value)
+  if (priceMax && priceMax.value) params.set('max_price', priceMax.value)
+
+  try{
+    const data = await fetch(`${API}/shop/${slug}/products?${params}`).then(r=>r.json())
+    if (resultsSpan) resultsSpan.textContent = `${data.total} product${data.total!==1?'s':''}`
+    renderProductsInGrid(grid, data.products || [])
+    renderPaginationInDiv(paginationDiv, data.page, data.pages, section)
+  }catch(e){
+    if (resultsSpan) resultsSpan.textContent = 'Failed to load'
+  }
+}
+
+function renderProductsInGrid(grid, products){
+  if (!products.length){
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`
+    return
+  }
+  grid.innerHTML = products.map(p => renderCard(p, 'main', 'Add to cart')).join('')
+  applyStyleToGrid(grid)
+  initCartButtons()
+  products.forEach(p => { if(getQty(p._id)>0) updateCC(p._id) })
+  restoreWish()
+}
+
+function renderPaginationInDiv(div, page, pages, section){
+  if (!div) return
+  if (!pages || pages <= 1){ div.innerHTML = ''; return }
+  let h = `<button class="page-btn" data-page="${page-1}" ${page<=1?'disabled':''}>← Prev</button>`
+  for(let i=1;i<=pages;i++){
+    if(pages<=7 || i===1 || i===pages || Math.abs(i-page)<=2){
+      h += `<button class="page-btn ${i===page?'active':''}" data-page="${i}">${i}</button>`
+    } else if(Math.abs(i-page)===3){
+      h += '<span style="padding:0 4px;color:var(--p3)">…</span>'
+    }
+  }
+  h += `<button class="page-btn" data-page="${page+1}" ${page>=pages?'disabled':''}>Next →</button>`
+  div.innerHTML = h
+  div.querySelectorAll('.page-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault()
+      currentPage = parseInt(btn.dataset.page)
+      loadProductsForSection(section)
+      window.scrollTo({top: section.offsetTop - 100, behavior: 'smooth'})
+    })
+  })
 }
 
 // ─────────────── INIT ────────────────────────────────────────
@@ -1624,16 +1863,13 @@ async function init(){
     if(storeConfig.brand_color)R.style.setProperty('--primary',storeConfig.brand_color)
     if(storeConfig.currency==='USD')currency='$';else if(storeConfig.currency==='EUR')currency='€'
     if(storeConfig.payment_enabled)document.getElementById('payBadge').style.display='flex'
-    sessionStorage.setItem('ekart_store',slug)
-    sessionStorage.setItem('ekart_currency',currency)
+    sessionStorage.setItem('ekart_store',slug);sessionStorage.setItem('ekart_currency',currency)
     sessionStorage.setItem('ekart_store_name',storeConfig.name)
     sessionStorage.setItem('ekart_pay_enabled',storeConfig.payment_enabled?'1':'0')
     document.getElementById('cartBarBtn').href=`cart.html?store=${slug}`
     const tok=localStorage.getItem(`cust_token_${slug}`),name=localStorage.getItem(`cust_name_${slug}`)
     if(tok&&name){const icon=document.getElementById('accountBtnIcon');if(icon)icon.title=name.split(' ')[0]}
     await loadTheme()
-    await loadCategories()
-    await loadProducts()
     updateCartUI()
     hideLoader()
     if(!document.querySelector('.tc-hero'))document.getElementById('heroBanner').classList.add('visible')
@@ -1642,58 +1878,6 @@ async function init(){
     hideLoader()
   }
 }
-
-// ─────────────── CATEGORIES ──────────────────────────────────
-async function loadCategories(){
-  try{
-    const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
-    storeCategories=Array.isArray(cats)?cats:[]
-    const p=document.getElementById('catPills')
-    if(p)p.innerHTML=`<button class="cat-pill active" data-cat="" onclick="selectCat(this,'')">All</button>`+storeCategories.map(c=>`<button class="cat-pill" data-cat="${c._id}" onclick="selectCat(this,'${c._id}')">${esc(c.name)}</button>`).join('')
-  }catch(e){}
-}
-function selectCat(el,id){document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active'));el.classList.add('active');currentCat=id;currentPage=1;loadProducts()}
-function filterByCat(id){currentCat=id;currentPage=1;document.querySelectorAll('.cat-pill').forEach(x=>x.classList.toggle('active',x.dataset.cat===id));loadProducts();smoothScroll()}
-function updateSearch(v){searchQ=v;const o=document.getElementById('origSearchInput'),m=document.getElementById('mainSearchInput');if(o&&o!==document.activeElement)o.value=v;if(m&&m!==document.activeElement)m.value=v;clearTimeout(searchT);searchT=setTimeout(()=>{currentPage=1;loadProducts()},350)}
-
-// ─────────────── PRODUCTS ────────────────────────────────────
-async function loadProducts(){
-  const p=new URLSearchParams({page:currentPage})
-  if(searchQ)p.set('q',searchQ)
-  if(currentCat)p.set('category',currentCat)
-  const sort=document.getElementById('sortSelect').value;if(sort)p.set('sort',sort)
-  const min=document.getElementById('priceMin').value;if(min)p.set('min_price',min)
-  const max=document.getElementById('priceMax').value;if(max)p.set('max_price',max)
-  try{
-    const data=await fetch(`${API}/shop/${slug}/products?${p}`).then(r=>r.json())
-    document.getElementById('resultsCount').textContent=`${data.total} product${data.total!==1?'s':''}`
-    renderProducts(data.products||[])
-    renderPagination(data.page,data.pages)
-  }catch(e){document.getElementById('resultsCount').textContent='Failed to load';console.error(e)}
-}
-
-function renderProducts(products){
-  const grid=document.getElementById('productsGrid')
-  if(!products.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`;return}
-  grid.innerHTML=products.map(p=>renderCard(p,'main','Add to cart')).join('')
-  applyStyleToGrid()
-  initCartButtons()
-  products.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)})
-  restoreWish()
-}
-
-function renderPagination(page,pages){
-  const el=document.getElementById('pagination')
-  if(!pages||pages<=1){el.innerHTML='';return}
-  let h=`<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>`
-  for(let i=1;i<=pages;i++){
-    if(pages<=7||i===1||i===pages||Math.abs(i-page)<=2)h+=`<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`
-    else if(Math.abs(i-page)===3)h+='<span style="padding:0 4px;color:var(--p3)">…</span>'
-  }
-  h+=`<button class="page-btn" onclick="goPage(${page+1})" ${page>=pages?'disabled':''}>Next →</button>`
-  el.innerHTML=h
-}
-function goPage(p){currentPage=p;loadProducts();scrollTo({top:0,behavior:'smooth'})}
 
 if(slug){setTimeout(hideLoader,6000);init()}else hideLoader()
 </script>
