@@ -546,6 +546,54 @@ a{color:inherit;text-decoration:none}
 .tc-cat-icon{font-size:28px;margin-bottom:8px}
 .tc-cat-name-plain{font-size:13.5px;font-weight:600}
 
+/* ── Circle / Pill category style (like preview) ── */
+.tc-cats-grid.cats-circle{gap:24px}
+.tc-cats-grid.cats-circle .tc-cat-card{
+  background:transparent;border:none;box-shadow:none;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:8px 4px;
+  border-radius:0;
+}
+.tc-cats-grid.cats-circle .tc-cat-card:hover{transform:translateY(-3px);box-shadow:none;border:none}
+.tc-cats-grid.cats-circle .tc-cat-img-wrap{
+  width:100%;aspect-ratio:1/1;
+  border-radius:50%;
+  overflow:hidden;
+  border:3px solid transparent;
+  background:var(--bg2);
+  transition:border-color .2s,box-shadow .2s;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+.tc-cats-grid.cats-circle .tc-cat-card:hover .tc-cat-img-wrap{
+  border-color:var(--primary);
+  box-shadow:0 6px 24px rgba(0,0,0,.14);
+}
+.tc-cats-grid.cats-circle .tc-cat-footer{
+  background:transparent;padding:0;
+  flex-direction:column;align-items:center;gap:2px;
+  width:100%;
+}
+.tc-cats-grid.cats-circle .tc-cat-name{
+  font-size:14px;font-weight:700;text-align:center;
+}
+.tc-cats-grid.cats-circle .tc-cat-count{
+  font-size:12px;color:var(--p3);text-align:center;
+}
+/* Circle fallback icon — larger, centered */
+.tc-cats-grid.cats-circle .cat-fallback-wrap{
+  width:100%;aspect-ratio:1/1;border-radius:50%;
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+  border:3px solid transparent;
+  transition:border-color .2s,box-shadow .2s;
+}
+.tc-cats-grid.cats-circle .tc-cat-card:hover .cat-fallback-wrap{
+  border-color:var(--primary);
+  box-shadow:0 6px 24px rgba(0,0,0,.14);
+}
+
 /* ─── TRUST BADGES ───────────────────────────────────────── */
 .tc-trust-section{padding:32px 48px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
 .tc-trust-grid{display:grid;gap:0}
@@ -951,8 +999,16 @@ function getBadge(p,cls){
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 // ─────────────── RENDER CARD ─────────────────────────────────
-function renderCard(p,ctx,btnLabel){
-  ctx=ctx||'main';btnLabel=btnLabel||'Add to cart'
+// cardOpts = { btnLabel, cardBg, priceColor, showOriginal, showBadge }
+function renderCard(p, ctx, btnLabel, cardOpts){
+  ctx = ctx||'main'
+  cardOpts = cardOpts||{}
+  const label        = cardOpts.btnLabel      || btnLabel   || 'Add to Cart'
+  const cardBg       = cardOpts.cardBg        || ''
+  const priceColor   = cardOpts.priceColor    || ''
+  const showOriginal = cardOpts.showOriginal !== 'no'
+  const showBadge    = cardOpts.showBadge    !== 'no'
+
   const oos=isOOS(p),qty=getQty(p._id),imgUrl=p.images?.[0]||''
   const si=esa(imgUrl),sn=esa(p.name),d=discPct(p)
   const isM=ctx==='main'
@@ -971,16 +1027,23 @@ function renderCard(p,ctx,btnLabel){
   const [bg1,bg2c]=colorPairs[colorIdx]
   const gradientBg=imgUrl?'':`background:linear-gradient(135deg,${bg1},${bg2c});`
 
-  const imgTag=imgUrl?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">`:''
+  // inline style attrs for card-bg tinting
+  const bgAttr     = cardBg ? ` style="background:${cardBg}"` : ''
+  const cardAttr   = cardBg ? ` style="background:${cardBg};border-color:rgba(0,0,0,.06)"` : ''
+  const priceAttr  = priceColor ? ` style="color:${priceColor}"` : ''
+
+  const imgTag=imgUrl
+    ?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">`
+    :''
   const fallback=`<div class="img-fallback-icon" style="opacity:${imgUrl?'0':'.2'}">🛍️</div>`
-  const badge=getBadge(p,bc)
+  const badge = showBadge ? getBadge(p,bc) : ''
   const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
 
-  // Hover overlay ATC — only for non-overlay styles and when not OOS/in-cart
+  // Hover overlay — only non-overlay styles, not OOS/in-cart
   const hoverOverlay=(oos||qty>0||activeStyle==='overlay')?''
-    :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 Quick Add</button></div>`
+    :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
 
-  // Bottom cart controls HTML
+  // Bottom cart controls
   let ctrlHTML
   if(oos){
     ctrlHTML=`<span class="out-of-stock-label">Out of stock</span>`
@@ -991,48 +1054,44 @@ function renderCard(p,ctx,btnLabel){
   }
 
   // ── OVERLAY STYLE ──────────────────────────────────────────
-  // Image fills the card, gradient+text overlaid, ATC button below
   if(activeStyle==='overlay'){
-    const compareHtml=p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
+    const compareHtml=showOriginal&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
     const discHtml=d?`<span class="ov-discount">−${d}%</span>`:''
     return`<div class="${cc}${qty>0?' in-cart':''}">
       <a class="card-link" href="product.html?store=${slug}&id=${p._id}" style="position:relative;display:block">
         <div class="${ic}" style="${gradientBg}">
-          ${badge}
-          ${imgTag}${fallback}
+          ${badge}${imgTag}${fallback}
           <div class="ov-layer">
             <div class="ov-name">${esc(p.name)}</div>
             <div class="ov-price-row">
-              <span class="ov-price">${currency}${p.price.toFixed(2)}</span>
+              <span class="ov-price"${priceAttr}>${currency}${p.price.toFixed(2)}</span>
               ${compareHtml}${discHtml}
             </div>
           </div>
         </div>
       </a>
-      <div class="${wc}">${ctrlHTML}</div>
+      <div class="${wc}"${bgAttr}>${ctrlHTML}</div>
     </div>`
   }
 
-  // ── STANDARD STYLES (classic, minimal, bold, elevated, compact, list, magazine) ──
+  // ── STANDARD STYLES ──────────────────────────────────────────
   const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
-  return`<div class="${cc}${qty>0?' in-cart':''}">
+  return`<div class="${cc}${qty>0?' in-cart':''}"${cardAttr}>
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
       <div class="${ic}" style="${gradientBg}">
-        ${badge}${wish}
-        ${imgTag}${fallback}
-        ${hoverOverlay}
+        ${badge}${wish}${imgTag}${fallback}${hoverOverlay}
       </div>
-      <div class="${inf}">
+      <div class="${inf}"${bgAttr}>
         ${p.category_name?`<div class="${ca}">${esc(p.category_name)}</div>`:''}
         <div class="${nc}">${esc(p.name)}</div>
         <div class="${rc}">
-          <span class="${pc}">${currency}${p.price.toFixed(2)}</span>
-          ${p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+          <span class="${pc}"${priceAttr}>${currency}${p.price.toFixed(2)}</span>
+          ${showOriginal&&p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
           ${d?`<span class="product-discount">−${d}%</span>`:''}
         </div>
       </div>
     </a>
-    <div class="${wc}">${ctrlHTML}</div>
+    <div class="${wc}"${bgAttr}>${ctrlHTML}</div>
   </div>`
 }
 
@@ -1040,7 +1099,10 @@ function initCartButtons(){
   document.querySelectorAll('.cart-controls').forEach(el=>{
     if(el.innerHTML.trim()!=='')return
     const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
-    el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> Add to cart</button>`
+    // read label from card's btn-add data attr if present
+    const card=el.closest('.product-card,.tc-product-card')
+    const lbl=card?.dataset.btnLabel||'Add to Cart'
+    el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> ${esc(lbl)}</button>`
   })
 }
 
@@ -1071,7 +1133,15 @@ function gd(sec){
     logoText:str('logoText','logo_text'),logoColor:str('logoColor'),logoUrl:str('logoUrl','logo_url'),
     linkColor:str('linkColor'),showCart:str('showCart','show_cart')||'yes',
     overlayColor:str('overlayColor')||'rgba(0,0,0,0.4)',overlayOpacity:parseInt(get('overlayOpacity','overlay_opacity'))||40,
-    btnText:str('btnText')||'Add to cart',
+    // ── Featured section card-level fields ──────────────────────────
+    btnText:str('btnText','addToCartLabel','add_to_cart_label')||'Add to Cart',
+    cardBg:str('cardBackground','card_background','cardBg','card_bg'),
+    priceColor:str('priceColor','price_color'),
+    showOriginalPrice:str('showOriginalPrice','show_original_price')||'yes',
+    showRatingStars:str('showRatingStars','show_rating_stars')||'no',
+    showProductBadge:str('showProductBadge','show_product_badge')||'no',
+    featuredCols:parseInt(get('columns','cols','featuredColumns'))||0,
+    // ── Trust badges ────────────────────────────────────────────────
     badge1:str('badge1')||'Free Shipping',badge2:str('badge2')||'Secure Payment',badge3:str('badge3')||'Easy Returns',badge4:str('badge4')||'24/7 Support',
     badge1Icon:str('badge1Icon')||'🚚',badge2Icon:str('badge2Icon')||'🔒',badge3Icon:str('badge3Icon')||'↩️',badge4Icon:str('badge4Icon')||'💬',
     badge1sub:str('badge1sub')||'On orders above ₹499',badge2sub:str('badge2sub')||'100% safe & encrypted',badge3sub:str('badge3sub')||'30-day return policy',badge4sub:str('badge4sub')||'Always here to help',
@@ -1100,7 +1170,8 @@ function gd(sec){
     cartText:str('cartText')||'Cart',
     navLinks:get('navLinks','nav_links')||null,
     newsletterNote:str('newsletterNote')||'No spam. Unsubscribe anytime.',
-    cardStyle:str('cardStyle','card_style')||'image',
+    // ── Category fields ─────────────────────────────────────────────
+    cardStyle:str('cardStyle','card_style','imageShape','image_shape')||'image',
     layout:str('layout'),
     // About section
     aboutBody:str('body','content','aboutBody'),
@@ -1198,9 +1269,20 @@ function buildSec(sec, isMobile){
 
     case 'featured':{
       const count=parseInt(d.count)||8,sid=`ft-${sec.id}`
-      setTimeout(()=>fillFeatured(sid,count,d),0)
-      const skCount=isMobile?2:4
-      return`<section class="tc-section featured-${activeStyle}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto">
+      // per-section columns override global --cols
+      const featCols=d.featuredCols||d.columns||0
+      const colsStyle=featCols?`--cols:${featCols};`:'';
+      const skCount=isMobile?2:(featCols||4)
+      // collect all card-level opts for fillFeatured
+      const cardOpts={
+        btnLabel:d.btnText,
+        cardBg:d.cardBg,
+        priceColor:d.priceColor,
+        showOriginal:d.showOriginalPrice,
+        showBadge:d.showProductBadge,
+      }
+      setTimeout(()=>fillFeatured(sid,count,cardOpts),0)
+      return`<section class="tc-section featured-${activeStyle}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto;${colsStyle}">
         <div class="tc-section-hd">
           <div>
             <div class="tc-section-title">${esc(d.title||'Featured Products')}</div>
@@ -1214,7 +1296,11 @@ function buildSec(sec, isMobile){
 
     case 'categories':{
       const cols=isMobile?2:(parseInt(d.columns)||4),sid=`cs-${sec.id}`
-      const catStyle=sec.settings?.card_style||sec.data?.cardStyle||d.cardStyle||'image'
+      // Builder sends imageShape or card_style — check all variants
+      const catStyle=
+        sec.data?.imageShape||sec.data?.cardStyle||sec.data?.card_style||
+        sec.settings?.imageShape||sec.settings?.card_style||sec.settings?.cardStyle||
+        d.cardStyle||'image'
       setTimeout(()=>fillCats(sid,cols,d,catStyle),0)
       return`<section class="tc-section" id="${sid}">
         <div class="tc-section-hd">
@@ -1645,13 +1731,13 @@ function renderSections(sections){
 }
 
 // ─────────────── FILL SECTIONS ───────────────────────────────
-async function fillFeatured(secId,count,d){
+async function fillFeatured(secId,count,cardOpts){
   const grid=document.getElementById(`${secId}-grid`);if(!grid)return
   try{
     const data=await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json())
     const prods=(data.products||[]).slice(0,count)
     if(!prods.length){const s=grid.closest('section');if(s)s.style.display='none';return}
-    grid.innerHTML=prods.map(p=>renderCard(p,'featured',d.btnText||'Add to cart')).join('')
+    grid.innerHTML=prods.map(p=>renderCard(p,'featured',null,cardOpts)).join('')
     initCartButtons()
     prods.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)})
     restoreWish()
@@ -1660,41 +1746,103 @@ async function fillFeatured(secId,count,d){
 
 async function fillCats(secId,cols,d,catStyle){
   const grid=document.getElementById(`${secId}-grid`);if(!grid)return
-  const resolvedStyle=catStyle||d.cardStyle||'image'
+  const resolvedStyle=(catStyle||'image').toLowerCase()
+  const isCircle = resolvedStyle==='circle'||resolvedStyle==='circular'||resolvedStyle==='round'
+  const isSimple = resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'
+
+  // Apply circle class to the grid
+  if(isCircle) grid.classList.add('cats-circle')
+
   try{
     const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
     const list=Array.isArray(cats)?cats:[]
     if(!list.length){const s=grid.closest('section');if(s)s.style.display='none';return}
-    const em={fashion:'👗',clothing:'👕',electronics:'📱',tech:'💻',home:'🏠',living:'🏠',beauty:'💄',gaming:'🎮',food:'🍕',accessories:'👜',footwear:'👟',shoes:'👟',sports:'⚽',furniture:'🛋️',books:'📚',toys:'🧸',jewelry:'💎',watches:'⌚',bags:'👜'}
-    const ge=n=>{const lc=(n||'').toLowerCase();for(const[k,v]of Object.entries(em))if(lc.includes(k))return v;return'🛍️'}
+
+    // Rich emoji map for categories
+    const em={
+      fashion:'👗',clothing:'👕',shirt:'👔',dress:'👗',
+      electronics:'📱',tech:'💻',gadget:'🎧',
+      home:'🏠',living:'🛋️',furniture:'🛋️',decor:'🕯️',
+      beauty:'💄',skincare:'🧴',cosmetic:'💅',
+      gaming:'🎮',game:'🎮',
+      food:'🍕',grocery:'🥗',drink:'☕',
+      accessories:'👜',bag:'👜',watch:'⌚',sunglasses:'🕶️',
+      footwear:'👟',shoes:'👟',boots:'👢',sandal:'👡',
+      sports:'⚽',fitness:'💪',gym:'🏋️',outdoor:'🏕️',
+      books:'📚',education:'📖',stationery:'✏️',
+      toys:'🧸',kids:'🧒',baby:'👶',
+      jewelry:'💎',gold:'💍',silver:'💍',
+      travel:'✈️',luggage:'🧳',
+      health:'💊',medical:'🏥',wellness:'🌿',
+      pet:'🐾',animal:'🐶',
+      art:'🎨',craft:'✂️',music:'🎵',
+      car:'🚗',auto:'🔧',
+      plants:'🌿',garden:'🌱',flower:'🌸',
+    }
+    const getEmoji=n=>{
+      const lc=(n||'').toLowerCase()
+      for(const[k,v]of Object.entries(em))if(lc.includes(k))return v
+      // Generate a colorful random fallback based on name
+      const colors=['#FFD166','#EF476F','#06D6A0','#118AB2','#073B4C','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7']
+      const ci=(n||'?').charCodeAt(0)%colors.length
+      return`<span style="font-size:44px;line-height:1">${['🛍️','🎁','⭐','🏷️','✨','🎯','💫','🔆'][ci%8]}</span>`
+    }
+
     const showCount=d.showCount!=='no'
+
     grid.innerHTML=list.map(c=>{
-      const countBadge=showCount&&c.product_count!=null?`${c.product_count}+ items`:null
-      if(resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'){
+      const emoji=c.icon||getEmoji(c.name)
+      const countTxt=showCount&&c.product_count!=null?`${c.product_count}+`:''
+
+      // ── CIRCLE STYLE ────────────────────────────────────────
+      if(isCircle){
+        const imgContent=c.image_url
+          ?`<img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${typeof emoji==='string'?emoji:'🛍️'}</span>'">`
+          :`<span style="font-size:44px">${emoji}</span>`
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-          <div class="tc-cat-simple">
-            <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
-            <div class="tc-cat-name-plain">${esc(c.name)}</div>
-            ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${esc(countBadge)}</div>`:''}
+          <div class="tc-cat-img-wrap">${imgContent}</div>
+          <div class="tc-cat-footer">
+            <span class="tc-cat-name">${esc(c.name)}</span>
+            ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
           </div>
         </div>`
       }
+
+      // ── SIMPLE / ICON STYLE ──────────────────────────────────
+      if(isSimple){
+        return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
+          <div class="tc-cat-simple">
+            <div class="tc-cat-icon">${emoji}</div>
+            <div class="tc-cat-name-plain">${esc(c.name)}</div>
+            ${countTxt?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${countTxt}</div>`:''}
+          </div>
+        </div>`
+      }
+
+      // ── IMAGE STYLE (default) ────────────────────────────────
       if(c.image_url){
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
           <div class="tc-cat-img-wrap">
-            <img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:32px\\'>${ge(c.name)}</span>'">
+            <img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy"
+              onerror="this.parentElement.innerHTML='<span style=\\'font-size:36px;padding:20px;display:flex;align-items:center;justify-content:center;width:100%;height:100%\\'>${typeof emoji==='string'?emoji:'🛍️'}</span>'">
           </div>
           <div class="tc-cat-footer">
             <span class="tc-cat-name">${esc(c.name)}</span>
-            ${countBadge?`<span class="tc-cat-count">${esc(countBadge)}</span>`:''}
+            ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
           </div>
         </div>`
       }
+
+      // No image — attractive icon fallback
+      const colors=['#fef3c7','#fce7f3','#e0f2fe','#dcfce7','#ede9fe','#ffedd5']
+      const bgColor=colors[(c.name||'?').charCodeAt(0)%colors.length]
       return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-        <div class="tc-cat-simple">
-          <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
-          <div class="tc-cat-name-plain">${esc(c.name)}</div>
-          ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${esc(countBadge)}</div>`:''}
+        <div class="tc-cat-img-wrap" style="background:${bgColor}">
+          <span style="font-size:48px">${emoji}</span>
+        </div>
+        <div class="tc-cat-footer">
+          <span class="tc-cat-name">${esc(c.name)}</span>
+          ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
         </div>
       </div>`
     }).join('')
