@@ -593,7 +593,7 @@
         {key:'viewAllLink',label:'"View All" URL',type:'text',placeholder:'#'},
       ]},
       {label:'Card Style',fields:[
-        {key:'cardStyle',label:'Card Style',type:'card_style_picker'},
+        {key:'cardStyle',label:'Card Style (overrides global)',type:'card_style_picker'},
       ]},
       {label:'Product Grid',fields:[
         {key:'count',label:'Products to Show',type:'number',placeholder:'8',min:1,max:24},
@@ -913,7 +913,8 @@
     {id:'sec_announcement',type:'announcement',enabled:true,data:{text:'✨ Free shipping on all orders above ₹999!',bgColor:'#5b5cf6',textColor:'#ffffff'}},
     {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showSearch:'yes',showCart:'yes',sticky:'yes',link1Text:'Home',link2Text:'Products',link3Text:'Categories',link4Text:'About',cartText:'Cart'}},
     {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
-    {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',cardStyle:'classic',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
+    /* FIX: removed cardStyle from featured data so themeData.cardStyle is always used */
+    {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',showOldPrice:'yes',showRating:'no',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
     {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'image',showCount:'yes'}},
     {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
     {id:'sec_trustbadges',type:'trustbadges',enabled:true,data:{badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}},
@@ -1059,7 +1060,10 @@
       sections=doc.sections.map(bs=>{
         const ft=resolveFrontendType(bs.type)
         const def=DEFAULT_SECTIONS.find(d=>d.type===ft)
-        return{id:bs.id||`sec_${ft}_${Date.now()}`,type:ft,_bt:bs.type,enabled:bs.is_visible!==false,data:{...(def?.data||{}),...(bs.settings||{})}}
+        /* FIX: don't copy cardStyle from backend section data into section.data — let themeData.cardStyle govern */
+        const sectionSettings={...(bs.settings||{})}
+        delete sectionSettings.cardStyle // remove so themeData.cardStyle takes precedence
+        return{id:bs.id||`sec_${ft}_${Date.now()}`,type:ft,_bt:bs.type,enabled:bs.is_visible!==false,data:{...(def?.data||{}),...sectionSettings}}
       })
       DEFAULT_SECTIONS.forEach(def=>{
         if(!sections.find(s=>s.type===def.type))
@@ -1250,8 +1254,10 @@
         <span class="field-range-val" id="${id}_v">${v}${sfx}</span>
       </div>`
     }else if(f.type==='card_style_picker'){
+      /* Show current themeData.cardStyle as active when section has no override */
+      const effectiveStyle=value||themeData.cardStyle||'classic'
       input=`<div class="card-style-grid">
-        ${CARD_STYLES.map(s=>`<div class="card-style-opt${value===s.id?' active':''}"
+        ${CARD_STYLES.map(s=>`<div class="card-style-opt${effectiveStyle===s.id?' active':''}"
           onclick="liveUpdateField('${f.key}','${s.id}');document.querySelectorAll('#editor-fields-wrap .card-style-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
           <div class="card-style-preview ${s.icon}"></div>
           <span class="cs-label">${s.name}</span>
@@ -1264,7 +1270,16 @@
   function liveUpdateField(key,value){
     if(!activeSectionId)return
     const s=sections.find(x=>x.id===activeSectionId);if(!s)return
-    s.data[key]=value;markUnsaved(true);renderPreview()
+    s.data[key]=value
+    /* FIX: if user changes cardStyle in section editor, also sync to themeData so it takes global effect */
+    if(key==='cardStyle'){
+      themeData.cardStyle=value
+      /* Update settings panel card style picker to stay in sync */
+      document.querySelectorAll('#settings-panel-content .card-style-opt').forEach(el=>{
+        el.classList.toggle('active',el.querySelector('.cs-label')?.textContent===CARD_STYLES.find(x=>x.id===value)?.name)
+      })
+    }
+    markUnsaved(true);renderPreview()
   }
   function applySectionChanges(id){toast('Section updated ✓','success');markUnsaved(true)}
   function resetSectionData(id){
@@ -1377,15 +1392,13 @@
     </div>
 
     <span class="panel-group-label" style="margin-top:14px">Default Product Card Style</span>
-    <div class="field-row">
-      <div class="field-label" style="margin-bottom:8px">Applied globally across your store</div>
-      <div class="card-style-grid">
-        ${CARD_STYLES.map(s=>`<div class="card-style-opt${themeData.cardStyle===s.id?' active':''}"
-          onclick="updateSetting('cardStyle','${s.id}');document.querySelectorAll('#settings-panel-content .card-style-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
-          <div class="card-style-preview ${s.icon}"></div>
-          <span class="cs-label">${s.name}</span>
-        </div>`).join('')}
-      </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding:0 2px">Applied globally across your store</div>
+    <div class="card-style-grid">
+      ${CARD_STYLES.map(s=>`<div class="card-style-opt${themeData.cardStyle===s.id?' active':''}"
+        onclick="updateSetting('cardStyle','${s.id}');document.querySelectorAll('#settings-panel-content .card-style-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
+        <div class="card-style-preview ${s.icon}"></div>
+        <span class="cs-label">${s.name}</span>
+      </div>`).join('')}
     </div>
 
     <span class="panel-group-label" style="margin-top:14px">Store Info</span>
@@ -1418,7 +1431,9 @@
     </div>`
   }
 
-  function updateSetting(key,value){themeData[key]=value;markUnsaved(true);renderPreview()}
+  function updateSetting(key,value){
+    themeData[key]=value;markUnsaved(true);renderPreview()
+  }
 
   /* ═══════════════════════════════════════
      ADD SECTION DRAWER
@@ -1573,8 +1588,12 @@ img{max-width:100%;display:block}
 .view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text)}
 .view-all-btn:hover{opacity:1;border-color:var(--primary);color:var(--primary)}
 
-/* ── PRODUCT CARDS ── */
+/* ══════════════════════════════════════
+   PRODUCT CARDS — ALL STYLES
+══════════════════════════════════════ */
 .themed-products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:${isMobile?'10px':'18px'}}
+
+/* Base card */
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all .22s;display:block;color:inherit;text-decoration:none}
 .tc-img{width:100%;aspect-ratio:1;background:rgba(${borderRgb},.06);overflow:hidden;position:relative;flex-shrink:0}
 .tc-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;display:block}
@@ -1593,20 +1612,53 @@ img{max-width:100%;display:block}
 .tc-btn{width:100%;padding:${isMobile?'8px':'10px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s;display:block}
 .tc-btn:hover{opacity:.88}
 
-/* Card style variants */
-.classic-grid .tc{box-shadow:0 1px 6px rgba(0,0,0,.06)}.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.14)}
-.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.1)}.minimal-grid .tc:hover{border-color:var(--primary)}
+/* ── Classic ── */
+.classic-grid .tc{box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.classic-grid .tc:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.14)}
+
+/* ── Minimal ── */
+.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12)}
+.minimal-grid .tc:hover{border-color:var(--primary)}
+
+/* ── Overlay ── */
 .overlay-grid .tc-img{aspect-ratio:3/4}
-.overlay-grid .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.3) 60%,transparent 100%);padding:20px 14px 14px;color:white;z-index:3}
-.overlay-grid .tc-overlay .tc-name{color:white;font-size:${isMobile?'12px':'14px'};margin-bottom:4px}
-.overlay-grid .tc-overlay .tc-price{color:white}
-.overlay-grid .tc-overlay .tc-btn{background:rgba(255,255,255,.2);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.3);color:white;margin-top:8px}
+.overlay-grid .tc{overflow:hidden}
+.overlay-grid .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.90) 0%,rgba(0,0,0,.4) 55%,transparent 100%);padding:${isMobile?'16px 12px 12px':'22px 16px 14px'};color:white;z-index:3;display:flex;flex-direction:column;gap:4px}
+.overlay-grid .tc-overlay .tc-name{color:white;font-size:${isMobile?'12px':'14px'};font-weight:700;margin:0}
+.overlay-grid .tc-overlay .tc-price{color:white;font-size:${isMobile?'13px':'15px'};font-weight:800}
+.overlay-grid .tc-overlay .tc-compare{color:rgba(255,255,255,.55);font-size:11px;text-decoration:line-through}
+.overlay-grid .tc-overlay .tc-btn{background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:white;border-radius:var(--btn-r);margin-top:6px;padding:7px}
 .overlay-grid .tc-info{display:none}
-.bold-grid .tc{border-top:3px solid var(--primary)}.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.list-grid{grid-template-columns:1fr!important}.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}.list-grid .tc-img{width:${isMobile?'100px':'160px'};min-width:${isMobile?'100px':'160px'};aspect-ratio:auto;height:auto;min-height:140px}.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'20px'}}
-.magazine-grid .tc:first-child{grid-column:span 2}.magazine-grid .tc:first-child .tc-img{aspect-ratio:${isMobile?'16/9':'2/1'}}.magazine-grid .tc{box-shadow:0 2px 8px rgba(0,0,0,.08)}.magazine-grid .tc:hover{transform:translateY(-3px)}
-.compact-grid{gap:${isMobile?'7px':'12px'}!important}.compact-grid .tc-info{padding:8px 10px 10px}.compact-grid .tc-name{font-size:${isMobile?'11px':'12px'};margin-bottom:3px}.compact-grid .tc-price{font-size:${isMobile?'12px':'14px'}}.compact-grid .tc-price-row{margin-bottom:0}.compact-grid .tc-btn{display:none}.compact-grid .tc:hover{opacity:.85}
-.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.1);border-radius:calc(var(--radius)*1.5)}.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.18)}
+
+/* ── Bold ── */
+.bold-grid .tc{border-top:3px solid var(--primary)}
+.bold-grid .tc:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+
+/* ── List ── */
+.list-grid{grid-template-columns:1fr!important}
+.list-grid .tc{display:flex;flex-direction:row;align-items:stretch}
+.list-grid .tc-img{width:${isMobile?'100px':'180px'};min-width:${isMobile?'100px':'180px'};aspect-ratio:auto;height:auto;min-height:140px}
+.list-grid .tc-info{flex:1;display:flex;flex-direction:column;justify-content:center;padding:${isMobile?'12px':'20px'}}
+.list-grid .tc-btn{width:auto;padding:8px 20px}
+
+/* ── Magazine ── */
+.magazine-grid .tc:first-child{grid-column:span 2}
+.magazine-grid .tc:first-child .tc-img{aspect-ratio:${isMobile?'16/9':'2/1'}}
+.magazine-grid .tc{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.magazine-grid .tc:hover{transform:translateY(-3px)}
+
+/* ── Compact ── */
+.compact-grid{gap:${isMobile?'7px':'12px'}!important}
+.compact-grid .tc-info{padding:8px 10px 10px}
+.compact-grid .tc-name{font-size:${isMobile?'11px':'12px'};margin-bottom:3px}
+.compact-grid .tc-price{font-size:${isMobile?'12px':'14px'}}
+.compact-grid .tc-price-row{margin-bottom:0}
+.compact-grid .tc-btn{display:none}
+.compact-grid .tc:hover{opacity:.85}
+
+/* ── Elevated ── */
+.elevated-grid .tc{border:none;box-shadow:0 8px 28px rgba(0,0,0,.1);border-radius:calc(var(--radius)*1.5)}
+.elevated-grid .tc:hover{transform:translateY(-7px);box-shadow:0 20px 50px rgba(0,0,0,.18)}
 
 /* ── CATEGORIES ── */
 .cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}
@@ -1752,14 +1804,12 @@ img{max-width:100%;display:block}
 [data-section-id]:hover{outline:2px dashed rgba(91,92,246,.4);outline-offset:-2px}
 [data-section-id].sec-active{outline:2px solid rgba(91,92,246,.8)!important;outline-offset:-2px}
 
-/* Image skeleton loader */
 .img-placeholder{background:linear-gradient(90deg,rgba(${borderRgb},.06) 25%,rgba(${borderRgb},.1) 50%,rgba(${borderRgb},.06) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(${borderRgb},.15)}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>${sectionsHTML}
 <script>
-// Live countdown timer
 document.querySelectorAll('[data-countdown]').forEach(function(el){
   var endDate=new Date(el.getAttribute('data-countdown'));
   function update(){
@@ -1786,6 +1836,7 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
 
   /* ═══════════════════════════════════════
      BUILD SECTION HTML
+     FIX: themeData.cardStyle takes priority over section-level d.cardStyle
   ═══════════════════════════════════════ */
   function buildSectionHTML(sec,isMobile){
     const d=sec.data||{}
@@ -1840,7 +1891,8 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
 
       case 'featured':{
         const count=Math.min(parseInt(d.count)||8, SAMPLE_PRODUCTS.length)
-        const cardStyle=d.cardStyle||themeData.cardStyle||'classic'
+        /* ═══ FIX: themeData.cardStyle takes priority over section d.cardStyle ═══ */
+        const cardStyle=themeData.cardStyle||d.cardStyle||'classic'
         const fCols=cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3))
         const cBg=d.cardBg||themeData.cardBg||'#13131e'
         const pColor=d.priceColor||themeData.primaryColor||'#5b5cf6'
@@ -1854,20 +1906,25 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
           const imgArea=`<div class="tc-img">
             ${(showBadge||p.badge)&&badgeLabel?`<div class="tc-badge">${badgeLabel}</div>`:''}
             <button class="tc-wishlist" title="Wishlist">♡</button>
-            <img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML+='<div class=\\'img-placeholder\\'>${p.emoji||'🛍️'}</div>'">
+            <img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none'">
           </div>`
 
-          const ratingStars='★★★★' + (i%3===0?'★':'☆')
+          const ratingStars='★★★★'+(i%3===0?'★':'☆')
           const ratingCount=42+i*13
 
-          const infoArea=cardStyle==='overlay'?`
-            <div class="tc-overlay">
+          let infoArea
+          if(cardStyle==='overlay'){
+            infoArea=`<div class="tc-overlay">
               ${showRating?`<div class="tc-stars">${ratingStars}</div>`:''}
               <div class="tc-name">${escHtmlInner(p.name)}</div>
-              <div class="tc-price-row"><span class="tc-price" style="color:white">₹${p.price.toLocaleString('en-IN')}</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span>
+                ${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}
+              </div>
               <button class="tc-btn">${btnTxt}</button>
-            </div>`:`
-            <div class="tc-info">
+            </div>`
+          }else{
+            infoArea=`<div class="tc-info">
               <div class="tc-cat">${escHtmlInner(p.cat)}</div>
               ${showRating?`<div class="tc-stars">${ratingStars} <span style="opacity:.4;font-size:10px">(${ratingCount})</span></div>`:''}
               <div class="tc-name">${escHtmlInner(p.name)}</div>
@@ -1877,6 +1934,7 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
               </div>
               ${cardStyle!=='compact'?`<button class="tc-btn">${btnTxt}</button>`:''}
             </div>`
+          }
           return`<a class="tc" style="background:${cBg}">${imgArea}${infoArea}</a>`
         }).join('')
 
@@ -1899,9 +1957,8 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
 
         const catCards=SAMPLE_CATEGORIES.slice(0,catCount).map(cat=>{
           const imgHtml=`<div class="cat-img">
-            <img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'img-placeholder\\'>${cat.emoji}</div>'">
+            <img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none'">
           </div>`
-
           if(style==='image'){
             return`<div class="cat-card" style="overflow:hidden;border-radius:var(--radius);position:relative;cursor:pointer">
               ${imgHtml}
@@ -2071,7 +2128,6 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
         const gCols=isMobile?2:(parseInt(d.columns)||4)
         const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1'
         const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean)
-        // Use product images as gallery defaults
         const defaultImgs=SAMPLE_PRODUCTS.slice(0,8).map(p=>p.img)
         const displayImgs=imgs.length?imgs:defaultImgs
         const displayCount=isMobile?4:Math.min(gCols*2,displayImgs.length||8)
@@ -2155,7 +2211,7 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
         const textSide=`<div>
           <h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;letter-spacing:-.02em;margin-bottom:12px">${escHtmlInner(d.title||'Our Story')}</h2>
           ${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px">${escHtmlInner(d.subtitle)}</p>`:''}
-          ${d.body?`<p style="opacity:.65;line-height:1.75;margin-bottom:12px">${escHtmlInner(d.body)}</p>`:'<p style="opacity:.65;line-height:1.75;margin-bottom:12px">We started with a simple mission: to bring quality products to every household across India. From humble beginnings to serving thousands of happy customers, our journey has been driven by your trust.</p>'}
+          ${d.body?`<p style="opacity:.65;line-height:1.75;margin-bottom:12px">${escHtmlInner(d.body)}</p>`:'<p style="opacity:.65;line-height:1.75;margin-bottom:12px">We started with a simple mission: to bring quality products to every household across India.</p>'}
           ${d.body2?`<p style="opacity:.65;line-height:1.75;margin-bottom:20px">${escHtmlInner(d.body2)}</p>`:''}
           ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}
           ${(d.stat1num||d.stat2num)?`<div class="about-stats">
@@ -2280,7 +2336,6 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
       }
       doc.querySelectorAll('[data-section-id]').forEach(el=>{
         el.addEventListener('click',e=>{
-          // Don't trigger click on interactive elements inside sections
           if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'||e.target.tagName==='A')return
           e.stopPropagation()
           selectSection(el.getAttribute('data-section-id'))
