@@ -141,7 +141,7 @@ a{color:inherit;text-decoration:none}
 .product-img,.tc-product-img{
   position:relative;
   width:100%;
-  aspect-ratio:1/1;
+  aspect-ratio:4/3;
   overflow:hidden;
   background:var(--bg2);
   flex-shrink:0;
@@ -149,16 +149,16 @@ a{color:inherit;text-decoration:none}
 .product-img img,.tc-product-img img{
   width:100%;height:100%;
   object-fit:cover;
-  transition:transform .5s var(--ease);
+  transition:transform .45s var(--ease);
   display:block;
 }
 .product-card:hover .product-img img,
-.tc-product-card:hover .tc-product-img img{transform:scale(1.07)}
+.tc-product-card:hover .tc-product-img img{transform:scale(1.06)}
 .product-img.img-error img,.tc-product-img.img-error img{display:none}
 .img-fallback-icon{
   position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  font-size:48px;opacity:.15;pointer-events:none;
+  font-size:40px;opacity:.15;pointer-events:none;
 }
 
 /* ── Badges ── */
@@ -939,24 +939,22 @@ function updateCC(id){
     const n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
     const card=el.closest('.product-card,.tc-product-card')
     const ic=card?.querySelector('.product-img,.tc-product-img')
-    const isOverlay=activeStyle==='overlay'||card?.closest('.overlay-grid,.featured-overlay')
+    // Detect overlay style from the card's parent grid class, not global activeStyle
+    const isOverlay=card?.closest('.overlay-grid,.featured-overlay')!=null
+    const lbl=card?.dataset.btnLabel||'Add to Cart'
     if(qty===0){
-      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> Add to cart</button>`
+      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> ${esc(lbl)}</button>`
       if(card){
         card.classList.remove('in-cart')
-        // Re-add hover overlay only for non-overlay styles
         if(!isOverlay&&ic&&!ic.querySelector('.card-atc-overlay')){
           const ov=document.createElement('div');ov.className='card-atc-overlay'
-          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')">🛒 Quick Add</button>`
+          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')">🛒 ${esc(lbl)}</button>`
           ic.appendChild(ov)
         }
       }
     }else{
       el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
-      if(card){
-        card.classList.add('in-cart')
-        ic?.querySelector('.card-atc-overlay')?.remove()
-      }
+      if(card){card.classList.add('in-cart');ic?.querySelector('.card-atc-overlay')?.remove()}
     }
   })
 }
@@ -999,7 +997,9 @@ function getBadge(p,cls){
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 // ─────────────── RENDER CARD ─────────────────────────────────
-// cardOpts = { btnLabel, cardBg, priceColor, showOriginal, showBadge }
+// cardOpts = { btnLabel, cardBg, priceColor, showOriginal, showBadge, cardStyle }
+// cardStyle in cardOpts overrides the global activeStyle — so featured and main grid
+// can independently have different card styles.
 function renderCard(p, ctx, btnLabel, cardOpts){
   ctx = ctx||'main'
   cardOpts = cardOpts||{}
@@ -1008,6 +1008,8 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const priceColor   = cardOpts.priceColor    || ''
   const showOriginal = cardOpts.showOriginal !== 'no'
   const showBadge    = cardOpts.showBadge    !== 'no'
+  // Use per-card style if provided, else fall back to global activeStyle
+  const style        = cardOpts.cardStyle     || activeStyle || 'classic'
 
   const oos=isOOS(p),qty=getQty(p._id),imgUrl=p.images?.[0]||''
   const si=esa(imgUrl),sn=esa(p.name),d=discPct(p)
@@ -1040,7 +1042,7 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
 
   // Hover overlay — only non-overlay styles, not OOS/in-cart
-  const hoverOverlay=(oos||qty>0||activeStyle==='overlay')?''
+  const hoverOverlay=(oos||qty>0||style==='overlay')?''
     :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
 
   // Bottom cart controls
@@ -1054,12 +1056,12 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   }
 
   // ── OVERLAY STYLE ──────────────────────────────────────────
-  if(activeStyle==='overlay'){
+  if(style==='overlay'){
     const compareHtml=showOriginal&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
     const discHtml=d?`<span class="ov-discount">−${d}%</span>`:''
     return`<div class="${cc}${qty>0?' in-cart':''}">
       <a class="card-link" href="product.html?store=${slug}&id=${p._id}" style="position:relative;display:block">
-        <div class="${ic}" style="${gradientBg}">
+        <div class="${ic}" style="aspect-ratio:3/4;${gradientBg}">
           ${badge}${imgTag}${fallback}
           <div class="ov-layer">
             <div class="ov-name">${esc(p.name)}</div>
@@ -1108,7 +1110,13 @@ function initCartButtons(){
 
 function applyStyleToGrid(){
   const grid=document.getElementById('productsGrid');if(!grid)return
-  const styleMap={classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',magazine:'magazine-grid',overlay:'overlay-grid'}
+  // activeStyle is ONLY for the main products grid.
+  // Featured sections have their own independent style via cardOpts.cardStyle
+  const styleMap={
+    classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',
+    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',
+    magazine:'magazine-grid',overlay:'overlay-grid'
+  }
   const cls=styleMap[activeStyle]||'classic-grid'
   grid.className=`products-grid ${cls}`
   grid.style.gridTemplateColumns=activeStyle==='list'?'1fr':''
@@ -1269,20 +1277,29 @@ function buildSec(sec, isMobile){
 
     case 'featured':{
       const count=parseInt(d.count)||8,sid=`ft-${sec.id}`
-      // per-section columns override global --cols
+      // featured columns — per section override, independent of global --cols
       const featCols=d.featuredCols||d.columns||0
-      const colsStyle=featCols?`--cols:${featCols};`:'';
+      const colsStyle=featCols?`--cols:${featCols};`:''
       const skCount=isMobile?2:(featCols||4)
-      // collect all card-level opts for fillFeatured
+      // The featured section has its OWN card style from its data
+      // We pass it via cardOpts so it NEVER bleeds into the global activeStyle
+      const featCardStyle=
+        sec.data?.cardStyle||sec.data?.card_style||
+        sec.settings?.cardStyle||sec.settings?.card_style||
+        activeStyle  // fallback to global only if section has no own style
       const cardOpts={
         btnLabel:d.btnText,
         cardBg:d.cardBg,
         priceColor:d.priceColor,
         showOriginal:d.showOriginalPrice,
         showBadge:d.showProductBadge,
+        cardStyle:featCardStyle,
       }
+      // CSS class for the grid uses featCardStyle, NOT activeStyle
+      const gridStyleMap={classic:'featured-classic',minimal:'featured-minimal',bold:'featured-bold',elevated:'featured-elevated',compact:'featured-compact',list:'featured-list',overlay:'featured-overlay'}
+      const gridClass=gridStyleMap[featCardStyle]||'featured-classic'
       setTimeout(()=>fillFeatured(sid,count,cardOpts),0)
-      return`<section class="tc-section featured-${activeStyle}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto;${colsStyle}">
+      return`<section class="tc-section ${gridClass}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto;${colsStyle}">
         <div class="tc-section-hd">
           <div>
             <div class="tc-section-title">${esc(d.title||'Featured Products')}</div>
@@ -1290,7 +1307,7 @@ function buildSec(sec, isMobile){
           </div>
           <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
         </div>
-        <div class="tc-products-grid" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="tc-product-card skeleton" style="aspect-ratio:1/1"></div>`).join('')}</div>
+        <div class="tc-products-grid" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="tc-product-card skeleton" style="aspect-ratio:4/3"></div>`).join('')}</div>
       </section>`
     }
 
