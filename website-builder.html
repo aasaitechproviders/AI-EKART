@@ -445,8 +445,44 @@
   ]
 
   /* ═══════════════════════════════════════
-     CARD SIZE DEFINITIONS
+     CARD SIZE DEFINITIONS (complete set for preview)
   ═══════════════════════════════════════ */
+  const CARD_SIZE_VARS = {
+    small: {
+      '--card-img-min-h': '120px',
+      '--card-img-aspect': '1/1',
+      '--card-name-fs': '11px',
+      '--card-price-fs': '12px',
+      '--card-info-pad': '6px',
+      '--grid-gap': '8px',
+      '--product-cat-fs': '9px',
+      '--product-badge-fs': '9px',
+      '--qty-btn-size': '24px'
+    },
+    medium: {
+      '--card-img-min-h': '180px',
+      '--card-img-aspect': '1/1',
+      '--card-name-fs': '14px',
+      '--card-price-fs': '16px',
+      '--card-info-pad': '12px',
+      '--grid-gap': '16px',
+      '--product-cat-fs': '11px',
+      '--product-badge-fs': '11px',
+      '--qty-btn-size': '32px'
+    },
+    large: {
+      '--card-img-min-h': '260px',
+      '--card-img-aspect': '1/1',
+      '--card-name-fs': '16px',
+      '--card-price-fs': '20px',
+      '--card-info-pad': '18px',
+      '--grid-gap': '24px',
+      '--product-cat-fs': '12px',
+      '--product-badge-fs': '12px',
+      '--qty-btn-size': '36px'
+    },
+  }
+
   const CARD_SIZES=[
     {id:'small',icon:'▪',label:'Small',desc:'Compact'},
     {id:'medium',icon:'◼',label:'Medium',desc:'Default'},
@@ -992,6 +1028,8 @@
     setLoading('Loading theme…',90)
     if(authOk&&currentStoreId&&currentStoreId!=='demo')await loadThemeForStore(currentStoreId)
     else{sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS));renderSectionsList();renderPreview();markThemeActive('modern');markUnsaved(false)}
+    // FIX: Re-render settings panel after theme loads to reflect saved card size
+    renderSettingsPanel()
     try{
       const pt=JSON.parse(localStorage.getItem('ekart_pending_theme')||'null')
       if(pt){localStorage.removeItem('ekart_pending_theme');Object.assign(themeData,pt);markUnsaved(true);renderSettingsPanel();renderPreview();markThemeActive(pt.themeId||'modern');toast(`"${pt.themeId}" theme applied from Theme Store! Save to publish.`,'success')}
@@ -1022,6 +1060,8 @@
     currentStoreId=id;sessionStorage.setItem('ekart_current_store',id);localStorage.setItem('ekart_store_id',id)
     document.getElementById('store-dropdown').classList.remove('open')
     renderStorePill();renderStoreDropdown();await loadThemeForStore(id)
+    // FIX: Re-render settings after switching store
+    renderSettingsPanel()
   }
 
   /* ═══════════════════════════════════════
@@ -1123,6 +1163,8 @@
     document.getElementById('tab-sections').style.display=tab==='sections'?'':'none'
     document.getElementById('tab-themes').style.display=tab==='themes'?'':'none'
     document.getElementById('tab-settings').style.display=tab==='settings'?'':'none'
+    // If switching to settings, re-render to ensure latest themeData is shown
+    if(tab==='settings') renderSettingsPanel()
   }
 
   /* ═══════════════════════════════════════
@@ -1592,8 +1634,10 @@
     const fontEnc=encodeURIComponent(fontName)
     const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
     const borderRgb=isLight?'0,0,0':'255,255,255'
-    const cardSizeMap={small:'160px',medium:'220px',large:'280px'}
-    const minCardH=cardSizeMap[themeData.cardSize||'medium']
+    
+    // FIX: Use complete CARD_SIZE_VARS for preview
+    const cardSizeVars = CARD_SIZE_VARS[themeData.cardSize] || CARD_SIZE_VARS.medium
+    const sizeVarsCSS = Object.entries(cardSizeVars).map(([k,v]) => `${k}:${v};`).join('')
 
     const html=`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -1610,7 +1654,8 @@
   --font:'${fontName}',sans-serif;
   --cols:${isMobile?2:parseInt(themeData.cols||3)};
   --border-rgb:${borderRgb};
-  --card-min-h:${minCardH};
+  /* Card size variables from CARD_SIZE_VARS */
+  ${sizeVarsCSS}
 }
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}
@@ -1648,20 +1693,20 @@ img{max-width:100%;display:block}
 .view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text)}
 .view-all-btn:hover{opacity:1;border-color:var(--primary);color:var(--primary)}
 
-.themed-products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:${isMobile?'10px':'18px'}}
+.themed-products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:var(--grid-gap,18px)}
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all .22s;display:block;color:inherit;text-decoration:none}
-.tc-img{width:100%;aspect-ratio:1;background:rgba(${borderRgb},.06);overflow:hidden;position:relative;flex-shrink:0;min-height:var(--card-min-h)}
+.tc-img{width:100%;aspect-ratio:var(--card-img-aspect,1/1);min-height:var(--card-img-min-h,180px);background:rgba(${borderRgb},.06);overflow:hidden;position:relative;flex-shrink:0}
 .tc-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;display:block}
 .tc:hover .tc-img img{transform:scale(1.04)}
 .tc-badge{position:absolute;top:10px;left:10px;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:.04em;z-index:2}
 .tc-wishlist{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;z-index:2;opacity:0;transition:opacity .15s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .tc:hover .tc-wishlist{opacity:1}
-.tc-info{padding:${isMobile?'10px':'14px'}}
+.tc-info{padding:var(--card-info-pad,14px)}
 .tc-cat{font-size:10px;font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
-.tc-name{font-size:${isMobile?'12.5px':'13.5px'};font-weight:700;line-height:1.4;margin-bottom:6px}
+.tc-name{font-size:var(--card-name-fs,13.5px);font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tc-stars{font-size:11px;color:#f59e0b;margin-bottom:5px;letter-spacing:1px}
 .tc-price-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.tc-price{font-size:${isMobile?'14px':'16px'};font-weight:800;color:var(--primary)}
+.tc-price{font-size:var(--card-price-fs,16px);font-weight:800;color:var(--primary)}
 .tc-compare{font-size:11.5px;text-decoration:line-through;opacity:.38}
 .tc-disc{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 .tc-btn{width:100%;padding:${isMobile?'8px':'10px'};background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:opacity .15s;display:block}
