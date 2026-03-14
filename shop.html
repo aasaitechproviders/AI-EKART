@@ -159,12 +159,6 @@ a{color:inherit;text-decoration:none}
 
 /* ═══════════════════════════════════════════════════
    PRODUCT CARD — Production Quality
-   Core principles:
-   1. Image fills card (cover) with smart fallback gradient
-   2. Clean info section with proper hierarchy
-   3. Smooth hover interactions
-   4. Quick-add button slides up on hover
-   5. In-cart qty controls replace button
 ═══════════════════════════════════════════════════ */
 .products-grid,.tc-products-grid{
   display:grid;
@@ -202,11 +196,9 @@ a{color:inherit;text-decoration:none}
   background:var(--bg2);
   display:flex;align-items:center;justify-content:center;
 }
-
-/* Cover — fills the space, crops if needed. Best for real product shots */
 .product-img img,.tc-product-img img{
   width:100%;height:100%;
-  object-fit:cover; /* ← COVER: fills card cleanly */
+  object-fit:cover;
   transition:transform .45s var(--ease), filter .3s var(--ease);
   display:block;
 }
@@ -214,30 +206,15 @@ a{color:inherit;text-decoration:none}
 .tc-product-card:hover .tc-product-img img{
   transform:scale(1.06);
 }
-
-/* Smart fallback when image fails or is ugly — beautiful gradient placeholder */
 .product-img.img-error,.tc-product-img.img-error{
   background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);
 }
 .product-img.img-error img,.tc-product-img.img-error img{display:none}
-.product-img.img-error::after,.tc-product-img.img-error::after{
-  content:'';
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-}
-/* Product icon fallback */
 .img-fallback-icon{
   position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
   font-size:48px;opacity:.2;
   pointer-events:none;
-}
-
-/* Gradient overlay on image bottom for text readability in overlay mode */
-.product-img-gradient{
-  position:absolute;bottom:0;left:0;right:0;height:50%;
-  background:linear-gradient(to top,rgba(0,0,0,.5),transparent);
-  opacity:0;transition:opacity .3s var(--ease);pointer-events:none;
 }
 
 /* ── Badges ── */
@@ -270,7 +247,7 @@ a{color:inherit;text-decoration:none}
 .wish-btn:hover{background:#fff;transform:scale(1.1)!important}
 .wish-btn.wished{color:#ef4444;opacity:1;transform:scale(1)}
 
-/* ── Quick Add overlay (slides up on hover) ── */
+/* ── Quick Add overlay ── */
 .card-atc-overlay{
   position:absolute;bottom:0;left:0;right:0;z-index:4;
   padding:0 12px 12px;
@@ -283,28 +260,41 @@ a{color:inherit;text-decoration:none}
   transform:translateY(0);
   pointer-events:auto;
 }
-/* Belt-and-suspenders: hide overlay on in-cart cards (both card types) */
 .product-card.in-cart .card-atc-overlay,
 .tc-product-card.in-cart .card-atc-overlay{
   display:none!important;
   pointer-events:none!important;
 }
 
+/* ══════════════════════════════════════════════════
+   PREMIUM QUICK-ADD BUTTON — Glassmorphism
+══════════════════════════════════════════════════ */
 .card-atc-btn{
-  width:100%;padding:12px 16px;
-  background:rgba(10,10,10,.88);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  color:#fff;border:none;border-radius:10px;
+  width:100%;padding:13px 16px;
+  background:rgba(8,8,8,.80);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:12px;
   font-size:13px;font-weight:600;cursor:pointer;
-  font-family:var(--font);letter-spacing:.03em;
-  transition:background .15s, transform .1s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  font-family:var(--font);letter-spacing:.05em;
+  transition:background .18s var(--ease),transform .12s,box-shadow .18s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,.28),
+    0 2px 8px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  text-transform:uppercase;
+  font-size:11.5px;letter-spacing:.1em;
 }
-.card-atc-btn:hover{background:rgba(10,10,10,1)}
-.card-atc-btn:active{transform:scale(.97)}
+.card-atc-btn:hover{
+  background:rgba(8,8,8,.95);
+  box-shadow:0 12px 40px rgba(0,0,0,.38),0 4px 12px rgba(0,0,0,.22);
+  transform:translateY(-1px);
+}
+.card-atc-btn:active{transform:scale(.97) translateY(0)}
 
-/* ── Card Info — polished ── */
+/* ── Card Info ── */
 .product-info,.tc-product-info{padding:14px 16px 16px}
 
 .product-cat,.tc-product-cat{
@@ -338,90 +328,150 @@ a{color:inherit;text-decoration:none}
   font-style:italic;letter-spacing:.01em;
 }
 
-/* ── Cart Controls (inline qty) ── */
+/* ══════════════════════════════════════════════════
+   PREMIUM CART CONTROLS — Complete Redesign
+══════════════════════════════════════════════════ */
 .cart-controls-wrap,.tc-btn-wrap{padding:8px 16px 14px}
+
+/* Qty row — full width, pill style, premium feel */
 .cart-qty-row{
-  display:inline-flex;align-items:center;
-  border:1.5px solid var(--border);border-radius:10px;
-  overflow:hidden;background:#fff;
-  box-shadow:0 1px 4px rgba(0,0,0,.04);
+  display:flex;
+  align-items:center;
+  width:100%;
+  height:46px;
+  border-radius:12px;
+  border:1.5px solid var(--border);
+  overflow:hidden;
+  background:#fff;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,.06),
+    0 4px 12px rgba(0,0,0,.04);
+  transition:border-color .2s, box-shadow .2s;
 }
-.qty-btn{
-  width:38px;height:38px;border:none;background:transparent;
-  color:var(--p);font-size:18px;font-weight:400;
-  cursor:pointer;transition:background .15s;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  line-height:1;
-}
-.qty-btn:hover{background:var(--bg2)}
-.qty-btn:active{background:var(--bg3)}
-.qty-value{
-  padding:0 14px;font-size:14px;font-weight:700;color:var(--p);
-  min-width:40px;text-align:center;line-height:38px;
-  border-left:1.5px solid var(--border);
-  border-right:1.5px solid var(--border);
-  letter-spacing:-.01em;
+.cart-qty-row:hover{
+  border-color:rgba(0,0,0,.18);
+  box-shadow:0 2px 8px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.06);
 }
 
-/* Fallback add button (non-hover, e.g. mobile) */
-.btn-add,.tc-product-btn{
-  width:100%;padding:11px 16px;
-  background:var(--p);color:#fff;border:none;border-radius:9px;
-  font-size:13px;font-weight:600;cursor:pointer;
-  transition:.2s var(--ease);font-family:var(--font);
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  letter-spacing:.02em;
+.qty-btn{
+  flex:1;
+  height:100%;
+  border:none;
+  background:transparent;
+  color:var(--p);
+  font-size:22px;
+  font-weight:300;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .15s,color .15s;
+  -webkit-user-select:none;user-select:none;
+  line-height:1;
 }
-.btn-add:hover,.tc-product-btn:hover{background:#333}
-.btn-add:active,.tc-product-btn:active{transform:scale(.98)}
+.qty-btn:hover{
+  background:var(--bg2);
+  color:var(--p);
+}
+.qty-btn:active{
+  background:var(--bg3);
+}
+
+.qty-value{
+  /* Fixed width center cell with full-height dividers */
+  flex:0 0 52px;
+  text-align:center;
+  font-size:15px;
+  font-weight:700;
+  color:var(--p);
+  border-left:1.5px solid var(--border);
+  border-right:1.5px solid var(--border);
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  letter-spacing:-.02em;
+  background:#fff;
+  line-height:1;
+}
+
+/* ══════════════════════════════════════════════════
+   PREMIUM ADD TO CART BUTTON
+══════════════════════════════════════════════════ */
+.btn-add,.tc-product-btn{
+  width:100%;
+  padding:13px 16px;
+  background:var(--p);
+  color:#fff;
+  border:none;
+  border-radius:11px;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  transition:
+    background .2s var(--ease),
+    transform .12s,
+    box-shadow .2s var(--ease);
+  font-family:var(--font);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.14),
+    0 6px 20px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+.btn-add:hover,.tc-product-btn:hover{
+  background:#1a1a1a;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.2),
+    0 10px 32px rgba(0,0,0,.15),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  transform:translateY(-1px);
+}
+.btn-add:active,.tc-product-btn:active{
+  transform:scale(.97) translateY(0);
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+}
+
+/* Cart button icon pulse on add */
+@keyframes cartPulse{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.3)}
+  100%{transform:scale(1)}
+}
+.btn-add.just-added .btn-icon,
+.tc-product-btn.just-added .btn-icon{
+  animation:cartPulse .35s var(--ease);
+}
 
 /* ════════════════════════════════════════════════
    CARD STYLE VARIANTS
 ════════════════════════════════════════════════ */
-
-/* classic — minimal, Shopify-style */
 .classic-grid{gap:20px!important}
-.classic-grid .product-card{
-  border-radius:12px;border:1px solid var(--border);
-  background:#fff;
-}
+.classic-grid .product-card{border-radius:12px;border:1px solid var(--border);background:#fff}
 
-/* minimal — no border, no shadow */
 .minimal-grid{gap:24px!important}
-.minimal-grid .product-card{
-  background:transparent;border:none;
-  border-radius:12px;
-}
+.minimal-grid .product-card{background:transparent;border:none;border-radius:12px}
 .minimal-grid .product-img{border-radius:12px;overflow:hidden}
 .minimal-grid .product-card:hover{box-shadow:none;transform:none}
 .minimal-grid .product-card:hover .product-img img{transform:scale(1.05)}
 .minimal-grid .product-info{padding:12px 0}
 
-/* bold — colored accent top */
 .bold-grid{gap:20px!important}
-.bold-grid .product-card{
-  border-radius:12px;
-  border-top:3px solid var(--primary);
-  border:1px solid var(--border);
-  border-top:3px solid var(--primary);
-}
+.bold-grid .product-card{border-radius:12px;border:1px solid var(--border);border-top:3px solid var(--primary)}
 .bold-grid .product-img img{object-fit:cover;padding:0}
 .bold-grid .product-info{padding:14px 14px 16px}
 
-/* elevated — card with depth */
 .elevated-grid{gap:28px!important}
-.elevated-grid .product-card{
-  border-radius:16px;border:none;
-  box-shadow:0 2px 12px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
-}
-.elevated-grid .product-card:hover{
-  box-shadow:0 20px 60px rgba(0,0,0,.14),0 4px 16px rgba(0,0,0,.06);
-  transform:translateY(-5px);
-}
+.elevated-grid .product-card{border-radius:16px;border:none;box-shadow:0 2px 12px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04)}
+.elevated-grid .product-card:hover{box-shadow:0 20px 60px rgba(0,0,0,.14),0 4px 16px rgba(0,0,0,.06);transform:translateY(-5px)}
 .elevated-grid .product-img img{object-fit:cover;padding:0}
 .elevated-grid .product-info{padding:14px 16px 18px}
 
-/* compact — small cards, no add button */
 .compact-grid{gap:14px!important}
 .compact-grid .product-card{border-radius:10px;border:1px solid var(--border)}
 .compact-grid .product-img{aspect-ratio:1/1}
@@ -431,7 +481,6 @@ a{color:inherit;text-decoration:none}
 .compact-grid .cart-controls-wrap,.compact-grid .tc-btn-wrap{display:none}
 .compact-grid .card-atc-overlay{display:none}
 
-/* list — horizontal layout */
 .list-grid{grid-template-columns:1fr!important;gap:12px!important}
 .list-grid .product-card{flex-direction:row;height:150px;border-radius:12px}
 .list-grid .card-link{display:flex;flex:1;min-width:0}
@@ -443,12 +492,10 @@ a{color:inherit;text-decoration:none}
 .list-grid .card-atc-overlay{display:none}
 .list-grid .btn-add{width:auto;padding:9px 20px}
 
-/* magazine — first card spans 2x2 */
 .magazine-grid{gap:16px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
 .magazine-grid .product-card:first-child .product-img{aspect-ratio:auto;height:100%}
 
-/* overlay — full image with text over */
 .overlay-grid{gap:16px!important}
 .overlay-grid .product-card{border-radius:14px;border:none;overflow:hidden}
 .overlay-grid .product-card .card-link{display:block;position:relative}
@@ -465,19 +512,14 @@ a{color:inherit;text-decoration:none}
 .ov-name{font-size:13.5px;font-weight:600;color:#fff;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ov-price{font-size:15px;font-weight:700;color:#fff}
 
-/* padded — for builder view */
 .padded-grid{gap:20px!important}
 .padded-grid .product-card{border-radius:12px;border:1px solid var(--border)}
 .padded-grid .product-info{padding:14px 14px 16px}
 
 /* ══════════════════════════════════════════════════════════
-   FEATURED SECTION — matches mainLayout width exactly
-   Key: max-width:1440px + same 48px side padding as #mainLayout
-   This ensures featured cards are the exact same width as
-   main product grid cards at every breakpoint.
+   FEATURED SECTION
 ══════════════════════════════════════════════════════════ */
 [class*="featured-"].tc-section{
-  /* Override tc-section's default padding to match mainLayout */
   padding-left:48px!important;
   padding-right:48px!important;
   max-width:1440px;
@@ -485,21 +527,14 @@ a{color:inherit;text-decoration:none}
   margin-right:auto;
   box-sizing:border-box;
 }
-/* tc-products-grid inside featured: use same --cols root variable, same gap */
 [class*="featured-"] .tc-products-grid{
   grid-template-columns:repeat(var(--cols,4),1fr)!important;
   gap:24px!important;
 }
-/* tc- card mirrors product-card exactly */
-.tc-product-card{
-  border-radius:16px;
-  border:1px solid var(--border);
-  background:#fff;
-}
+.tc-product-card{border-radius:16px;border:1px solid var(--border);background:#fff}
 .tc-product-info{padding:14px 16px 16px}
 .tc-product-img img{object-fit:cover;padding:0}
 
-/* Style overrides per variant — mirror the main grid variants */
 .featured-classic .tc-products-grid{gap:20px!important}
 .featured-classic .tc-product-card{border-radius:12px}
 
@@ -816,6 +851,10 @@ a{color:inherit;text-decoration:none}
   .cart-bar{padding:12px 16px}
   .products-grid{gap:12px!important}
   .tc-products-grid{gap:12px!important}
+  /* Mobile qty row slight tweak */
+  .cart-qty-row{height:42px}
+  .qty-btn{font-size:20px}
+  .qty-value{flex:0 0 44px;font-size:14px}
 }
 </style>
 </head>
@@ -942,6 +981,7 @@ const updateCols = ()=>{const s=themeData?.settings||{},cols=s.cols||s.columns||
 const getCart = ()=>JSON.parse(localStorage.getItem('cart_'+slug)||'[]')
 const saveCart = c=>localStorage.setItem('cart_'+slug,JSON.stringify(c))
 const getQty = id=>{const i=getCart().find(x=>x.product_id===id&&!x.variant);return i?i.qty:0}
+
 function incCart(id,name,price,image){
   const cart=getCart(),i=cart.find(x=>x.product_id===id&&!x.variant)
   if(i)i.qty++;else cart.push({product_id:id,name,price,image,qty:1})
@@ -952,6 +992,7 @@ function decCart(id){
   if(idx!==-1){if(cart[idx].qty>1)cart[idx].qty--;else cart.splice(idx,1);saveCart(cart);updateCartUI();updateCC(id)}
 }
 const addToCart=(id,n,p,img)=>incCart(id,n,p,img)
+
 function updateCC(id){
   const qty=getQty(id)
   document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(el=>{
@@ -960,28 +1001,25 @@ function updateCC(id){
     const ic=card?.querySelector('.product-img,.tc-product-img')
 
     if(qty===0){
-      // Item removed — show add button in info, inject overlay back into image
-      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">Add to cart</button>`
+      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> Add to cart</button>`
       if(card){
         card.classList.remove('in-cart')
-        // Re-inject overlay if not already there
         if(ic && !ic.querySelector('.card-atc-overlay')){
           const ov=document.createElement('div');ov.className='card-atc-overlay'
-          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">+ Add to cart</button>`
+          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')">🛒 Add to cart</button>`
           ic.appendChild(ov)
         }
       }
     }else{
-      // Item in cart — show qty row, remove overlay entirely
       el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
       if(card){
         card.classList.add('in-cart')
-        // Remove overlay from DOM entirely — cleanest approach
         ic?.querySelector('.card-atc-overlay')?.remove()
       }
     }
   })
 }
+
 function updateCartUI(){
   const cart=getCart(),qty=cart.reduce((s,x)=>s+x.qty,0),amt=cart.reduce((s,x)=>s+x.price*x.qty,0)
   const el=document.getElementById('cartCount');el.textContent=qty;el.className='cart-badge'+(qty>0?' on':'')
@@ -1035,9 +1073,8 @@ function renderCard(p,ctx,btnLabel){
   const oc=isM?'product-compare':'tc-product-old'
   const wc=isM?'cart-controls-wrap':'tc-btn-wrap'
   const bc=isM?'product-badge':'tc-product-badge'
-  const btc=isM?'btn-add':'tc-product-btn'
 
-  // Image: if no image, show a beautiful gradient placeholder based on product name
+  // Gradient placeholder colors
   const colorPairs=[
     ['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],
     ['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']
@@ -1066,9 +1103,8 @@ function renderCard(p,ctx,btnLabel){
     ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
   }
 
-  // Hover overlay quick-add — only render when item NOT in cart and NOT out of stock
-  // This is the definitive fix: don't emit the HTML at all, not just hide with CSS
-  const overlayBtn = (oos || qty > 0) ? '' : `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">+ Add to cart</button></div>`
+  // Hover overlay — only when not in cart and not OOS
+  const overlayBtn = (oos || qty > 0) ? '' : `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 Add to cart</button></div>`
 
   // OVERLAY STYLE
   if(activeStyle==='overlay'){
@@ -1100,10 +1136,27 @@ function renderCard(p,ctx,btnLabel){
           ${p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
           ${d?`<span class="product-discount">−${d}%</span>`:''}
         </div>
-        <div class="${wc}">${ctrlHTML}</div>
+        <div class="${wc}">
+          ${oos
+            ? `<span class="out-of-stock-label">Out of stock</span>`
+            : qty>0
+              ? `<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
+              : `<div class="cart-controls" ${ctrlData}></div>`
+          }
+        </div>
       </div>
     </a>
   </div>`
+}
+
+// Render initial add-to-cart button for empty cart-controls divs
+function initCartButtons(){
+  document.querySelectorAll('.cart-controls').forEach(el=>{
+    if(el.innerHTML.trim()!=='') return // already has content (qty row or OOS)
+    const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image
+    const sn=esa(n),si=esa(img)
+    el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> Add to cart</button>`
+  })
 }
 
 function applyStyleToGrid(){
@@ -1218,7 +1271,9 @@ function gd(sec){
     link1Text:d.link1Text||'Home',link1Url:d.link1Url||'#',link2Text:d.link2Text||'Catalog',link2Url:d.link2Url||'#mainAnchor',
     link3Text:d.link3Text||'Categories',link3Url:d.link3Url||'#catPills',link4Text:d.link4Text||'Contact',link4Url:d.link4Url||'#',
     link5Text:d.link5Text||'',link5Url:d.link5Url||'#',cartText:d.cartText||'Cart',navLinks:s.nav_links||null,
-    newsletterNote:d.newsletterNote||'No spam. Unsubscribe anytime.'
+    newsletterNote:d.newsletterNote||'No spam. Unsubscribe anytime.',
+    // ── Category card style — read from both sec.settings and sec.data ──
+    catCardStyle:d.cardStyle||s.card_style||'image'
   }
 }
 
@@ -1229,7 +1284,7 @@ function buildSec(sec,isMobile){
     case 'navbar':{
       const lt=d.logoText||storeConfig.name||'My Store'
       let links=d.navLinks?.length?d.navLinks:[1,2,3,4,5].map(i=>d[`link${i}Text`]?{text:d[`link${i}Text`],url:d[`link${i}Url`]}:null).filter(Boolean)
-      const lh=links.map(l=>{const url=l.url||l.href||'#',isA=url.startsWith('#'),sid=isA?url.slice(1):null,oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"`:`onclick="event.preventDefault();scrollToEl('${sid}')"`):' ';return`<a href="${esc(url)}" ${oc}>${esc(l.text||l.txt||'')}</a>`}).join('')
+      const lh=links.map(l=>{const url=l.url||l.href||'#',isA=url.startsWith('#'),sid=isA?url.slice(1):null,oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"` :`onclick="event.preventDefault();scrollToEl('${sid}')"`):' ';return`<a href="${esc(url)}" ${oc}>${esc(l.text||l.txt||'')}</a>`}).join('')
       const pos=d.sticky!=='no'?'sticky':'relative'
       return`<nav class="tc-navbar" style="${d.bgColor?'background:'+d.bgColor+';':''}position:${pos};top:0;z-index:200" id="themeNavbar">
         <div class="nav-logo" style="${d.logoColor?'color:'+d.logoColor+';':''}" onclick="scrollTop()">${d.logoUrl?`<img src="${d.logoUrl}" class="nav-logo-img" alt="${esc(lt)}">`:`${esc(lt)}`}</div>
@@ -1258,8 +1313,20 @@ function buildSec(sec,isMobile){
     }
     case 'categories':{
       const cols=isMobile?2:(parseInt(d.columns)||4),sid=`cs-${sec.id}`
-      setTimeout(()=>fillCats(sid,cols,d),0)
-      return`<section class="tc-section" id="${sid}"><div class="tc-section-hd"><div><div class="tc-section-title">${esc(d.title||'Browse categories')}</div>${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}</div></div><div class="tc-cats-grid" id="${sid}-grid" style="grid-template-columns:repeat(${cols},1fr)">${[...Array(cols)].map(()=>`<div class="tc-cat-card skeleton" style="height:200px"></div>`).join('')}</div></section>`
+      // ── FIX: pass card_style from raw sec.settings so fillCats can read it ──
+      const catStyle=sec.settings?.card_style||sec.data?.cardStyle||d.catCardStyle||'image'
+      setTimeout(()=>fillCats(sid,cols,d,catStyle),0)
+      return`<section class="tc-section" id="${sid}" data-cat-style="${catStyle}">
+        <div class="tc-section-hd">
+          <div>
+            <div class="tc-section-title">${esc(d.title||'Browse categories')}</div>
+            ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
+          </div>
+        </div>
+        <div class="tc-cats-grid" id="${sid}-grid" style="grid-template-columns:repeat(${cols},1fr)">
+          ${[...Array(cols)].map(()=>`<div class="tc-cat-card skeleton" style="height:200px"></div>`).join('')}
+        </div>
+      </section>`
     }
     case 'banner':{const bg=d.bgColor||'#111';return`<section class="tc-promo-banner" style="background:${bg}"><div class="tc-promo-content"><h2 style="${d.textColor?'color:'+d.textColor:'color:#fff'}">${esc(d.heading||'Limited Time Offer')}</h2><p style="${d.textColor?'color:'+d.textColor:'color:rgba(255,255,255,.7)'}">${esc(d.subtext||d.subheading||'Get 20% off your first order.')}</p>${d.couponCode?`<div style="display:inline-block;background:rgba(255,255,255,.12);border:1.5px dashed rgba(255,255,255,.4);padding:10px 24px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:.1em;color:#fff;margin-bottom:18px">${esc(d.couponCode)}</div><br>`:''} ${d.ctaText?`<button class="btn-ghost-white" onclick="smoothScroll()">${esc(d.ctaText)}</button>`:''}</div></section>`}
     case 'trustbadges':{const gc=d.layout==='2x2'?2:d.layout==='column'?1:(isMobile?2:4),badges=[{icon:d.badge1Icon,label:d.badge1,sub:d.badge1sub},{icon:d.badge2Icon,label:d.badge2,sub:d.badge2sub},{icon:d.badge3Icon,label:d.badge3,sub:d.badge3sub},{icon:d.badge4Icon,label:d.badge4,sub:d.badge4sub}];return`<section class="tc-trust-section" style="${d.bgColor?'background:'+d.bgColor+';':''}"><div class="tc-trust-grid" style="grid-template-columns:repeat(${gc},1fr)">${badges.map(b=>`<div class="tc-trust-item"><span class="tc-trust-icon">${b.icon}</span><div><div class="tc-trust-label">${esc(b.label)}</div>${b.sub?`<div class="tc-trust-sub">${esc(b.sub)}</div>`:''}</div></div>`).join('')}</div></section>`}
@@ -1287,20 +1354,65 @@ async function fillFeatured(secId,count,d){
     const data=await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json()),prods=(data.products||[]).slice(0,count)
     if(!prods.length){const s=grid.closest('section');if(s)s.style.display='none';return}
     grid.innerHTML=prods.map(p=>renderCard(p,'featured',d.btnText||'Add to cart')).join('')
+    // Init add-to-cart buttons for items not in cart
+    initCartButtons()
     prods.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)});restoreWish()
   }catch(e){const s=document.getElementById(secId);if(s)s.style.display='none'}
 }
 
-async function fillCats(secId,cols,d){
+// ── FIXED fillCats — respects card_style from builder ──
+async function fillCats(secId,cols,d,catStyle){
   const grid=document.getElementById(`${secId}-grid`);if(!grid)return
+
+  // Resolve card style: argument > data-attr on section element > default
+  const secEl=document.getElementById(secId)
+  const resolvedStyle=catStyle||secEl?.dataset.catStyle||d.catCardStyle||'image'
+
   try{
     const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json()),list=Array.isArray(cats)?cats:[]
     if(!list.length){const s=grid.closest('section');if(s)s.style.display='none';return}
+
     const em={fashion:'👗',clothing:'👕',electronics:'📱',tech:'💻',home:'🏠',beauty:'💄',gaming:'🎮',food:'🍕',accessories:'👜',footwear:'👟',sports:'⚽',furniture:'🛋️',books:'📚',toys:'🧸'}
     const ge=n=>{const lc=(n||'').toLowerCase();for(const[k,v]of Object.entries(em))if(lc.includes(k))return v;return'🛍️'}
+
+    const showCount=(d.showCount==='yes')
+
     grid.innerHTML=list.map(c=>{
-      if(c.image_url)return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')"><div class="tc-cat-img-wrap"><img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=font-size:32px>${ge(c.name)}</span>'"></div><div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${(d.showCount==='yes')&&c.product_count!=null?`<span class="tc-cat-count">${c.product_count} items</span>`:''}</div></div>`
-      return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')"><div class="tc-cat-simple"><div class="tc-cat-icon">${c.icon||ge(c.name)}</div><div class="tc-cat-name-plain">${esc(c.name)}</div>${(d.showCount==='yes')&&c.product_count!=null?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${c.product_count}</div>`:''}</div></div>`
+      const countBadge=showCount&&c.product_count!=null?`${c.product_count}+ items`:null
+
+      // ── SIMPLE / ICON card style ──
+      if(resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'){
+        return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
+          <div class="tc-cat-simple">
+            <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
+            <div class="tc-cat-name-plain">${esc(c.name)}</div>
+            ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${countBadge}</div>`:''}
+          </div>
+        </div>`
+      }
+
+      // ── IMAGE card style (default) — with fallback to simple if no image ──
+      if(c.image_url){
+        return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
+          <div class="tc-cat-img-wrap">
+            <img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy"
+              onerror="this.parentElement.innerHTML='<span style=\\'font-size:32px\\'>${ge(c.name)}</span>'">
+          </div>
+          <div class="tc-cat-footer">
+            <span class="tc-cat-name">${esc(c.name)}</span>
+            ${countBadge?`<span class="tc-cat-count">${countBadge}</span>`:''}
+          </div>
+        </div>`
+      }
+
+      // No image — fallback to simple regardless of style
+      return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
+        <div class="tc-cat-simple">
+          <div class="tc-cat-icon">${c.icon||ge(c.name)}</div>
+          <div class="tc-cat-name-plain">${esc(c.name)}</div>
+          ${countBadge?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${countBadge}</div>`:''}
+        </div>
+      </div>`
     }).join('')
   }catch(e){const s=document.getElementById(secId);if(s)s.style.display='none'}
 }
@@ -1380,6 +1492,8 @@ function renderProducts(products){
   if(!products.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`;return}
   grid.innerHTML=products.map(p=>renderCard(p,'main','Add to cart')).join('')
   applyStyleToGrid()
+  // Init add-to-cart buttons for items not yet in cart
+  initCartButtons()
   products.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)});restoreWish()
 }
 
