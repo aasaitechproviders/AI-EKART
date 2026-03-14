@@ -21,6 +21,9 @@
   --sh1:0 4px 16px rgba(0,0,0,.06);
   --sh2:0 16px 48px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
   --ease:cubic-bezier(.4,0,.2,1);
+  --card-bg:#ffffff;
+  --card-border:var(--border);
+  --card-radius:16px;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--p);-webkit-font-smoothing:antialiased;padding-bottom:80px}
 img{display:block;max-width:100%}
@@ -109,50 +112,54 @@ a{color:inherit;text-decoration:none}
 .cat-pill:hover{border-color:var(--p);color:var(--p)}
 .cat-pill.active{background:var(--p);color:#fff;border-color:var(--p)}
 
-/* ─── PRODUCT CARDS ──────────────────────────────────────── */
-:root{
-  --card-bg:#ffffff;
-  --card-border:var(--border);
-  --card-radius:12px;
-}
+/* ════════════════════════════════════════════════
+   BASE CARD — unique, elevated, modern design
+════════════════════════════════════════════════ */
 .products-grid,.tc-products-grid{
   display:grid;
   grid-template-columns:repeat(var(--cols,4),1fr);
-  gap:16px;
+  gap:20px;
 }
 
-/* ════════════════════════════════════════════════
-   BASE CARD — compact, clean, modern
-════════════════════════════════════════════════ */
 .product-card,.tc-product-card{
-  background:var(--card-bg);
+  background:#fff;
   border-radius:var(--card-radius);
   overflow:hidden;
   color:var(--p);
   display:flex;flex-direction:column;
   position:relative;
-  border:1px solid var(--card-border);
-  transition:box-shadow .22s var(--ease),transform .22s var(--ease);
+  border:none;
+  box-shadow:0 2px 12px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.05);
+  transition:box-shadow .28s var(--ease),transform .28s var(--ease);
   cursor:pointer;
 }
+/* Top accent line — slides in on hover */
+.product-card::before,.tc-product-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),rgba(0,0,0,.25));
+  z-index:5;opacity:0;
+  transition:opacity .25s var(--ease);
+}
+.product-card:hover::before,.tc-product-card:hover::before{opacity:1}
 .product-card:hover,.tc-product-card:hover{
-  box-shadow:0 10px 32px rgba(0,0,0,.09),0 2px 10px rgba(0,0,0,.05);
-  transform:translateY(-2px);z-index:2;
+  box-shadow:0 18px 40px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.07);
+  transform:translateY(-4px);z-index:2;
 }
 .card-link{text-decoration:none;color:inherit;display:flex;flex-direction:column;flex:1}
 
-/* ── Image — square, compact ── */
+/* ── Image — portrait 4:5 ratio ── */
 .product-img,.tc-product-img{
   position:relative;width:100%;
-  aspect-ratio:1/1;
+  aspect-ratio:4/5;
   overflow:hidden;background:var(--bg2);flex-shrink:0;
 }
 .product-img img,.tc-product-img img{
   width:100%;height:100%;object-fit:cover;
-  transition:transform .38s var(--ease);display:block;
+  transition:transform .42s var(--ease);display:block;
 }
 .product-card:hover .product-img img,
-.tc-product-card:hover .tc-product-img img{transform:scale(1.04)}
+.tc-product-card:hover .tc-product-img img{transform:scale(1.06)}
 .product-img.img-error img,.tc-product-img.img-error img{display:none}
 .img-fallback-icon{
   position:absolute;top:50%;left:50%;
@@ -176,23 +183,23 @@ a{color:inherit;text-decoration:none}
 /* ── Wishlist ── */
 .wish-btn{
   position:absolute;top:8px;right:8px;z-index:3;
-  width:28px;height:28px;border-radius:50%;
-  background:rgba(255,255,255,.9);border:none;
-  box-shadow:0 1px 6px rgba(0,0,0,.12);
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,.92);border:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.14);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:12px;transition:all .18s var(--ease);
+  font-size:13px;transition:all .2s var(--ease);
   opacity:0;transform:scale(.8) translateY(-3px);
 }
 .product-card:hover .wish-btn,.tc-product-card:hover .wish-btn{opacity:1;transform:scale(1) translateY(0)}
-.wish-btn:hover{background:#fff;transform:scale(1.1)!important}
+.wish-btn:hover{background:#fff;transform:scale(1.12)!important;box-shadow:0 4px 12px rgba(0,0,0,.18)}
 .wish-btn.wished{color:#ef4444;opacity:1;transform:scale(1) translateY(0)}
 
 /* ── Quick-Add hover overlay ── */
 .card-atc-overlay{
   position:absolute;bottom:0;left:0;right:0;z-index:4;
-  padding:0 8px 8px;
+  padding:0 10px 10px;
   transform:translateY(110%);
-  transition:transform .22s var(--ease);pointer-events:none;
+  transition:transform .25s var(--ease);pointer-events:none;
 }
 .product-card:hover .card-atc-overlay,
 .tc-product-card:hover .card-atc-overlay{transform:translateY(0);pointer-events:auto;}
@@ -201,156 +208,175 @@ a{color:inherit;text-decoration:none}
 .overlay-grid .card-atc-overlay,
 [class*="featured-overlay"] .card-atc-overlay{display:none!important}
 .card-atc-btn{
-  width:100%;padding:9px 12px;
-  background:rgba(0,0,0,.76);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  color:#fff;border:1px solid rgba(255,255,255,.14);
-  border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;
+  width:100%;padding:10px 12px;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:#fff;border:1px solid rgba(255,255,255,.16);
+  border-radius:9px;font-size:10px;font-weight:700;cursor:pointer;
   font-family:var(--font);letter-spacing:.08em;
   transition:background .12s;
   display:flex;align-items:center;justify-content:center;gap:5px;
-  box-shadow:0 3px 12px rgba(0,0,0,.2);text-transform:uppercase;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);text-transform:uppercase;
 }
-.card-atc-btn:hover{background:rgba(0,0,0,.92);}
+.card-atc-btn:hover{background:rgba(0,0,0,.94);}
 
-/* ── Card Info ── */
+/* ── Card Info — white bg, clean typography ── */
 .product-info,.tc-product-info{
-  padding:10px 12px 3px;
-  background:var(--card-bg);flex:1;display:flex;flex-direction:column;
+  padding:13px 14px 5px;
+  background:#fff;
+  flex:1;display:flex;flex-direction:column;
+  border-top:1px solid rgba(0,0,0,.05);
 }
 .product-cat,.tc-product-cat{
-  font-size:8.5px;color:var(--p3);font-weight:700;
-  text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;
+  font-size:9px;color:var(--primary);font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;
+  opacity:.65;
 }
 .product-name,.tc-product-name{
-  font-size:13px;font-weight:600;line-height:1.38;
-  color:var(--p);margin-bottom:6px;
+  font-size:13.5px;font-weight:600;line-height:1.4;
+  color:var(--p);margin-bottom:7px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  flex:1;
+  flex:1;letter-spacing:-.01em;
 }
 .product-price-row,.tc-price-row{
-  display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
 }
 .product-price,.tc-product-price{
-  font-size:14px;font-weight:700;color:var(--p);letter-spacing:-.02em;
+  font-size:15px;font-weight:800;color:var(--p);letter-spacing:-.03em;
 }
 .product-compare,.tc-product-old{
   font-size:11px;text-decoration:line-through;color:var(--p3);
 }
 .product-discount{
-  font-size:8.5px;font-weight:800;color:#16a34a;
-  background:#f0fdf4;padding:1px 5px;border-radius:999px;
+  font-size:9px;font-weight:800;color:#16a34a;
+  background:#f0fdf4;padding:2px 6px;border-radius:999px;
   letter-spacing:.04em;border:1px solid #bbf7d0;
 }
 .out-of-stock-label{font-size:11px;color:var(--p3);font-style:italic;}
 
 /* ── Cart Controls ── */
 .cart-controls-wrap,.tc-btn-wrap{
-  padding:7px 11px 11px;background:var(--card-bg);
+  padding:7px 12px 12px;background:#fff;
 }
 .cart-qty-row{
-  display:flex;align-items:center;width:100%;height:38px;
-  border-radius:8px;border:1.5px solid var(--border);
-  overflow:hidden;background:var(--card-bg);
-  transition:border-color .15s;
+  display:flex;align-items:center;width:100%;height:40px;
+  border-radius:10px;border:1.5px solid var(--border);
+  overflow:hidden;background:#f8f8f8;
+  transition:border-color .18s,box-shadow .18s;
 }
-.cart-qty-row:hover{border-color:rgba(0,0,0,.2);}
+.cart-qty-row:hover{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,0,0,.05);}
 .qty-btn{
   flex:1;height:100%;border:none;background:transparent;
   color:var(--p);font-size:17px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:background .1s;-webkit-user-select:none;user-select:none;
 }
-.qty-btn:hover{background:var(--bg2)}
-.qty-btn:active{background:var(--bg3)}
+.qty-btn:hover{background:var(--bg3)}
+.qty-btn:active{background:var(--border)}
 .qty-value{
   flex:0 0 40px;text-align:center;
   font-size:13px;font-weight:700;color:var(--p);
   border-left:1.5px solid var(--border);border-right:1.5px solid var(--border);
   height:100%;display:flex;align-items:center;justify-content:center;
-  background:var(--card-bg);
+  background:#fff;
 }
+
+/* ── Add to Cart Button — unique elevated design ── */
 .btn-add,.tc-product-btn{
-  width:100%;padding:10px 13px;
+  width:100%;padding:11px 13px;
   background:var(--primary);color:#fff;border:none;
-  border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;
+  border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;
   font-family:var(--font);
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  letter-spacing:.05em;text-transform:uppercase;
-  transition:filter .14s,transform .1s;
-  box-shadow:0 1px 5px rgba(0,0,0,.12);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  letter-spacing:.06em;text-transform:uppercase;
+  transition:all .22s var(--ease);
+  box-shadow:0 2px 8px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.1);
+  position:relative;overflow:hidden;
 }
-.btn-add:hover,.tc-product-btn:hover{filter:brightness(1.1);box-shadow:0 3px 12px rgba(0,0,0,.18);transform:translateY(-1px);}
-.btn-add:active,.tc-product-btn:active{transform:scale(.97);box-shadow:none;filter:none;}
+.btn-add::after,.tc-product-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 55%);
+  pointer-events:none;
+}
+.btn-add:hover,.tc-product-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15);
+  filter:brightness(1.08);
+}
+.btn-add:active,.tc-product-btn:active{
+  transform:scale(.97);
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+  filter:none;
+}
 
 /* ════════════════════════════════════════════════
    MAIN GRID STYLE VARIANTS
-   activeStyle is for main products grid ONLY.
-   NEVER applies to featured sections.
 ════════════════════════════════════════════════ */
-.classic-grid{gap:14px!important}
-.classic-grid .product-card{border-radius:12px}
+.classic-grid{gap:18px!important}
+.classic-grid .product-card{border-radius:16px}
 
-.minimal-grid{gap:16px!important}
+.minimal-grid{gap:18px!important}
 .minimal-grid .product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
-.minimal-grid .product-img{border-radius:10px;overflow:hidden}
+.minimal-grid .product-card::before{display:none}
+.minimal-grid .product-img{border-radius:14px;overflow:hidden}
 .minimal-grid .product-info,.minimal-grid .cart-controls-wrap{background:transparent!important}
 .minimal-grid .product-card:hover .product-img img{transform:scale(1.05)}
 
-.bold-grid{gap:14px!important}
-.bold-grid .product-card{border-radius:11px;border-top:3px solid var(--primary)}
+.bold-grid{gap:16px!important}
+.bold-grid .product-card{border-radius:12px;border-top:3px solid var(--primary)}
+.bold-grid .product-card::before{display:none}
 
-.elevated-grid{gap:18px!important}
-.elevated-grid .product-card{border:none;box-shadow:0 1px 10px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04)}
-.elevated-grid .product-card:hover{box-shadow:0 16px 44px rgba(0,0,0,.11),0 3px 14px rgba(0,0,0,.06);transform:translateY(-4px)}
+.elevated-grid{gap:22px!important}
+.elevated-grid .product-card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04)}
+.elevated-grid .product-card:hover{box-shadow:0 20px 52px rgba(0,0,0,.13),0 4px 18px rgba(0,0,0,.07);transform:translateY(-5px)}
 
 .compact-grid{gap:10px!important}
-.compact-grid .product-card{border-radius:10px}
+.compact-grid .product-card{border-radius:12px}
 .compact-grid .product-img{aspect-ratio:1/1}
-.compact-grid .product-info{padding:7px 9px 7px}
+.compact-grid .product-info{padding:7px 10px 7px}
 .compact-grid .product-name{font-size:11.5px;-webkit-line-clamp:1;margin-bottom:3px}
-.compact-grid .product-price{font-size:12px}
+.compact-grid .product-price{font-size:12.5px}
 .compact-grid .cart-controls-wrap{display:none!important}
 
-.list-grid{grid-template-columns:1fr!important;gap:8px!important}
-.list-grid .product-card{flex-direction:row;height:120px;border-radius:11px}
+.list-grid{grid-template-columns:1fr!important;gap:10px!important}
+.list-grid .product-card{flex-direction:row;height:128px;border-radius:14px}
+.list-grid .product-card::before{width:3px;height:auto;top:0;bottom:0;right:auto;left:0}
 .list-grid .card-link{flex-direction:row;flex:1;min-width:0}
-.list-grid .product-img{width:120px;min-width:120px;aspect-ratio:auto;height:120px;flex-shrink:0;border-radius:0}
-.list-grid .product-info{flex:1;padding:14px 16px;justify-content:center}
-.list-grid .cart-controls-wrap{padding:0 12px;display:flex;align-items:center;align-self:center}
+.list-grid .product-img{width:128px;min-width:128px;aspect-ratio:auto;height:128px;flex-shrink:0;border-radius:0}
+.list-grid .product-info{flex:1;padding:14px 18px;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
+.list-grid .cart-controls-wrap{padding:0 14px;display:flex;align-items:center;align-self:center}
 .list-grid .product-card:hover{transform:none;box-shadow:var(--sh1)}
 .list-grid .card-atc-overlay{display:none!important}
-.list-grid .btn-add{width:auto;padding:8px 14px;white-space:nowrap}
+.list-grid .btn-add{width:auto;padding:9px 16px;white-space:nowrap}
 
-.magazine-grid{gap:12px!important}
+.magazine-grid{gap:14px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
 .magazine-grid .product-card:first-child .product-img{aspect-ratio:auto;height:100%}
 
-.overlay-grid{gap:12px!important}
+.overlay-grid{gap:14px!important}
 .overlay-grid .product-card{border-radius:var(--card-radius);border:none;overflow:hidden;background:transparent;box-shadow:0 2px 10px rgba(0,0,0,.08);}
-.overlay-grid .product-card:hover{box-shadow:0 12px 36px rgba(0,0,0,.16);transform:translateY(-2px)}
+.overlay-grid .product-card::before{display:none}
+.overlay-grid .product-card:hover{box-shadow:0 14px 40px rgba(0,0,0,.18);transform:translateY(-3px)}
 .overlay-grid .card-link{flex-direction:column;position:relative}
 .overlay-grid .product-img{aspect-ratio:3/4!important;border-radius:var(--card-radius)!important;}
 .overlay-grid .product-info{display:none!important}
-.overlay-grid .cart-controls-wrap{padding:5px 7px 7px;background:transparent;}
-.overlay-grid .btn-add{background:var(--primary);border-radius:7px;font-size:10.5px;}
+.overlay-grid .cart-controls-wrap{padding:6px 8px 8px;background:transparent;}
+.overlay-grid .btn-add{background:var(--primary);border-radius:9px;font-size:11px;}
 
 /* ── Gradient overlay layer ── */
 .ov-layer{
   position:absolute;bottom:0;left:0;right:0;z-index:2;
-  background:linear-gradient(to top,rgba(0,0,0,.82) 0%,rgba(0,0,0,.44) 40%,transparent 100%);
-  padding:22px 11px 11px;color:#fff;pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.84) 0%,rgba(0,0,0,.46) 40%,transparent 100%);
+  padding:24px 12px 12px;color:#fff;pointer-events:none;
 }
-.ov-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;
+.ov-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:5px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.35;}
 .ov-price-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ov-price{font-size:14px;font-weight:700;color:#fff}
 .ov-compare{font-size:11px;text-decoration:line-through;color:rgba(255,255,255,.5)}
-.ov-discount{font-size:9px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:2px 5px;border-radius:4px;letter-spacing:.04em}
+.ov-discount{font-size:9px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.04em}
 
 /* ════════════════════════════════════════════════
-   FEATURED SECTION — completely independent from main grid
-   Uses tc-product-card. Card bg/style set via inline attrs
-   from cardOpts so they never bleed into global CSS vars.
+   FEATURED SECTION
 ════════════════════════════════════════════════ */
 [class*="featured-"].tc-section{
   padding-left:48px!important;padding-right:48px!important;
@@ -358,56 +384,66 @@ a{color:inherit;text-decoration:none}
 }
 [class*="featured-"] .tc-products-grid{
   grid-template-columns:repeat(var(--cols,4),1fr)!important;
-  gap:16px!important;
+  gap:18px!important;
 }
 .tc-product-card{
   border-radius:var(--card-radius);
-  border:1px solid var(--card-border);
-  background:#fff; /* overridden by inline style from cardOpts.cardBg */
+  border:none;
+  background:#fff;
+  box-shadow:0 2px 12px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.05);
   overflow:hidden;display:flex;flex-direction:column;
-  transition:box-shadow .22s var(--ease),transform .22s var(--ease);
-  cursor:pointer;
+  transition:box-shadow .28s var(--ease),transform .28s var(--ease);
+  cursor:pointer;position:relative;
 }
+.tc-product-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),rgba(0,0,0,.2));
+  z-index:5;opacity:0;transition:opacity .25s;
+}
+.tc-product-card:hover::before{opacity:1}
 .tc-product-card:hover{
-  box-shadow:0 10px 32px rgba(0,0,0,.09),0 2px 10px rgba(0,0,0,.05);
-  transform:translateY(-2px);z-index:2;
+  box-shadow:0 18px 40px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.07);
+  transform:translateY(-4px);z-index:2;
 }
-.tc-product-img{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:var(--bg2);flex-shrink:0;}
-.tc-product-img img{width:100%;height:100%;object-fit:cover;transition:transform .38s var(--ease);display:block;}
-.tc-product-card:hover .tc-product-img img{transform:scale(1.04)}
-.tc-product-info{padding:10px 12px 3px;background:inherit;flex:1;display:flex;flex-direction:column;}
-.tc-btn-wrap{padding:7px 11px 11px;background:inherit;}
-.tc-product-cat{font-size:8.5px;color:var(--p3);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;}
-.tc-product-name{font-size:13px;font-weight:600;line-height:1.38;color:var(--p);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;}
-.tc-price-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.tc-product-price{font-size:14px;font-weight:700;color:var(--p);letter-spacing:-.02em;}
+.tc-product-img{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--bg2);flex-shrink:0;}
+.tc-product-img img{width:100%;height:100%;object-fit:cover;transition:transform .42s var(--ease);display:block;}
+.tc-product-card:hover .tc-product-img img{transform:scale(1.06)}
+.tc-product-info{padding:13px 14px 5px;background:#fff;flex:1;display:flex;flex-direction:column;border-top:1px solid rgba(0,0,0,.05);}
+.tc-btn-wrap{padding:7px 12px 12px;background:#fff;}
+.tc-product-cat{font-size:9px;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;opacity:.65;}
+.tc-product-name{font-size:13.5px;font-weight:600;line-height:1.4;color:var(--p);margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;letter-spacing:-.01em;}
+.tc-price-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.tc-product-price{font-size:15px;font-weight:800;color:var(--p);letter-spacing:-.03em;}
 .tc-product-old{font-size:11px;text-decoration:line-through;color:var(--p3);}
 
-.featured-classic .tc-product-card{border-radius:12px}
+.featured-classic .tc-product-card{border-radius:16px}
 .featured-minimal .tc-product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
+.featured-minimal .tc-product-card::before{display:none}
 .featured-minimal .tc-product-card:hover .tc-product-img img{transform:scale(1.05)}
-.featured-minimal .tc-product-img{border-radius:10px;overflow:hidden}
+.featured-minimal .tc-product-img{border-radius:14px;overflow:hidden}
 .featured-minimal .tc-product-info,.featured-minimal .tc-btn-wrap{background:transparent!important;padding-left:0;padding-right:0}
-.featured-elevated .tc-products-grid{gap:18px!important}
-.featured-elevated .tc-product-card{border:none;box-shadow:0 1px 10px rgba(0,0,0,.06)}
-.featured-elevated .tc-product-card:hover{transform:translateY(-4px);box-shadow:0 16px 44px rgba(0,0,0,.11)}
-.featured-bold .tc-product-card{border-radius:11px;border-top:3px solid var(--primary)}
+.featured-elevated .tc-products-grid{gap:22px!important}
+.featured-elevated .tc-product-card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07)}
+.featured-elevated .tc-product-card:hover{transform:translateY(-5px);box-shadow:0 20px 52px rgba(0,0,0,.13)}
+.featured-bold .tc-product-card{border-radius:12px;border-top:3px solid var(--primary)}
+.featured-bold .tc-product-card::before{display:none}
 .featured-compact .tc-btn-wrap{display:none!important}
 .featured-compact .tc-product-name{-webkit-line-clamp:1}
-.featured-compact .tc-product-info{padding:7px 9px 7px}
-.featured-list .tc-products-grid{grid-template-columns:1fr!important;gap:8px!important}
-.featured-list .tc-product-card{flex-direction:row;height:120px;border-radius:11px}
+.featured-compact .tc-product-info{padding:8px 10px 8px}
+.featured-list .tc-products-grid{grid-template-columns:1fr!important;gap:10px!important}
+.featured-list .tc-product-card{flex-direction:row;height:128px;border-radius:14px}
 .featured-list .card-link{flex-direction:row;flex:1;min-width:0}
-.featured-list .tc-product-img{width:120px;min-width:120px;aspect-ratio:auto!important;height:120px;flex-shrink:0}
-.featured-list .tc-product-info{flex:1;padding:12px 16px;justify-content:center}
-.featured-list .tc-btn-wrap{padding:0 12px;display:flex;align-items:center}
-.featured-overlay .tc-products-grid{gap:12px!important}
+.featured-list .tc-product-img{width:128px;min-width:128px;aspect-ratio:auto!important;height:128px;flex-shrink:0}
+.featured-list .tc-product-info{flex:1;padding:12px 16px;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
+.featured-list .tc-btn-wrap{padding:0 14px;display:flex;align-items:center}
+.featured-overlay .tc-products-grid{gap:14px!important}
 .featured-overlay .tc-product-card{overflow:hidden;border-radius:var(--card-radius);border:none;background:transparent;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.featured-overlay .tc-product-card:hover{box-shadow:0 12px 36px rgba(0,0,0,.16);transform:translateY(-2px)}
+.featured-overlay .tc-product-card::before{display:none}
+.featured-overlay .tc-product-card:hover{box-shadow:0 14px 40px rgba(0,0,0,.18);transform:translateY(-3px)}
 .featured-overlay .card-link{flex-direction:column;position:relative}
 .featured-overlay .tc-product-img{aspect-ratio:3/4!important;border-radius:var(--card-radius)!important;}
 .featured-overlay .tc-product-info{display:none!important}
-.featured-overlay .tc-btn-wrap{padding:5px 7px 7px;background:transparent;}
+.featured-overlay .tc-btn-wrap{padding:6px 8px 8px;background:transparent;}
 
 /* ─── PAGINATION ─────────────────────────────────────────── */
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:56px;flex-wrap:wrap;padding-bottom:56px}
@@ -484,53 +520,17 @@ a{color:inherit;text-decoration:none}
 .tc-cat-icon{font-size:28px;margin-bottom:8px}
 .tc-cat-name-plain{font-size:13.5px;font-weight:600}
 
-/* ── Circle / Pill category style (like preview) ── */
+/* ── Circle category style ── */
 .tc-cats-grid.cats-circle{gap:24px}
-.tc-cats-grid.cats-circle .tc-cat-card{
-  background:transparent;border:none;box-shadow:none;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  padding:8px 4px;
-  border-radius:0;
-}
+.tc-cats-grid.cats-circle .tc-cat-card{background:transparent;border:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 4px;border-radius:0;}
 .tc-cats-grid.cats-circle .tc-cat-card:hover{transform:translateY(-3px);box-shadow:none;border:none}
-.tc-cats-grid.cats-circle .tc-cat-img-wrap{
-  width:100%;aspect-ratio:1/1;
-  border-radius:50%;
-  overflow:hidden;
-  border:3px solid transparent;
-  background:var(--bg2);
-  transition:border-color .2s,box-shadow .2s;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-}
-.tc-cats-grid.cats-circle .tc-cat-card:hover .tc-cat-img-wrap{
-  border-color:var(--primary);
-  box-shadow:0 6px 24px rgba(0,0,0,.14);
-}
-.tc-cats-grid.cats-circle .tc-cat-footer{
-  background:transparent;padding:0;
-  flex-direction:column;align-items:center;gap:2px;
-  width:100%;
-}
-.tc-cats-grid.cats-circle .tc-cat-name{
-  font-size:14px;font-weight:700;text-align:center;
-}
-.tc-cats-grid.cats-circle .tc-cat-count{
-  font-size:12px;color:var(--p3);text-align:center;
-}
-/* Circle fallback icon — larger, centered */
-.tc-cats-grid.cats-circle .cat-fallback-wrap{
-  width:100%;aspect-ratio:1/1;border-radius:50%;
-  background:linear-gradient(135deg,var(--bg2),var(--bg3));
-  display:flex;align-items:center;justify-content:center;
-  font-size:44px;
-  box-shadow:0 2px 12px rgba(0,0,0,.08);
-  border:3px solid transparent;
-  transition:border-color .2s,box-shadow .2s;
-}
-.tc-cats-grid.cats-circle .tc-cat-card:hover .cat-fallback-wrap{
-  border-color:var(--primary);
-  box-shadow:0 6px 24px rgba(0,0,0,.14);
-}
+.tc-cats-grid.cats-circle .tc-cat-img-wrap{width:100%;aspect-ratio:1/1;border-radius:50%;overflow:hidden;border:3px solid transparent;background:var(--bg2);transition:border-color .2s,box-shadow .2s;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.tc-cats-grid.cats-circle .tc-cat-card:hover .tc-cat-img-wrap{border-color:var(--primary);box-shadow:0 6px 24px rgba(0,0,0,.14);}
+.tc-cats-grid.cats-circle .tc-cat-footer{background:transparent;padding:0;flex-direction:column;align-items:center;gap:2px;width:100%;}
+.tc-cats-grid.cats-circle .tc-cat-name{font-size:14px;font-weight:700;text-align:center;}
+.tc-cats-grid.cats-circle .tc-cat-count{font-size:12px;color:var(--p3);text-align:center;}
+.tc-cats-grid.cats-circle .cat-fallback-wrap{width:100%;aspect-ratio:1/1;border-radius:50%;background:linear-gradient(135deg,var(--bg2),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 2px 12px rgba(0,0,0,.08);border:3px solid transparent;transition:border-color .2s,box-shadow .2s;}
+.tc-cats-grid.cats-circle .tc-cat-card:hover .cat-fallback-wrap{border-color:var(--primary);box-shadow:0 6px 24px rgba(0,0,0,.14);}
 
 /* ─── TRUST BADGES ───────────────────────────────────────── */
 .tc-trust-section{padding:32px 48px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2)}
@@ -728,15 +728,15 @@ a{color:inherit;text-decoration:none}
   .tc-newsletter-form{flex-direction:column!important}
   .tc-newsletter-input{min-width:unset!important;width:100%!important}
   .cart-bar{padding:12px 16px}
-  .tc-products-grid,.products-grid{gap:10px!important}
-  .cart-qty-row{height:36px}
+  .tc-products-grid,.products-grid{gap:12px!important}
+  .cart-qty-row{height:38px}
   .qty-btn{font-size:16px}
   .qty-value{flex:0 0 38px;font-size:12px}
-  .btn-add,.tc-product-btn{padding:9px 11px;font-size:10.5px}
-  .cart-controls-wrap,.tc-btn-wrap{padding:6px 9px 9px}
-  .product-info,.tc-product-info{padding:8px 10px 2px}
-  .product-name,.tc-product-name{font-size:12px}
-  .product-price,.tc-product-price{font-size:13px}
+  .btn-add,.tc-product-btn{padding:10px 12px;font-size:11px}
+  .cart-controls-wrap,.tc-btn-wrap{padding:6px 10px 10px}
+  .product-info,.tc-product-info{padding:10px 11px 3px}
+  .product-name,.tc-product-name{font-size:12.5px}
+  .product-price,.tc-product-price{font-size:13.5px}
   .about-grid,.imagetext-grid,.contact-grid{grid-template-columns:1fr!important;gap:32px!important}
   .about-stats{grid-template-columns:repeat(3,1fr)!important}
   .offers-grid,.team-grid{grid-template-columns:repeat(2,1fr)!important}
@@ -877,7 +877,6 @@ function updateCC(id){
     const n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
     const card=el.closest('.product-card,.tc-product-card')
     const ic=card?.querySelector('.product-img,.tc-product-img')
-    // Detect overlay style from the card's parent grid class, not global activeStyle
     const isOverlay=card?.closest('.overlay-grid,.featured-overlay')!=null
     const lbl=card?.dataset.btnLabel||'Add to Cart'
     if(qty===0){
@@ -935,9 +934,6 @@ function getBadge(p,cls){
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 // ─────────────── RENDER CARD ─────────────────────────────────
-// cardOpts = { btnLabel, cardBg, priceColor, showOriginal, showBadge, cardStyle }
-// cardStyle in cardOpts overrides the global activeStyle — so featured and main grid
-// can independently have different card styles.
 function renderCard(p, ctx, btnLabel, cardOpts){
   ctx = ctx||'main'
   cardOpts = cardOpts||{}
@@ -946,9 +942,6 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const priceColor   = cardOpts.priceColor    || ''
   const showOriginal = cardOpts.showOriginal !== 'no'
   const showBadge    = cardOpts.showBadge    !== 'no'
-  // Use per-card style if provided, else fall back to global activeStyle.
-  // CRITICAL: main grid (ctx==='main') NEVER uses overlay style.
-  // Overlay is only valid for featured sections (ctx==='featured').
   const rawStyle = cardOpts.cardStyle || activeStyle || 'classic'
   const style = (ctx==='main' && rawStyle==='overlay') ? 'classic' : rawStyle
 
@@ -970,7 +963,6 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const [bg1,bg2c]=colorPairs[colorIdx]
   const gradientBg=imgUrl?'':`background:linear-gradient(135deg,${bg1},${bg2c});`
 
-  // inline style attrs for card-bg tinting
   const bgAttr     = cardBg ? ` style="background:${cardBg}"` : ''
   const cardAttr   = cardBg ? ` style="background:${cardBg};border-color:rgba(0,0,0,.06)"` : ''
   const priceAttr  = priceColor ? ` style="color:${priceColor}"` : ''
@@ -982,11 +974,9 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const badge = showBadge ? getBadge(p,bc) : ''
   const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
 
-  // Hover overlay — only non-overlay styles, not OOS/in-cart
   const hoverOverlay=(oos||qty>0||style==='overlay')?''
     :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
 
-  // Bottom cart controls
   let ctrlHTML
   if(oos){
     ctrlHTML=`<span class="out-of-stock-label">Out of stock</span>`
@@ -996,7 +986,6 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
   }
 
-  // ── OVERLAY STYLE ──────────────────────────────────────────
   if(style==='overlay'){
     const compareHtml=showOriginal&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
     const discHtml=d?`<span class="ov-discount">−${d}%</span>`:''
@@ -1017,7 +1006,6 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     </div>`
   }
 
-  // ── STANDARD STYLES ──────────────────────────────────────────
   const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
   return`<div class="${cc}${qty>0?' in-cart':''}"${cardAttr}>
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
@@ -1042,7 +1030,6 @@ function initCartButtons(){
   document.querySelectorAll('.cart-controls').forEach(el=>{
     if(el.innerHTML.trim()!=='')return
     const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
-    // read label from card's btn-add data attr if present
     const card=el.closest('.product-card,.tc-product-card')
     const lbl=card?.dataset.btnLabel||'Add to Cart'
     el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> ${esc(lbl)}</button>`
@@ -1051,7 +1038,6 @@ function initCartButtons(){
 
 function applyStyleToGrid(){
   const grid=document.getElementById('productsGrid');if(!grid)return
-  // Main products grid never gets overlay-grid — overlay is featured-section only
   const safeStyle=(activeStyle==='overlay')?'classic':activeStyle
   const styleMap={
     classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',
@@ -1081,7 +1067,6 @@ function gd(sec){
     logoText:str('logoText','logo_text'),logoColor:str('logoColor'),logoUrl:str('logoUrl','logo_url'),
     linkColor:str('linkColor'),showCart:str('showCart','show_cart')||'yes',
     overlayColor:str('overlayColor')||'rgba(0,0,0,0.4)',overlayOpacity:parseInt(get('overlayOpacity','overlay_opacity'))||40,
-    // ── Featured section card-level fields ──────────────────────────
     btnText:str('btnText','addToCartLabel','add_to_cart_label')||'Add to Cart',
     cardBg:str('cardBackground','card_background','cardBg','card_bg'),
     priceColor:str('priceColor','price_color'),
@@ -1089,7 +1074,6 @@ function gd(sec){
     showRatingStars:str('showRatingStars','show_rating_stars')||'no',
     showProductBadge:str('showProductBadge','show_product_badge')||'no',
     featuredCols:parseInt(get('columns','cols','featuredColumns'))||0,
-    // ── Trust badges ────────────────────────────────────────────────
     badge1:str('badge1')||'Free Shipping',badge2:str('badge2')||'Secure Payment',badge3:str('badge3')||'Easy Returns',badge4:str('badge4')||'24/7 Support',
     badge1Icon:str('badge1Icon')||'🚚',badge2Icon:str('badge2Icon')||'🔒',badge3Icon:str('badge3Icon')||'↩️',badge4Icon:str('badge4Icon')||'💬',
     badge1sub:str('badge1sub')||'On orders above ₹499',badge2sub:str('badge2sub')||'100% safe & encrypted',badge3sub:str('badge3sub')||'30-day return policy',badge4sub:str('badge4sub')||'Always here to help',
@@ -1118,43 +1102,34 @@ function gd(sec){
     cartText:str('cartText')||'Cart',
     navLinks:get('navLinks','nav_links')||null,
     newsletterNote:str('newsletterNote')||'No spam. Unsubscribe anytime.',
-    // ── Category fields ─────────────────────────────────────────────
     cardStyle:str('cardStyle','card_style','imageShape','image_shape')||'image',
     layout:str('layout'),
-    // About section
     aboutBody:str('body','content','aboutBody'),
     aboutImage:str('image','aboutImage','image_url'),
     stat1num:str('stat1num'),stat1label:str('stat1label'),
     stat2num:str('stat2num'),stat2label:str('stat2label'),
     stat3num:str('stat3num'),stat3label:str('stat3label'),
-    // Image+Text
     imageUrl:str('imageUrl','image','image_url'),imagePosition:str('imagePosition','image_position')||'left',
     bodyText:str('body','content','bodyText'),
     bullet1:str('bullet1'),bullet2:str('bullet2'),bullet3:str('bullet3'),bullet4:str('bullet4'),
-    // Brands
     brand1name:str('brand1name'),brand1logo:str('brand1logo'),
     brand2name:str('brand2name'),brand2logo:str('brand2logo'),
     brand3name:str('brand3name'),brand3logo:str('brand3logo'),
     brand4name:str('brand4name'),brand4logo:str('brand4logo'),
     brand5name:str('brand5name'),brand5logo:str('brand5logo'),
     brand6name:str('brand6name'),brand6logo:str('brand6logo'),
-    // Offers
     offer1title:str('offer1title'),offer1desc:str('offer1desc'),offer1badge:str('offer1badge'),offer1icon:str('offer1icon'),
     offer2title:str('offer2title'),offer2desc:str('offer2desc'),offer2badge:str('offer2badge'),offer2icon:str('offer2icon'),
     offer3title:str('offer3title'),offer3desc:str('offer3desc'),offer3badge:str('offer3badge'),offer3icon:str('offer3icon'),
     offer4title:str('offer4title'),offer4desc:str('offer4desc'),offer4badge:str('offer4badge'),offer4icon:str('offer4icon'),
-    // Team
     team1name:str('team1name'),team1role:str('team1role'),team1bio:str('team1bio'),team1img:str('team1img'),
     team2name:str('team2name'),team2role:str('team2role'),team2bio:str('team2bio'),team2img:str('team2img'),
     team3name:str('team3name'),team3role:str('team3role'),team3bio:str('team3bio'),team3img:str('team3img'),
     team4name:str('team4name'),team4role:str('team4role'),team4bio:str('team4bio'),team4img:str('team4img'),
-    // Contact
     contactEmail:str('contactEmail','email'),contactPhone:str('contactPhone','phone'),contactAddress:str('contactAddress','address'),
     contactHours:str('contactHours'),
     formName:str('formName')||'yes',formPhone:str('formPhone')||'no',formSubject:str('formSubject')||'no',
-    // Rich text
     richContent:str('content','body','richContent'),richAlign:str('align','textAlign')||'center',
-    // Footer
     footerTagline:str('footerTagline','tagline'),footerContact:str('footerContact'),
   }
 }
@@ -1217,29 +1192,13 @@ function buildSec(sec, isMobile){
 
     case 'featured':{
       const count=parseInt(d.count)||8,sid=`ft-${sec.id}`
-      // featured columns — per section override, independent of global --cols
       const featCols=d.featuredCols||d.columns||0
       const colsStyle=featCols?`--cols:${featCols};`:''
       const skCount=isMobile?2:(featCols||4)
-      // The featured section has its OWN card style from its section data.
-      // We NEVER fall back to activeStyle='overlay' — that would break the layout.
-      // Overlay is valid for featured only when explicitly set per-section.
       const VALID_FEAT_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','overlay'])
-      const rawFeatStyle=
-        sec.data?.cardStyle||sec.data?.card_style||
-        sec.settings?.cardStyle||sec.settings?.card_style||''
-      // Only use overlay if explicitly set; otherwise use activeStyle or classic
-      const featCardStyle=VALID_FEAT_STYLES.has(rawFeatStyle)?rawFeatStyle:
-        (activeStyle==='overlay'?'classic':activeStyle||'classic')
-      const cardOpts={
-        btnLabel:d.btnText,
-        cardBg:d.cardBg,
-        priceColor:d.priceColor,
-        showOriginal:d.showOriginalPrice,
-        showBadge:d.showProductBadge,
-        cardStyle:featCardStyle,
-      }
-      // CSS class for the grid uses featCardStyle, NOT activeStyle
+      const rawFeatStyle=sec.data?.cardStyle||sec.data?.card_style||sec.settings?.cardStyle||sec.settings?.card_style||''
+      const featCardStyle=VALID_FEAT_STYLES.has(rawFeatStyle)?rawFeatStyle:(activeStyle==='overlay'?'classic':activeStyle||'classic')
+      const cardOpts={btnLabel:d.btnText,cardBg:d.cardBg,priceColor:d.priceColor,showOriginal:d.showOriginalPrice,showBadge:d.showProductBadge,cardStyle:featCardStyle}
       const gridStyleMap={classic:'featured-classic',minimal:'featured-minimal',bold:'featured-bold',elevated:'featured-elevated',compact:'featured-compact',list:'featured-list',overlay:'featured-overlay'}
       const gridClass=gridStyleMap[featCardStyle]||'featured-classic'
       setTimeout(()=>fillFeatured(sid,count,cardOpts),0)
@@ -1251,17 +1210,13 @@ function buildSec(sec, isMobile){
           </div>
           <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
         </div>
-        <div class="tc-products-grid" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="tc-product-card skeleton" style="aspect-ratio:4/3"></div>`).join('')}</div>
+        <div class="tc-products-grid" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="tc-product-card skeleton" style="aspect-ratio:4/5"></div>`).join('')}</div>
       </section>`
     }
 
     case 'categories':{
       const cols=isMobile?2:(parseInt(d.columns)||4),sid=`cs-${sec.id}`
-      // Builder sends imageShape or card_style — check all variants
-      const catStyle=
-        sec.data?.imageShape||sec.data?.cardStyle||sec.data?.card_style||
-        sec.settings?.imageShape||sec.settings?.card_style||sec.settings?.cardStyle||
-        d.cardStyle||'image'
+      const catStyle=sec.data?.imageShape||sec.data?.cardStyle||sec.data?.card_style||sec.settings?.imageShape||sec.settings?.card_style||sec.settings?.cardStyle||d.cardStyle||'image'
       setTimeout(()=>fillCats(sid,cols,d,catStyle),0)
       return`<section class="tc-section" id="${sid}">
         <div class="tc-section-hd">
@@ -1552,13 +1507,11 @@ function applySettings(s){
   const primary=s.primaryColor||s.primary_color||'#0f0f0f'
   const bg=s.bgColor||s.secondary_color||'#fafafa'
   const text=s.textColor||s.text_color||'#0f0f0f'
-  const radiusVal=s.radius||s.border_radius||'12px'
-  // border_radius from builder may come as a number (px)
+  const radiusVal=s.radius||s.border_radius||'16px'
   const radiusPx=typeof radiusVal==='number'?`${radiusVal}px`:radiusVal.toString().includes('px')?radiusVal:`${radiusVal}px`
   const font=s.fontHeading||s.font_heading||'DM Sans'
   const btnStyle=s.buttonStyle||s.button_style||'rounded'
   const cols=s.cols||s.columns||4
-  // Card background — builder sends cardBg or card_bg; fall back to white
   const cardBg=s.cardBg||s.card_bg||s.cardBackground||s.card_background||'#ffffff'
   const cardBorder=s.cardBorder||s.card_border||s.border||''
 
@@ -1578,9 +1531,6 @@ function applySettings(s){
     const fid='gf-'+font.replace(/\s+/g,'-')
     if(!document.getElementById(fid)){const l=document.createElement('link');l.id=fid;l.rel='stylesheet';l.href=`https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700&display=swap`;document.head.appendChild(l)}
   }
-  // card_style from global settings applies to MAIN products grid only.
-  // 'overlay' is a featured-section-only style — main grid falls back to 'classic'
-  // if overlay is set globally (it just doesn't make sense for the all-products grid).
   const rawStyle=s.card_style||s.cardStyle||'classic'
   const MAIN_GRID_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','magazine'])
   activeStyle=MAIN_GRID_STYLES.has(rawStyle)?rawStyle:'classic'
@@ -1594,7 +1544,6 @@ function renderSections(sections){
     .filter(s=>s.is_visible!==false&&s.enabled!==false)
     .sort((a,b)=>(a.order||0)-(b.order||0))
   if(!visible.length){
-    // No theme sections — show default header, hero, and products normally
     document.getElementById('mainLayout').style.display=''
     return
   }
@@ -1602,65 +1551,33 @@ function renderSections(sections){
   const hasNavbar=visible.some(s=>s.type==='navbar')
   const hasHero=visible.some(s=>s.type==='hero')
 
-  // Hide default header if theme navbar present
   document.getElementById('origHeader').style.display=hasNavbar?'none':''
-  // Hide default hero if theme hero present
   const hb=document.getElementById('heroBanner')
   if(hasHero) hb.style.display='none'
   else hb.classList.add('visible')
 
-  // The page container — we'll appendChild/insertBefore in order
   const page=document.getElementById('page-sections')
   const mainLayout=document.getElementById('mainLayout')
   page.innerHTML=''
 
-  // Products section sits at order = the first section that is NOT
-  // navbar/hero/announcement (i.e. after the header-type sections).
-  // But we want it to appear exactly where the builder has NO explicit
-  // "products" section — which is between the last "top" section
-  // and the first "bottom" section per the user's custom order.
-  // 
-  // CORRECT APPROACH: render all sections in order. The products grid
-  // is shown after all "above-products" content sections.
-  // We determine insertion point: after the last section whose type is
-  // navbar|hero|announcement that appears at the start of the list.
-  // Everything else renders in strict order; products go after the
-  // opening chrome (navbar/hero/announcement at top) and before the
-  // first explicitly-placed non-featured/non-categories section.
-  //
-  // SIMPLEST CORRECT RULE per builder behaviour:
-  //   • navbar/hero always come first (even if reordered in builder)
-  //   • ALL other sections render in EXACT order field sequence
-  //   • #mainLayout (product grid) is inserted AFTER featured/categories
-  //     sections (if any), or after hero if no featured, or at very end
-  //     if user wants it last. We detect this by finding the last section
-  //     of type featured|categories in the list and inserting after it.
-
-  // Step 1: Separate navbar/hero from rest (they always go first)
   const navbarSec=visible.find(s=>s.type==='navbar')
   const heroSec=visible.find(s=>s.type==='hero')
   const rest=visible.filter(s=>s.type!=='navbar'&&s.type!=='hero')
 
-  // Step 2: Build ordered section elements
-  // Navbar first
   if(navbarSec){
     const el=document.createElement('div')
     el.innerHTML=buildSec(navbarSec,isMobile)
     while(el.firstChild)page.appendChild(el.firstChild)
   }
-  // Hero second
   if(heroSec){
     const el=document.createElement('div')
     el.innerHTML=buildSec(heroSec,isMobile)
     while(el.firstChild)page.appendChild(el.firstChild)
   }
 
-  // Step 3: Walk rest in order, insert #mainLayout after the last
-  // featured/categories section (or after all content if none)
   let mainLayoutInserted=false
   const featCatTypes=new Set(['featured','categories'])
 
-  // Find last index of featured/categories in rest
   let lastFeatCatIdx=-1
   rest.forEach((s,i)=>{if(featCatTypes.has(s.type))lastFeatCatIdx=i})
 
@@ -1669,7 +1586,6 @@ function renderSections(sections){
     el.innerHTML=buildSec(s,isMobile)
     while(el.firstChild)page.appendChild(el.firstChild)
 
-    // After the last featured/categories section, inject the product grid
     if(i===lastFeatCatIdx&&!mainLayoutInserted){
       mainLayout.style.display=''
       page.appendChild(mainLayout)
@@ -1677,8 +1593,6 @@ function renderSections(sections){
     }
   })
 
-  // If no featured/categories at all, put product grid at the very end
-  // (before footer if present — so find footer and insert before it)
   if(!mainLayoutInserted){
     const footer=page.querySelector('.tc-footer')
     if(footer){
@@ -1690,7 +1604,6 @@ function renderSections(sections){
     mainLayoutInserted=true
   }
 
-  // Step 4: update cart counts in nav
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=getCart().reduce((s,x)=>s+x.qty,0))
   updateOffset()
   window.addEventListener('resize',()=>{updateCols();updateOffset()},{passive:true})
@@ -1716,7 +1629,6 @@ async function fillCats(secId,cols,d,catStyle){
   const isCircle = resolvedStyle==='circle'||resolvedStyle==='circular'||resolvedStyle==='round'
   const isSimple = resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'
 
-  // Apply circle class to the grid
   if(isCircle) grid.classList.add('cats-circle')
 
   try{
@@ -1724,7 +1636,6 @@ async function fillCats(secId,cols,d,catStyle){
     const list=Array.isArray(cats)?cats:[]
     if(!list.length){const s=grid.closest('section');if(s)s.style.display='none';return}
 
-    // Rich emoji map for categories
     const em={
       fashion:'👗',clothing:'👕',shirt:'👔',dress:'👗',
       electronics:'📱',tech:'💻',gadget:'🎧',
@@ -1748,7 +1659,6 @@ async function fillCats(secId,cols,d,catStyle){
     const getEmoji=n=>{
       const lc=(n||'').toLowerCase()
       for(const[k,v]of Object.entries(em))if(lc.includes(k))return v
-      // Generate a colorful random fallback based on name
       const colors=['#FFD166','#EF476F','#06D6A0','#118AB2','#073B4C','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7']
       const ci=(n||'?').charCodeAt(0)%colors.length
       return`<span style="font-size:44px;line-height:1">${['🛍️','🎁','⭐','🏷️','✨','🎯','💫','🔆'][ci%8]}</span>`
@@ -1760,7 +1670,6 @@ async function fillCats(secId,cols,d,catStyle){
       const emoji=c.icon||getEmoji(c.name)
       const countTxt=showCount&&c.product_count!=null?`${c.product_count}+`:''
 
-      // ── CIRCLE STYLE ────────────────────────────────────────
       if(isCircle){
         const imgContent=c.image_url
           ?`<img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${typeof emoji==='string'?emoji:'🛍️'}</span>'">`
@@ -1774,7 +1683,6 @@ async function fillCats(secId,cols,d,catStyle){
         </div>`
       }
 
-      // ── SIMPLE / ICON STYLE ──────────────────────────────────
       if(isSimple){
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
           <div class="tc-cat-simple">
@@ -1785,7 +1693,6 @@ async function fillCats(secId,cols,d,catStyle){
         </div>`
       }
 
-      // ── IMAGE STYLE (default) ────────────────────────────────
       if(c.image_url){
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
           <div class="tc-cat-img-wrap">
@@ -1799,7 +1706,6 @@ async function fillCats(secId,cols,d,catStyle){
         </div>`
       }
 
-      // No image — attractive icon fallback
       const colors=['#fef3c7','#fce7f3','#e0f2fe','#dcfce7','#ede9fe','#ffedd5']
       const bgColor=colors[(c.name||'?').charCodeAt(0)%colors.length]
       return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
@@ -1836,7 +1742,6 @@ async function init(){
     const tok=localStorage.getItem(`cust_token_${slug}`),name=localStorage.getItem(`cust_name_${slug}`)
     if(tok&&name){const icon=document.getElementById('accountBtnIcon');if(icon)icon.title=name.split(' ')[0]}
     await loadTheme()
-    // If no theme sections were rendered, show the default product grid directly
     if(!document.querySelector('#page-sections > *')){
       document.getElementById('mainLayout').style.display=''
       document.getElementById('page-sections').appendChild(document.getElementById('mainLayout'))
@@ -1884,10 +1789,6 @@ async function loadProducts(){
 function renderProducts(products){
   const grid=document.getElementById('productsGrid')
   if(!products.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`;return}
-  // Main grid ALWAYS uses classic-style rendering regardless of activeStyle.
-  // Overlay is a featured-section-only style; it makes no sense for the
-  // all-products grid where images are real product photos (not art cards).
-  // We pass an explicit cardOpts with cardStyle:'classic' to guarantee this.
   const mainOpts={cardStyle:'classic'}
   grid.innerHTML=products.map(p=>renderCard(p,'main','Add to Cart',mainOpts)).join('')
   applyStyleToGrid()
