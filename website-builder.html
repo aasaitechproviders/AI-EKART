@@ -67,7 +67,7 @@
     .sections-panel{padding:10px}
     .panel-group-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:10px 4px 6px;display:flex;align-items:center;gap:6px}
     .section-count-badge{background:var(--surface3);color:var(--text3);font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;letter-spacing:0}
-    .section-row{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:2px;border:1.5px solid transparent;user-select:none}
+    .section-row{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:all .15s;margin-bottom:2px;border:1.5px solid transparent;user-select:none;position:relative}
     .section-row:hover{background:var(--surface2)}
     .section-row.active{background:rgba(91,92,246,.08);border-color:rgba(91,92,246,.25)}
     .section-row.drag-ghost{opacity:.3;pointer-events:none}
@@ -78,13 +78,15 @@
     .section-icon-wrap{width:26px;height:26px;border-radius:6px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
     .section-row.active .section-icon-wrap{background:rgba(91,92,246,.18)}
     .section-row-label{font-size:12px;font-weight:600;color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .section-row.active .section-row-label{color:var(--text)}
-    .section-actions{display:flex;align-items:center;gap:2px;opacity:0;transition:opacity .15s;flex-shrink:0}
-    .section-row:hover .section-actions,.section-row.active .section-actions{opacity:1}
-    .section-action-btn{width:22px;height:22px;border-radius:5px;border:none;background:var(--surface3);color:var(--text3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s}
+    .section-row.active .section-row-label{color:var(--text);font-weight:700}
+
+    /* FIX: actions collapse to 0 width when hidden — this is what caused names to be cut off */
+    .section-actions{display:flex;align-items:center;gap:2px;overflow:hidden;max-width:0;transition:max-width .2s ease;flex-shrink:0}
+    .section-row:hover .section-actions,.section-row.active .section-actions{max-width:80px}
+
+    .section-action-btn{width:22px;height:22px;border-radius:5px;border:none;background:var(--surface3);color:var(--text3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
     .section-action-btn:hover{background:var(--border2);color:var(--text)}
     .section-action-btn.danger:hover{background:rgba(239,68,68,.15);color:var(--red)}
-    .section-action-btn.move:hover{background:rgba(91,92,246,.15);color:var(--accent2)}
     .section-toggle{width:28px;height:16px;border-radius:8px;background:var(--border2);border:none;cursor:pointer;position:relative;transition:background .15s;flex-shrink:0}
     .section-toggle.on{background:var(--accent)}
     .section-toggle::after{content:'';position:absolute;width:11px;height:11px;background:white;border-radius:50%;top:2.5px;left:2.5px;transition:left .15s}
@@ -132,12 +134,13 @@
     .font-suggestion-item{padding:8px 10px;font-size:12.5px;cursor:pointer;color:var(--text2);transition:background .1s}
     .font-suggestion-item:hover{background:var(--surface3);color:var(--text)}
     .font-preview-badge{display:inline-block;margin-top:5px;font-size:10.5px;color:var(--text3);padding:2px 8px;background:var(--surface3);border-radius:4px}
-    .editor-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0}
-    .ef-btn{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;border:none;display:flex;align-items:center;justify-content:center;gap:5px}
+    .editor-footer{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0}
+    .ef-btn{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;border:none;display:flex;align-items:center;justify-content:center;gap:4px}
     .ef-btn-ghost{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border2)}
     .ef-btn-ghost:hover{color:var(--text);border-color:var(--border3)}
     .ef-btn-primary{background:var(--accent);color:white}
     .ef-btn-primary:hover{background:#4f4de0}
+    .ef-btn-icon{flex:none;width:34px;padding:0}
 
     /* ═══ CARD STYLE PICKER ═══ */
     .card-style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:4px}
@@ -496,7 +499,6 @@ const CARD_STYLES=[
 const ALL_CARD_STYLES_SET=new Set(['classic','minimal','bold','elevated','compact','list','magazine','overlay'])
 
 const BACKEND_TYPE_ALIASES={navigation:'navbar',nav:'navbar',header:'navbar',featured_products:'featured',products:'featured',category_grid:'categories',categories_grid:'categories',trust_badges:'trustbadges',trust_section:'trustbadges',trust:'trustbadges',newsletter_signup:'newsletter',announcement_bar:'announcement',promo_banner:'banner',promotional_banner:'banner',image_gallery:'gallery',photo_gallery:'gallery',countdown_timer:'countdown',faq_section:'faq',social_proof:'testimonials',reviews:'testimonials',contact_form:'contact',about_us:'about',team_section:'team',rich_text:'richtext',text_block:'richtext',image_text:'imagetext',split_section:'imagetext'}
-/* FIX: Reverse map for frontend→backend type conversion */
 const FRONTEND_TO_BACKEND={navbar:'navbar',announcement:'announcement',hero:'hero',featured:'featured',categories:'categories',banner:'banner',testimonials:'testimonials',newsletter:'newsletter',footer:'footer',video:'video',countdown:'countdown',gallery:'gallery',trustbadges:'trustbadges',faq:'faq',contact:'contact',about:'about',richtext:'richtext',imagetext:'imagetext',brands:'brands',offers:'offers',team:'team'}
 
 function resolveFrontendType(bt){if(SECTION_DEFS[bt])return bt;return BACKEND_TYPE_ALIASES[bt]||bt}
@@ -531,7 +533,7 @@ const DEFAULT_SECTIONS=[
   {id:'sec_announcement',type:'announcement',enabled:true,data:{text:'✨ Free shipping on all orders above ₹999!',bgColor:'#5b5cf6',textColor:'#ffffff'}},
   {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showCart:'yes',sticky:'yes',link1Text:'Home',link1Url:'#',link2Text:'Products',link2Url:'#products',link3Text:'Categories',link3Url:'#categories',link4Text:'About',link4Url:'#about',cartText:'Cart'}},
   {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
-  {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',showOldPrice:'yes',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
+  {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',showOldPrice:'yes',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products',cardStyle:'classic'}},
   {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'image',showCount:'yes'}},
   {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
   {id:'sec_trustbadges',type:'trustbadges',enabled:true,data:{badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}},
@@ -557,9 +559,7 @@ const COLOR_PALETTE=['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4'
 
 /* ═══════════════ KEYBOARD SHORTCUTS ═══════════════ */
 document.addEventListener('keydown',e=>{
-  /* Ctrl+S / Cmd+S to save */
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();if(hasUnsaved)saveAndPublish();return}
-  /* Escape to close editor/drawer */
   if(e.key==='Escape'){
     if(document.getElementById('add-section-drawer').classList.contains('open')){closeAddDrawer();return}
     if(document.getElementById('reset-modal').classList.contains('open')){closeResetModal();return}
@@ -602,12 +602,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
     setLoading('Ready!',100);hideLoading()
   }catch(initErr){
     console.error('Builder init failed:',initErr)
-    /* Emergency fallback: load default sections and show preview regardless */
-    try{
-      sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
-      renderSectionsList();renderPreview();hideLoading()
-      toast('Builder loaded with defaults due to an error','error')
-    }catch(e2){console.error('Emergency fallback also failed:',e2);hideLoading()}
+    try{sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS));renderSectionsList();renderPreview();hideLoading();toast('Builder loaded with defaults due to an error','error')}catch(e2){console.error('Emergency fallback also failed:',e2);hideLoading()}
   }
 })
 
@@ -666,7 +661,6 @@ function applyThemeFromBackend(doc){
   }else{sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))}
 }
 
-/* FIX: Improved buildBackendPayload with proper type handling */
 function buildBackendPayload(){
   const navSec=sections.find(s=>s.type==='navbar')
   const navLinks=[]
@@ -690,12 +684,16 @@ function buildBackendPayload(){
       nav_links:navLinks,
       announcement_bar:(()=>{const ann=sections.find(s=>s.type==='announcement');return{enabled:ann?.enabled||false,text:ann?.data?.text||themeData.announcementText,bg_color:ann?.data?.bgColor||themeData.primaryColor,text_color:ann?.data?.textColor||'#ffffff'}})()
     },
-    /* FIX: Use _bt (original backend type) if available, otherwise use frontend type directly */
-    sections:sections.map((s,i)=>({id:s.id,type:s._bt||FRONTEND_TO_BACKEND[s.type]||s.type,order:i+1,is_visible:s.enabled,settings:s.data||{}}))
+    sections:sections.map((s,i)=>({
+      id:s.id,
+      type:s._bt||FRONTEND_TO_BACKEND[s.type]||s.type,
+      order:i+1,
+      is_visible:s.enabled,
+      settings:{...(s.data||{})}  /* IMPORTANT: includes cardStyle per section */
+    }))
   }
 }
 
-/* IMPROVED: Save with progress feedback */
 async function saveAndPublish(){
   if(!currentStoreId||currentStoreId==='demo'){toast('Connect your store to save — preview mode only','error');return}
   const btn=document.getElementById('save-btn')
@@ -726,24 +724,23 @@ function renderSectionsList(){
   const enabled=sections.filter(s=>s.enabled),disabled=sections.filter(s=>!s.enabled)
   let html=`<span class="panel-group-label">Active Sections <span class="section-count-badge">${enabled.length}</span></span>`
   if(!enabled.length)html+=`<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">No active sections</div>`
-  enabled.forEach((s,i)=>html+=renderSectionRow(s,sections.indexOf(s),activeSectionId===s.id,true,i,enabled.length))
+  enabled.forEach(s=>html+=renderSectionRow(s,sections.indexOf(s),activeSectionId===s.id,true))
   html+=`<div class="add-section-row" onclick="openAddDrawer()"><span>＋</span> Add Section</div>`
   if(disabled.length){html+=`<span class="panel-group-label" style="margin-top:12px">Hidden Sections <span class="section-count-badge">${disabled.length}</span></span>`;disabled.forEach(s=>html+=renderSectionRow(s,sections.indexOf(s),false,false))}
   wrap.innerHTML=html;initDragDrop()
 }
 
-/* IMPROVED: Section row with move up/down and duplicate buttons */
-function renderSectionRow(s,idx,isActive,isEnabled,posInEnabled,totalEnabled){
+/* FIX: Simplified section row — 3 actions only (edit,dup,delete). Actions collapse to width:0 via CSS max-width transition.
+   This is what fixes the truncated section names issue. */
+function renderSectionRow(s,idx,isActive,isEnabled){
   const def=getSectionDef(s.type)
   return`<div class="section-row${isActive?' active':''}" id="srow_${s.id}" draggable="true" data-id="${s.id}" data-idx="${idx}" onclick="selectSection('${s.id}')">
     <span class="section-drag" title="Drag to reorder">⠿</span>
     <div class="section-icon-wrap">${def.icon}</div>
-    <span class="section-row-label">${def.label}</span>
+    <span class="section-row-label" title="${def.label}">${def.label}</span>
     <div class="section-actions">
-      ${isEnabled&&posInEnabled!==undefined&&posInEnabled>0?`<button class="section-action-btn move" onclick="event.stopPropagation();moveSectionUp('${s.id}')" title="Move up">↑</button>`:''}
-      ${isEnabled&&posInEnabled!==undefined&&posInEnabled<totalEnabled-1?`<button class="section-action-btn move" onclick="event.stopPropagation();moveSectionDown('${s.id}')" title="Move down">↓</button>`:''}
+      <button class="section-action-btn" onclick="event.stopPropagation();openSectionEditor('${s.id}')" title="Edit section">✏️</button>
       <button class="section-action-btn" onclick="event.stopPropagation();duplicateSection('${s.id}')" title="Duplicate">⧉</button>
-      <button class="section-action-btn" onclick="event.stopPropagation();openSectionEditor('${s.id}')" title="Edit">✏️</button>
       <button class="section-action-btn danger" onclick="event.stopPropagation();removeSection('${s.id}')" title="Remove">🗑</button>
     </div>
     <button class="section-toggle${isEnabled?' on':''}" onclick="event.stopPropagation();toggleSection('${s.id}')" title="${isEnabled?'Hide':'Show'} section"></button>
@@ -753,7 +750,6 @@ function renderSectionRow(s,idx,isActive,isEnabled,posInEnabled,totalEnabled){
 function selectSection(id){activeSectionId=id;highlightSectionInPreview(id);openSectionEditor(id);if(activeLeftTab!=='sections'){document.querySelectorAll('.panel-tab')[0].click()}}
 function toggleSection(id){const s=sections.find(x=>x.id===id);if(!s)return;s.enabled=!s.enabled;markUnsaved(true);if(activeSectionId===id&&!s.enabled){activeSectionId=null;showSectionsListView()}else{renderSectionsList()};try{renderPreview()}catch(e){console.error('Preview:',e)}}
 
-/* IMPROVED: Remove with undo support */
 function removeSection(id){
   const idx=sections.findIndex(x=>x.id===id);if(idx===-1)return
   const removed=sections.splice(idx,1)[0]
@@ -761,7 +757,6 @@ function removeSection(id){
   markUnsaved(true)
   if(activeSectionId===id){activeSectionId=null;showSectionsListView()}else renderSectionsList()
   renderPreview()
-  /* Show undo bar */
   const def=getSectionDef(removed.type)
   document.getElementById('undo-text').textContent=`"${def.label}" removed`
   document.getElementById('undo-bar').classList.add('show')
@@ -775,7 +770,6 @@ function undoRemove(){
 }
 function dismissUndo(){document.getElementById('undo-bar').classList.remove('show');clearTimeout(undoTimer)}
 
-/* NEW: Duplicate section */
 function duplicateSection(id){
   const s=sections.find(x=>x.id===id);if(!s)return
   const idx=sections.indexOf(s)
@@ -785,28 +779,44 @@ function duplicateSection(id){
   const def=getSectionDef(s.type);toast(`"${def.label}" duplicated`,'success')
 }
 
-/* NEW: Move section up/down */
 function moveSectionUp(id){
   const idx=sections.findIndex(x=>x.id===id);if(idx<=0)return
   ;[sections[idx-1],sections[idx]]=[sections[idx],sections[idx-1]]
-  markUnsaved(true);renderSectionsList();renderPreview()
+  markUnsaved(true);renderPreview()
 }
 function moveSectionDown(id){
   const idx=sections.findIndex(x=>x.id===id);if(idx===-1||idx>=sections.length-1)return
   ;[sections[idx],sections[idx+1]]=[sections[idx+1],sections[idx]]
-  markUnsaved(true);renderSectionsList();renderPreview()
+  markUnsaved(true);renderPreview()
 }
 
 /* ═══════════════ SECTION EDITOR ═══════════════ */
+/* FIX: Move Up/Down added to editor footer — cleaner UX than crowding section rows */
 function openSectionEditor(id){
   const s=sections.find(x=>x.id===id);if(!s)return;activeSectionId=id
   const def=getSectionDef(s.type)
+  const idx=sections.indexOf(s)
+  const canUp=idx>0,canDown=idx<sections.length-1
   const tabSections=document.getElementById('tab-sections')
   tabSections.style.display='';document.getElementById('tab-themes').style.display='none';document.getElementById('tab-settings').style.display='none'
   document.querySelectorAll('.panel-tab').forEach((t,i)=>t.classList.toggle('active',i===0))
-  tabSections.innerHTML=`<div class="editor-panel"><div class="editor-panel-header"><button class="editor-back-btn" onclick="showSectionsListView()">←</button><span class="editor-panel-title">${def.label}</span><span style="font-size:16px">${def.icon}</span></div><div class="editor-fields" id="editor-fields-wrap">${renderEditorFields(def,s.data)}</div><div class="editor-footer"><button class="ef-btn ef-btn-ghost" onclick="resetSectionData('${id}')">↺ Reset</button><button class="ef-btn ef-btn-primary" onclick="applySectionChanges('${id}')">✓ Apply</button></div></div>`
+  tabSections.innerHTML=`<div class="editor-panel">
+    <div class="editor-panel-header">
+      <button class="editor-back-btn" onclick="showSectionsListView()">←</button>
+      <span class="editor-panel-title">${def.label}</span>
+      <span style="font-size:16px">${def.icon}</span>
+    </div>
+    <div class="editor-fields" id="editor-fields-wrap">${renderEditorFields(def,s.data)}</div>
+    <div class="editor-footer">
+      <button class="ef-btn ef-btn-ghost ef-btn-icon" onclick="moveSectionUp('${id}');reopenEditor('${id}')" title="Move up" ${canUp?'':'disabled style="opacity:.35;cursor:not-allowed"'}>↑</button>
+      <button class="ef-btn ef-btn-ghost ef-btn-icon" onclick="moveSectionDown('${id}');reopenEditor('${id}')" title="Move down" ${canDown?'':'disabled style="opacity:.35;cursor:not-allowed"'}>↓</button>
+      <button class="ef-btn ef-btn-ghost" onclick="resetSectionData('${id}')">↺ Reset</button>
+      <button class="ef-btn ef-btn-primary" onclick="applySectionChanges('${id}')">✓ Apply</button>
+    </div>
+  </div>`
   highlightSectionInPreview(id)
 }
+function reopenEditor(id){renderSectionsList();openSectionEditor(id)}
 function showSectionsListView(){activeSectionId=null;document.getElementById('tab-sections').innerHTML=`<div class="sections-panel" id="sections-list-wrap"></div>`;renderSectionsList();clearHighlight()}
 function renderEditorFields(def,data){
   const groups=def.groups||[]
@@ -842,30 +852,41 @@ document.getElementById('reset-modal').addEventListener('click',e=>{if(e.target=
 /* ═══════════════ SETTINGS PANEL ═══════════════ */
 function renderSettingsPanel(){
   document.getElementById('settings-panel-content').innerHTML=`
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="panel-group-label" style="margin:0">Brand Colors</span><button onclick="openResetModal()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">🎨 Reset Colors</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:12px 12px 0"><span class="panel-group-label" style="margin:0;padding:0">Brand Colors</span><button onclick="openResetModal()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">🎨 Reset Colors</button></div>
+  <div style="padding:0 12px 8px">
   ${colorField('Primary Color','primaryColor',themeData.primaryColor,true)}
   ${colorField('Background','bgColor',themeData.bgColor)}
   ${colorField('Text Color','textColor',themeData.textColor)}
   ${colorField('Card Background','cardBg',themeData.cardBg)}
   ${colorField('Navbar Background','navBg',themeData.navBg)}
-  <span class="panel-group-label" style="margin-top:14px">Typography</span>
+  </div>
+  <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
+  <span class="panel-group-label" style="padding-top:12px">Typography</span>
   <div class="field-row"><div class="field-label">Font Family <span class="field-hint">any Google Font</span></div><div class="font-input-wrap" id="font-input-wrap"><input type="text" id="font-free-input" value="${escHtml(themeData.font)}" placeholder="e.g. Outfit, Playfair Display…" oninput="onFontInput(this.value)" onfocus="showFontSuggestions()" onblur="setTimeout(hideFontSuggestions,200)" autocomplete="off"><div class="font-suggestions" id="font-suggestions"></div></div><div class="font-preview-badge" id="font-preview-badge" style="font-family:'${escHtml(themeData.font)}',sans-serif">Aa — ${escHtml(themeData.font)}</div></div>
-  <span class="panel-group-label" style="margin-top:14px">Layout & Shape</span>
+  </div>
+  <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
+  <span class="panel-group-label" style="padding-top:12px">Layout & Shape</span>
   <div class="field-row"><div class="field-label">Product Columns</div><select class="field-select" onchange="updateSetting('cols',this.value)">${['2','3','4'].map(v=>`<option value="${v}"${themeData.cols==v?' selected':''}>${v} Columns</option>`).join('')}</select></div>
   <div class="field-row"><div class="field-label">Border Radius <span class="field-hint" id="radius-display">${themeData.radius}</span></div><div class="field-range-wrap"><input type="range" class="field-range" min="0" max="24" value="${parseInt(themeData.radius)||12}" oninput="const v=this.value+'px';updateSetting('radius',v);document.getElementById('radius-display').textContent=v"></div></div>
   <div class="field-row"><div class="field-label">Button Style</div><select class="field-select" onchange="updateSetting('btnStyle',this.value)">${['rounded','pill','square'].map(v=>`<option value="${v}"${themeData.btnStyle===v?' selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div>
-  <span class="panel-group-label" style="margin-top:14px">Product Card Style</span>
-  <div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding:0 2px">Global default for all product grids</div>
+  </div>
+  <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
+  <span class="panel-group-label" style="padding-top:12px">Product Card Style</span>
+  <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Global default — overridable per section</div>
   <div class="card-style-grid" id="global-card-style-grid">${CARD_STYLES.map(s=>`<div class="card-style-opt${themeData.cardStyle===s.id?' active':''}" onclick="updateSetting('cardStyle','${s.id}');syncCardStyleUI('${s.id}')"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>
-  <span class="panel-group-label" style="margin-top:14px">Product Card Size</span>
-  <div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding:0 2px">Controls card dimensions in the shop</div>
+  </div>
+  <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
+  <span class="panel-group-label" style="padding-top:12px">Product Card Size</span>
   <div class="card-size-grid">${CARD_SIZES.map(s=>`<div class="card-size-opt${themeData.cardSize===s.id?' active':''}" onclick="updateSetting('cardSize','${s.id}');document.querySelectorAll('.card-size-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')"><div class="card-size-icon">${s.icon}</div><div class="card-size-label">${s.label}</div><div style="font-size:8px;color:var(--text3);margin-top:1px">${s.desc}</div></div>`).join('')}</div>
-  <span class="panel-group-label" style="margin-top:14px">Store Info</span>
+  </div>
+  <div style="padding:0 12px 12px;border-top:1px solid var(--border)">
+  <span class="panel-group-label" style="padding-top:12px">Store Info</span>
   <div class="field-row"><div class="field-label">Announcement Bar Text</div><input type="text" class="field-input" value="${escHtml(themeData.announcementText)}" placeholder="Free shipping on orders over ₹999!" oninput="updateSetting('announcementText',this.value)"></div>
-  <div class="field-row"><div class="field-label">Footer Copyright</div><input type="text" class="field-input" value="${escHtml(themeData.footerText)}" placeholder="© 2025 My Store" oninput="updateSetting('footerText',this.value)"></div>`
+  <div class="field-row"><div class="field-label">Footer Copyright</div><input type="text" class="field-input" value="${escHtml(themeData.footerText)}" placeholder="© 2025 My Store" oninput="updateSetting('footerText',this.value)"></div>
+  </div>`
   loadFontForPreview(themeData.font)
 }
-function syncCardStyleUI(styleId){document.querySelectorAll('#global-card-style-grid .card-style-opt').forEach(el=>el.classList.remove('active'));document.querySelectorAll('#global-card-style-grid .card-style-opt').forEach(el=>{if(el.querySelector('.cs-label')?.textContent===CARD_STYLES.find(x=>x.id===styleId)?.name)el.classList.add('active')})}
+function syncCardStyleUI(styleId){document.querySelectorAll('#global-card-style-grid .card-style-opt').forEach((el,i)=>{el.classList.toggle('active',CARD_STYLES[i]?.id===styleId)})}
 function onFontInput(val){themeData.font=val.trim()||'Outfit';updateSetting('font',themeData.font);showFontSuggestions(val);const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${themeData.font}',sans-serif`;badge.textContent=`Aa — ${themeData.font}`};loadFontForPreview(themeData.font)}
 function showFontSuggestions(filter){const el=document.getElementById('font-suggestions');if(!el)return;const q=(filter||document.getElementById('font-free-input')?.value||'').toLowerCase();const matches=q?POPULAR_FONTS.filter(f=>f.toLowerCase().includes(q)).slice(0,8):POPULAR_FONTS.slice(0,8);el.innerHTML=matches.map(f=>`<div class="font-suggestion-item" onmousedown="selectFont('${f}')">${f}</div>`).join('');el.classList.add('open')}
 function hideFontSuggestions(){document.getElementById('font-suggestions')?.classList.remove('open')}
@@ -913,7 +934,6 @@ function renderPreview(){
   const sizeVarsCSS=Object.entries(sizeVars).map(([k,v])=>`${k}:${v};`).join('')
   const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
 
-  /* NOTE: The preview CSS below is identical to the original — kept exactly as-is for consistency */
   const html=`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -964,7 +984,24 @@ function buildSectionHTML(sec,isMobile){
     case 'announcement':{const sz=d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px';const fw=d.bold==='no'?'500':'700';return wrap('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};"><span>${escHtmlInner(d.text||themeData.announcementText)}</span>${d.linkText?`<span class="ann-link">${escHtmlInner(d.linkText)}</span>`:''}${d.closable==='yes'?`<button class="ann-close" onclick="this.closest('.announcement-bar').parentElement.style.display='none'">✕</button>`:''}</div>`)}
     case 'navbar':{const logoStyle=d.logoColor?`color:${d.logoColor};`:'';const navStyle=d.bgColor?`background:${d.bgColor};`:'';const pos=d.sticky!=='no'?'sticky':'relative';const links=[];for(let i=1;i<=5;i++){const txt=d[`link${i}Text`],url=d[`link${i}Url`]||'#';if(txt)links.push({txt,url})};return wrap('',`<nav class="navbar" style="${navStyle}position:${pos};top:0;z-index:100;"><div class="nav-logo" style="${logoStyle}">${escHtmlInner(d.logoText||'My Store')}</div>${!isMobile&&links.length?`<div class="nav-links-center" style="${d.linkColor?'color:'+d.linkColor+';':''}">${links.map(l=>`<a href="${escHtml(l.url)}">${escHtmlInner(l.txt)}</a>`).join('')}</div>`:''}<div class="nav-right">${d.showCart!=='no'?`<button class="nav-cart">🛒 ${escHtmlInner(d.cartText||'Cart')} (0)</button>`:''}</div></nav>`)}
     case 'hero':{const rawH=d.heading||'Welcome to our Store';const heading=rawH.replace(/(store|shop)/gi,m=>`<em>${m}</em>`);const align=d.textAlign||'center';const padMap={compact:isMobile?'32px 5% 28px':'48px 5% 40px',normal:isMobile?'48px 5% 40px':'80px 5% 72px',tall:isMobile?'72px 5% 60px':'120px 5% 100px',fullscreen:isMobile?'80px 5%':'160px 5%'};const pad=padMap[d.size||'normal'];const bgStyle=d.bgColor&&!d.bgImage?`background:${d.bgColor};`:`background:var(--bg);`;const overlayStyle=d.bgImage&&d.overlayColor?`background:${d.overlayColor};opacity:${(parseInt(d.overlayOpacity)||0)/100};`:'opacity:0;';return wrap('',`<section class="hero" style="${bgStyle}padding:${pad};text-align:${align};">${d.bgImage?`<div class="hero-bg" style="background-image:url('${d.bgImage}')"></div>`:''}<div class="hero-overlay" style="${overlayStyle}"></div><div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">${d.badge?`<div class="hero-badge">${escHtmlInner(d.badge)}</div>`:''}<h1>${heading}</h1><p>${escHtmlInner(d.subheading||'Discover amazing products at the best prices.')}</p><div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText||'Shop Now')} →</a>${d.cta2Text?`<a href="${d.cta2Link||'#'}" class="btn-cta btn-cta-ghost">${escHtmlInner(d.cta2Text)}</a>`:''}</div></div></section>`)}
-    case 'featured':{const sectionCardStyle=d.cardStyle;const cardStyle=ALL_CARD_STYLES_SET.has(sectionCardStyle)?sectionCardStyle:ALL_CARD_STYLES_SET.has(themeData.cardStyle)?themeData.cardStyle:'classic';const count=Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length);const fCols=cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3));const cBg=d.cardBg||themeData.cardBg||'var(--card-bg)';const pColor=d.priceColor||themeData.primaryColor||'var(--primary)';const btnTxt=escHtmlInner(d.btnText||'Add to Cart');const showOld=d.showOldPrice!=='no';const showBadge=d.showBadge==='yes';const cards=SAMPLE_PRODUCTS.slice(0,count).map((p,i)=>{const imgArea=`<div class="tc-img">${showBadge&&p.badge?`<div class="tc-badge">${escHtmlInner(p.badge)}</div>`:''}<button class="tc-wish">♡</button><img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>`;if(cardStyle==='overlay'){return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-overlay"><div class="ov-name">${escHtmlInner(p.name)}</div><div class="ov-price-row"><span class="ov-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="ov-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}</div><button class="ov-btn">${btnTxt}</button></div></a>`};return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-info"><div class="tc-cat">${escHtmlInner(p.cat)}</div><div class="tc-name">${escHtmlInner(p.name)}</div><div class="tc-price-row"><span class="tc-price" style="color:${pColor}">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}</div></div>${cardStyle!=='compact'?`<div class="tc-btn-wrap"><button class="tc-btn">${btnTxt}</button></div>`:''}</a>`}).join('');return wrap('',`<section class="section" id="products"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}</div><div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div></section>`)}
+    case 'featured':{
+      /* FIX: Use section-specific cardStyle first, fallback to global themeData.cardStyle */
+      const sectionCardStyle=d.cardStyle;
+      const cardStyle=ALL_CARD_STYLES_SET.has(sectionCardStyle)?sectionCardStyle:(ALL_CARD_STYLES_SET.has(themeData.cardStyle)?themeData.cardStyle:'classic');
+      const count=Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length);
+      const fCols=cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3));
+      const cBg=d.cardBg||themeData.cardBg||'var(--card-bg)';
+      const pColor=d.priceColor||themeData.primaryColor||'var(--primary)';
+      const btnTxt=escHtmlInner(d.btnText||'Add to Cart');
+      const showOld=d.showOldPrice!=='no';
+      const showBadge=d.showBadge==='yes';
+      const cards=SAMPLE_PRODUCTS.slice(0,count).map((p,i)=>{
+        const imgArea=`<div class="tc-img">${showBadge&&p.badge?`<div class="tc-badge">${escHtmlInner(p.badge)}</div>`:''}<button class="tc-wish">♡</button><img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>`;
+        if(cardStyle==='overlay'){return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-overlay"><div class="ov-name">${escHtmlInner(p.name)}</div><div class="ov-price-row"><span class="ov-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="ov-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}</div><button class="ov-btn">${btnTxt}</button></div></a>`}
+        return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-info"><div class="tc-cat">${escHtmlInner(p.cat)}</div><div class="tc-name">${escHtmlInner(p.name)}</div><div class="tc-price-row"><span class="tc-price" style="color:${pColor}">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}</div></div>${cardStyle!=='compact'?`<div class="tc-btn-wrap"><button class="tc-btn">${btnTxt}</button></div>`:''}</a>`
+      }).join('');
+      return wrap('',`<section class="section" id="products"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}</div><div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div></section>`)
+    }
     case 'categories':{const cCols=isMobile?2:(parseInt(d.columns)||4);const style=d.style||'image';const showCount=d.showCount!=='no';const catCards=SAMPLE_CATEGORIES.slice(0,cCols*2).map(cat=>{const imgHtml=`<div class="cat-img"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none'"></div>`;if(style==='image')return`<div class="cat-card" style="overflow:hidden;border-radius:var(--radius);position:relative">${imgHtml}<div class="cat-info overlay-info"><div class="cat-name" style="color:white">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count" style="color:rgba(255,255,255,.6)">${cat.count} items</div>`:''}</div></div>`;if(style==='circle')return`<div style="text-align:center;cursor:pointer"><div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid rgba(0,0,0,.1)"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div><div class="cat-name">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count}</div>`:''}</div>`;return`<div class="cat-card" style="border-radius:var(--radius)">${imgHtml}<div class="cat-info"><div class="cat-name">${cat.emoji} ${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count} items</div>`:''}</div></div>`}).join('');return wrap('',`<section class="section"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Browse by Category')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div></div><div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">${catCards}</div></section>`)}
     case 'banner':{const bg=d.bgColor||themeData.primaryColor||'#5b5cf6';const tc=d.textColor||'#ffffff';const bgStyle=d.bgImage?`background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${d.bgImage}') center/cover;`:`background:${bg};`;return wrap('',`<section class="promo-banner" style="${bgStyle}color:${tc}"><div class="promo-content">${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px">${escHtmlInner(d.badgeText)}</div>`:''}<h2>${escHtmlInner(d.heading||'Limited Time Offer')}</h2><p>${escHtmlInner(d.subtext||'Get 20% off your first order.')}</p>${d.couponCode?`<div class="promo-coupon">🎫 ${escHtmlInner(d.couponCode)}</div>`:''}<button class="btn-white" style="color:${bg}">${escHtmlInner(d.ctaText||'Claim Offer')}</button></div></section>`)}
     case 'testimonials':{const tCols=isMobile?1:(parseInt(d.columns)||3);const ts=[[d.t1name||'Sarah M.',d.t1text||'Absolutely love this store!',parseInt(d.t1stars||5)],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.',parseInt(d.t2stars||5)],[d.t3name||'Anita P.',d.t3text||'Great products and customer service.',parseInt(d.t3stars||5)]];return wrap('',`<section class="testimonials"><div class="section-header-row" style="margin-bottom:0"><div class="section-title">${escHtmlInner(d.title||'What Customers Say')}</div></div><div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">${ts.map(([n,t,stars])=>`<div class="testimonial"><div class="t-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="t-text">"${escHtmlInner(t)}"</div><div class="t-author"><div class="t-avatar">${n[0]}</div><div class="t-name">${escHtmlInner(n)}</div></div></div>`).join('')}</div></section>`)}
