@@ -92,7 +92,7 @@ a{color:inherit;text-decoration:none}
 
 /* ════ BASE CARD ════ */
 .product-card{
-  background:var(--card-bg);
+  background:#fff;
   border-radius:var(--card-radius);
   overflow:hidden;
   position:relative;
@@ -103,7 +103,8 @@ a{color:inherit;text-decoration:none}
   flex-direction:column;
 }
 .product-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
-.card-link{display:flex;flex-direction:column;flex:1;color:inherit;min-width:0;cursor:pointer;background:inherit}
+/* card-link: transparent so card bg shows through */
+.card-link{display:flex;flex-direction:column;flex:1;color:inherit;min-width:0;cursor:pointer}
 .product-img{
   width:100%;
   aspect-ratio:var(--card-aspect,4/5);
@@ -141,7 +142,7 @@ a{color:inherit;text-decoration:none}
 .card-atc-btn:hover{background:var(--bg2)}
 
 /* product info */
-.product-info{padding:var(--card-info-pad,13px 14px 5px);background:inherit;flex:1;min-width:0}
+.product-info{padding:var(--card-info-pad,13px 14px 5px);background:var(--card-bg,#fff);flex:1;min-width:0}
 .product-cat{font-size:var(--card-cat-fs,9px);font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .product-name{font-size:var(--card-name-fs,13.5px);font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .product-price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -150,7 +151,7 @@ a{color:inherit;text-decoration:none}
 .product-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 
 /* cart controls */
-.cart-controls-wrap{padding:var(--card-btn-pad,7px 12px 12px);background:inherit;flex-shrink:0}
+.cart-controls-wrap{padding:var(--card-btn-pad,7px 12px 12px);background:var(--card-bg,#fff);flex-shrink:0}
 .cart-controls{width:100%}
 .btn-add{width:100%;padding:var(--card-btn-padding,11px 13px);background:var(--primary);color:#fff;border:none;border-radius:var(--btn-r);font-size:var(--card-btn-fs,11.5px);font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
 .btn-add:hover{opacity:.88}
@@ -822,7 +823,9 @@ function renderCard(p, cardOpts){
   const showOrig   = (cardOpts.showOriginal  !== 'no') && (globalCardSettings.showOriginal  !== 'no')
   const showBadge  = (cardOpts.showBadge     !== 'no') && (globalCardSettings.showBadge     !== 'no')
 
-  const cardBgStyle   = `background:${cardBg}`
+  // Set --card-bg as a CSS variable on the card so product-info + controls inherit it
+  // The card container itself stays white — only info panel gets the custom color
+  const cardBgStyle   = `--card-bg:${cardBg}`
   const priceStyle    = `style="color:${priceColor}"`
   const style = activeStyle
   const oos = isOOS(p), qty = getQty(p._id), imgUrl = p.images?.[0] || ''
