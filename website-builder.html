@@ -573,24 +573,42 @@ function hideLoading(){setTimeout(()=>document.getElementById('loading-overlay')
 
 /* ═══════════════ INIT ═══════════════ */
 window.addEventListener('DOMContentLoaded',async()=>{
-  setLoading('Authenticating…',15)
-  let authOk=false
-  const hasToken=!!localStorage.getItem('ekart_token')
-  if(hasToken){try{setLoading('Loading user…',30);currentUser=await apiFetch('/auth/me');authOk=true}catch(e){console.warn('Auth failed, demo mode:',e.message)}}
-  if(authOk){
-    try{setLoading('Fetching stores…',55);const r=await apiFetch('/stores');allStores=Array.isArray(r)?r:(r?.stores||[])}catch(e){console.warn('Stores failed:',e.message);allStores=[]}
-    currentStoreId=sessionStorage.getItem('ekart_current_store')||localStorage.getItem('ekart_store_id')
-    if(!currentStoreId||!allStores.find(s=>s._id===currentStoreId))currentStoreId=allStores[0]?._id||null
-    if(currentStoreId){sessionStorage.setItem('ekart_current_store',currentStoreId);localStorage.setItem('ekart_store_id',currentStoreId)}
-  }else{allStores=[{_id:'demo',name:'Demo Store',slug:'demo-store'}];currentStoreId='demo';if(!hasToken)toast('No auth token — running in preview mode','error')}
-  setLoading('Building UI…',75)
-  renderStorePill();renderStoreDropdown();renderThemesGrid();renderSettingsPanel();renderAddSectionTypes()
-  setLoading('Loading theme…',90)
-  if(authOk&&currentStoreId&&currentStoreId!=='demo')await loadThemeForStore(currentStoreId)
-  else{sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS));renderSectionsList();renderPreview();markThemeActive('modern');markUnsaved(false)}
-  renderSettingsPanel()
-  try{const pt=JSON.parse(localStorage.getItem('ekart_pending_theme')||'null');if(pt){localStorage.removeItem('ekart_pending_theme');Object.assign(themeData,pt);markUnsaved(true);renderSettingsPanel();renderPreview();markThemeActive(pt.themeId||'modern');toast(`"${pt.themeId}" theme applied! Save to publish.`,'success')}}catch(e){}
-  setLoading('Ready!',100);hideLoading()
+  try{
+    setLoading('Authenticating…',15)
+    let authOk=false
+    const hasToken=!!localStorage.getItem('ekart_token')
+    if(hasToken){try{setLoading('Loading user…',30);currentUser=await apiFetch('/auth/me');authOk=true}catch(e){console.warn('Auth failed, demo mode:',e.message)}}
+    if(authOk){
+      try{setLoading('Fetching stores…',55);const r=await apiFetch('/stores');allStores=Array.isArray(r)?r:(r?.stores||[])}catch(e){console.warn('Stores failed:',e.message);allStores=[]}
+      currentStoreId=sessionStorage.getItem('ekart_current_store')||localStorage.getItem('ekart_store_id')
+      if(!currentStoreId||!allStores.find(s=>s._id===currentStoreId))currentStoreId=allStores[0]?._id||null
+      if(currentStoreId){sessionStorage.setItem('ekart_current_store',currentStoreId);localStorage.setItem('ekart_store_id',currentStoreId)}
+    }else{allStores=[{_id:'demo',name:'Demo Store',slug:'demo-store'}];currentStoreId='demo';if(!hasToken)toast('No auth token — running in preview mode','error')}
+    setLoading('Building UI…',75)
+    try{renderStorePill()}catch(e){console.warn('renderStorePill:',e)}
+    try{renderStoreDropdown()}catch(e){console.warn('renderStoreDropdown:',e)}
+    try{renderThemesGrid()}catch(e){console.warn('renderThemesGrid:',e)}
+    try{renderSettingsPanel()}catch(e){console.warn('renderSettingsPanel:',e)}
+    try{renderAddSectionTypes()}catch(e){console.warn('renderAddSectionTypes:',e)}
+    setLoading('Loading theme…',90)
+    if(authOk&&currentStoreId&&currentStoreId!=='demo'){
+      await loadThemeForStore(currentStoreId)
+    }else{
+      sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+      renderSectionsList();renderPreview();markThemeActive('modern');markUnsaved(false)
+    }
+    try{renderSettingsPanel()}catch(e){console.warn('renderSettingsPanel:',e)}
+    try{const pt=JSON.parse(localStorage.getItem('ekart_pending_theme')||'null');if(pt){localStorage.removeItem('ekart_pending_theme');Object.assign(themeData,pt);markUnsaved(true);renderSettingsPanel();renderPreview();markThemeActive(pt.themeId||'modern');toast(`"${pt.themeId}" theme applied! Save to publish.`,'success')}}catch(e){}
+    setLoading('Ready!',100);hideLoading()
+  }catch(initErr){
+    console.error('Builder init failed:',initErr)
+    /* Emergency fallback: load default sections and show preview regardless */
+    try{
+      sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+      renderSectionsList();renderPreview();hideLoading()
+      toast('Builder loaded with defaults due to an error','error')
+    }catch(e2){console.error('Emergency fallback also failed:',e2);hideLoading()}
+  }
 })
 
 /* ═══════════════ STORE UI ═══════════════ */
@@ -612,7 +630,10 @@ async function loadThemeForStore(storeId){
   if(!storeId){useDefaults();return}
   try{const data=await apiFetch(`/stores/${storeId}/theme`);const doc=data.draft||data.published||null;applyThemeFromBackend(doc)}
   catch(e){console.warn('Theme load failed, using defaults:',e.message);useDefaults()}
-  renderSectionsList();renderPreview();markThemeActive(themeData.themeId||'modern');markUnsaved(false)
+  try{renderSectionsList()}catch(e){console.warn('renderSectionsList:',e)}
+  try{renderPreview()}catch(e){console.warn('renderPreview:',e)}
+  try{markThemeActive(themeData.themeId||'modern')}catch(e){}
+  markUnsaved(false)
 }
 function useDefaults(){sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS));themeData={...THEMES[0].settings,themeId:'modern',cardStyle:'classic',cardSize:'medium',announcementText:'✨ Free shipping on orders over ₹999!',footerText:'© 2025 My Store.'}}
 function applyThemeFromBackend(doc){
@@ -730,7 +751,7 @@ function renderSectionRow(s,idx,isActive,isEnabled,posInEnabled,totalEnabled){
 }
 
 function selectSection(id){activeSectionId=id;highlightSectionInPreview(id);openSectionEditor(id);if(activeLeftTab!=='sections'){document.querySelectorAll('.panel-tab')[0].click()}}
-function toggleSection(id){const s=sections.find(x=>x.id===id);if(!s)return;s.enabled=!s.enabled;markUnsaved(true);if(activeSectionId===id&&!s.enabled){activeSectionId=null;showSectionsListView()}else{renderSectionsList()};renderPreview()}
+function toggleSection(id){const s=sections.find(x=>x.id===id);if(!s)return;s.enabled=!s.enabled;markUnsaved(true);if(activeSectionId===id&&!s.enabled){activeSectionId=null;showSectionsListView()}else{renderSectionsList()};try{renderPreview()}catch(e){console.error('Preview:',e)}}
 
 /* IMPROVED: Remove with undo support */
 function removeSection(id){
@@ -802,7 +823,7 @@ function renderField(f,value){
   else if(f.type==='card_style_picker'){const effectiveStyle=value||themeData.cardStyle||'classic';input=`<div class="card-style-grid">${CARD_STYLES.map(s=>`<div class="card-style-opt${effectiveStyle===s.id?' active':''}" onclick="liveUpdateField('${f.key}','${s.id}');document.querySelectorAll('#editor-fields-wrap .card-style-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>`}
   return`<div class="field-row"><div class="field-label">${f.label}</div>${input}</div>`
 }
-function liveUpdateField(key,value){if(!activeSectionId)return;const s=sections.find(x=>x.id===activeSectionId);if(!s)return;s.data[key]=value;markUnsaved(true);renderPreview()}
+function liveUpdateField(key,value){if(!activeSectionId)return;const s=sections.find(x=>x.id===activeSectionId);if(!s)return;s.data[key]=value;markUnsaved(true);try{renderPreview()}catch(e){console.error('Preview update failed:',e)}}
 function applySectionChanges(id){toast('Section updated ✓','success');markUnsaved(true)}
 function resetSectionData(id){const s=sections.find(x=>x.id===id);const def=DEFAULT_SECTIONS.find(d=>d.type===s?.type);if(s&&def){s.data={...def.data};openSectionEditor(id);renderPreview();markUnsaved(true)}}
 
@@ -851,7 +872,7 @@ function hideFontSuggestions(){document.getElementById('font-suggestions')?.clas
 function selectFont(f){themeData.font=f;const input=document.getElementById('font-free-input');if(input)input.value=f;const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${f}',sans-serif`;badge.textContent=`Aa — ${f}`};hideFontSuggestions();updateSetting('font',f);loadFontForPreview(f)}
 function loadFontForPreview(fontName){const id='dyn-font-'+fontName.replace(/\s+/g,'-');if(!document.getElementById(id)){const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700;900&display=swap`;document.head.appendChild(link)}}
 function colorField(label,key,val,withPalette=false){return`<div class="field-row"><div class="field-label">${label}</div><div class="field-color-row"><div class="field-color-swatch"><input type="color" id="s_${key}" value="${val||'#000000'}" oninput="updateSetting('${key}',this.value);document.getElementById('s_${key}_h').value=this.value"></div><input type="text" class="field-input" id="s_${key}_h" style="flex:1" value="${val||''}" placeholder="#000000" oninput="if(/^#[0-9a-fA-F]{3,6}$/.test(this.value)){const v=this.value.length===4?'#'+this.value[1]+this.value[1]+this.value[2]+this.value[2]+this.value[3]+this.value[3]:this.value;document.getElementById('s_${key}').value=v;updateSetting('${key}',v)}"></div>${withPalette?`<div class="color-palette">${COLOR_PALETTE.map(c=>`<div class="color-dot" style="background:${c}" onclick="updateSetting('primaryColor','${c}');document.getElementById('s_primaryColor').value='${c}';document.getElementById('s_primaryColor_h').value='${c}'"></div>`).join('')}</div>`:''}</div>`}
-function updateSetting(key,value){themeData[key]=value;markUnsaved(true);renderPreview()}
+function updateSetting(key,value){themeData[key]=value;markUnsaved(true);try{renderPreview()}catch(e){console.error('Preview update failed:',e)}}
 
 /* ═══════════════ ADD SECTION DRAWER ═══════════════ */
 function renderAddSectionTypes(){document.getElementById('add-section-types').innerHTML=ADD_SECTION_TYPES.map(t=>`<div class="add-section-type" onclick="addSection('${t.type}','${t.name}','${t.icon}')"><span class="add-section-type-icon">${t.icon}</span><span class="add-section-type-name">${t.name}</span></div>`).join('')}
@@ -926,7 +947,14 @@ function renderPreview(){
 </style></head><body>${sectionsHTML}
 <script>document.querySelectorAll('[data-countdown]').forEach(function(el){var end=new Date(el.getAttribute('data-countdown')).getTime();function tick(){var diff=end-Date.now(),pad=function(n){return String(Math.max(0,Math.floor(n))).padStart(2,'0')};if(diff<=0)return;var d=el.querySelector('.cd-days'),h=el.querySelector('.cd-hrs'),m=el.querySelector('.cd-min'),s=el.querySelector('.cd-sec');if(d)d.textContent=pad(diff/86400000);if(h)h.textContent=pad((diff%86400000)/3600000);if(m)m.textContent=pad((diff%3600000)/60000);if(s)s.textContent=pad((diff%60000)/1000);}tick();setInterval(tick,1000);});<\/script></body></html>`
 
-  try{const iframe=document.getElementById('preview-iframe');const doc=iframe.contentDocument||iframe.contentWindow.document;doc.open();doc.write(html);doc.close();setTimeout(()=>setupPreviewClicks(iframe),400)}catch(e){console.warn('Preview error:',e)}
+  try{
+    const iframe=document.getElementById('preview-iframe')
+    if(!iframe){console.error('Preview iframe not found!');return}
+    const doc=iframe.contentDocument||(iframe.contentWindow&&iframe.contentWindow.document)
+    if(!doc){console.error('Cannot access iframe document');return}
+    doc.open();doc.write(html);doc.close()
+    setTimeout(()=>{try{setupPreviewClicks(iframe)}catch(e){console.warn('setupPreviewClicks:',e)}},400)
+  }catch(e){console.error('Preview render failed:',e.message,e.stack)}
 }
 
 /* ═══════════════ BUILD SECTION HTML ═══════════════ */
