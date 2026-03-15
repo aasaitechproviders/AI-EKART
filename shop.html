@@ -24,6 +24,16 @@
   --card-bg:#ffffff;
   --card-border:var(--border);
   --card-radius:16px;
+  /* ── Card size CSS variables (set dynamically by applyCardSizeVars) ── */
+  --card-aspect:4/5;
+  --card-name-fs:13.5px;
+  --card-price-fs:15px;
+  --card-info-pad:13px 14px 5px;
+  --card-btn-pad:7px 12px 12px;
+  --card-btn-padding:11px 13px;
+  --card-btn-fs:11.5px;
+  --card-gap:20px;
+  --card-cat-fs:9px;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--p);-webkit-font-smoothing:antialiased;padding-bottom:80px}
 img{display:block;max-width:100%}
@@ -113,12 +123,12 @@ a{color:inherit;text-decoration:none}
 .cat-pill.active{background:var(--p);color:#fff;border-color:var(--p)}
 
 /* ════════════════════════════════════════════════
-   BASE CARD — unique, elevated, modern design
+   BASE CARD — uses CSS variables for size control
 ════════════════════════════════════════════════ */
 .products-grid,.tc-products-grid{
   display:grid;
   grid-template-columns:repeat(var(--cols,4),1fr);
-  gap:20px;
+  gap:var(--card-gap,20px);
 }
 
 .product-card,.tc-product-card{
@@ -133,7 +143,6 @@ a{color:inherit;text-decoration:none}
   transition:box-shadow .28s var(--ease),transform .28s var(--ease);
   cursor:pointer;
 }
-/* Top accent line — slides in on hover */
 .product-card::before,.tc-product-card::before{
   content:'';
   position:absolute;top:0;left:0;right:0;height:3px;
@@ -148,10 +157,10 @@ a{color:inherit;text-decoration:none}
 }
 .card-link{text-decoration:none;color:inherit;display:flex;flex-direction:column;flex:1}
 
-/* ── Image — portrait 4:5 ratio ── */
+/* ── Image — CSS variable aspect ratio ── */
 .product-img,.tc-product-img{
   position:relative;width:100%;
-  aspect-ratio:4/5;
+  aspect-ratio:var(--card-aspect,4/5);
   overflow:hidden;background:var(--bg2);flex-shrink:0;
 }
 .product-img img,.tc-product-img img{
@@ -205,8 +214,6 @@ a{color:inherit;text-decoration:none}
 .tc-product-card:hover .card-atc-overlay{transform:translateY(0);pointer-events:auto;}
 .product-card.in-cart .card-atc-overlay,
 .tc-product-card.in-cart .card-atc-overlay{display:none!important;}
-.overlay-grid .card-atc-overlay,
-[class*="featured-overlay"] .card-atc-overlay{display:none!important}
 .card-atc-btn{
   width:100%;padding:10px 12px;
   background:rgba(0,0,0,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -219,20 +226,20 @@ a{color:inherit;text-decoration:none}
 }
 .card-atc-btn:hover{background:rgba(0,0,0,.94);}
 
-/* ── Card Info — white bg, clean typography ── */
+/* ── Card Info — CSS variable padding ── */
 .product-info,.tc-product-info{
-  padding:13px 14px 5px;
+  padding:var(--card-info-pad,13px 14px 5px);
   background:#fff;
   flex:1;display:flex;flex-direction:column;
   border-top:1px solid rgba(0,0,0,.05);
 }
 .product-cat,.tc-product-cat{
-  font-size:9px;color:var(--primary);font-weight:700;
+  font-size:var(--card-cat-fs,9px);color:var(--primary);font-weight:700;
   text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;
   opacity:.65;
 }
 .product-name,.tc-product-name{
-  font-size:13.5px;font-weight:600;line-height:1.4;
+  font-size:var(--card-name-fs,13.5px);font-weight:600;line-height:1.4;
   color:var(--p);margin-bottom:7px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   flex:1;letter-spacing:-.01em;
@@ -241,7 +248,7 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;gap:6px;flex-wrap:wrap;
 }
 .product-price,.tc-product-price{
-  font-size:15px;font-weight:800;color:var(--p);letter-spacing:-.03em;
+  font-size:var(--card-price-fs,15px);font-weight:800;color:var(--p);letter-spacing:-.03em;
 }
 .product-compare,.tc-product-old{
   font-size:11px;text-decoration:line-through;color:var(--p3);
@@ -255,7 +262,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── Cart Controls ── */
 .cart-controls-wrap,.tc-btn-wrap{
-  padding:7px 12px 12px;background:#fff;
+  padding:var(--card-btn-pad,7px 12px 12px);background:#fff;
 }
 .cart-qty-row{
   display:flex;align-items:center;width:100%;height:40px;
@@ -280,11 +287,11 @@ a{color:inherit;text-decoration:none}
   background:#fff;
 }
 
-/* ── Add to Cart Button — unique elevated design ── */
+/* ── Add to Cart Button ── */
 .btn-add,.tc-product-btn{
-  width:100%;padding:11px 13px;
+  width:100%;padding:var(--card-btn-padding,11px 13px);
   background:var(--primary);color:#fff;border:none;
-  border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;
+  border-radius:10px;font-size:var(--card-btn-fs,11.5px);font-weight:700;cursor:pointer;
   font-family:var(--font);
   display:flex;align-items:center;justify-content:center;gap:6px;
   letter-spacing:.06em;text-transform:uppercase;
@@ -311,58 +318,59 @@ a{color:inherit;text-decoration:none}
 /* ════════════════════════════════════════════════
    MAIN GRID STYLE VARIANTS
 ════════════════════════════════════════════════ */
-.classic-grid{gap:18px!important}
 .classic-grid .product-card{border-radius:16px}
+.classic-grid .product-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
 
-.minimal-grid{gap:18px!important}
 .minimal-grid .product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
 .minimal-grid .product-card::before{display:none}
 .minimal-grid .product-img{border-radius:14px;overflow:hidden}
 .minimal-grid .product-info,.minimal-grid .cart-controls-wrap{background:transparent!important}
 .minimal-grid .product-card:hover .product-img img{transform:scale(1.05)}
+.minimal-grid .product-card:hover{transform:none!important;box-shadow:none!important}
 
-.bold-grid{gap:16px!important}
 .bold-grid .product-card{border-radius:12px;border-top:3px solid var(--primary)}
 .bold-grid .product-card::before{display:none}
+.bold-grid .product-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
 
-.elevated-grid{gap:22px!important}
 .elevated-grid .product-card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04)}
 .elevated-grid .product-card:hover{box-shadow:0 20px 52px rgba(0,0,0,.13),0 4px 18px rgba(0,0,0,.07);transform:translateY(-5px)}
 
 .compact-grid{gap:10px!important}
 .compact-grid .product-card{border-radius:12px}
-.compact-grid .product-img{aspect-ratio:1/1}
-.compact-grid .product-info{padding:7px 10px 7px}
-.compact-grid .product-name{font-size:11.5px;-webkit-line-clamp:1;margin-bottom:3px}
-.compact-grid .product-price{font-size:12.5px}
+.compact-grid .product-img{aspect-ratio:1/1!important}
+.compact-grid .product-info{padding:7px 10px 7px!important}
+.compact-grid .product-name{font-size:11.5px!important;-webkit-line-clamp:1;margin-bottom:3px}
+.compact-grid .product-price{font-size:12.5px!important}
 .compact-grid .cart-controls-wrap{display:none!important}
 
 .list-grid{grid-template-columns:1fr!important;gap:10px!important}
 .list-grid .product-card{flex-direction:row;height:128px;border-radius:14px}
 .list-grid .product-card::before{width:3px;height:auto;top:0;bottom:0;right:auto;left:0}
 .list-grid .card-link{flex-direction:row;flex:1;min-width:0}
-.list-grid .product-img{width:128px;min-width:128px;aspect-ratio:auto;height:128px;flex-shrink:0;border-radius:0}
-.list-grid .product-info{flex:1;padding:14px 18px;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
-.list-grid .cart-controls-wrap{padding:0 14px;display:flex;align-items:center;align-self:center}
+.list-grid .product-img{width:128px;min-width:128px;aspect-ratio:auto!important;height:128px;flex-shrink:0;border-radius:0}
+.list-grid .product-info{flex:1;padding:14px 18px!important;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
+.list-grid .cart-controls-wrap{padding:0 14px!important;display:flex;align-items:center;align-self:center}
 .list-grid .product-card:hover{transform:none;box-shadow:var(--sh1)}
 .list-grid .card-atc-overlay{display:none!important}
-.list-grid .btn-add{width:auto;padding:9px 16px;white-space:nowrap}
+.list-grid .btn-add{width:auto;padding:9px 16px!important;white-space:nowrap}
 
 .magazine-grid{gap:14px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
-.magazine-grid .product-card:first-child .product-img{aspect-ratio:auto;height:100%}
+.magazine-grid .product-card:first-child .product-img{aspect-ratio:auto!important;height:100%}
+.magazine-grid .product-card{border-radius:14px}
+.magazine-grid .product-card:hover{box-shadow:0 12px 36px rgba(0,0,0,.12)}
 
-.overlay-grid{gap:14px!important}
 .overlay-grid .product-card{border-radius:var(--card-radius);border:none;overflow:hidden;background:transparent;box-shadow:0 2px 10px rgba(0,0,0,.08);}
 .overlay-grid .product-card::before{display:none}
 .overlay-grid .product-card:hover{box-shadow:0 14px 40px rgba(0,0,0,.18);transform:translateY(-3px)}
-.overlay-grid .card-link{flex-direction:column;position:relative}
+.overlay-grid .card-link{flex-direction:column;position:relative;display:block}
 .overlay-grid .product-img{aspect-ratio:3/4!important;border-radius:var(--card-radius)!important;}
 .overlay-grid .product-info{display:none!important}
-.overlay-grid .cart-controls-wrap{padding:6px 8px 8px;background:transparent;}
+.overlay-grid .cart-controls-wrap{padding:6px 8px 8px!important;background:transparent;}
 .overlay-grid .btn-add{background:var(--primary);border-radius:9px;font-size:11px;}
+.overlay-grid .card-atc-overlay{display:none!important}
 
-/* ── Gradient overlay layer ── */
+/* ── Gradient overlay for overlay grid ── */
 .ov-layer{
   position:absolute;bottom:0;left:0;right:0;z-index:2;
   background:linear-gradient(to top,rgba(0,0,0,.84) 0%,rgba(0,0,0,.46) 40%,transparent 100%);
@@ -376,7 +384,7 @@ a{color:inherit;text-decoration:none}
 .ov-discount{font-size:9px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.04em}
 
 /* ════════════════════════════════════════════════
-   FEATURED SECTION
+   FEATURED SECTION BASE
 ════════════════════════════════════════════════ */
 [class*="featured-"].tc-section{
   padding-left:48px!important;padding-right:48px!important;
@@ -384,7 +392,7 @@ a{color:inherit;text-decoration:none}
 }
 [class*="featured-"] .tc-products-grid{
   grid-template-columns:repeat(var(--cols,4),1fr)!important;
-  gap:18px!important;
+  gap:var(--card-gap,18px)!important;
 }
 .tc-product-card{
   border-radius:var(--card-radius);
@@ -405,45 +413,78 @@ a{color:inherit;text-decoration:none}
   box-shadow:0 18px 40px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.07);
   transform:translateY(-4px);z-index:2;
 }
-.tc-product-img{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--bg2);flex-shrink:0;}
+.tc-product-img{position:relative;width:100%;aspect-ratio:var(--card-aspect,4/5);overflow:hidden;background:var(--bg2);flex-shrink:0;}
 .tc-product-img img{width:100%;height:100%;object-fit:cover;transition:transform .42s var(--ease);display:block;}
 .tc-product-card:hover .tc-product-img img{transform:scale(1.06)}
-.tc-product-info{padding:13px 14px 5px;background:#fff;flex:1;display:flex;flex-direction:column;border-top:1px solid rgba(0,0,0,.05);}
-.tc-btn-wrap{padding:7px 12px 12px;background:#fff;}
-.tc-product-cat{font-size:9px;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;opacity:.65;}
-.tc-product-name{font-size:13.5px;font-weight:600;line-height:1.4;color:var(--p);margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;letter-spacing:-.01em;}
+.tc-product-info{padding:var(--card-info-pad,13px 14px 5px);background:#fff;flex:1;display:flex;flex-direction:column;border-top:1px solid rgba(0,0,0,.05);}
+.tc-btn-wrap{padding:var(--card-btn-pad,7px 12px 12px);background:#fff;}
+.tc-product-cat{font-size:var(--card-cat-fs,9px);color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;opacity:.65;}
+.tc-product-name{font-size:var(--card-name-fs,13.5px);font-weight:600;line-height:1.4;color:var(--p);margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;letter-spacing:-.01em;}
 .tc-price-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.tc-product-price{font-size:15px;font-weight:800;color:var(--p);letter-spacing:-.03em;}
+.tc-product-price{font-size:var(--card-price-fs,15px);font-weight:800;color:var(--p);letter-spacing:-.03em;}
 .tc-product-old{font-size:11px;text-decoration:line-through;color:var(--p3);}
+.tc-product-badge{position:absolute;top:10px;left:10px;z-index:3;font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.06em;text-transform:uppercase;}
 
+/* ════════════════════════════════════════════════
+   FEATURED STYLE VARIANTS — all 8 styles supported
+════════════════════════════════════════════════ */
+/* classic */
 .featured-classic .tc-product-card{border-radius:16px}
+.featured-classic .tc-product-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
+
+/* minimal */
 .featured-minimal .tc-product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
 .featured-minimal .tc-product-card::before{display:none}
 .featured-minimal .tc-product-card:hover .tc-product-img img{transform:scale(1.05)}
 .featured-minimal .tc-product-img{border-radius:14px;overflow:hidden}
 .featured-minimal .tc-product-info,.featured-minimal .tc-btn-wrap{background:transparent!important;padding-left:0;padding-right:0}
+
+/* bold */
+.featured-bold .tc-product-card{border-radius:12px;border-top:3px solid var(--primary)}
+.featured-bold .tc-product-card::before{display:none}
+.featured-bold .tc-product-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+
+/* elevated */
 .featured-elevated .tc-products-grid{gap:22px!important}
 .featured-elevated .tc-product-card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07)}
 .featured-elevated .tc-product-card:hover{transform:translateY(-5px);box-shadow:0 20px 52px rgba(0,0,0,.13)}
-.featured-bold .tc-product-card{border-radius:12px;border-top:3px solid var(--primary)}
-.featured-bold .tc-product-card::before{display:none}
+
+/* compact */
 .featured-compact .tc-btn-wrap{display:none!important}
-.featured-compact .tc-product-name{-webkit-line-clamp:1}
-.featured-compact .tc-product-info{padding:8px 10px 8px}
+.featured-compact .tc-product-name{-webkit-line-clamp:1;margin-bottom:2px!important}
+.featured-compact .tc-product-info{padding:8px 10px 8px!important}
+.featured-compact .tc-product-img{aspect-ratio:1/1!important}
+
+/* list */
 .featured-list .tc-products-grid{grid-template-columns:1fr!important;gap:10px!important}
 .featured-list .tc-product-card{flex-direction:row;height:128px;border-radius:14px}
+.featured-list .tc-product-card::before{width:3px;height:auto;top:0;bottom:0;right:auto;left:0}
 .featured-list .card-link{flex-direction:row;flex:1;min-width:0}
-.featured-list .tc-product-img{width:128px;min-width:128px;aspect-ratio:auto!important;height:128px;flex-shrink:0}
-.featured-list .tc-product-info{flex:1;padding:12px 16px;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
-.featured-list .tc-btn-wrap{padding:0 14px;display:flex;align-items:center}
+.featured-list .tc-product-img{width:128px;min-width:128px;aspect-ratio:auto!important;height:128px;flex-shrink:0;border-radius:0}
+.featured-list .tc-product-info{flex:1;padding:12px 16px!important;justify-content:center;border-top:none;border-left:1px solid rgba(0,0,0,.05)}
+.featured-list .tc-btn-wrap{padding:0 14px!important;display:flex;align-items:center}
+.featured-list .tc-product-card:hover{transform:none;box-shadow:var(--sh1)}
+.featured-list .card-atc-overlay{display:none!important}
+.featured-list .tc-product-btn{width:auto;padding:9px 16px!important;white-space:nowrap}
+
+/* overlay */
 .featured-overlay .tc-products-grid{gap:14px!important}
 .featured-overlay .tc-product-card{overflow:hidden;border-radius:var(--card-radius);border:none;background:transparent;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .featured-overlay .tc-product-card::before{display:none}
 .featured-overlay .tc-product-card:hover{box-shadow:0 14px 40px rgba(0,0,0,.18);transform:translateY(-3px)}
-.featured-overlay .card-link{flex-direction:column;position:relative}
+.featured-overlay .card-link{flex-direction:column;position:relative;display:block}
 .featured-overlay .tc-product-img{aspect-ratio:3/4!important;border-radius:var(--card-radius)!important;}
 .featured-overlay .tc-product-info{display:none!important}
-.featured-overlay .tc-btn-wrap{padding:6px 8px 8px;background:transparent;}
+.featured-overlay .tc-btn-wrap{padding:6px 8px 8px!important;background:transparent;}
+.featured-overlay .card-atc-overlay{display:none!important}
+.featured-overlay .ov-layer{display:flex!important;flex-direction:column;gap:4px}
+
+/* magazine — NEW */
+.featured-magazine .tc-products-grid{gap:14px!important}
+.featured-magazine .tc-product-card{border-radius:14px}
+.featured-magazine .tc-product-card:first-child{grid-column:span 2;grid-row:span 2}
+.featured-magazine .tc-product-card:first-child .tc-product-img{aspect-ratio:auto!important;height:100%}
+.featured-magazine .tc-product-card:hover{box-shadow:0 12px 36px rgba(0,0,0,.12);transform:translateY(-3px)}
 
 /* ─── PAGINATION ─────────────────────────────────────────── */
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:56px;flex-wrap:wrap;padding-bottom:56px}
@@ -520,7 +561,7 @@ a{color:inherit;text-decoration:none}
 .tc-cat-icon{font-size:28px;margin-bottom:8px}
 .tc-cat-name-plain{font-size:13.5px;font-weight:600}
 
-/* ── Circle category style ── */
+/* circle style */
 .tc-cats-grid.cats-circle{gap:24px}
 .tc-cats-grid.cats-circle .tc-cat-card{background:transparent;border:none;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 4px;border-radius:0;}
 .tc-cats-grid.cats-circle .tc-cat-card:hover{transform:translateY(-3px);box-shadow:none;border:none}
@@ -620,18 +661,16 @@ a{color:inherit;text-decoration:none}
 /* ─── ABOUT ──────────────────────────────────────────────── */
 .tc-about-section{padding:64px 48px}
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
-.about-text{}
 .about-heading{font-family:var(--font-display);font-size:34px;font-weight:400;letter-spacing:-.02em;margin-bottom:16px}
 .about-subheading{font-size:16px;color:var(--p2);margin-bottom:20px;line-height:1.7}
 .about-body{font-size:14px;color:var(--p2);line-height:1.8;margin-bottom:28px}
-.about-cta{margin-top:8px}
 .about-img-wrap{border-radius:16px;overflow:hidden;aspect-ratio:4/3;background:var(--bg2)}
 .about-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
 .about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;padding-top:40px;border-top:1px solid var(--border)}
 .about-stat-num{font-family:var(--font-display);font-size:36px;color:var(--primary)}
 .about-stat-label{font-size:13px;color:var(--p2);margin-top:4px}
 
-/* ─── RICH TEXT / TEXT BLOCK ─────────────────────────────── */
+/* ─── RICH TEXT ──────────────────────────────────────────── */
 .tc-richtext-section{padding:64px 48px}
 .richtext-inner{max-width:720px;margin:0 auto;text-align:center}
 .richtext-title{font-family:var(--font-display);font-size:30px;font-weight:400;letter-spacing:-.02em;margin-bottom:20px}
@@ -660,7 +699,7 @@ a{color:inherit;text-decoration:none}
 .brand-item img{max-height:40px;max-width:120px;object-fit:contain}
 .brand-item-text{font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--p)}
 
-/* ─── OFFERS & DEALS ─────────────────────────────────────── */
+/* ─── OFFERS ─────────────────────────────────────────────── */
 .tc-offers-section{padding:64px 48px}
 .offers-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:16px}
 .offer-card{background:#fff;border-radius:14px;padding:24px;border:1px solid var(--border);text-align:center;transition:.2s var(--ease)}
@@ -680,7 +719,6 @@ a{color:inherit;text-decoration:none}
 .team-info{padding:16px}
 .team-name{font-size:15px;font-weight:700;color:var(--p);margin-bottom:4px}
 .team-role{font-size:12.5px;color:var(--p3)}
-.team-bio{font-size:13px;color:var(--p2);margin-top:8px;line-height:1.6}
 
 /* ─── CONTACT ────────────────────────────────────────────── */
 .tc-contact-section{padding:64px 48px}
@@ -693,7 +731,7 @@ a{color:inherit;text-decoration:none}
 .contact-field{display:flex;flex-direction:column;gap:6px}
 .contact-field label{font-size:12px;font-weight:600;color:var(--p2);letter-spacing:.03em}
 .contact-field input,.contact-field textarea,.contact-field select{padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;background:#fff;color:var(--p);transition:.15s}
-.contact-field input:focus,.contact-field textarea:focus,.contact-field select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(0,0,0,.05)}
+.contact-field input:focus,.contact-field textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(0,0,0,.05)}
 .contact-field textarea{resize:vertical;min-height:120px}
 
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
@@ -724,7 +762,10 @@ a{color:inherit;text-decoration:none}
   .list-grid .product-card{flex-direction:column!important;height:auto}
   .list-grid .card-link{flex-direction:column!important}
   .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important}
-  .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
+  .featured-list .tc-product-card{flex-direction:column!important;height:auto}
+  .featured-list .card-link{flex-direction:column!important}
+  .featured-list .tc-product-img{width:100%!important;min-width:unset!important;height:200px!important;aspect-ratio:auto!important}
+  .magazine-grid .product-card:first-child,.featured-magazine .tc-product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
   .tc-newsletter-form{flex-direction:column!important}
   .tc-newsletter-input{min-width:unset!important;width:100%!important}
   .cart-bar{padding:12px 16px}
@@ -732,11 +773,11 @@ a{color:inherit;text-decoration:none}
   .cart-qty-row{height:38px}
   .qty-btn{font-size:16px}
   .qty-value{flex:0 0 38px;font-size:12px}
-  .btn-add,.tc-product-btn{padding:10px 12px;font-size:11px}
-  .cart-controls-wrap,.tc-btn-wrap{padding:6px 10px 10px}
-  .product-info,.tc-product-info{padding:10px 11px 3px}
-  .product-name,.tc-product-name{font-size:12.5px}
-  .product-price,.tc-product-price{font-size:13.5px}
+  .btn-add,.tc-product-btn{padding:10px 12px!important;font-size:11px!important}
+  .cart-controls-wrap,.tc-btn-wrap{padding:6px 10px 10px!important}
+  .product-info,.tc-product-info{padding:10px 11px 3px!important}
+  .product-name,.tc-product-name{font-size:12.5px!important}
+  .product-price,.tc-product-price{font-size:13.5px!important}
   .about-grid,.imagetext-grid,.contact-grid{grid-template-columns:1fr!important;gap:32px!important}
   .about-stats{grid-template-columns:repeat(3,1fr)!important}
   .offers-grid,.team-grid{grid-template-columns:repeat(2,1fr)!important}
@@ -783,10 +824,8 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ALL THEME SECTIONS + PRODUCTS rendered in order here -->
 <div id="page-sections"></div>
 
-<!-- Products section (moved here; injected by renderSections at correct order position) -->
 <div id="mainLayout" style="display:none">
   <a id="mainAnchor" style="display:block;visibility:hidden;position:relative"></a>
   <div class="toolbar">
@@ -838,6 +877,48 @@ let activeStyle='classic', activeSize='medium'
 let currentCat='', currentPage=1, searchQ='', searchT=null
 let storeCategories=[]
 
+// ─────────────── CARD SIZE VARS ──────────────────────────────
+const CARD_SIZE_VARS = {
+  small:{
+    '--card-aspect':'1/1',
+    '--card-name-fs':'11.5px',
+    '--card-price-fs':'12.5px',
+    '--card-info-pad':'8px 10px 4px',
+    '--card-btn-pad':'5px 10px 10px',
+    '--card-btn-padding':'8px 10px',
+    '--card-btn-fs':'10px',
+    '--card-cat-fs':'8.5px',
+    '--card-gap':'10px',
+  },
+  medium:{
+    '--card-aspect':'4/5',
+    '--card-name-fs':'13.5px',
+    '--card-price-fs':'15px',
+    '--card-info-pad':'13px 14px 5px',
+    '--card-btn-pad':'7px 12px 12px',
+    '--card-btn-padding':'11px 13px',
+    '--card-btn-fs':'11.5px',
+    '--card-cat-fs':'9px',
+    '--card-gap':'20px',
+  },
+  large:{
+    '--card-aspect':'4/5',
+    '--card-name-fs':'15px',
+    '--card-price-fs':'17px',
+    '--card-info-pad':'16px 18px 8px',
+    '--card-btn-pad':'8px 14px 14px',
+    '--card-btn-padding':'13px 16px',
+    '--card-btn-fs':'12.5px',
+    '--card-cat-fs':'9.5px',
+    '--card-gap':'24px',
+  }
+}
+
+function applyCardSizeVars(size){
+  const vars = CARD_SIZE_VARS[size] || CARD_SIZE_VARS.medium
+  Object.entries(vars).forEach(([k,v]) => R.style.setProperty(k, v))
+}
+
 // ─────────────── UTILS ───────────────────────────────────────
 const esc = s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
 const esa = s=>String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')
@@ -853,7 +934,10 @@ const gotoCart = ()=>location.href=`cart.html?store=${slug}`
 const gotoAccount = ()=>location.href=localStorage.getItem(`cust_token_${slug}`)?`customer-account.html?store=${slug}`:`customer-login.html?store=${slug}`
 const subscribeNL = ()=>{const v=document.querySelector('.tc-newsletter-input')?.value?.trim();showToast(v?`📧 Thanks! We'll reach ${v}`:'Please enter your email')}
 const updateOffset = ()=>{const a=document.getElementById('mainAnchor');if(!a)return;const nb=document.querySelector('.tc-navbar')||document.getElementById('origHeader');a.style.top=`-${(nb?nb.offsetHeight:0)+20}px`}
-const updateCols = ()=>{const s=themeData?.settings||{},cols=s.cols||s.columns||4;R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))}
+const updateCols = ()=>{
+  const s=themeData?.settings||{},cols=s.cols||s.columns||4
+  R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
+}
 
 // ─────────────── CART ─────────────────────────────────────────
 const getCart = ()=>JSON.parse(localStorage.getItem('cart_'+slug)||'[]')
@@ -880,7 +964,7 @@ function updateCC(id){
     const isOverlay=card?.closest('.overlay-grid,.featured-overlay')!=null
     const lbl=card?.dataset.btnLabel||'Add to Cart'
     if(qty===0){
-      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> ${esc(lbl)}</button>`
+      el.innerHTML=`<button class="btn-add tc-product-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
       if(card){
         card.classList.remove('in-cart')
         if(!isOverlay&&ic&&!ic.querySelector('.card-atc-overlay')){
@@ -934,16 +1018,18 @@ function getBadge(p,cls){
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 // ─────────────── RENDER CARD ─────────────────────────────────
-function renderCard(p, ctx, btnLabel, cardOpts){
-  ctx = ctx||'main'
-  cardOpts = cardOpts||{}
-  const label        = cardOpts.btnLabel      || btnLabel   || 'Add to Cart'
-  const cardBg       = cardOpts.cardBg        || ''
-  const priceColor   = cardOpts.priceColor    || ''
-  const showOriginal = cardOpts.showOriginal !== 'no'
-  const showBadge    = cardOpts.showBadge    !== 'no'
+function renderCard(p,ctx,btnLabel,cardOpts){
+  ctx=ctx||'main'
+  cardOpts=cardOpts||{}
+  const label        = cardOpts.btnLabel    || btnLabel || 'Add to Cart'
+  const cardBg       = cardOpts.cardBg      || ''
+  const priceColor   = cardOpts.priceColor  || ''
+  const showOriginal = cardOpts.showOriginal!=='no'
+  const showBadge    = cardOpts.showBadge   !=='no'
+  // For main grid: overlay is allowed but rendered as overlay style
+  // For featured: use cardOpts.cardStyle directly
   const rawStyle = cardOpts.cardStyle || activeStyle || 'classic'
-  const style = (ctx==='main' && rawStyle==='overlay') ? 'classic' : rawStyle
+  const style    = rawStyle
 
   const oos=isOOS(p),qty=getQty(p._id),imgUrl=p.images?.[0]||''
   const si=esa(imgUrl),sn=esa(p.name),d=discPct(p)
@@ -963,19 +1049,15 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const [bg1,bg2c]=colorPairs[colorIdx]
   const gradientBg=imgUrl?'':`background:linear-gradient(135deg,${bg1},${bg2c});`
 
-  const bgAttr     = cardBg ? ` style="background:${cardBg}"` : ''
-  const cardAttr   = cardBg ? ` style="background:${cardBg};border-color:rgba(0,0,0,.06)"` : ''
-  const priceAttr  = priceColor ? ` style="color:${priceColor}"` : ''
+  const bgAttr    = cardBg?` style="background:${cardBg}"`:''
+  const cardStyle2= cardBg?` style="background:${cardBg};border-color:rgba(0,0,0,.06)"`:''
+  const priceAttr = priceColor?` style="color:${priceColor}"`:''
 
-  const imgTag=imgUrl
-    ?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">`
-    :''
+  const imgTag=imgUrl?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">`:''
   const fallback=`<div class="img-fallback-icon" style="opacity:${imgUrl?'0':'.2'}">🛍️</div>`
-  const badge = showBadge ? getBadge(p,bc) : ''
-  const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+  const badge=showBadge?getBadge(p,bc):''
 
-  const hoverOverlay=(oos||qty>0||style==='overlay')?''
-    :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+  const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
 
   let ctrlHTML
   if(oos){
@@ -986,13 +1068,15 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
   }
 
+  // OVERLAY style — works for both main grid and featured
   if(style==='overlay'){
     const compareHtml=showOriginal&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''
     const discHtml=d?`<span class="ov-discount">−${d}%</span>`:''
-    return`<div class="${cc}${qty>0?' in-cart':''}">
-      <a class="card-link" href="product.html?store=${slug}&id=${p._id}" style="position:relative;display:block">
+    const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
+    return`<div class="${cc}${qty>0?' in-cart':''}"${cardStyle2}>
+      <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
         <div class="${ic}" style="aspect-ratio:3/4;${gradientBg}">
-          ${badge}${imgTag}${fallback}
+          ${badge}${wish}${imgTag}${fallback}
           <div class="ov-layer">
             <div class="ov-name">${esc(p.name)}</div>
             <div class="ov-price-row">
@@ -1006,8 +1090,11 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     </div>`
   }
 
+  const hoverOverlay=(oos||qty>0)?''
+    :`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+
   const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
-  return`<div class="${cc}${qty>0?' in-cart':''}"${cardAttr}>
+  return`<div class="${cc}${qty>0?' in-cart':''}"${cardStyle2}>
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
       <div class="${ic}" style="${gradientBg}">
         ${badge}${wish}${imgTag}${fallback}${hoverOverlay}
@@ -1032,20 +1119,19 @@ function initCartButtons(){
     const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
     const card=el.closest('.product-card,.tc-product-card')
     const lbl=card?.dataset.btnLabel||'Add to Cart'
-    el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span class="btn-icon">🛒</span> ${esc(lbl)}</button>`
+    el.innerHTML=`<button class="btn-add tc-product-btn" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
   })
 }
 
 function applyStyleToGrid(){
   const grid=document.getElementById('productsGrid');if(!grid)return
-  const safeStyle=(activeStyle==='overlay')?'classic':activeStyle
   const styleMap={
     classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',
-    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',magazine:'magazine-grid'
+    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',
+    magazine:'magazine-grid',overlay:'overlay-grid'
   }
-  const cls=styleMap[safeStyle]||'classic-grid'
+  const cls=styleMap[activeStyle]||'classic-grid'
   grid.className=`products-grid ${cls}`
-  grid.style.gridTemplateColumns=safeStyle==='list'?'1fr':''
 }
 
 // ─────────────── DATA EXTRACTOR ──────────────────────────────
@@ -1071,7 +1157,6 @@ function gd(sec){
     cardBg:str('cardBackground','card_background','cardBg','card_bg'),
     priceColor:str('priceColor','price_color'),
     showOriginalPrice:str('showOriginalPrice','show_original_price')||'yes',
-    showRatingStars:str('showRatingStars','show_rating_stars')||'no',
     showProductBadge:str('showProductBadge','show_product_badge')||'no',
     featuredCols:parseInt(get('columns','cols','featuredColumns'))||0,
     badge1:str('badge1')||'Free Shipping',badge2:str('badge2')||'Secure Payment',badge3:str('badge3')||'Easy Returns',badge4:str('badge4')||'24/7 Support',
@@ -1102,7 +1187,8 @@ function gd(sec){
     cartText:str('cartText')||'Cart',
     navLinks:get('navLinks','nav_links')||null,
     newsletterNote:str('newsletterNote')||'No spam. Unsubscribe anytime.',
-    cardStyle:str('cardStyle','card_style','imageShape','image_shape')||'image',
+    // Card style: read from section data, falls back to global activeStyle
+    cardStyle:str('cardStyle','card_style')||'',
     layout:str('layout'),
     aboutBody:str('body','content','aboutBody'),
     aboutImage:str('image','aboutImage','image_url'),
@@ -1135,7 +1221,7 @@ function gd(sec){
 }
 
 // ─────────────── BUILD SECTIONS ──────────────────────────────
-function buildSec(sec, isMobile){
+function buildSec(sec,isMobile){
   const d=gd(sec)
   switch(sec.type){
 
@@ -1194,12 +1280,18 @@ function buildSec(sec, isMobile){
       const count=parseInt(d.count)||8,sid=`ft-${sec.id}`
       const featCols=d.featuredCols||d.columns||0
       const colsStyle=featCols?`--cols:${featCols};`:''
+
+      // Resolve featured card style:
+      // 1. Section-specific style (set in section editor)
+      // 2. Global activeStyle
+      const VALID_FEAT_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','overlay','magazine'])
+      const sectionCardStyle=d.cardStyle // already extracted via gd()
+      const featCardStyle=VALID_FEAT_STYLES.has(sectionCardStyle)?sectionCardStyle:
+                          VALID_FEAT_STYLES.has(activeStyle)?activeStyle:'classic'
+
       const skCount=isMobile?2:(featCols||4)
-      const VALID_FEAT_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','overlay'])
-      const rawFeatStyle=sec.data?.cardStyle||sec.data?.card_style||sec.settings?.cardStyle||sec.settings?.card_style||''
-      const featCardStyle=VALID_FEAT_STYLES.has(rawFeatStyle)?rawFeatStyle:(activeStyle==='overlay'?'classic':activeStyle||'classic')
       const cardOpts={btnLabel:d.btnText,cardBg:d.cardBg,priceColor:d.priceColor,showOriginal:d.showOriginalPrice,showBadge:d.showProductBadge,cardStyle:featCardStyle}
-      const gridStyleMap={classic:'featured-classic',minimal:'featured-minimal',bold:'featured-bold',elevated:'featured-elevated',compact:'featured-compact',list:'featured-list',overlay:'featured-overlay'}
+      const gridStyleMap={classic:'featured-classic',minimal:'featured-minimal',bold:'featured-bold',elevated:'featured-elevated',compact:'featured-compact',list:'featured-list',overlay:'featured-overlay',magazine:'featured-magazine'}
       const gridClass=gridStyleMap[featCardStyle]||'featured-classic'
       setTimeout(()=>fillFeatured(sid,count,cardOpts),0)
       return`<section class="tc-section ${gridClass}" id="${sid}" style="padding-left:48px;padding-right:48px;max-width:1440px;margin-left:auto;margin-right:auto;${colsStyle}">
@@ -1364,7 +1456,7 @@ function buildSec(sec, isMobile){
             <h2 class="about-heading">${esc(d.heading||'About Us')}</h2>
             ${d.subheading?`<p class="about-subheading">${esc(d.subheading)}</p>`:''}
             <div class="about-body">${esc(d.aboutBody||d.bodyText||'We are passionate about bringing you the best products.')}</div>
-            ${d.ctaText?`<a class="btn-cta about-cta" href="${esc(d.ctaLink)}">${esc(d.ctaText)}</a>`:''}
+            ${d.ctaText?`<a class="btn-cta" href="${esc(d.ctaLink)}">${esc(d.ctaText)}</a>`:''}
           </div>
           ${hasImg?`<div class="about-img-wrap"><img src="${esc(d.aboutImage)}" alt="About us" loading="lazy"></div>`:''}
         </div>
@@ -1440,7 +1532,7 @@ function buildSec(sec, isMobile){
           ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
         </div>
         <div class="team-grid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${members.map(m=>`<div class="team-card"><div class="team-avatar">${m.img?`<img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy">`:'👤'}</div><div class="team-info"><div class="team-name">${esc(m.name)}</div>${m.role?`<div class="team-role">${esc(m.role)}</div>`:''} ${m.bio?`<div class="team-bio">${esc(m.bio)}</div>`:''}</div></div>`).join('')}
+          ${members.map(m=>`<div class="team-card"><div class="team-avatar">${m.img?`<img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy">`:'👤'}</div><div class="team-info"><div class="team-name">${esc(m.name)}</div>${m.role?`<div class="team-role">${esc(m.role)}</div>`:''}</div></div>`).join('')}
         </div>
       </section>`
     }
@@ -1457,15 +1549,12 @@ function buildSec(sec, isMobile){
             ${d.contactEmail?`<div class="contact-info-item"><span class="contact-info-icon">📧</span><div><div class="contact-info-label">Email</div><div class="contact-info-val">${esc(d.contactEmail)}</div></div></div>`:''}
             ${d.contactPhone?`<div class="contact-info-item"><span class="contact-info-icon">📞</span><div><div class="contact-info-label">Phone</div><div class="contact-info-val">${esc(d.contactPhone)}</div></div></div>`:''}
             ${d.contactAddress?`<div class="contact-info-item"><span class="contact-info-icon">📍</span><div><div class="contact-info-label">Address</div><div class="contact-info-val">${esc(d.contactAddress)}</div></div></div>`:''}
-            ${d.contactHours?`<div class="contact-info-item"><span class="contact-info-icon">🕐</span><div><div class="contact-info-label">Hours</div><div class="contact-info-val">${esc(d.contactHours)}</div></div></div>`:''}
           </div>`:''}
           <div class="contact-form-grid">
             ${d.formName!=='no'?`<div class="contact-field"><label>Name</label><input type="text" placeholder="Your name"></div>`:''}
             <div class="contact-field"><label>Email</label><input type="email" placeholder="your@email.com"></div>
-            ${d.formPhone==='yes'?`<div class="contact-field"><label>Phone</label><input type="tel" placeholder="Phone number"></div>`:''}
-            ${d.formSubject==='yes'?`<div class="contact-field"><label>Subject</label><input type="text" placeholder="Subject"></div>`:''}
             <div class="contact-field"><label>Message</label><textarea placeholder="Your message..."></textarea></div>
-            <button class="btn-add" style="border-radius:10px" onclick="showToast('Message sent! We will get back to you soon.')">Send Message →</button>
+            <button class="btn-add" style="border-radius:10px;font-size:13px;padding:12px;letter-spacing:.04em" onclick="showToast('Message sent! We will get back to you soon.')">Send Message →</button>
           </div>
         </div>
       </section>`
@@ -1504,38 +1593,43 @@ async function loadTheme(){
 }
 
 function applySettings(s){
-  const primary=s.primaryColor||s.primary_color||'#0f0f0f'
+  const primary=s.primaryColor||s.primary_color||s.themeId?undefined:undefined||s.primary_color||s.primaryColor||'#0f0f0f'
+  const primaryFinal=s.primary_color||s.primaryColor||'#0f0f0f'
   const bg=s.bgColor||s.secondary_color||'#fafafa'
   const text=s.textColor||s.text_color||'#0f0f0f'
   const radiusVal=s.radius||s.border_radius||'16px'
-  const radiusPx=typeof radiusVal==='number'?`${radiusVal}px`:radiusVal.toString().includes('px')?radiusVal:`${radiusVal}px`
+  const radiusPx=typeof radiusVal==='number'?`${radiusVal}px`:String(radiusVal).includes('px')?radiusVal:`${radiusVal}px`
   const font=s.fontHeading||s.font_heading||'DM Sans'
   const btnStyle=s.buttonStyle||s.button_style||'rounded'
   const cols=s.cols||s.columns||4
   const cardBg=s.cardBg||s.card_bg||s.cardBackground||s.card_background||'#ffffff'
-  const cardBorder=s.cardBorder||s.card_border||s.border||''
 
-  R.style.setProperty('--primary',primary)
-  R.style.setProperty('--brand',primary)
+  R.style.setProperty('--primary',primaryFinal)
+  R.style.setProperty('--brand',primaryFinal)
   R.style.setProperty('--p',text)
   R.style.setProperty('--bg',bg)
   R.style.setProperty('--radius',radiusPx)
   R.style.setProperty('--card-radius',radiusPx)
   R.style.setProperty('--card-bg',cardBg)
-  if(cardBorder)R.style.setProperty('--card-border',cardBorder)
   R.style.setProperty('--font',`'${font}',system-ui,sans-serif`)
   R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'4px':radiusPx)
   R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
   document.body.style.background=bg
+
   if(font&&font!=='DM Sans'&&font!=='system-ui'){
     const fid='gf-'+font.replace(/\s+/g,'-')
     if(!document.getElementById(fid)){const l=document.createElement('link');l.id=fid;l.rel='stylesheet';l.href=`https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;500;600;700&display=swap`;document.head.appendChild(l)}
   }
+
+  // ── Card style (global) ────────────────────────────────────
   const rawStyle=s.card_style||s.cardStyle||'classic'
-  const MAIN_GRID_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','magazine'])
-  activeStyle=MAIN_GRID_STYLES.has(rawStyle)?rawStyle:'classic'
+  const ALL_CARD_STYLES=new Set(['classic','minimal','bold','elevated','compact','list','magazine','overlay'])
+  activeStyle=ALL_CARD_STYLES.has(rawStyle)?rawStyle:'classic'
   applyStyleToGrid()
+
+  // ── Card size (global) — apply CSS variables ───────────────
   activeSize=s.card_size||s.cardSize||'medium'
+  applyCardSizeVars(activeSize)
 }
 
 function renderSections(sections){
@@ -1577,7 +1671,6 @@ function renderSections(sections){
 
   let mainLayoutInserted=false
   const featCatTypes=new Set(['featured','categories'])
-
   let lastFeatCatIdx=-1
   rest.forEach((s,i)=>{if(featCatTypes.has(s.type))lastFeatCatIdx=i})
 
@@ -1595,18 +1688,14 @@ function renderSections(sections){
 
   if(!mainLayoutInserted){
     const footer=page.querySelector('.tc-footer')
-    if(footer){
-      page.insertBefore(mainLayout,footer)
-    }else{
-      page.appendChild(mainLayout)
-    }
+    if(footer)page.insertBefore(mainLayout,footer)
+    else page.appendChild(mainLayout)
     mainLayout.style.display=''
-    mainLayoutInserted=true
   }
 
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=getCart().reduce((s,x)=>s+x.qty,0))
   updateOffset()
-  window.addEventListener('resize',()=>{updateCols();updateOffset()},{passive:true})
+  window.addEventListener('resize',()=>{updateCols();updateOffset();applyCardSizeVars(activeSize)},{passive:true})
 }
 
 // ─────────────── FILL SECTIONS ───────────────────────────────
@@ -1626,44 +1715,16 @@ async function fillFeatured(secId,count,cardOpts){
 async function fillCats(secId,cols,d,catStyle){
   const grid=document.getElementById(`${secId}-grid`);if(!grid)return
   const resolvedStyle=(catStyle||'image').toLowerCase()
-  const isCircle = resolvedStyle==='circle'||resolvedStyle==='circular'||resolvedStyle==='round'
-  const isSimple = resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'
-
-  if(isCircle) grid.classList.add('cats-circle')
-
+  const isCircle=resolvedStyle==='circle'||resolvedStyle==='circular'||resolvedStyle==='round'
+  const isSimple=resolvedStyle==='simple'||resolvedStyle==='plain'||resolvedStyle==='icon'
+  if(isCircle)grid.classList.add('cats-circle')
   try{
     const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
     const list=Array.isArray(cats)?cats:[]
     if(!list.length){const s=grid.closest('section');if(s)s.style.display='none';return}
 
-    const em={
-      fashion:'👗',clothing:'👕',shirt:'👔',dress:'👗',
-      electronics:'📱',tech:'💻',gadget:'🎧',
-      home:'🏠',living:'🛋️',furniture:'🛋️',decor:'🕯️',
-      beauty:'💄',skincare:'🧴',cosmetic:'💅',
-      gaming:'🎮',game:'🎮',
-      food:'🍕',grocery:'🥗',drink:'☕',
-      accessories:'👜',bag:'👜',watch:'⌚',sunglasses:'🕶️',
-      footwear:'👟',shoes:'👟',boots:'👢',sandal:'👡',
-      sports:'⚽',fitness:'💪',gym:'🏋️',outdoor:'🏕️',
-      books:'📚',education:'📖',stationery:'✏️',
-      toys:'🧸',kids:'🧒',baby:'👶',
-      jewelry:'💎',gold:'💍',silver:'💍',
-      travel:'✈️',luggage:'🧳',
-      health:'💊',medical:'🏥',wellness:'🌿',
-      pet:'🐾',animal:'🐶',
-      art:'🎨',craft:'✂️',music:'🎵',
-      car:'🚗',auto:'🔧',
-      plants:'🌿',garden:'🌱',flower:'🌸',
-    }
-    const getEmoji=n=>{
-      const lc=(n||'').toLowerCase()
-      for(const[k,v]of Object.entries(em))if(lc.includes(k))return v
-      const colors=['#FFD166','#EF476F','#06D6A0','#118AB2','#073B4C','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7']
-      const ci=(n||'?').charCodeAt(0)%colors.length
-      return`<span style="font-size:44px;line-height:1">${['🛍️','🎁','⭐','🏷️','✨','🎯','💫','🔆'][ci%8]}</span>`
-    }
-
+    const em={fashion:'👗',clothing:'👕',electronics:'📱',tech:'💻',home:'🏠',living:'🛋️',beauty:'💄',gaming:'🎮',food:'🍕',accessories:'👜',footwear:'👟',sports:'⚽',fitness:'💪',books:'📚',toys:'🧸',jewelry:'💎',health:'💊',pet:'🐾',art:'🎨',music:'🎵',plants:'🌿',car:'🚗'}
+    const getEmoji=n=>{const lc=(n||'').toLowerCase();for(const[k,v]of Object.entries(em))if(lc.includes(k))return v;const ci=(n||'?').charCodeAt(0)%8;return['🛍️','🎁','⭐','🏷️','✨','🎯','💫','🔆'][ci]}
     const showCount=d.showCount!=='no'
 
     grid.innerHTML=list.map(c=>{
@@ -1672,50 +1733,29 @@ async function fillCats(secId,cols,d,catStyle){
 
       if(isCircle){
         const imgContent=c.image_url
-          ?`<img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${typeof emoji==='string'?emoji:'🛍️'}</span>'">`
+          ?`<img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${emoji}</span>'">`
           :`<span style="font-size:44px">${emoji}</span>`
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
           <div class="tc-cat-img-wrap">${imgContent}</div>
-          <div class="tc-cat-footer">
-            <span class="tc-cat-name">${esc(c.name)}</span>
-            ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
-          </div>
+          <div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}</div>
         </div>`
       }
-
       if(isSimple){
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-          <div class="tc-cat-simple">
-            <div class="tc-cat-icon">${emoji}</div>
-            <div class="tc-cat-name-plain">${esc(c.name)}</div>
-            ${countTxt?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${countTxt}</div>`:''}
-          </div>
+          <div class="tc-cat-simple"><div class="tc-cat-icon">${emoji}</div><div class="tc-cat-name-plain">${esc(c.name)}</div>${countTxt?`<div style="font-size:11px;color:var(--p3);margin-top:3px">${countTxt}</div>`:''}</div>
         </div>`
       }
-
       if(c.image_url){
         return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-          <div class="tc-cat-img-wrap">
-            <img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy"
-              onerror="this.parentElement.innerHTML='<span style=\\'font-size:36px;padding:20px;display:flex;align-items:center;justify-content:center;width:100%;height:100%\\'>${typeof emoji==='string'?emoji:'🛍️'}</span>'">
-          </div>
-          <div class="tc-cat-footer">
-            <span class="tc-cat-name">${esc(c.name)}</span>
-            ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
-          </div>
+          <div class="tc-cat-img-wrap"><img class="tc-cat-img" src="${c.image_url}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:36px;padding:20px;display:flex;align-items:center;justify-content:center;width:100%;height:100%\\'>${emoji}</span>'"></div>
+          <div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}</div>
         </div>`
       }
-
       const colors=['#fef3c7','#fce7f3','#e0f2fe','#dcfce7','#ede9fe','#ffedd5']
       const bgColor=colors[(c.name||'?').charCodeAt(0)%colors.length]
       return`<div class="tc-cat-card" onclick="filterByCat('${c._id}','${esa(c.name)}')">
-        <div class="tc-cat-img-wrap" style="background:${bgColor}">
-          <span style="font-size:48px">${emoji}</span>
-        </div>
-        <div class="tc-cat-footer">
-          <span class="tc-cat-name">${esc(c.name)}</span>
-          ${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}
-        </div>
+        <div class="tc-cat-img-wrap" style="background:${bgColor}"><span style="font-size:48px">${emoji}</span></div>
+        <div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${countTxt?`<span class="tc-cat-count">${countTxt}</span>`:''}</div>
       </div>`
     }).join('')
   }catch(e){const s=document.getElementById(secId);if(s)s.style.display='none'}
@@ -1789,8 +1829,7 @@ async function loadProducts(){
 function renderProducts(products){
   const grid=document.getElementById('productsGrid')
   if(!products.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`;return}
-  const mainOpts={cardStyle:'classic'}
-  grid.innerHTML=products.map(p=>renderCard(p,'main','Add to Cart',mainOpts)).join('')
+  grid.innerHTML=products.map(p=>renderCard(p,'main','Add to Cart',{})).join('')
   applyStyleToGrid()
   initCartButtons()
   products.forEach(p=>{if(getQty(p._id)>0)updateCC(p._id)})
