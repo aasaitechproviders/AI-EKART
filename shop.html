@@ -52,7 +52,7 @@ a{color:inherit;text-decoration:none}
 .ann-close:hover{color:#fff}
 .ann-link{color:rgba(255,255,255,.8);text-decoration:underline;font-size:12px;white-space:nowrap}
 
-/* ════ FALLBACK HEADER (when no navbar section) ════ */
+/* ════ FALLBACK HEADER ════ */
 #origHeader{background:rgba(250,250,250,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
 .hdr-inner{max-width:1440px;margin:0 auto;padding:0 48px;height:var(--navbar-h);display:flex;align-items:center;justify-content:space-between;gap:24px}
 .hdr-logo{font-family:var(--font-display);font-size:20px;font-weight:400;letter-spacing:-.01em;color:var(--p);white-space:nowrap;display:flex;align-items:center;gap:10px}
@@ -80,14 +80,15 @@ a{color:inherit;text-decoration:none}
 /* ════ SECTION BASE ════ */
 .featured-section{max-width:1440px;margin:0 auto;box-sizing:border-box}
 
-/* ════ PRODUCT GRID & CARDS - WITH !IMPORTANT FOR ENFORCEMENT ════ */
+/* ════ PRODUCT GRID ════ */
 .products-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:var(--card-gap,20px)}
 
-/* base card */
-.product-card{background:var(--card-bg) !important;border-radius:var(--card-radius) !important;overflow:hidden;position:relative;cursor:pointer;transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s;border:1px solid var(--border) !important}
-.product-card:hover{transform:translateY(-4px);box-shadow:var(--sh2) !important}
-.card-link{display:block;text-decoration:none;color:inherit}
-.product-img{width:100%;aspect-ratio:var(--card-aspect,4/5) !important;background:var(--bg2);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+/* ════ BASE CARD ════ */
+.product-card{background:var(--card-bg);border-radius:var(--card-radius);overflow:hidden;position:relative;cursor:pointer;transition:transform .22s var(--ease),box-shadow .22s var(--ease);border:1px solid var(--border);display:flex;flex-direction:column}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
+/* card-link wraps only image + info, NOT controls */
+.card-link{display:flex;flex-direction:column;flex:1;text-decoration:none;color:inherit;min-width:0}
+.product-img{width:100%;aspect-ratio:var(--card-aspect,4/5);background:var(--bg2);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s var(--ease);display:block}
 .product-card:hover .product-img img{transform:scale(1.05)}
 .img-fallback-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;pointer-events:none}
@@ -108,54 +109,54 @@ a{color:inherit;text-decoration:none}
 .wish-btn:hover{transform:scale(1.12)}
 
 /* hover overlay ATC */
-.card-atc-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;opacity:0;transition:opacity .2s var(--ease);z-index:4}
-.product-card:hover .card-atc-overlay{opacity:1}
+.card-atc-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;opacity:0;transition:opacity .2s var(--ease);z-index:4;pointer-events:none}
+.product-card:hover .card-atc-overlay{opacity:1;pointer-events:auto}
 .card-atc-btn{padding:9px 20px;background:#fff;color:var(--p);border:none;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);letter-spacing:.02em;transition:background .15s}
 .card-atc-btn:hover{background:var(--bg2)}
 
 /* product info */
-.product-info{padding:var(--card-info-pad,13px 14px 5px) !important;background:inherit}
+.product-info{padding:var(--card-info-pad,13px 14px 5px);background:inherit;flex:1}
 .product-cat{font-size:var(--card-cat-fs,9px);font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
-.product-name{font-size:var(--card-name-fs,13.5px) !important;font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.product-name{font-size:var(--card-name-fs,13.5px);font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .product-price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.product-price{font-size:var(--card-price-fs,15px) !important;font-weight:800;color:var(--card-price-color, var(--primary)) !important}
+.product-price{font-size:var(--card-price-fs,15px);font-weight:800;color:var(--card-price-color,var(--primary))}
 .product-compare{font-size:12px;text-decoration:line-through;opacity:.38;color:var(--p)}
 .product-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 
-/* cart controls - FIXED: Ensure quantity controls are visible */
-.cart-controls-wrap{padding:var(--card-btn-pad,7px 12px 12px) !important;background:inherit}
+/* cart controls */
+.cart-controls-wrap{padding:var(--card-btn-pad,7px 12px 12px);background:inherit;flex-shrink:0}
 .cart-controls{width:100%}
-.btn-add{width:100%;padding:var(--card-btn-padding,11px 13px) !important;background:var(--primary) !important;color:#fff;border:none;border-radius:var(--btn-r);font-size:var(--card-btn-fs,11.5px) !important;font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.btn-add{width:100%;padding:var(--card-btn-padding,11px 13px);background:var(--primary);color:#fff;border:none;border-radius:var(--btn-r);font-size:var(--card-btn-fs,11.5px);font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
 .btn-add:hover{opacity:.88}
 .out-of-stock-label{display:block;text-align:center;font-size:11.5px;font-weight:600;color:var(--p3);padding:8px}
 .cart-qty-row{display:flex;align-items:center;height:42px;border-radius:var(--btn-r);overflow:hidden;border:1.5px solid var(--border);width:100%}
-.qty-btn{flex:0 0 42px;height:100%;border:none;background:var(--bg2);color:var(--p);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.qty-btn{flex:0 0 42px;height:100%;border:none;background:var(--bg2);color:var(--p);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
 .qty-btn:hover{background:var(--bg3)}
 .qty-value{flex:1;text-align:center;font-size:13.5px;font-weight:700;color:var(--p)}
-.product-card.in-cart{border-color:var(--primary) !important}
+.product-card.in-cart{border-color:var(--primary)!important}
 .product-card.in-cart::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary);z-index:5}
 
-/* ════ CARD STYLE VARIANTS - FIXED ALL STYLES ════ */
+/* ════ CARD STYLE VARIANTS ════ */
 
 /* MINIMAL */
-.minimal-grid .product-card{background:transparent !important;border:1.5px solid var(--border) !important;box-shadow:none !important}
-.minimal-grid .product-card:hover{border-color:var(--primary) !important;transform:none !important;box-shadow:none !important}
+.minimal-grid .product-card{background:transparent!important;border:1.5px solid var(--border)!important;box-shadow:none!important}
+.minimal-grid .product-card:hover{border-color:var(--primary)!important;transform:none!important;box-shadow:none!important}
 .minimal-grid .product-card::before{display:none}
-.minimal-grid .product-img{border-bottom:1px solid var(--border) !important}
+.minimal-grid .product-img{border-bottom:1px solid var(--border)!important}
 
 /* BOLD */
-.bold-grid .product-card{border-top:3px solid var(--primary) !important}
+.bold-grid .product-card{border-top:3px solid var(--primary)!important}
 .bold-grid .product-card::before{display:none}
 
 /* ELEVATED */
-.elevated-grid .product-card{border:none !important;box-shadow:0 2px 14px rgba(0,0,0,.07) !important}
-.elevated-grid .product-card:hover{transform:translateY(-6px) !important;box-shadow:0 20px 52px rgba(0,0,0,.14) !important}
+.elevated-grid .product-card{border:none!important;box-shadow:0 2px 14px rgba(0,0,0,.07)!important}
+.elevated-grid .product-card:hover{transform:translateY(-6px)!important;box-shadow:0 20px 52px rgba(0,0,0,.14)!important}
 
-/* COMPACT - FIXED: Now properly hides elements and sizes correctly */
+/* ════ COMPACT ════ */
 .compact-grid{gap:10px!important}
 .compact-grid .product-img{aspect-ratio:1/1!important}
 .compact-grid .product-info{padding:6px 8px 4px!important}
-.compact-grid .product-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compact-grid .product-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px!important}
 .compact-grid .product-price{font-size:12px!important}
 .compact-grid .product-cat{display:none!important}
 .compact-grid .product-compare{display:none!important}
@@ -166,39 +167,78 @@ a{color:inherit;text-decoration:none}
 .compact-grid .qty-btn{flex:0 0 32px!important;font-size:14px!important}
 .compact-grid .qty-value{font-size:11px!important}
 
-/* LIST - FIXED: Now properly displays as horizontal list */
-.list-grid{grid-template-columns:1fr!important}
-.list-grid .product-card{display:flex!important;flex-direction:row!important;height:140px;border-radius:var(--card-radius) !important;margin-bottom:10px}
-.list-grid .card-link{display:flex!important;flex-direction:row!important;flex:1;min-width:0;height:100%}
-.list-grid .product-img{width:140px!important;min-width:140px!important;height:140px!important;aspect-ratio:1/1!important;border-radius:0;flex-shrink:0}
-.list-grid .product-info{flex:1;padding:14px 16px!important;display:flex;flex-direction:column;justify-content:center;border-top:none;border-left:1px solid var(--border);height:100%}
-.list-grid .product-card:hover{transform:none;box-shadow:var(--sh1) !important}
-.list-grid .cart-controls-wrap{padding:0 14px!important;display:flex;align-items:center;flex-shrink:0;width:auto;min-width:140px}
-.list-grid .cart-controls{width:auto}
-.list-grid .btn-add{width:auto;white-space:nowrap;padding:9px 16px!important;min-width:100px}
-.list-grid .cart-qty-row{height:38px;width:140px}
+/* ════ LIST — complete rebuild ════ */
+.list-grid{grid-template-columns:1fr!important;gap:12px!important}
+.list-grid .product-card{
+  flex-direction:row!important;
+  height:140px!important;
+  border-radius:var(--card-radius)!important;
+  overflow:hidden;
+  align-items:stretch;
+}
+/* card-link = image + info side by side */
+.list-grid .card-link{
+  flex-direction:row!important;
+  flex:1!important;
+  min-width:0;
+}
+.list-grid .product-img{
+  width:140px!important;
+  min-width:140px!important;
+  height:140px!important;
+  aspect-ratio:unset!important;
+  border-radius:0!important;
+  flex-shrink:0;
+}
+.list-grid .product-info{
+  flex:1!important;
+  padding:14px 16px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  border-left:1px solid var(--border);
+  min-width:0;
+}
+.list-grid .product-name{-webkit-line-clamp:2!important;white-space:normal!important}
+.list-grid .product-card:hover{transform:none!important;box-shadow:var(--sh1)!important}
+/* controls sit at far right, not inside card-link */
+.list-grid .cart-controls-wrap{
+  padding:0 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  flex-shrink:0!important;
+  width:160px!important;
+  border-left:1px solid var(--border);
+}
+.list-grid .cart-controls{width:100%}
+.list-grid .btn-add{white-space:nowrap;padding:9px 12px!important;font-size:11px!important}
+.list-grid .cart-qty-row{height:38px!important;width:100%!important}
 .list-grid .wish-btn{opacity:1}
+/* hide hover overlay in list */
+.list-grid .card-atc-overlay{display:none!important}
+/* hide in-cart top bar — list has border */
+.list-grid .product-card.in-cart::before{display:none}
 @media(max-width:768px){
-  .list-grid .product-card{height:auto;flex-direction:column!important}
+  .list-grid .product-card{height:auto!important;flex-direction:column!important}
   .list-grid .card-link{flex-direction:column!important}
-  .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important}
-  .list-grid .product-info{border-left:none;border-top:1px solid var(--border)}
-  .list-grid .cart-controls-wrap{padding:8px 12px!important;width:100%}
-  .list-grid .cart-qty-row{width:100%}
+  .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important;aspect-ratio:unset!important}
+  .list-grid .product-info{border-left:none!important;border-top:1px solid var(--border)!important}
+  .list-grid .cart-controls-wrap{width:100%!important;border-left:none!important;border-top:1px solid var(--border)!important;padding:8px 12px!important}
+  .list-grid .cart-qty-row{width:100%!important}
 }
 
-/* MAGAZINE - FIXED: Now properly displays featured layout */
+/* ════ MAGAZINE ════ */
 .magazine-grid{gap:14px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
-.magazine-grid .product-card:first-child .product-img{aspect-ratio:16/9!important;height:auto}
-.magazine-grid .product-card:first-child .product-name{font-size:calc(var(--card-name-fs) * 1.2)!important}
+.magazine-grid .product-card:first-child .product-img{aspect-ratio:16/9!important}
+.magazine-grid .product-card:first-child .product-name{font-size:calc(var(--card-name-fs) * 1.3)!important}
 .magazine-grid .product-card:first-child .product-price{font-size:calc(var(--card-price-fs) * 1.2)!important}
 @media(max-width:768px){
   .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
   .magazine-grid .product-card:first-child .product-img{aspect-ratio:var(--card-aspect)!important}
 }
 
-/* OVERLAY */
+/* ════ OVERLAY ════ */
 .overlay-grid .product-card{overflow:hidden}
 .overlay-grid .product-img{aspect-ratio:3/4!important}
 .overlay-grid .product-info,.overlay-grid .cart-controls-wrap{display:none!important}
@@ -206,11 +246,16 @@ a{color:inherit;text-decoration:none}
 .ov-layer{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.45) 55%,transparent 100%);padding:24px 14px 14px;color:#fff;z-index:3}
 .ov-name{font-size:13.5px;font-weight:700;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ov-price-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.ov-price{font-size:15px;font-weight:800;color:var(--card-price-color, #fff) !important}
+.ov-price{font-size:15px;font-weight:800;color:#fff}
 .ov-compare{font-size:11.5px;text-decoration:line-through;opacity:.55}
 .ov-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.85);padding:2px 7px;border-radius:4px}
 .ov-btn{width:100%;padding:8px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s}
 .ov-btn:hover{background:rgba(255,255,255,.28)}
+/* overlay qty row — dark theme */
+.overlay-grid .ov-qty-row{display:flex;align-items:center;height:36px;border-radius:var(--btn-r);overflow:hidden;border:1px solid rgba(255,255,255,.35);width:100%}
+.overlay-grid .ov-qty-btn{flex:0 0 36px;height:100%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
+.overlay-grid .ov-qty-btn:hover{background:rgba(255,255,255,.28)}
+.overlay-grid .ov-qty-val{flex:1;text-align:center;font-size:13px;font-weight:700;color:#fff}
 
 /* ════ SKELETON ════ */
 @keyframes shimmer{0%{background-position:-800px 0}100%{background-position:800px 0}}
@@ -320,8 +365,6 @@ a{color:inherit;text-decoration:none}
 .tc-newsletter-input{flex:1;min-width:200px;padding:13px 18px;border:1.5px solid var(--border);border-radius:var(--btn-r);font-size:14px;background:#fff;color:var(--p);font-family:var(--font);outline:none;transition:border-color .15s}
 .tc-newsletter-input:focus{border-color:var(--primary)}
 .tc-nl-note{font-size:12px;color:var(--p3);margin-top:14px}
-
-/* dark newsletter variant */
 .tc-newsletter-dark{background:var(--p);color:#fff}
 .tc-newsletter-dark .tc-newsletter-input{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)}
 .tc-newsletter-dark .tc-newsletter-input::placeholder{color:rgba(255,255,255,.4)}
@@ -472,10 +515,6 @@ a{color:inherit;text-decoration:none}
   .tc-trust-item{border-right:none!important;border-bottom:1px solid var(--border)}
   .tc-testimonials-grid{grid-template-columns:1fr!important}
   .products-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
-  .list-grid .product-card{flex-direction:column!important;height:auto}
-  .list-grid .card-link{flex-direction:column}
-  .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important}
-  .list-grid .cart-controls-wrap{padding:8px 12px!important}
   .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
   .tc-newsletter-form{flex-direction:column}
   .tc-newsletter-input{min-width:unset!important;width:100%!important}
@@ -542,7 +581,7 @@ const API = 'https://apiv2.aasaitech.in'
 const R = document.documentElement
 let storeConfig = {}, themeData = null, currency = '₹'
 let activeStyle = 'classic', activeSize = 'medium'
-let globalCardSettings = {} // Store global card settings
+let globalCardSettings = {}
 
 const ALL_CARD_STYLES = new Set(['classic','minimal','bold','elevated','compact','list','magazine','overlay'])
 
@@ -585,7 +624,7 @@ const subscribeNL = (inputEl) => { const v=(inputEl||document.querySelector('.tc
 function readKey(obj,...keys){ if(!obj)return undefined; for(const k of keys){ const v=obj[k]; if(v!==undefined&&v!==null&&v!=='')return v } return undefined }
 
 // ═══════════════════════════════════════════
-// CART - FIXED: Quantity controls now work properly
+// CART
 // ═══════════════════════════════════════════
 const getCart = () => JSON.parse(localStorage.getItem('cart_'+slug)||'[]')
 const saveCart = c => localStorage.setItem('cart_'+slug, JSON.stringify(c))
@@ -594,57 +633,86 @@ const getQty = id => { const i=getCart().find(x=>x.product_id===id&&!x.variant);
 function incCart(id,name,price,image){
   const cart=getCart(), i=cart.find(x=>x.product_id===id&&!x.variant)
   if(i) i.qty++; else cart.push({product_id:id,name,price,image,qty:1})
-  saveCart(cart); updateCartUI(); updateCC(id); showToast('Added to cart ✓')
+  saveCart(cart); updateCartUI(); refreshProductCard(id); showToast('Added to cart ✓')
 }
 function decCart(id){
   const cart=getCart(), idx=cart.findIndex(x=>x.product_id===id&&!x.variant)
-  if(idx!==-1){ if(cart[idx].qty>1)cart[idx].qty--; else cart.splice(idx,1); saveCart(cart); updateCartUI(); updateCC(id) }
+  if(idx!==-1){ if(cart[idx].qty>1)cart[idx].qty--; else cart.splice(idx,1); saveCart(cart); updateCartUI(); refreshProductCard(id) }
 }
 const addToCart = (id,n,p,img) => incCart(id,n,p,img)
 
-function updateCC(id){
-  const qty=getQty(id)
-  document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(el=>{
-    const n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
-    const card=el.closest('.product-card')
-    const ic=card?.querySelector('.product-img')
-    const isOverlay=card?.closest('.overlay-grid')!=null
-    const lbl=card?.dataset.btnLabel||globalCardSettings.btnLabel||'Add to Cart'
-    
-    if(qty===0){
-      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
-      if(card){
-        card.classList.remove('in-cart')
-        if(!isOverlay&&ic&&!ic.querySelector('.card-atc-overlay')){
-          const ov=document.createElement('div'); ov.className='card-atc-overlay'
-          ov.innerHTML=`<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')">🛒 ${esc(lbl)}</button>`
-          ic.appendChild(ov)
+// ═══════════════════════════════════════════
+// REFRESH A SINGLE PRODUCT CARD — handles ALL styles
+// ═══════════════════════════════════════════
+function refreshProductCard(id){
+  const qty = getQty(id)
+
+  // Update ALL cart-controls elements for this product
+  document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(ctrlEl => {
+    const name    = ctrlEl.dataset.name
+    const price   = parseFloat(ctrlEl.dataset.price)
+    const image   = ctrlEl.dataset.image
+    const card    = ctrlEl.closest('.product-card')
+    const isOverlay = card && card.closest('.overlay-grid') != null
+    const label   = (card && card.dataset.btnLabel) || globalCardSettings.btnLabel || 'Add to Cart'
+    const sn = esa(name), si = esa(image)
+
+    if(qty === 0){
+      // Restore Add-to-Cart button
+      ctrlEl.innerHTML = `<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')"><span>🛒</span> ${esc(label)}</button>`
+      if(card) card.classList.remove('in-cart')
+      // Restore hover overlay if not overlay style or list
+      if(card && !isOverlay && !card.closest('.list-grid')){
+        let ov = card.querySelector('.card-atc-overlay')
+        if(!ov){
+          const imgWrap = card.querySelector('.product-img')
+          if(imgWrap){
+            ov = document.createElement('div')
+            ov.className = 'card-atc-overlay'
+            ov.innerHTML = `<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')">🛒 ${esc(label)}</button>`
+            imgWrap.appendChild(ov)
+          }
         }
       }
     } else {
-      el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
-      if(card){ 
-        card.classList.add('in-cart'); 
-        ic?.querySelector('.card-atc-overlay')?.remove() 
+      // Show qty row
+      ctrlEl.innerHTML = `<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${price},'${si}')">+</button></div>`
+      if(card){
+        card.classList.add('in-cart')
+        const ov = card.querySelector('.card-atc-overlay')
+        if(ov) ov.remove()
       }
+    }
+  })
+
+  // Handle OVERLAY style separately — controls live inside .ov-layer
+  document.querySelectorAll(`.ov-ctrl[data-pid="${id}"]`).forEach(ovCtrl => {
+    const name  = ovCtrl.dataset.name
+    const price = parseFloat(ovCtrl.dataset.price)
+    const image = ovCtrl.dataset.image
+    const card  = ovCtrl.closest('.product-card')
+    const label = (card && card.dataset.btnLabel) || globalCardSettings.btnLabel || 'Add to Cart'
+    const sn = esa(name), si = esa(image)
+
+    if(qty === 0){
+      ovCtrl.innerHTML = `<button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')">🛒 ${esc(label)}</button>`
+      if(card) card.classList.remove('in-cart')
+    } else {
+      ovCtrl.innerHTML = `<div class="ov-qty-row"><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="ov-qty-val">${qty}</span><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${price},'${si}')">+</button></div>`
+      if(card) card.classList.add('in-cart')
     }
   })
 }
 
 function updateCartUI(){
   const cart=getCart(), qty=cart.reduce((s,x)=>s+x.qty,0), amt=cart.reduce((s,x)=>s+x.price*x.qty,0)
-  const el=document.getElementById('cartCount'); el.textContent=qty; el.className='cart-badge'+(qty>0?' on':'')
+  const el=document.getElementById('cartCount')
+  el.textContent=qty; el.className='cart-badge'+(qty>0?' on':'')
   document.getElementById('cartLabel').textContent=qty>0?`(${qty})`:'Cart'
   const bar=document.getElementById('cartBar')
   if(qty>0){ bar.classList.add('on'); document.getElementById('cbarQty').textContent=`${qty} item${qty!==1?'s':''} — `; document.getElementById('cbarTotal').textContent=`${currency}${amt.toFixed(2)}` }
   else bar.classList.remove('on')
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=qty)
-  
-  // Update all product cards with current quantities
-  document.querySelectorAll('.cart-controls[data-pid]').forEach(el => {
-    const pid = el.dataset.pid
-    if(pid) updateCC(pid)
-  })
 }
 
 // ═══════════════════════════════════════════
@@ -659,54 +727,65 @@ function toggleWish(pid,btn){
 function restoreWish(){
   const list=JSON.parse(localStorage.getItem(`wish_${slug}`)||'[]')
   list.forEach(pid=>{
-    document.querySelectorAll(`.cart-controls[data-pid="${pid}"]`).forEach(cc=>{
-      const wb=cc.closest('.product-card')?.querySelector('.wish-btn')
-      if(wb){ wb.textContent='♥'; wb.classList.add('wished') }
+    document.querySelectorAll(`.product-card`).forEach(card=>{
+      const cc = card.querySelector(`.cart-controls[data-pid="${pid}"]`)
+      if(cc){
+        const wb=card.querySelector('.wish-btn')
+        if(wb){ wb.textContent='♥'; wb.classList.add('wished') }
+      }
     })
   })
 }
 
 // ═══════════════════════════════════════════
-// PRODUCT CARD HELPERS - FIXED: Now properly handles all styles
+// PRODUCT CARD RENDER
 // ═══════════════════════════════════════════
 const discPct = p => p.compare_at_price && p.compare_at_price > p.price ? Math.round((1-p.price/p.compare_at_price)*100) : 0
 const isOOS = p => p.track_inventory && p.stock_qty <= 0
+
 function getBadge(p,cls){
-  const bt=p.badge_text||p.badge||''; if(bt){ const bl=bt.toLowerCase(), c=bl.includes('best')||bl.includes('seller')?'badge-bestseller':bl.includes('new')?'badge-new':bl.includes('trend')?'badge-trending':bl.includes('hot')?'badge-hot':bl.includes('sale')?'badge-sale':'badge-custom'; return`<div class="${cls} ${c}">${esc(bt)}</div>` }
+  const bt=p.badge_text||p.badge||''
+  if(bt){ const bl=bt.toLowerCase(), c=bl.includes('best')||bl.includes('seller')?'badge-bestseller':bl.includes('new')?'badge-new':bl.includes('trend')?'badge-trending':bl.includes('hot')?'badge-hot':bl.includes('sale')?'badge-sale':'badge-custom'; return`<div class="${cls} ${c}">${esc(bt)}</div>` }
   const d=discPct(p); if(d>=5) return`<div class="${cls} badge-discount">−${d}%</div>`; return ''
 }
+
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 function renderCard(p, cardOpts){
   cardOpts = cardOpts || {}
-  // Merge global settings with section-specific settings
-  const label = cardOpts.btnLabel || globalCardSettings.btnLabel || 'Add to Cart'
-  const cardBg = cardOpts.cardBg || globalCardSettings.cardBg || '#ffffff'
-  const priceColor = cardOpts.priceColor || globalCardSettings.priceColor || '#000000'
-  const showOrig = cardOpts.showOriginal !== 'no' ? cardOpts.showOriginal : globalCardSettings.showOriginal
-  const showBadge = cardOpts.showBadge !== 'no' ? cardOpts.showBadge : globalCardSettings.showBadge
-  
-  const cardBgStyle = `background:${cardBg} !important;border-color:rgba(0,0,0,.06) !important`
-  const priceStyle = `style="color:${priceColor} !important"`
-  const style = activeStyle // Use global card style
-  const oos=isOOS(p), qty=getQty(p._id), imgUrl=p.images?.[0]||''
-  const si=esa(imgUrl), sn=esa(p.name), d=discPct(p)
-  const cIdx=(p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0)%colorPairs.length
-  const [bg1,bg2c]=colorPairs[cIdx]
-  const gradBg=imgUrl?'':`background:linear-gradient(135deg,${bg1},${bg2c});`
-  const ctrlData=`data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
-  const imgTag=imgUrl?`<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.product-img').classList.add('img-error')">`:''
-  const fallback=`<div class="img-fallback-icon" style="opacity:.2">🛍️</div>`
-  const badge=showBadge?getBadge(p,'product-badge'):''
-  const wish=`<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
+  const label      = cardOpts.btnLabel    || globalCardSettings.btnLabel    || 'Add to Cart'
+  const cardBg     = cardOpts.cardBg      || globalCardSettings.cardBg      || '#ffffff'
+  const priceColor = cardOpts.priceColor  || globalCardSettings.priceColor  || '#000000'
+  const showOrig   = (cardOpts.showOriginal  !== 'no') && (globalCardSettings.showOriginal  !== 'no')
+  const showBadge  = (cardOpts.showBadge     !== 'no') && (globalCardSettings.showBadge     !== 'no')
 
-  let ctrlHTML
-  if(oos) ctrlHTML=`<div class="cart-controls" ${ctrlData}><span class="out-of-stock-label">Out of stock</span></div>`
-  else if(qty>0) ctrlHTML=`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
-  else ctrlHTML=`<div class="cart-controls" ${ctrlData}><button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')"><span>🛒</span> ${esc(label)}</button></div>`
+  const cardBgStyle   = `background:${cardBg}`
+  const priceStyle    = `style="color:${priceColor}"`
+  const style = activeStyle
+  const oos = isOOS(p), qty = getQty(p._id), imgUrl = p.images?.[0] || ''
+  const si = esa(imgUrl), sn = esa(p.name), d = discPct(p)
+  const cIdx = (p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0) % colorPairs.length
+  const [bg1,bg2c] = colorPairs[cIdx]
+  const gradBg = imgUrl ? '' : `background:linear-gradient(135deg,${bg1},${bg2c});`
+  // data attributes stored on cart-controls — note data-image uses HTML-escaped value
+  const ctrlData = `data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+  const imgTag   = imgUrl ? `<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.product-img').classList.add('img-error')">` : ''
+  const fallback = `<div class="img-fallback-icon" style="opacity:.2">🛍️</div>`
+  const badge    = showBadge ? getBadge(p,'product-badge') : ''
+  const wish     = `<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
 
-  if(style==='overlay'){
-    return`<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
+  // ── OVERLAY STYLE ────────────────────────────────────────────
+  if(style === 'overlay'){
+    const ovCtrlData = `data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+    let ovCtrlHTML
+    if(oos){
+      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><span style="opacity:.5;font-size:12px">Out of stock</span></div>`
+    } else if(qty > 0){
+      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><div class="ov-qty-row"><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="ov-qty-val">${qty}</span><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
+    } else {
+      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+    }
+    return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
       <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
         <div class="product-img" style="${gradBg}aspect-ratio:3/4">
           ${badge}${wish}${imgTag}${fallback}
@@ -714,51 +793,57 @@ function renderCard(p, cardOpts){
             <div class="ov-name">${esc(p.name)}</div>
             <div class="ov-price-row">
               <span class="ov-price" ${priceStyle}>${currency}${p.price.toFixed(2)}</span>
-              ${showOrig&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-              ${d?`<span class="ov-discount">−${d}%</span>`:''}
+              ${showOrig && p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+              ${d ? `<span class="ov-discount">−${d}%</span>` : ''}
             </div>
-            ${!oos?`<button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button>`:'<span style="opacity:.5;font-size:12px">Out of stock</span>'}
+            ${ovCtrlHTML}
           </div>
         </div>
       </a>
     </div>`
   }
 
-  const hoverAtc=oos||qty>0?'':`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+  // ── ALL OTHER STYLES ─────────────────────────────────────────
+  // Cart controls block — qty toggle or add button
+  let ctrlInner
+  if(oos){
+    ctrlInner = `<span class="out-of-stock-label">Out of stock</span>`
+  } else if(qty > 0){
+    ctrlInner = `<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div>`
+  } else {
+    ctrlInner = `<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')"><span>🛒</span> ${esc(label)}</button>`
+  }
+  const ctrlHTML = `<div class="cart-controls" ${ctrlData}>${ctrlInner}</div>`
 
-  return`<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
+  // Hover overlay ATC (not in list or if already in cart)
+  const isListStyle = style === 'list'
+  const hoverAtc = (oos || qty > 0 || isListStyle) ? '' :
+    `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+
+  return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
       <div class="product-img" style="${gradBg}">
         ${badge}${wish}${imgTag}${fallback}${hoverAtc}
       </div>
-      <div class="product-info" style="background:${cardBg} !important">
-        ${p.category_name?`<div class="product-cat">${esc(p.category_name)}</div>`:''}
+      <div class="product-info" style="background:${cardBg}">
+        ${p.category_name ? `<div class="product-cat">${esc(p.category_name)}</div>` : ''}
         <div class="product-name">${esc(p.name)}</div>
         <div class="product-price-row">
           <span class="product-price" ${priceStyle}>${currency}${p.price.toFixed(2)}</span>
-          ${showOrig&&p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
-          ${d?`<span class="product-discount">−${d}%</span>`:''}
+          ${showOrig && p.compare_at_price ? `<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''}
+          ${d ? `<span class="product-discount">−${d}%</span>` : ''}
         </div>
       </div>
     </a>
-    <div class="cart-controls-wrap" style="background:${cardBg} !important">
+    <div class="cart-controls-wrap" style="background:${cardBg}">
       ${ctrlHTML}
     </div>
   </div>`
 }
 
-function initCartButtons(){
-  document.querySelectorAll('.cart-controls').forEach(el=>{
-    const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image
-    if(id && n && !isNaN(p)){
-      updateCC(id)
-    }
-  })
-}
-
 function syncGridStyles(){
   document.querySelectorAll('.products-grid').forEach(g=>{
-    g.className=`products-grid ${getGridClass(activeStyle)}`
+    g.className = `products-grid ${getGridClass(activeStyle)}`
   })
 }
 
@@ -889,7 +974,7 @@ function buildSec(sec, isMobile){
       let links=d.navLinks?.length ? d.navLinks : [1,2,3,4,5].map(i=>d[`link${i}Text`]?{text:d[`link${i}Text`],url:d[`link${i}Url`]}:null).filter(Boolean)
       const lh=links.map(l=>{
         const url=l.url||l.href||'#', isA=url.startsWith('#'), sid=isA?url.slice(1):null
-        const oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"`:`onclick="event.preventDefault();scrollToEl('${sid}')"`):`target="${url.startsWith('http')?'_self':'_self'}"`
+        const oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"`:`onclick="event.preventDefault();scrollToEl('${sid}')"`):`target="_self"`
         return `<a href="${esc(url)}" ${oc} style="${d.linkColor?'color:'+d.linkColor:''}">${esc(l.text||l.txt||'')}</a>`
       }).join('')
       const pos=d.sticky!=='no'?'sticky':'relative'
@@ -932,15 +1017,14 @@ function buildSec(sec, isMobile){
       const fc=d.featuredCols||d.columns||0
       const colsStyle=fc?`--cols:${fc};`:''
       const skCount=isMobile?2:(fc||4)
-      // Pass section-specific settings to override global
       const cardOpts = {
-        btnLabel: d.btnText,
-        cardBg: d.cardBg,
-        priceColor: d.priceColor,
-        showOriginal: d.showOriginalPrice,
-        showBadge: d.showProductBadge
+        btnLabel:      d.btnText,
+        cardBg:        d.cardBg,
+        priceColor:    d.priceColor,
+        showOriginal:  d.showOriginalPrice,
+        showBadge:     d.showProductBadge
       }
-      setTimeout(()=>fillFeatured(sid,d.count||1000,cardOpts),0)
+      setTimeout(()=>fillFeatured(sid, d.count||1000, cardOpts), 0)
       return `<section class="tc-section featured-section" id="${sid}" style="${colsStyle}">
         <div class="tc-section-hd">
           <div>
@@ -979,7 +1063,7 @@ function buildSec(sec, isMobile){
       const layout=d.layout||'center'
       return `<section class="tc-promo-banner" style="${bannerStyle}text-align:${layout==='split'?'left':layout};">
         <div class="tc-promo-content" style="${layout==='split'?'max-width:600px;':''}${d.textColor?'color:'+d.textColor:''}">
-          ${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:14px;letter-spacing:.04em">${esc(d.badgeText)}</div>`:'' }
+          ${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:14px;letter-spacing:.04em">${esc(d.badgeText)}</div>`:''}
           <h2>${esc(d.heading||'Limited Time Offer')}</h2>
           ${d.subtext?`<p>${esc(d.subtext)}</p>`:''}
           ${d.couponCode?`<div class="banner-coupon-box">🎫 ${esc(d.couponCode)}</div><br>`:''}
@@ -992,8 +1076,7 @@ function buildSec(sec, isMobile){
       const layout=d.layout||'row'
       const gridCols=layout==='2x2'?2:layout==='column'?1:(isMobile?2:4)
       const badges=[[d.badge1Icon,d.badge1,d.badge1sub],[d.badge2Icon,d.badge2,d.badge2sub],[d.badge3Icon,d.badge3,d.badge3sub],[d.badge4Icon,d.badge4,d.badge4sub]]
-      // Fix light text color issue - ensure contrast
-      const textColor = d.textColor && d.textColor !== '#ececf3' ? d.textColor : 'var(--p)'
+      const textColor=d.textColor&&d.textColor!=='#ececf3'?d.textColor:'var(--p)'
       return `<section class="tc-trust-section" style="${bgS}color:${textColor}">
         <div class="tc-trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">
           ${badges.map(([icon,label,sub])=>`<div class="tc-trust-item">
@@ -1081,9 +1164,7 @@ function buildSec(sec, isMobile){
           ${d.subtext?`<div class="tc-section-subtitle">${esc(d.subtext)}</div>`:''}
         </div>
         <div class="tc-video-box">
-          ${d.videoUrl
-            ?`<iframe src="${esc(d.videoUrl)}" allowfullscreen></iframe>`
-            :`<div class="tc-play-circle">▶</div><div class="tc-play-label">${esc(d.playBtnText)}</div>`}
+          ${d.videoUrl?`<iframe src="${esc(d.videoUrl)}" allowfullscreen></iframe>`:`<div class="tc-play-circle">▶</div><div class="tc-play-label">${esc(d.playBtnText)}</div>`}
         </div>
       </section>`
     }
@@ -1129,7 +1210,7 @@ function buildSec(sec, isMobile){
           <div class="tc-section-title">${esc(d.title||'Frequently Asked Questions')}</div>
           ${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}
         </div>
-        ${defaults.map(([q,a],i)=>`<div class="tc-faq-item" onclick="this.classList.toggle('open')">
+        ${defaults.map(([q,a])=>`<div class="tc-faq-item" onclick="this.classList.toggle('open')">
           <div class="tc-faq-q"><span class="tc-faq-q-text">${esc(q)}</span><span class="tc-faq-icon">+</span></div>
           <div class="tc-faq-a">${esc(a)}</div>
         </div>`).join('')}
@@ -1274,7 +1355,7 @@ function buildSec(sec, isMobile){
 }
 
 // ═══════════════════════════════════════════
-// FILL FEATURED (API)
+// FILL FEATURED
 // ═══════════════════════════════════════════
 async function fillFeatured(secId, count, cardOpts){
   const grid=document.getElementById(`${secId}-grid`); if(!grid)return
@@ -1284,11 +1365,8 @@ async function fillFeatured(secId, count, cardOpts){
     if(!prods.length){ const s=grid.closest('section'); if(s)s.style.display='none'; return }
     grid.className=`products-grid ${getGridClass(activeStyle)}`
     grid.innerHTML=prods.map(p=>renderCard(p,cardOpts)).join('')
-    initCartButtons()
-    prods.forEach(p=>{ if(getQty(p._id)>0)updateCC(p._id) })
     restoreWish()
-    // Enforce card styles after rendering
-    enforceCardStyles()
+    updateCartUI()
   }catch(e){
     console.warn('[featured]',e.message)
     const s=document.getElementById(secId); if(s)s.style.display='none'
@@ -1296,13 +1374,12 @@ async function fillFeatured(secId, count, cardOpts){
 }
 
 // ═══════════════════════════════════════════
-// FILL CATEGORIES (API)
+// FILL CATEGORIES
 // ═══════════════════════════════════════════
 async function fillCats(secId, cols, d, catStyle){
   const grid=document.getElementById(`${secId}-grid`); if(!grid)return
   const style=(catStyle||'image').toLowerCase()
   const isCircle=style==='circle'||style==='circular'||style==='round'
-  const isSimple=style==='simple'||style==='minimal'||style==='icon'
   if(isCircle)grid.classList.add('cats-circle')
   try{
     const cats=await fetch(`${API}/shop/${slug}/categories`).then(r=>r.json())
@@ -1316,7 +1393,7 @@ async function fillCats(secId, cols, d, catStyle){
       const emoji=c.icon||getEmoji(c.name)
       const count=showCount&&c.product_count!=null?`${c.product_count}+`:''
       if(isCircle){
-        const imgContent=c.image_url?`<img class="tc-cat-img" src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${emoji}</span>'">`:``
+        const imgContent=c.image_url?`<img class="tc-cat-img" src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<span style=\\'font-size:44px\\'>${emoji}</span>'">`:''
         return `<div class="tc-cat-card"><div class="tc-cat-img-wrap">${imgContent||`<span style="font-size:44px">${emoji}</span>`}</div><div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${count?`<span class="tc-cat-count">${count}</span>`:''}</div></div>`
       }
       if(c.image_url) return `<div class="tc-cat-card"><div class="tc-cat-img-wrap"><img class="tc-cat-img" src="${esc(c.image_url)}" alt="${esc(c.name)}" loading="lazy"></div><div class="tc-cat-footer"><span class="tc-cat-name">${esc(c.name)}</span>${count?`<span class="tc-cat-count">${count}</span>`:''}</div></div>`
@@ -1327,30 +1404,7 @@ async function fillCats(secId, cols, d, catStyle){
 }
 
 // ═══════════════════════════════════════════
-// ENFORCE CARD STYLES
-// ═══════════════════════════════════════════
-function enforceCardStyles() {
-  // Apply global card styles to all product cards
-  document.querySelectorAll('.product-card').forEach(card => {
-    if (globalCardSettings.cardBg) {
-      card.style.setProperty('background', globalCardSettings.cardBg, 'important')
-      const info = card.querySelector('.product-info')
-      const ctrlWrap = card.querySelector('.cart-controls-wrap')
-      if (info) info.style.setProperty('background', globalCardSettings.cardBg, 'important')
-      if (ctrlWrap) ctrlWrap.style.setProperty('background', globalCardSettings.cardBg, 'important')
-    }
-    if (globalCardSettings.priceColor) {
-      const prices = card.querySelectorAll('.product-price, .ov-price')
-      prices.forEach(p => p.style.setProperty('color', globalCardSettings.priceColor, 'important'))
-    }
-  })
-  
-  // Ensure all cart controls are properly initialized
-  initCartButtons()
-}
-
-// ═══════════════════════════════════════════
-// COLOR HELPERS
+// COLOR HELPER
 // ═══════════════════════════════════════════
 function isColorDark(hex){
   const c=(hex||'').replace('#','')
@@ -1379,7 +1433,7 @@ function startCountdowns(){
 }
 
 // ═══════════════════════════════════════════
-// LOAD THEME & APPLY SETTINGS
+// LOAD THEME
 // ═══════════════════════════════════════════
 async function loadTheme(){
   try{
@@ -1400,24 +1454,23 @@ async function loadTheme(){
 
 function applySettings(s){
   if(!s||typeof s!=='object')return
-  const primary=readKey(s,'primary_color','primaryColor')||'#0f0f0f'
-  const bg=readKey(s,'secondary_color','bgColor','bg_color','background_color')||'#fafafa'
-  const text=readKey(s,'accent_color','textColor','text_color')||'#0f0f0f'
-  const radiusRaw=readKey(s,'radius','border_radius')||'16px'
-  const radius=typeof radiusRaw==='number'?`${radiusRaw}px`:String(radiusRaw).includes('px')?radiusRaw:`${radiusRaw}px`
-  const font=readKey(s,'font_heading','fontHeading','font')||'DM Sans'
-  const btnStyle=readKey(s,'button_style','buttonStyle','btnStyle')||'rounded'
-  const cols=readKey(s,'cols','columns')||4
-  const cardBg=readKey(s,'card_bg','cardBg','card_background')||'#ffffff'
-  const navBg=readKey(s,'nav_bg','navBg')
+  const primary  = readKey(s,'primary_color','primaryColor')||'#0f0f0f'
+  const bg       = readKey(s,'secondary_color','bgColor','bg_color','background_color')||'#fafafa'
+  const text     = readKey(s,'accent_color','textColor','text_color')||'#0f0f0f'
+  const radiusRaw= readKey(s,'radius','border_radius')||'16px'
+  const radius   = typeof radiusRaw==='number'?`${radiusRaw}px`:String(radiusRaw).includes('px')?radiusRaw:`${radiusRaw}px`
+  const font     = readKey(s,'font_heading','fontHeading','font')||'DM Sans'
+  const btnStyle = readKey(s,'button_style','buttonStyle','btnStyle')||'rounded'
+  const cols     = readKey(s,'cols','columns')||4
+  const cardBg   = readKey(s,'card_bg','cardBg','card_background')||'#ffffff'
+  const navBg    = readKey(s,'nav_bg','navBg')
 
-  // Store global card settings
   globalCardSettings = {
-    cardBg: cardBg,
-    priceColor: readKey(s,'price_color','priceColor')||'#000000',
-    btnLabel: readKey(s,'add_to_cart_label','btnText')||'Add to Cart',
+    cardBg:       cardBg,
+    priceColor:   readKey(s,'price_color','priceColor')||'#000000',
+    btnLabel:     readKey(s,'add_to_cart_label','btnText')||'Add to Cart',
     showOriginal: readKey(s,'show_original_price','showOldPrice')||'yes',
-    showBadge: readKey(s,'show_product_badge','showBadge')||'no'
+    showBadge:    readKey(s,'show_product_badge','showBadge')||'no'
   }
 
   R.style.setProperty('--primary',primary)
@@ -1427,7 +1480,7 @@ function applySettings(s){
   R.style.setProperty('--radius',radius)
   R.style.setProperty('--card-radius',radius)
   R.style.setProperty('--card-bg',cardBg)
-  R.style.setProperty('--card-price-color', globalCardSettings.priceColor)
+  R.style.setProperty('--card-price-color',globalCardSettings.priceColor)
   R.style.setProperty('--font',`'${font}',system-ui,sans-serif`)
   R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'4px':radius)
   R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
@@ -1451,7 +1504,7 @@ function applySettings(s){
 }
 
 // ═══════════════════════════════════════════
-// RENDER SECTIONS (FIXED ORDERING)
+// RENDER SECTIONS
 // ═══════════════════════════════════════════
 function renderSections(sections){
   const isMobile=window.innerWidth<=768
@@ -1466,19 +1519,16 @@ function renderSections(sections){
 
   const page=document.getElementById('page-sections')
   page.innerHTML=''
-
-  // Append each section in the sorted order
   visible.forEach(sec => {
-    const el = document.createElement('div');
-    el.innerHTML = buildSec(sec, isMobile);
-    while(el.firstChild) page.appendChild(el.firstChild);
-  });
+    const el=document.createElement('div')
+    el.innerHTML=buildSec(sec,isMobile)
+    while(el.firstChild) page.appendChild(el.firstChild)
+  })
 
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=getCart().reduce((s,x)=>s+x.qty,0))
-  setTimeout(() => {
+  setTimeout(()=>{
     startCountdowns()
-    enforceCardStyles() // Enforce styles after all sections are rendered
-    updateCartUI() // Ensure cart UI is up to date
+    updateCartUI()
   }, 100)
 
   window.addEventListener('resize',()=>{
