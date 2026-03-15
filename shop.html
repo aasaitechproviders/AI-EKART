@@ -1248,7 +1248,10 @@ async function loadTheme(){
     else if(raw.settings || raw.sections) doc = raw
     else doc = { settings: raw, sections: [] }
     themeData = doc
-    const settings = doc.settings || {}
+
+    // ★ FIX: If doc has no settings property, use the whole doc as settings
+    const settings = doc.settings || doc
+
     applySettings(settings)
     const sections = (doc.sections || []).map(s => ({...s, type: resolveType(s.type)}))
     renderSections(sections)
