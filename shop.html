@@ -1370,7 +1370,7 @@ function applySettings(s){
 }
 
 // ═══════════════════════════════════════════
-// RENDER SECTIONS
+// RENDER SECTIONS (FIXED ORDERING)
 // ═══════════════════════════════════════════
 function renderSections(sections){
   const isMobile=window.innerWidth<=768
@@ -1386,14 +1386,12 @@ function renderSections(sections){
   const page=document.getElementById('page-sections')
   page.innerHTML=''
 
-  const navSec=visible.find(s=>s.type==='navbar')
-  const heroSec=visible.find(s=>s.type==='hero')
-  const rest=visible.filter(s=>s.type!=='navbar'&&s.type!=='hero')
-
-  const append=secData=>{ const el=document.createElement('div'); el.innerHTML=buildSec(secData,isMobile); while(el.firstChild)page.appendChild(el.firstChild) }
-  if(navSec)append(navSec)
-  if(heroSec)append(heroSec)
-  rest.forEach(s=>append(s))
+  // Append each section in the sorted order (no special forcing)
+  visible.forEach(sec => {
+    const el = document.createElement('div');
+    el.innerHTML = buildSec(sec, isMobile);
+    while(el.firstChild) page.appendChild(el.firstChild);
+  });
 
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=getCart().reduce((s,x)=>s+x.qty,0))
   setTimeout(startCountdowns,100)
