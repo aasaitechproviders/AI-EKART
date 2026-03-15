@@ -1018,6 +1018,12 @@ function applyFilters(secId){
   const view = filter.view || secStyle
   applyStyleToGrid(grid, view)
 
+  /* Re-apply section size vars (view toggle may have reset grid; size cascades from secEl) */
+  const sizeKeyF=(grid._cardOpts&&grid._cardOpts.cardSize)||activeSize
+  const sizeVarsF=CARD_SIZE_VARS[sizeKeyF]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
+  const secElF=document.getElementById(secId)
+  if(secElF) Object.entries(sizeVarsF).forEach(([k,v])=>secElF.style.setProperty(k,v))
+
   /* Render */
   const cardOpts = grid._cardOpts || {}
   if(!filtered.length){
@@ -1154,7 +1160,7 @@ function gd(sec){
     m3name:str('m3name','team3name'),m3role:str('m3role','team3role'),m3img:str('m3img','team3img'),
     contactEmail:str('email','contactEmail'),contactPhone:str('phone','contactPhone'),contactAddress:str('address','contactAddress'),
     btnSubmit:str('btnText','submitText')||'Send Message',showCount:str('showCount','show_count')||'yes',
-    catStyle:str('style','catStyle','layout')||'image',cardStyle:str('cardStyle','card_style'),
+    catStyle:str('style','catStyle','layout')||'image',cardStyle:str('cardStyle','card_style'),cardSize:str('cardSize','card_size'),
     navLinks:get('navLinks','nav_links'),cartText:str('cartText','cart_text')||'Cart',
     link1Text:str('link1Text')||'Home',link1Url:str('link1Url')||'#',
     link2Text:str('link2Text')||'Products',link2Url:str('link2Url')||'#',
@@ -1208,9 +1214,13 @@ function buildSec(sec,isMobile){
       const skCount=isMobile?2:(fc||4)
       const secCardStyle=d.cardStyle||readKey(sec.data||{},'cardStyle','card_style')||readKey(sec.settings||{},'cardStyle','card_style')||activeStyle
       const secStyle=ALL_CARD_STYLES.has(secCardStyle)?secCardStyle:activeStyle
-      const cardOpts={ btnLabel:d.btnText,cardBg:d.cardBg,priceColor:d.priceColor,showOriginal:d.showOriginalPrice,showBadge:d.showProductBadge,cardStyle:secStyle }
+      /* Per-section card size — section setting overrides global */
+      const secCardSize=d.cardSize||readKey(sec.data||{},'cardSize','card_size')||readKey(sec.settings||{},'cardSize','card_size')||activeSize
+      const secSizeVars=CARD_SIZE_VARS[secCardSize]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
+      const secSizeStyle=Object.entries(secSizeVars).map(([k,v])=>k+':'+v).join(';')
+      const cardOpts={ btnLabel:d.btnText,cardBg:d.cardBg,priceColor:d.priceColor,showOriginal:d.showOriginalPrice,showBadge:d.showProductBadge,cardStyle:secStyle,cardSize:secCardSize }
       setTimeout(()=>fillFeatured(sid,d.count||1000,cardOpts),0)
-      return`<section class="tc-section featured-section" id="${sid}" style="${colsStyle}"><div class="tc-section-hd"><div><div class="tc-section-title">${esc(d.title||'Featured Products')}</div>${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}</div><a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a></div><div class="products-toolbar" id="${sid}-toolbar"></div><div class="products-grid" id="${sid}-grid" data-style="${secStyle}">${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:3/4;min-height:180px"></div>`).join('')}</div></section>`
+      return`<section class="tc-section featured-section" id="${sid}" style="${colsStyle}${secSizeStyle}"><div class="tc-section-hd"><div><div class="tc-section-title">${esc(d.title||'Featured Products')}</div>${d.subtitle?`<div class="tc-section-subtitle">${esc(d.subtitle)}</div>`:''}</div><a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a></div><div class="products-toolbar" id="${sid}-toolbar"></div><div class="products-grid" id="${sid}-grid" data-style="${secStyle}">${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:3/4;min-height:180px"></div>`).join('')}</div></section>`
     }
 
     case 'categories':{
@@ -1347,6 +1357,12 @@ async function fillFeatured(secId,count,cardOpts){
     const sectionStyle=cardOpts.cardStyle||activeStyle
     grid.className='products-grid'
     applyStyleToGrid(grid,sectionStyle)
+
+    /* Apply per-section card size vars to section element so CSS tokens cascade */
+    const sizeKey=cardOpts.cardSize||activeSize
+    const sizeVarsNow=CARD_SIZE_VARS[sizeKey]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
+    const secEl=document.getElementById(secId)
+    if(secEl) Object.entries(sizeVarsNow).forEach(([k,v])=>secEl.style.setProperty(k,v))
 
     /* Build toolbar */
     setupToolbar(secId,prods,cardOpts)
