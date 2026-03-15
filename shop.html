@@ -80,15 +80,41 @@ a{color:inherit;text-decoration:none}
 /* ════ SECTION BASE ════ */
 .featured-section{max-width:1440px;margin:0 auto;box-sizing:border-box}
 
-/* ════ PRODUCT GRID ════ */
-.products-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:var(--card-gap,20px)}
+/* ════ PRODUCT GRID ════
+   Grid columns controlled ONLY via inline style="--cols:N" on the section.
+   Style variants use data-style attribute — higher specificity, zero !important.
+   ════════════════════════════════════════════════════════════════════════════ */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(var(--cols,4),1fr);
+  gap:var(--card-gap,20px);
+}
 
 /* ════ BASE CARD ════ */
-.product-card{background:var(--card-bg);border-radius:var(--card-radius);overflow:hidden;position:relative;cursor:pointer;transition:transform .22s var(--ease),box-shadow .22s var(--ease);border:1px solid var(--border);display:flex;flex-direction:column}
+.product-card{
+  background:var(--card-bg);
+  border-radius:var(--card-radius);
+  overflow:hidden;
+  position:relative;
+  cursor:pointer;
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s;
+  border:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+}
 .product-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
-/* card-link wraps only image + info, NOT controls */
-.card-link{display:flex;flex-direction:column;flex:1;text-decoration:none;color:inherit;min-width:0;cursor:pointer}
-.product-img{width:100%;aspect-ratio:var(--card-aspect,4/5);background:var(--bg2);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-link{display:flex;flex-direction:column;flex:1;color:inherit;min-width:0;cursor:pointer}
+.product-img{
+  width:100%;
+  aspect-ratio:var(--card-aspect,4/5);
+  background:var(--bg2);
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
 .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s var(--ease);display:block}
 .product-card:hover .product-img img{transform:scale(1.05)}
 .img-fallback-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;pointer-events:none}
@@ -133,116 +159,92 @@ a{color:inherit;text-decoration:none}
 .qty-btn{flex:0 0 42px;height:100%;border:none;background:var(--bg2);color:var(--p);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
 .qty-btn:hover{background:var(--bg3)}
 .qty-value{flex:1;text-align:center;font-size:13.5px;font-weight:700;color:var(--p)}
-.product-card.in-cart{border-color:var(--primary)!important}
+.product-card.in-cart{border-color:var(--primary)}
 .product-card.in-cart::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary);z-index:5}
 
-/* ════ CARD STYLE VARIANTS ════ */
+/* ══════════════════════════════════════════════════════
+   CARD STYLE VARIANTS  — scoped to [data-style="..."]
+   Higher specificity than .products-grid .product-card
+   No !important needed.
+   ══════════════════════════════════════════════════════ */
 
-/* MINIMAL */
-.minimal-grid .product-card{background:transparent!important;border:1.5px solid var(--border)!important;box-shadow:none!important}
-.minimal-grid .product-card:hover{border-color:var(--primary)!important;transform:none!important;box-shadow:none!important}
-.minimal-grid .product-card::before{display:none}
-.minimal-grid .product-img{border-bottom:1px solid var(--border)!important}
+/* ── MINIMAL ── */
+[data-style="minimal"].products-grid{gap:14px}
+[data-style="minimal"] .product-card{background:transparent;border:1.5px solid var(--border);box-shadow:none}
+[data-style="minimal"] .product-card:hover{border-color:var(--primary);transform:none;box-shadow:none}
+[data-style="minimal"] .product-card::before{display:none}
+[data-style="minimal"] .product-img{border-bottom:1px solid var(--border)}
 
-/* BOLD */
-.bold-grid .product-card{border-top:3px solid var(--primary)!important}
-.bold-grid .product-card::before{display:none}
+/* ── BOLD ── */
+[data-style="bold"] .product-card{border-top:3px solid var(--primary)}
+[data-style="bold"] .product-card::before{display:none}
 
-/* ELEVATED */
-.elevated-grid .product-card{border:none!important;box-shadow:0 2px 14px rgba(0,0,0,.07)!important}
-.elevated-grid .product-card:hover{transform:translateY(-6px)!important;box-shadow:0 20px 52px rgba(0,0,0,.14)!important}
+/* ── ELEVATED ── */
+[data-style="elevated"] .product-card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07)}
+[data-style="elevated"] .product-card:hover{transform:translateY(-6px);box-shadow:0 20px 52px rgba(0,0,0,.14)}
 
-/* ════ COMPACT ════ */
-.compact-grid{gap:10px!important}
-.compact-grid .product-img{aspect-ratio:1/1!important}
-.compact-grid .product-info{padding:6px 8px 4px!important}
-.compact-grid .product-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px!important}
-.compact-grid .product-price{font-size:12px!important}
-.compact-grid .product-cat{display:none!important}
-.compact-grid .product-compare{display:none!important}
-.compact-grid .product-discount{display:none!important}
-.compact-grid .cart-controls-wrap{padding:4px 8px 8px!important}
-.compact-grid .btn-add{padding:6px 8px!important;font-size:10px!important}
-.compact-grid .cart-qty-row{height:32px!important}
-.compact-grid .qty-btn{flex:0 0 32px!important;font-size:14px!important}
-.compact-grid .qty-value{font-size:11px!important}
+/* ── COMPACT ── */
+[data-style="compact"].products-grid{gap:10px}
+[data-style="compact"] .product-img{aspect-ratio:1/1}
+[data-style="compact"] .product-info{padding:6px 8px 4px}
+[data-style="compact"] .product-name{font-size:11px;-webkit-line-clamp:1;margin-bottom:2px}
+[data-style="compact"] .product-price{font-size:12px}
+[data-style="compact"] .product-cat,
+[data-style="compact"] .product-compare,
+[data-style="compact"] .product-discount{display:none}
+[data-style="compact"] .cart-controls-wrap{padding:4px 8px 8px}
+[data-style="compact"] .btn-add{padding:6px 8px;font-size:10px}
+[data-style="compact"] .cart-qty-row{height:32px}
+[data-style="compact"] .qty-btn{flex:0 0 32px;font-size:14px}
+[data-style="compact"] .qty-value{font-size:11px}
 
-/* ════ LIST — complete rebuild ════ */
-.list-grid{grid-template-columns:1fr!important;gap:12px!important}
-.list-grid .product-card{
-  flex-direction:row!important;
-  height:140px!important;
-  border-radius:var(--card-radius)!important;
-  overflow:hidden;
-  align-items:stretch;
+/* ── LIST ──
+   Full horizontal row: [image 140px] [info flex] [controls 160px]
+   The grid is forced to 1 column via JS setProperty on --cols.
+   We only handle the card layout here.
+*/
+[data-style="list"].products-grid{gap:12px}
+[data-style="list"] .product-card{flex-direction:row;height:140px;align-items:stretch}
+[data-style="list"] .card-link{flex-direction:row;flex:1;min-width:0}
+[data-style="list"] .product-img{
+  width:140px;min-width:140px;height:140px;
+  aspect-ratio:unset;border-radius:0;flex-shrink:0;
 }
-/* card-link = image + info side by side */
-.list-grid .card-link{
-  flex-direction:row!important;
-  flex:1!important;
-  min-width:0;
+[data-style="list"] .product-info{
+  flex:1;padding:14px 16px;
+  display:flex;flex-direction:column;justify-content:center;
+  border-left:1px solid var(--border);min-width:0;
 }
-.list-grid .product-img{
-  width:140px!important;
-  min-width:140px!important;
-  height:140px!important;
-  aspect-ratio:unset!important;
-  border-radius:0!important;
-  flex-shrink:0;
+[data-style="list"] .product-name{-webkit-line-clamp:2;white-space:normal}
+[data-style="list"] .product-card:hover{transform:none;box-shadow:var(--sh1)}
+[data-style="list"] .cart-controls-wrap{
+  padding:0 16px;display:flex;align-items:center;
+  flex-shrink:0;width:160px;border-left:1px solid var(--border);
 }
-.list-grid .product-info{
-  flex:1!important;
-  padding:14px 16px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  justify-content:center!important;
-  border-left:1px solid var(--border);
-  min-width:0;
-}
-.list-grid .product-name{-webkit-line-clamp:2!important;white-space:normal!important}
-.list-grid .product-card:hover{transform:none!important;box-shadow:var(--sh1)!important}
-/* controls sit at far right, not inside card-link */
-.list-grid .cart-controls-wrap{
-  padding:0 16px!important;
-  display:flex!important;
-  align-items:center!important;
-  flex-shrink:0!important;
-  width:160px!important;
-  border-left:1px solid var(--border);
-}
-.list-grid .cart-controls{width:100%}
-.list-grid .btn-add{white-space:nowrap;padding:9px 12px!important;font-size:11px!important}
-.list-grid .cart-qty-row{height:38px!important;width:100%!important}
-.list-grid .wish-btn{opacity:1}
-/* hide hover overlay in list */
-.list-grid .card-atc-overlay{display:none!important}
-/* hide in-cart top bar — list has border */
-.list-grid .product-card.in-cart::before{display:none}
-@media(max-width:768px){
-  .list-grid .product-card{height:auto!important;flex-direction:column!important}
-  .list-grid .card-link{flex-direction:column!important}
-  .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important;aspect-ratio:unset!important}
-  .list-grid .product-info{border-left:none!important;border-top:1px solid var(--border)!important}
-  .list-grid .cart-controls-wrap{width:100%!important;border-left:none!important;border-top:1px solid var(--border)!important;padding:8px 12px!important}
-  .list-grid .cart-qty-row{width:100%!important}
-}
+[data-style="list"] .cart-controls{width:100%}
+[data-style="list"] .btn-add{white-space:nowrap;padding:9px 12px;font-size:11px}
+[data-style="list"] .cart-qty-row{height:38px;width:100%}
+[data-style="list"] .wish-btn{opacity:1}
+[data-style="list"] .card-atc-overlay{display:none}
+[data-style="list"] .product-card.in-cart::before{display:none}
 
-/* ════ MAGAZINE ════ */
-.magazine-grid{gap:14px!important}
-.magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
-.magazine-grid .product-card:first-child .product-img{aspect-ratio:16/9!important}
-.magazine-grid .product-card:first-child .product-name{font-size:calc(var(--card-name-fs) * 1.3)!important}
-.magazine-grid .product-card:first-child .product-price{font-size:calc(var(--card-price-fs) * 1.2)!important}
-@media(max-width:768px){
-  .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
-  .magazine-grid .product-card:first-child .product-img{aspect-ratio:var(--card-aspect)!important}
-}
+/* ── MAGAZINE ──
+   First card spans 2 cols × 2 rows. Grid col count comes from --cols on section.
+   span 2 only makes sense when cols >= 3.
+*/
+[data-style="magazine"].products-grid{gap:14px}
+[data-style="magazine"] .product-card:first-child{grid-column:span 2;grid-row:span 2}
+[data-style="magazine"] .product-card:first-child .product-img{aspect-ratio:4/3}
+[data-style="magazine"] .product-card:first-child .product-name{font-size:calc(var(--card-name-fs) * 1.3)}
+[data-style="magazine"] .product-card:first-child .product-price{font-size:calc(var(--card-price-fs) * 1.2)}
+[data-style="magazine"] .product-card:first-child .cart-controls-wrap{padding:10px 16px 16px}
 
-/* ════ OVERLAY ════ */
-.overlay-grid .product-card{overflow:hidden}
-.overlay-grid .product-img{aspect-ratio:3/4!important}
-.overlay-grid .product-info,.overlay-grid .cart-controls-wrap{display:none!important}
-.overlay-grid .product-card::before{display:none}
+/* ── OVERLAY ── */
+[data-style="overlay"] .product-card{overflow:hidden}
+[data-style="overlay"] .product-img{aspect-ratio:3/4}
+[data-style="overlay"] .product-info,
+[data-style="overlay"] .cart-controls-wrap{display:none}
+[data-style="overlay"] .product-card::before{display:none}
 .ov-layer{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.45) 55%,transparent 100%);padding:24px 14px 14px;color:#fff;z-index:3}
 .ov-name{font-size:13.5px;font-weight:700;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ov-price-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -251,15 +253,36 @@ a{color:inherit;text-decoration:none}
 .ov-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.85);padding:2px 7px;border-radius:4px}
 .ov-btn{width:100%;padding:8px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s}
 .ov-btn:hover{background:rgba(255,255,255,.28)}
-/* overlay qty row — dark theme */
-.overlay-grid .ov-qty-row{display:flex;align-items:center;height:36px;border-radius:var(--btn-r);overflow:hidden;border:1px solid rgba(255,255,255,.35);width:100%}
-.overlay-grid .ov-qty-btn{flex:0 0 36px;height:100%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
-.overlay-grid .ov-qty-btn:hover{background:rgba(255,255,255,.28)}
-.overlay-grid .ov-qty-val{flex:1;text-align:center;font-size:13px;font-weight:700;color:#fff}
+.ov-qty-row{display:flex;align-items:center;height:36px;border-radius:var(--btn-r);overflow:hidden;border:1px solid rgba(255,255,255,.35);width:100%}
+.ov-qty-btn{flex:0 0 36px;height:100%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
+.ov-qty-btn:hover{background:rgba(255,255,255,.28)}
+.ov-qty-val{flex:1;text-align:center;font-size:13px;font-weight:700;color:#fff}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media(max-width:768px){
+  /* list collapses to vertical */
+  [data-style="list"] .product-card{height:auto;flex-direction:column}
+  [data-style="list"] .card-link{flex-direction:column}
+  [data-style="list"] .product-img{width:100%;min-width:unset;height:200px;aspect-ratio:unset}
+  [data-style="list"] .product-info{border-left:none;border-top:1px solid var(--border)}
+  [data-style="list"] .cart-controls-wrap{width:100%;border-left:none;border-top:1px solid var(--border);padding:8px 12px}
+  [data-style="list"] .cart-qty-row{width:100%}
+  /* magazine: first card no longer spans on mobile — set via JS removing span */
+  [data-style="magazine"] .product-card:first-child{grid-column:span 1;grid-row:span 1}
+  [data-style="magazine"] .product-card:first-child .product-img{aspect-ratio:var(--card-aspect)}
+}
 
 /* ════ SKELETON ════ */
 @keyframes shimmer{0%{background-position:-800px 0}100%{background-position:800px 0}}
-.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#fafafa 50%,#f0f0f0 75%)!important;background-size:800px 100%!important;animation:shimmer 1.6s ease-in-out infinite!important;border-radius:var(--radius)!important;border:none!important}
+.skeleton{
+  background:linear-gradient(90deg,#f0f0f0 25%,#fafafa 50%,#f0f0f0 75%);
+  background-size:800px 100%;
+  animation:shimmer 1.6s ease-in-out infinite;
+  border-radius:var(--radius);
+  border:none;
+}
 .skeleton *{visibility:hidden}
 
 /* ════ CART BAR ════ */
@@ -501,27 +524,30 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1200px){
   :root{--cols:3}
   .hdr-inner,.tc-navbar{padding:0 28px}
-  .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials,.featured-section{padding-left:28px!important;padding-right:28px!important}
+  .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials,.featured-section{padding-left:28px;padding-right:28px}
   .cart-bar{padding:14px 28px}
 }
 @media(max-width:768px){
-  :root{--cols:2;--navbar-h:56px}
+  :root{--navbar-h:56px}
   .hdr-inner,.tc-navbar{padding:0 16px}
   .hdr-nav,.nav-links{display:none}
-  .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials,.featured-section{padding-left:16px!important;padding-right:16px!important}
+  .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,.tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,.tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,.tc-team-section,.tc-contact-section,.tc-testimonials,.featured-section{padding-left:16px;padding-right:16px}
   .tc-section-title{font-size:22px}
-  .tc-footer-grid{grid-template-columns:1fr!important;gap:28px!important}
-  .tc-trust-grid{grid-template-columns:repeat(2,1fr)!important}
-  .tc-trust-item{border-right:none!important;border-bottom:1px solid var(--border)}
-  .tc-testimonials-grid{grid-template-columns:1fr!important}
-  .products-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px!important}
-  .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
+  .tc-footer-grid{grid-template-columns:1fr;gap:28px}
+  .tc-trust-grid{grid-template-columns:repeat(2,1fr)}
+  .tc-trust-item{border-right:none;border-bottom:1px solid var(--border)}
+  .tc-testimonials-grid{grid-template-columns:1fr}
+  /* Mobile grid: 2 cols for all styles except list (handled in data-style block) */
+  .products-grid:not([data-style="list"]){grid-template-columns:repeat(2,1fr);gap:12px}
+  /* Magazine on mobile: collapse first-card span */
+  .products-grid[data-style="magazine"] .product-card:first-child{grid-column:span 1;grid-row:span 1}
+  .products-grid[data-style="magazine"] .product-card:first-child .product-img{aspect-ratio:var(--card-aspect)}
   .tc-newsletter-form{flex-direction:column}
-  .tc-newsletter-input{min-width:unset!important;width:100%!important}
-  .about-grid,.imagetext-grid,.contact-grid{grid-template-columns:1fr!important;gap:32px!important}
-  .about-stats{grid-template-columns:repeat(3,1fr)!important}
-  .offers-grid{grid-template-columns:1fr!important}
-  .team-grid{grid-template-columns:repeat(2,1fr)!important}
+  .tc-newsletter-input{min-width:unset;width:100%}
+  .about-grid,.imagetext-grid,.contact-grid{grid-template-columns:1fr;gap:32px}
+  .about-stats{grid-template-columns:repeat(3,1fr)}
+  .offers-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
   .cart-bar{padding:12px 16px}
   .tc-cd-unit{padding:16px 18px;min-width:72px}
   .tc-cd-num{font-size:32px}
@@ -597,7 +623,22 @@ const GRID_CLASS = {
   magazine:'magazine-grid',overlay:'overlay-grid'
 }
 
-function getGridClass(style){ return GRID_CLASS[style] || 'classic-grid' }
+function getGridClass(style){ return '' } // no longer used — we use data-style attribute
+
+function applyStyleToGrid(gridEl, style){
+  // Remove any old style classes (backward compat cleanup)
+  gridEl.classList.remove('classic-grid','minimal-grid','bold-grid','elevated-grid',
+    'compact-grid','list-grid','magazine-grid','overlay-grid')
+  gridEl.setAttribute('data-style', style || 'classic')
+
+  // List needs 1 column regardless of --cols setting
+  if(style === 'list'){
+    gridEl.style.setProperty('--cols', '1')
+  } else {
+    // Let the section/global --cols value apply — remove any list override
+    gridEl.style.removeProperty('--cols')
+  }
+}
 
 function applyCardSizeVars(size){
   const vars = CARD_SIZE_VARS[size] || CARD_SIZE_VARS.medium
@@ -874,9 +915,7 @@ function renderCard(p, cardOpts){
 }
 
 function syncGridStyles(){
-  document.querySelectorAll('.products-grid').forEach(g=>{
-    g.className = `products-grid ${getGridClass(activeStyle)}`
-  })
+  document.querySelectorAll('.products-grid').forEach(g => applyStyleToGrid(g, activeStyle))
 }
 
 // ═══════════════════════════════════════════
@@ -1065,7 +1104,7 @@ function buildSec(sec, isMobile){
           </div>
           <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
         </div>
-        <div class="products-grid ${getGridClass(activeStyle)}" id="${sid}-grid">
+        <div class="products-grid" id="${sid}-grid" data-style="${activeStyle}">
           ${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:4/5;min-height:200px"></div>`).join('')}
         </div>
       </section>`
@@ -1395,7 +1434,8 @@ async function fillFeatured(secId, count, cardOpts){
     const data=await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json())
     const prods=data.products||[]
     if(!prods.length){ const s=grid.closest('section'); if(s)s.style.display='none'; return }
-    grid.className=`products-grid ${getGridClass(activeStyle)}`
+    grid.className='products-grid'
+    applyStyleToGrid(grid, activeStyle)
     grid.innerHTML=prods.map(p=>renderCard(p,cardOpts)).join('')
     restoreWish()
     updateCartUI()
@@ -1515,7 +1555,8 @@ function applySettings(s){
   R.style.setProperty('--card-price-color',globalCardSettings.priceColor)
   R.style.setProperty('--font',`'${font}',system-ui,sans-serif`)
   R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'4px':radius)
-  R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
+  // Set default cols — individual grids can override via inline style
+  R.style.setProperty('--cols', String(parseInt(cols)||4))
   if(navBg) R.style.setProperty('--navbar-bg',navBg)
   document.body.style.background=bg
 
@@ -1564,9 +1605,9 @@ function renderSections(sections){
   }, 100)
 
   window.addEventListener('resize',()=>{
-    const cols=themeData?.settings?.cols||themeData?.settings?.columns||4
-    R.style.setProperty('--cols',window.innerWidth<=768?'2':String(parseInt(cols)||4))
     applyCardSizeVars(activeSize)
+    // Re-sync list grids to always keep --cols:1
+    document.querySelectorAll('.products-grid[data-style="list"]').forEach(g => g.style.setProperty('--cols','1'))
   },{passive:true})
 }
 
