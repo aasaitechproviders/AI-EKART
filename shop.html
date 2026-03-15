@@ -87,7 +87,7 @@ a{color:inherit;text-decoration:none}
 .product-card{background:var(--card-bg);border-radius:var(--card-radius);overflow:hidden;position:relative;cursor:pointer;transition:transform .22s var(--ease),box-shadow .22s var(--ease);border:1px solid var(--border);display:flex;flex-direction:column}
 .product-card:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
 /* card-link wraps only image + info, NOT controls */
-.card-link{display:flex;flex-direction:column;flex:1;text-decoration:none;color:inherit;min-width:0}
+.card-link{display:flex;flex-direction:column;flex:1;text-decoration:none;color:inherit;min-width:0;cursor:pointer}
 .product-img{width:100%;aspect-ratio:var(--card-aspect,4/5);background:var(--bg2);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s var(--ease);display:block}
 .product-card:hover .product-img img{transform:scale(1.05)}
@@ -630,9 +630,34 @@ const getCart = () => JSON.parse(localStorage.getItem('cart_'+slug)||'[]')
 const saveCart = c => localStorage.setItem('cart_'+slug, JSON.stringify(c))
 const getQty = id => { const i=getCart().find(x=>x.product_id===id&&!x.variant); return i?i.qty:0 }
 
-function incCart(id,name,price,image){
+// Resolve product data from the nearest cart-controls or ov-ctrl element
+function getProductData(pid){
+  const el = document.querySelector(`.cart-controls[data-pid="${pid}"]`) ||
+             document.querySelector(`.ov-ctrl[data-pid="${pid}"]`)
+  if(!el) return null
+  return { id: pid, name: el.dataset.name, price: parseFloat(el.dataset.price), image: el.dataset.image }
+}
+
+// Central cart button handler — reads everything from data-attributes, no inline strings
+function handleCartBtn(btn){
+  const pid    = btn.dataset.pid
+  const action = btn.dataset.action
+  if(!pid) return
+  const p = getProductData(pid)
+  if(!p) return
+  if(action === 'add' || action === 'inc') incCart(p.id, p.name, p.price, p.image)
+  else if(action === 'dec') decCart(p.id)
+}
+
+// Card click → navigate to product page (fires only when NOT clicking a button/interactive el)
+function cardClick(event, pid, storeSlug){
+  if(event.target.closest('button,.wish-btn,.cart-controls,.cart-controls-wrap,.ov-ctrl,.card-atc-overlay')) return
+  location.href = `product.html?store=${storeSlug}&id=${pid}`
+}
+
+function incCart(id, name, price, image){
   const cart=getCart(), i=cart.find(x=>x.product_id===id&&!x.variant)
-  if(i) i.qty++; else cart.push({product_id:id,name,price,image,qty:1})
+  if(i) i.qty++; else cart.push({product_id:id, name, price, image, qty:1})
   saveCart(cart); updateCartUI(); refreshProductCard(id); showToast('Added to cart ✓')
 }
 function decCart(id){
@@ -647,21 +672,15 @@ const addToCart = (id,n,p,img) => incCart(id,n,p,img)
 function refreshProductCard(id){
   const qty = getQty(id)
 
-  // Update ALL cart-controls elements for this product
+  // Standard styles — update .cart-controls
   document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(ctrlEl => {
-    const name    = ctrlEl.dataset.name
-    const price   = parseFloat(ctrlEl.dataset.price)
-    const image   = ctrlEl.dataset.image
     const card    = ctrlEl.closest('.product-card')
     const isOverlay = card && card.closest('.overlay-grid') != null
     const label   = (card && card.dataset.btnLabel) || globalCardSettings.btnLabel || 'Add to Cart'
-    const sn = esa(name), si = esa(image)
 
     if(qty === 0){
-      // Restore Add-to-Cart button
-      ctrlEl.innerHTML = `<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')"><span>🛒</span> ${esc(label)}</button>`
+      ctrlEl.innerHTML = `<button class="btn-add" data-action="add" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)"><span>🛒</span> ${esc(label)}</button>`
       if(card) card.classList.remove('in-cart')
-      // Restore hover overlay if not overlay style or list
       if(card && !isOverlay && !card.closest('.list-grid')){
         let ov = card.querySelector('.card-atc-overlay')
         if(!ov){
@@ -669,14 +688,17 @@ function refreshProductCard(id){
           if(imgWrap){
             ov = document.createElement('div')
             ov.className = 'card-atc-overlay'
-            ov.innerHTML = `<button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')">🛒 ${esc(label)}</button>`
+            ov.innerHTML = `<button class="card-atc-btn" data-action="add" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">🛒 ${esc(label)}</button>`
             imgWrap.appendChild(ov)
           }
         }
       }
     } else {
-      // Show qty row
-      ctrlEl.innerHTML = `<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${price},'${si}')">+</button></div>`
+      ctrlEl.innerHTML = `<div class="cart-qty-row">
+        <button class="qty-btn" data-action="dec" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">−</button>
+        <span class="qty-value">${qty}</span>
+        <button class="qty-btn" data-action="inc" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">+</button>
+      </div>`
       if(card){
         card.classList.add('in-cart')
         const ov = card.querySelector('.card-atc-overlay')
@@ -685,20 +707,20 @@ function refreshProductCard(id){
     }
   })
 
-  // Handle OVERLAY style separately — controls live inside .ov-layer
+  // Overlay style — update .ov-ctrl
   document.querySelectorAll(`.ov-ctrl[data-pid="${id}"]`).forEach(ovCtrl => {
-    const name  = ovCtrl.dataset.name
-    const price = parseFloat(ovCtrl.dataset.price)
-    const image = ovCtrl.dataset.image
     const card  = ovCtrl.closest('.product-card')
     const label = (card && card.dataset.btnLabel) || globalCardSettings.btnLabel || 'Add to Cart'
-    const sn = esa(name), si = esa(image)
 
     if(qty === 0){
-      ovCtrl.innerHTML = `<button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${price},'${si}')">🛒 ${esc(label)}</button>`
+      ovCtrl.innerHTML = `<button class="ov-btn" data-action="add" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">🛒 ${esc(label)}</button>`
       if(card) card.classList.remove('in-cart')
     } else {
-      ovCtrl.innerHTML = `<div class="ov-qty-row"><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="ov-qty-val">${qty}</span><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${price},'${si}')">+</button></div>`
+      ovCtrl.innerHTML = `<div class="ov-qty-row">
+        <button class="ov-qty-btn" data-action="dec" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">−</button>
+        <span class="ov-qty-val">${qty}</span>
+        <button class="ov-qty-btn" data-action="inc" data-pid="${id}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">+</button>
+      </div>`
       if(card) card.classList.add('in-cart')
     }
   })
@@ -763,30 +785,38 @@ function renderCard(p, cardOpts){
   const priceStyle    = `style="color:${priceColor}"`
   const style = activeStyle
   const oos = isOOS(p), qty = getQty(p._id), imgUrl = p.images?.[0] || ''
-  const si = esa(imgUrl), sn = esa(p.name), d = discPct(p)
+  const d = discPct(p)
   const cIdx = (p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0) % colorPairs.length
   const [bg1,bg2c] = colorPairs[cIdx]
   const gradBg = imgUrl ? '' : `background:linear-gradient(135deg,${bg1},${bg2c});`
-  // data attributes stored on cart-controls — note data-image uses HTML-escaped value
-  const ctrlData = `data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+
+  // ALL cart interactions go through data-attributes — NO inline string escaping of name/image
+  // This avoids any broken onclick from apostrophes/quotes in product names
+  const pid    = p._id
+  const ctrlData = `data-pid="${pid}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
+
   const imgTag   = imgUrl ? `<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.product-img').classList.add('img-error')">` : ''
   const fallback = `<div class="img-fallback-icon" style="opacity:.2">🛍️</div>`
   const badge    = showBadge ? getBadge(p,'product-badge') : ''
-  const wish     = `<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
+  const wish     = `<button class="wish-btn" data-wish="${pid}" onclick="event.preventDefault();event.stopPropagation();toggleWish(this.dataset.wish,this)">♡</button>`
 
   // ── OVERLAY STYLE ────────────────────────────────────────────
   if(style === 'overlay'){
-    const ovCtrlData = `data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
     let ovCtrlHTML
     if(oos){
-      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><span style="opacity:.5;font-size:12px">Out of stock</span></div>`
+      ovCtrlHTML = `<div class="ov-ctrl" ${ctrlData}><span style="opacity:.5;font-size:12px">Out of stock</span></div>`
     } else if(qty > 0){
-      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><div class="ov-qty-row"><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="ov-qty-val">${qty}</span><button class="ov-qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
+      ovCtrlHTML = `<div class="ov-ctrl" ${ctrlData}>
+        <div class="ov-qty-row">
+          <button class="ov-qty-btn" data-action="dec" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">−</button>
+          <span class="ov-qty-val">${qty}</span>
+          <button class="ov-qty-btn" data-action="inc" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">+</button>
+        </div></div>`
     } else {
-      ovCtrlHTML = `<div class="ov-ctrl" ${ovCtrlData}><button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+      ovCtrlHTML = `<div class="ov-ctrl" ${ctrlData}><button class="ov-btn" data-action="add" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">🛒 ${esc(label)}</button></div>`
     }
-    return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
-      <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
+    return `<div class="product-card${qty>0?' in-cart':''}" data-pid="${pid}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
+      <div class="card-link" onclick="cardClick(event,'${pid}','${slug}')">
         <div class="product-img" style="${gradBg}aspect-ratio:3/4">
           ${badge}${wish}${imgTag}${fallback}
           <div class="ov-layer">
@@ -799,29 +829,31 @@ function renderCard(p, cardOpts){
             ${ovCtrlHTML}
           </div>
         </div>
-      </a>
+      </div>
     </div>`
   }
 
   // ── ALL OTHER STYLES ─────────────────────────────────────────
-  // Cart controls block — qty toggle or add button
   let ctrlInner
   if(oos){
     ctrlInner = `<span class="out-of-stock-label">Out of stock</span>`
   } else if(qty > 0){
-    ctrlInner = `<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div>`
+    ctrlInner = `<div class="cart-qty-row">
+      <button class="qty-btn" data-action="dec" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">−</button>
+      <span class="qty-value">${qty}</span>
+      <button class="qty-btn" data-action="inc" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">+</button>
+    </div>`
   } else {
-    ctrlInner = `<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')"><span>🛒</span> ${esc(label)}</button>`
+    ctrlInner = `<button class="btn-add" data-action="add" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)"><span>🛒</span> ${esc(label)}</button>`
   }
   const ctrlHTML = `<div class="cart-controls" ${ctrlData}>${ctrlInner}</div>`
 
-  // Hover overlay ATC (not in list or if already in cart)
   const isListStyle = style === 'list'
   const hoverAtc = (oos || qty > 0 || isListStyle) ? '' :
-    `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+    `<div class="card-atc-overlay"><button class="card-atc-btn" data-action="add" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">🛒 ${esc(label)}</button></div>`
 
-  return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
-    <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
+  return `<div class="product-card${qty>0?' in-cart':''}" data-pid="${pid}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
+    <div class="card-link" onclick="cardClick(event,'${pid}','${slug}')">
       <div class="product-img" style="${gradBg}">
         ${badge}${wish}${imgTag}${fallback}${hoverAtc}
       </div>
@@ -834,7 +866,7 @@ function renderCard(p, cardOpts){
           ${d ? `<span class="product-discount">−${d}%</span>` : ''}
         </div>
       </div>
-    </a>
+    </div>
     <div class="cart-controls-wrap" style="background:${cardBg}">
       ${ctrlHTML}
     </div>
