@@ -144,7 +144,7 @@ a{color:inherit;text-decoration:none}
 .btn-add:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15);filter:brightness(1.08)}
 .btn-add:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.15);filter:none}
 
-/* ════ CARD STYLE VARIANTS (unified for both featured & main) ════ */
+/* ════ CARD STYLE VARIANTS — identical for BOTH featured & main grids ════ */
 .classic-grid .product-card{border-radius:16px}
 .classic-grid .product-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.12)}
 .minimal-grid .product-card{background:transparent!important;border:none;box-shadow:none!important;transform:none!important}
@@ -197,7 +197,7 @@ a{color:inherit;text-decoration:none}
 .ov-compare{font-size:11px;text-decoration:line-through;color:rgba(255,255,255,.5)}
 .ov-discount{font-size:9px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.04em}
 
-/* ════ FEATURED SECTION LAYOUT ════ */
+/* ════ FEATURED SECTION ════ */
 .featured-section{max-width:1440px;margin:0 auto;box-sizing:border-box}
 
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:56px;flex-wrap:wrap;padding-bottom:56px}
@@ -563,11 +563,21 @@ let storeCategories = []
 
 const ALL_CARD_STYLES = new Set(['classic','minimal','bold','elevated','compact','list','magazine','overlay'])
 
+// ════ CARD SIZE PRESETS ════
 const CARD_SIZE_VARS = {
   small:{'--card-aspect':'1/1','--card-name-fs':'11.5px','--card-price-fs':'12.5px','--card-info-pad':'8px 10px 4px','--card-btn-pad':'5px 10px 10px','--card-btn-padding':'8px 10px','--card-btn-fs':'10px','--card-cat-fs':'8.5px','--card-gap':'10px'},
   medium:{'--card-aspect':'4/5','--card-name-fs':'13.5px','--card-price-fs':'15px','--card-info-pad':'13px 14px 5px','--card-btn-pad':'7px 12px 12px','--card-btn-padding':'11px 13px','--card-btn-fs':'11.5px','--card-cat-fs':'9px','--card-gap':'20px'},
   large:{'--card-aspect':'4/5','--card-name-fs':'15px','--card-price-fs':'17px','--card-info-pad':'16px 18px 8px','--card-btn-pad':'8px 14px 14px','--card-btn-padding':'13px 16px','--card-btn-fs':'12.5px','--card-cat-fs':'9.5px','--card-gap':'24px'}
 }
+
+// ════ STYLE → CSS CLASS MAP (shared constant) ════
+const GRID_STYLE_MAP = {
+  classic:'classic-grid', minimal:'minimal-grid', bold:'bold-grid',
+  elevated:'elevated-grid', compact:'compact-grid', list:'list-grid',
+  magazine:'magazine-grid', overlay:'overlay-grid'
+}
+
+function getGridClass(style){ return GRID_STYLE_MAP[style] || 'classic-grid' }
 
 function applyCardSizeVars(size){
   const vars = CARD_SIZE_VARS[size] || CARD_SIZE_VARS.medium
@@ -619,7 +629,6 @@ function updateCC(id){
   const qty=getQty(id)
   document.querySelectorAll(`.cart-controls[data-pid="${id}"]`).forEach(el=>{
     const n=el.dataset.name, p=parseFloat(el.dataset.price), img=el.dataset.image, sn=esa(n), si=esa(img)
-    // UNIFIED: Always use .product-card for both featured and main grids
     const card=el.closest('.product-card')
     const ic=card?.querySelector('.product-img')
     const isOverlay=card?.closest('.overlay-grid')!=null
@@ -664,7 +673,6 @@ function restoreWish(){
   const list=JSON.parse(localStorage.getItem(`wish_${slug}`)||'[]')
   list.forEach(pid=>{
     document.querySelectorAll(`.cart-controls[data-pid="${pid}"]`).forEach(cc=>{
-      // UNIFIED: Always use .product-card
       const wb=cc.closest('.product-card')?.querySelector('.wish-btn')
       if(wb){ wb.textContent='♥'; wb.classList.add('wished') }
     })
@@ -684,11 +692,11 @@ function getBadge(p,cls){
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
 // ═══════════════════════════════════════════════════════════════
-// RENDER CARD — UNIFIED for both main grid and featured sections
-// Uses SAME class names everywhere for consistent styling
+// RENDER CARD
+// SINGLE source of truth — always uses activeStyle
+// cardOpts.cardStyle is IGNORED to enforce global consistency
 // ═══════════════════════════════════════════════════════════════
 function renderCard(p, ctx, btnLabel, cardOpts){
-  ctx = ctx || 'main'
   cardOpts = cardOpts || {}
   const label = cardOpts.btnLabel || btnLabel || 'Add to Cart'
   const cardBg = cardOpts.cardBg || ''
@@ -696,23 +704,11 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const showOriginal = cardOpts.showOriginal !== 'no'
   const showBadge = cardOpts.showBadge !== 'no'
 
-  const rawStyle = cardOpts.cardStyle || activeStyle || 'classic'
-  const style = ALL_CARD_STYLES.has(rawStyle) ? rawStyle : 'classic'
+  // ★ KEY FIX: always use global activeStyle — ignore per-section cardStyle
+  const style = activeStyle
 
   const oos=isOOS(p), qty=getQty(p._id), imgUrl=p.images?.[0]||''
   const si=esa(imgUrl), sn=esa(p.name), d=discPct(p)
-
-  // UNIFIED: Always use same class names for both featured and main
-  const cc = 'product-card'
-  const ic = 'product-img'
-  const inf = 'product-info'
-  const ca = 'product-cat'
-  const nc = 'product-name'
-  const rc = 'product-price-row'
-  const pc = 'product-price'
-  const oc = 'product-compare'
-  const wc = 'cart-controls-wrap'
-  const bc = 'product-badge'
 
   const colorIdx = (p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0)%colorPairs.length
   const [bg1,bg2c] = colorPairs[colorIdx]
@@ -722,9 +718,9 @@ function renderCard(p, ctx, btnLabel, cardOpts){
   const cardStyle2 = cardBg ? ` style="background:${cardBg};border-color:rgba(0,0,0,.06)"` : ''
   const priceAttr = priceColor ? ` style="color:${priceColor}"` : ''
 
-  const imgTag = imgUrl ? `<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.${ic}').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">` : ''
+  const imgTag = imgUrl ? `<img src="${imgUrl}" alt="${esc(p.name)}" loading="lazy" onerror="this.closest('.product-img').classList.add('img-error');this.nextElementSibling.style.opacity='.35'">` : ''
   const fallback = `<div class="img-fallback-icon" style="opacity:${imgUrl?'0':'.2'}">🛍️</div>`
-  const badge = showBadge ? getBadge(p,bc) : ''
+  const badge = showBadge ? getBadge(p,'product-badge') : ''
   const ctrlData = `data-pid="${p._id}" data-name="${esc(p.name)}" data-price="${p.price}" data-image="${esc(imgUrl)}"`
 
   let ctrlHTML
@@ -741,9 +737,9 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     const compareHtml = showOriginal && p.compare_at_price ? `<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>` : ''
     const discHtml = d ? `<span class="ov-discount">−${d}%</span>` : ''
     const wish = `<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
-    return `<div class="${cc}${qty>0?' in-cart':''}" data-btn-label="${esc(label)}"${cardStyle2}>
+    return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}"${cardStyle2}>
       <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
-        <div class="${ic}" style="aspect-ratio:3/4;${gradientBg}">
+        <div class="product-img" style="aspect-ratio:3/4;${gradientBg}">
           ${badge}${wish}${imgTag}${fallback}
           <div class="ov-layer">
             <div class="ov-name">${esc(p.name)}</div>
@@ -754,7 +750,7 @@ function renderCard(p, ctx, btnLabel, cardOpts){
           </div>
         </div>
       </a>
-      <div class="${wc}"${bgAttr}>${ctrlHTML}</div>
+      <div class="cart-controls-wrap"${bgAttr}>${ctrlHTML}</div>
     </div>`
   }
 
@@ -762,22 +758,22 @@ function renderCard(p, ctx, btnLabel, cardOpts){
     : `<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
 
   const wish = `<button class="wish-btn" onclick="event.preventDefault();event.stopPropagation();toggleWish('${p._id}',this)">♡</button>`
-  return `<div class="${cc}${qty>0?' in-cart':''}" data-btn-label="${esc(label)}"${cardStyle2}>
+  return `<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}"${cardStyle2}>
     <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
-      <div class="${ic}" style="${gradientBg}">
+      <div class="product-img" style="${gradientBg}">
         ${badge}${wish}${imgTag}${fallback}${hoverOverlay}
       </div>
-      <div class="${inf}"${bgAttr}>
-        ${p.category_name?`<div class="${ca}">${esc(p.category_name)}</div>`:''}
-        <div class="${nc}">${esc(p.name)}</div>
-        <div class="${rc}">
-          <span class="${pc}"${priceAttr}>${currency}${p.price.toFixed(2)}</span>
-          ${showOriginal&&p.compare_at_price?`<span class="${oc}">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
+      <div class="product-info"${bgAttr}>
+        ${p.category_name?`<div class="product-cat">${esc(p.category_name)}</div>`:''}
+        <div class="product-name">${esc(p.name)}</div>
+        <div class="product-price-row">
+          <span class="product-price"${priceAttr}>${currency}${p.price.toFixed(2)}</span>
+          ${showOriginal&&p.compare_at_price?`<span class="product-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
           ${d?`<span class="product-discount">−${d}%</span>`:''}
         </div>
       </div>
     </a>
-    <div class="${wc}"${bgAttr}>${ctrlHTML}</div>
+    <div class="cart-controls-wrap"${bgAttr}>${ctrlHTML}</div>
   </div>`
 }
 
@@ -791,14 +787,14 @@ function initCartButtons(){
   })
 }
 
+// ★ KEY FIX: single function that sets the grid class on ANY grid element
+function applyGridStyle(gridEl){
+  if(!gridEl) return
+  gridEl.className = `products-grid ${getGridClass(activeStyle)}`
+}
+
 function applyStyleToGrid(){
-  const grid=document.getElementById('productsGrid'); if(!grid) return
-  const styleMap = {
-    classic:'classic-grid',minimal:'minimal-grid',bold:'bold-grid',
-    elevated:'elevated-grid',compact:'compact-grid',list:'list-grid',
-    magazine:'magazine-grid',overlay:'overlay-grid'
-  }
-  grid.className = `products-grid ${styleMap[activeStyle]||'classic-grid'}`
+  applyGridStyle(document.getElementById('productsGrid'))
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -864,7 +860,7 @@ function gd(sec){
     cartText: str('cartText','cart_text') || 'Cart',
     navLinks: get('navLinks','nav_links') || null,
     newsletterNote: str('newsletterNote','privacyText') || 'No spam. Unsubscribe anytime.',
-    cardStyle: str('cardStyle','card_style'), layout: str('layout'), closable: str('closable'),
+    layout: str('layout'), closable: str('closable'),
     linkText: str('linkText','link_text'), linkUrl: str('linkUrl','link_url'),
     aboutBody: str('body','content','aboutBody'), aboutImage: str('image','aboutImage','imageUrl','image_url'),
     stat1num: str('stat1num'), stat1label: str('stat1label'),
@@ -968,33 +964,25 @@ function buildSec(sec, isMobile){
     }
 
     case 'featured':{
-      const count = parseInt(d.count) || 8, sid = `ft-${sec.id}`
+      const count = parseInt(d.count) || 8
+      const sid = `ft-${sec.id}`
       const featCols = d.featuredCols || d.columns || 0
       const colsStyle = featCols ? `--cols:${featCols};` : ''
-
-      // UNIFIED: Use same card style resolution as main grid
-      const sectionCardStyle = d.cardStyle
-      const featCardStyle = ALL_CARD_STYLES.has(sectionCardStyle) ? sectionCardStyle
-                          : ALL_CARD_STYLES.has(activeStyle) ? activeStyle : 'classic'
-
       const skCount = isMobile ? 2 : (featCols || 4)
-      const cardOpts = {
-        btnLabel: d.btnText, cardBg: d.cardBg, priceColor: d.priceColor,
-        showOriginal: d.showOriginalPrice, showBadge: d.showProductBadge,
-        cardStyle: featCardStyle
-      }
 
-      // UNIFIED: Use SAME grid style classes as main products grid
-      const gridStyleMap = {
-        classic:'classic-grid', minimal:'minimal-grid', bold:'bold-grid',
-        elevated:'elevated-grid', compact:'compact-grid', list:'list-grid',
-        overlay:'overlay-grid', magazine:'magazine-grid'
+      // ★ KEY FIX: use activeStyle for the grid class — same as main grid
+      const gridClass = getGridClass(activeStyle)
+
+      const cardOpts = {
+        btnLabel: d.btnText, cardBg: d.cardBg,
+        priceColor: d.priceColor,
+        showOriginal: d.showOriginalPrice,
+        showBadge: d.showProductBadge
+        // NOTE: cardStyle intentionally omitted — renderCard always uses activeStyle
       }
-      const gridClass = gridStyleMap[featCardStyle] || 'classic-grid'
 
       setTimeout(() => fillFeatured(sid, count, cardOpts), 0)
 
-      // UNIFIED: Use products-grid class (same as main grid) + same style classes
       return `<section class="tc-section featured-section" id="${sid}" style="${colsStyle}">
         <div class="tc-section-hd">
           <div>
@@ -1003,13 +991,15 @@ function buildSec(sec, isMobile){
           </div>
           <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
         </div>
-        <div class="products-grid ${gridClass}" id="${sid}-grid">${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:4/5"></div>`).join('')}</div>
+        <div class="products-grid ${gridClass}" id="${sid}-grid">
+          ${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:4/5"></div>`).join('')}
+        </div>
       </section>`
     }
 
     case 'categories':{
       const cols = isMobile ? 2 : (parseInt(d.columns)||4), sid = `cs-${sec.id}`
-      const catStyle = d.style || d.cardStyle || 'image'
+      const catStyle = d.style || d.layout || 'image'
       setTimeout(() => fillCats(sid, cols, d, catStyle), 0)
       return `<section class="tc-section" id="${sid}">
         <div class="tc-section-hd">
@@ -1269,7 +1259,6 @@ function applySettings(s){
   const btnStyle = readKey(s, 'button_style','buttonStyle','btnStyle') || 'rounded'
   const cols = readKey(s, 'cols','columns') || 4
   const cardBg = readKey(s, 'card_bg','cardBg','card_background','cardBackground') || '#ffffff'
-  const navBg = readKey(s, 'nav_bg','navBg') || ''
 
   R.style.setProperty('--primary', primaryFinal)
   R.style.setProperty('--brand', primaryFinal)
@@ -1292,6 +1281,7 @@ function applySettings(s){
     }
   }
 
+  // ★ KEY FIX: activeStyle is set ONCE from global theme settings only
   const rawStyle = readKey(s, 'card_style','cardStyle') || 'classic'
   activeStyle = ALL_CARD_STYLES.has(rawStyle) ? rawStyle : 'classic'
   applyStyleToGrid()
@@ -1368,7 +1358,10 @@ async function fillFeatured(secId, count, cardOpts){
     const data = await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json())
     const prods = (data.products||[]).slice(0, count)
     if(!prods.length){ const s=grid.closest('section'); if(s) s.style.display='none'; return }
-    // UNIFIED: renderCard with 'featured' context now produces same classes as 'main'
+
+    // ★ KEY FIX: update grid class to match activeStyle before rendering
+    applyGridStyle(grid)
+
     grid.innerHTML = prods.map(p => renderCard(p, 'featured', null, cardOpts)).join('')
     initCartButtons()
     prods.forEach(p => { if(getQty(p._id)>0) updateCC(p._id) })
@@ -1451,6 +1444,7 @@ async function loadCategories(){
     if(p) p.innerHTML = `<button class="cat-pill active" data-cat="" onclick="selectCat(this,'')">All</button>` + storeCategories.map(c=>`<button class="cat-pill" data-cat="${c._id}" onclick="selectCat(this,'${c._id}')">${esc(c.name)}</button>`).join('')
   } catch(e) {}
 }
+
 function selectCat(el,id){ document.querySelectorAll('.cat-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); currentCat=id; currentPage=1; loadProducts() }
 function filterByCat(id){ currentCat=id; currentPage=1; document.querySelectorAll('.cat-pill').forEach(x=>x.classList.toggle('active',x.dataset.cat===id)); loadProducts(); smoothScroll() }
 function updateSearch(v){ searchQ=v; const o=document.getElementById('origSearchInput'),m=document.getElementById('mainSearchInput'); if(o&&o!==document.activeElement)o.value=v; if(m&&m!==document.activeElement)m.value=v; clearTimeout(searchT); searchT=setTimeout(()=>{currentPage=1;loadProducts()},350) }
@@ -1473,8 +1467,7 @@ async function loadProducts(){
 function renderProducts(products){
   const grid = document.getElementById('productsGrid')
   if(!products.length){ grid.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No products found</h3><p>Try a different search or category</p></div>`; return }
-  // UNIFIED: Pass activeStyle so both grids use same card rendering
-  grid.innerHTML = products.map(p => renderCard(p, 'main', 'Add to Cart', {cardStyle: activeStyle})).join('')
+  grid.innerHTML = products.map(p => renderCard(p, 'main', 'Add to Cart')).join('')
   applyStyleToGrid()
   initCartButtons()
   products.forEach(p => { if(getQty(p._id)>0) updateCC(p._id) })
