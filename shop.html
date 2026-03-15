@@ -141,7 +141,8 @@ a{color:inherit;text-decoration:none}
 .card-atc-btn{padding:9px 20px;background:#fff;color:var(--p);border:none;border-radius:var(--btn-r);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--font);letter-spacing:.02em;transition:background .15s}
 .card-atc-btn:hover{background:var(--bg2)}
 
-/* product info */
+/* product info — background comes from the card's --card-bg variable (set inline per card).
+   Falls back to white. Never inherits from :root --card-bg. */
 .product-info{padding:var(--card-info-pad,13px 14px 5px);background:var(--card-bg,#fff);flex:1;min-width:0}
 .product-cat{font-size:var(--card-cat-fs,9px);font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .product-name{font-size:var(--card-name-fs,13.5px);font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -815,7 +816,7 @@ function getBadge(p,cls){
 
 const colorPairs=[['#e8f4f8','#b2d8e8'],['#f8f0e8','#e8c8a8'],['#f0f8e8','#c8e8b0'],['#f8e8f0','#e8b0c8'],['#f0e8f8','#c8b0e8'],['#f8f8e8','#e8e8a0']]
 
-function renderCard(p, cardOpts){
+function renderCard(p, cardOpts, styleOverride){
   cardOpts = cardOpts || {}
   const label      = cardOpts.btnLabel    || globalCardSettings.btnLabel    || 'Add to Cart'
   const cardBg     = cardOpts.cardBg      || globalCardSettings.cardBg      || '#ffffff'
@@ -823,11 +824,12 @@ function renderCard(p, cardOpts){
   const showOrig   = (cardOpts.showOriginal  !== 'no') && (globalCardSettings.showOriginal  !== 'no')
   const showBadge  = (cardOpts.showBadge     !== 'no') && (globalCardSettings.showBadge     !== 'no')
 
-  // Set --card-bg as a CSS variable on the card so product-info + controls inherit it
-  // The card container itself stays white — only info panel gets the custom color
-  const cardBgStyle   = `--card-bg:${cardBg}`
-  const priceStyle    = `style="color:${priceColor}"`
-  const style = activeStyle
+  // Use explicit style override (per-section) or fall back to global activeStyle
+  const style = styleOverride || activeStyle
+
+  // --card-bg scoped to this card element — only product-info and controls pick it up
+  const cardBgStyle = `--card-bg:${cardBg}`
+  const priceStyle  = `style="color:${priceColor}"`
   const oos = isOOS(p), qty = getQty(p._id), imgUrl = p.images?.[0] || ''
   const d = discPct(p)
   const cIdx = (p.name||'').split('').reduce((s,c)=>s+c.charCodeAt(0),0) % colorPairs.length
@@ -1011,6 +1013,7 @@ function gd(sec){
     btnSubmit:str('btnText','submitText')||'Send Message',
     showCount:str('showCount','show_count')||'yes',
     catStyle:str('style','catStyle','layout')||'image',
+    cardStyle:str('cardStyle','card_style'),
     navLinks:get('navLinks','nav_links'),
     cartText:str('cartText','cart_text')||'Cart',
     link1Text:str('link1Text')||'Home', link1Url:str('link1Url')||'#',
@@ -1091,12 +1094,19 @@ function buildSec(sec, isMobile){
       const fc=d.featuredCols||d.columns||0
       const colsStyle=fc?`--cols:${fc};`:''
       const skCount=isMobile?2:(fc||4)
+      // Section-level card style overrides global — read from section data
+      const secCardStyle = d.cardStyle ||
+                           readKey(sec.data||{},'cardStyle','card_style') ||
+                           readKey(sec.settings||{},'cardStyle','card_style') ||
+                           activeStyle
+      const secStyle = ALL_CARD_STYLES.has(secCardStyle) ? secCardStyle : activeStyle
       const cardOpts = {
         btnLabel:      d.btnText,
         cardBg:        d.cardBg,
         priceColor:    d.priceColor,
         showOriginal:  d.showOriginalPrice,
-        showBadge:     d.showProductBadge
+        showBadge:     d.showProductBadge,
+        cardStyle:     secStyle,   // pass section style explicitly
       }
       setTimeout(()=>fillFeatured(sid, d.count||1000, cardOpts), 0)
       return `<section class="tc-section featured-section" id="${sid}" style="${colsStyle}">
@@ -1107,7 +1117,7 @@ function buildSec(sec, isMobile){
           </div>
           <a href="javascript:void(0)" onclick="smoothScroll()" class="tc-view-all">${esc(d.viewAllText)}</a>
         </div>
-        <div class="products-grid" id="${sid}-grid" data-style="${activeStyle}">
+        <div class="products-grid" id="${sid}-grid" data-style="${secStyle}">
           ${Array(skCount).fill(0).map(()=>`<div class="product-card skeleton" style="aspect-ratio:4/5;min-height:200px"></div>`).join('')}
         </div>
       </section>`
@@ -1437,9 +1447,11 @@ async function fillFeatured(secId, count, cardOpts){
     const data=await fetch(`${API}/shop/${slug}/products?page=1&limit=${count}`).then(r=>r.json())
     const prods=data.products||[]
     if(!prods.length){ const s=grid.closest('section'); if(s)s.style.display='none'; return }
+    // Use section-specific style if provided, else fall back to global
+    const sectionStyle = cardOpts.cardStyle || activeStyle
     grid.className='products-grid'
-    applyStyleToGrid(grid, activeStyle)
-    grid.innerHTML=prods.map(p=>renderCard(p,cardOpts)).join('')
+    applyStyleToGrid(grid, sectionStyle)
+    grid.innerHTML=prods.map(p=>renderCard(p, cardOpts, sectionStyle)).join('')
     restoreWish()
     updateCartUI()
   }catch(e){
@@ -1554,11 +1566,11 @@ function applySettings(s){
   R.style.setProperty('--bg',bg)
   R.style.setProperty('--radius',radius)
   R.style.setProperty('--card-radius',radius)
-  R.style.setProperty('--card-bg',cardBg)
+  // NOTE: --card-bg is NOT set on :root — it is set per-card via inline style="--card-bg:..."
+  // This prevents the global orange from bleeding into all product-info elements
   R.style.setProperty('--card-price-color',globalCardSettings.priceColor)
   R.style.setProperty('--font',`'${font}',system-ui,sans-serif`)
   R.style.setProperty('--btn-r',btnStyle==='pill'?'999px':btnStyle==='square'?'4px':radius)
-  // Set default cols — individual grids can override via inline style
   R.style.setProperty('--cols', String(parseInt(cols)||4))
   if(navBg) R.style.setProperty('--navbar-bg',navBg)
   document.body.style.background=bg
