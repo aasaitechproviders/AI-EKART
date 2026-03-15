@@ -122,20 +122,20 @@ a{color:inherit;text-decoration:none}
 .product-compare{font-size:12px;text-decoration:line-through;opacity:.38;color:var(--p)}
 .product-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 
-/* cart controls */
+/* cart controls - FIXED: Ensure quantity controls are visible */
 .cart-controls-wrap{padding:var(--card-btn-pad,7px 12px 12px) !important;background:inherit}
-.cart-controls{}
+.cart-controls{width:100%}
 .btn-add{width:100%;padding:var(--card-btn-padding,11px 13px) !important;background:var(--primary) !important;color:#fff;border:none;border-radius:var(--btn-r);font-size:var(--card-btn-fs,11.5px) !important;font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
 .btn-add:hover{opacity:.88}
 .out-of-stock-label{display:block;text-align:center;font-size:11.5px;font-weight:600;color:var(--p3);padding:8px}
-.cart-qty-row{display:flex;align-items:center;height:42px;border-radius:var(--btn-r);overflow:hidden;border:1.5px solid var(--border)}
+.cart-qty-row{display:flex;align-items:center;height:42px;border-radius:var(--btn-r);overflow:hidden;border:1.5px solid var(--border);width:100%}
 .qty-btn{flex:0 0 42px;height:100%;border:none;background:var(--bg2);color:var(--p);font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .12s}
 .qty-btn:hover{background:var(--bg3)}
 .qty-value{flex:1;text-align:center;font-size:13.5px;font-weight:700;color:var(--p)}
 .product-card.in-cart{border-color:var(--primary) !important}
 .product-card.in-cart::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary);z-index:5}
 
-/* ════ CARD STYLE VARIANTS - WITH ENHANCED SPECIFICITY ════ */
+/* ════ CARD STYLE VARIANTS - FIXED ALL STYLES ════ */
 
 /* MINIMAL */
 .minimal-grid .product-card{background:transparent !important;border:1.5px solid var(--border) !important;box-shadow:none !important}
@@ -151,30 +151,52 @@ a{color:inherit;text-decoration:none}
 .elevated-grid .product-card{border:none !important;box-shadow:0 2px 14px rgba(0,0,0,.07) !important}
 .elevated-grid .product-card:hover{transform:translateY(-6px) !important;box-shadow:0 20px 52px rgba(0,0,0,.14) !important}
 
-/* COMPACT */
+/* COMPACT - FIXED: Now properly hides elements and sizes correctly */
 .compact-grid{gap:10px!important}
 .compact-grid .product-img{aspect-ratio:1/1!important}
 .compact-grid .product-info{padding:6px 8px 4px!important}
-.compact-grid .product-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px!important}
+.compact-grid .product-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .compact-grid .product-price{font-size:12px!important}
-.compact-grid .cart-controls-wrap{display:none!important}
+.compact-grid .product-cat{display:none!important}
+.compact-grid .product-compare{display:none!important}
+.compact-grid .product-discount{display:none!important}
+.compact-grid .cart-controls-wrap{padding:4px 8px 8px!important}
+.compact-grid .btn-add{padding:6px 8px!important;font-size:10px!important}
+.compact-grid .cart-qty-row{height:32px!important}
+.compact-grid .qty-btn{flex:0 0 32px!important;font-size:14px!important}
+.compact-grid .qty-value{font-size:11px!important}
 
-/* LIST */
+/* LIST - FIXED: Now properly displays as horizontal list */
 .list-grid{grid-template-columns:1fr!important}
-.list-grid .product-card{display:flex;flex-direction:row;height:130px;border-radius:var(--card-radius) !important}
-.list-grid .card-link{display:flex;flex-direction:row;flex:1;min-width:0}
-.list-grid .product-img{width:130px;min-width:130px;height:100%;aspect-ratio:auto!important;border-radius:0;flex-shrink:0}
-.list-grid .product-info{flex:1;padding:14px 16px!important;display:flex;flex-direction:column;justify-content:center;border-top:none;border-left:1px solid var(--border)}
+.list-grid .product-card{display:flex!important;flex-direction:row!important;height:140px;border-radius:var(--card-radius) !important;margin-bottom:10px}
+.list-grid .card-link{display:flex!important;flex-direction:row!important;flex:1;min-width:0;height:100%}
+.list-grid .product-img{width:140px!important;min-width:140px!important;height:140px!important;aspect-ratio:1/1!important;border-radius:0;flex-shrink:0}
+.list-grid .product-info{flex:1;padding:14px 16px!important;display:flex;flex-direction:column;justify-content:center;border-top:none;border-left:1px solid var(--border);height:100%}
 .list-grid .product-card:hover{transform:none;box-shadow:var(--sh1) !important}
-.list-grid .cart-controls-wrap{padding:0 14px!important;display:flex;align-items:center;flex-shrink:0}
-.list-grid .btn-add{width:auto;white-space:nowrap;padding:9px 16px!important}
-.list-grid .cart-qty-row{height:38px}
+.list-grid .cart-controls-wrap{padding:0 14px!important;display:flex;align-items:center;flex-shrink:0;width:auto;min-width:140px}
+.list-grid .cart-controls{width:auto}
+.list-grid .btn-add{width:auto;white-space:nowrap;padding:9px 16px!important;min-width:100px}
+.list-grid .cart-qty-row{height:38px;width:140px}
 .list-grid .wish-btn{opacity:1}
+@media(max-width:768px){
+  .list-grid .product-card{height:auto;flex-direction:column!important}
+  .list-grid .card-link{flex-direction:column!important}
+  .list-grid .product-img{width:100%!important;min-width:unset!important;height:200px!important}
+  .list-grid .product-info{border-left:none;border-top:1px solid var(--border)}
+  .list-grid .cart-controls-wrap{padding:8px 12px!important;width:100%}
+  .list-grid .cart-qty-row{width:100%}
+}
 
-/* MAGAZINE */
+/* MAGAZINE - FIXED: Now properly displays featured layout */
 .magazine-grid{gap:14px!important}
 .magazine-grid .product-card:first-child{grid-column:span 2;grid-row:span 2}
-.magazine-grid .product-card:first-child .product-img{aspect-ratio:auto!important;height:calc(100% - 100px)}
+.magazine-grid .product-card:first-child .product-img{aspect-ratio:16/9!important;height:auto}
+.magazine-grid .product-card:first-child .product-name{font-size:calc(var(--card-name-fs) * 1.2)!important}
+.magazine-grid .product-card:first-child .product-price{font-size:calc(var(--card-price-fs) * 1.2)!important}
+@media(max-width:768px){
+  .magazine-grid .product-card:first-child{grid-column:span 1!important;grid-row:span 1!important}
+  .magazine-grid .product-card:first-child .product-img{aspect-ratio:var(--card-aspect)!important}
+}
 
 /* OVERLAY */
 .overlay-grid .product-card{overflow:hidden}
@@ -563,7 +585,7 @@ const subscribeNL = (inputEl) => { const v=(inputEl||document.querySelector('.tc
 function readKey(obj,...keys){ if(!obj)return undefined; for(const k of keys){ const v=obj[k]; if(v!==undefined&&v!==null&&v!=='')return v } return undefined }
 
 // ═══════════════════════════════════════════
-// CART
+// CART - FIXED: Quantity controls now work properly
 // ═══════════════════════════════════════════
 const getCart = () => JSON.parse(localStorage.getItem('cart_'+slug)||'[]')
 const saveCart = c => localStorage.setItem('cart_'+slug, JSON.stringify(c))
@@ -587,9 +609,10 @@ function updateCC(id){
     const card=el.closest('.product-card')
     const ic=card?.querySelector('.product-img')
     const isOverlay=card?.closest('.overlay-grid')!=null
-    const lbl=card?.dataset.btnLabel||'Add to Cart'
+    const lbl=card?.dataset.btnLabel||globalCardSettings.btnLabel||'Add to Cart'
+    
     if(qty===0){
-      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
+      el.innerHTML=`<button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
       if(card){
         card.classList.remove('in-cart')
         if(!isOverlay&&ic&&!ic.querySelector('.card-atc-overlay')){
@@ -599,8 +622,11 @@ function updateCC(id){
         }
       }
     } else {
-      el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
-      if(card){ card.classList.add('in-cart'); ic?.querySelector('.card-atc-overlay')?.remove() }
+      el.innerHTML=`<div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${id}','${sn}',${p},'${si}')">+</button></div>`
+      if(card){ 
+        card.classList.add('in-cart'); 
+        ic?.querySelector('.card-atc-overlay')?.remove() 
+      }
     }
   })
 }
@@ -613,6 +639,12 @@ function updateCartUI(){
   if(qty>0){ bar.classList.add('on'); document.getElementById('cbarQty').textContent=`${qty} item${qty!==1?'s':''} — `; document.getElementById('cbarTotal').textContent=`${currency}${amt.toFixed(2)}` }
   else bar.classList.remove('on')
   document.querySelectorAll('.theme-cart-qty').forEach(e=>e.textContent=qty)
+  
+  // Update all product cards with current quantities
+  document.querySelectorAll('.cart-controls[data-pid]').forEach(el => {
+    const pid = el.dataset.pid
+    if(pid) updateCC(pid)
+  })
 }
 
 // ═══════════════════════════════════════════
@@ -635,7 +667,7 @@ function restoreWish(){
 }
 
 // ═══════════════════════════════════════════
-// PRODUCT CARD HELPERS
+// PRODUCT CARD HELPERS - FIXED: Now properly handles all styles
 // ═══════════════════════════════════════════
 const discPct = p => p.compare_at_price && p.compare_at_price > p.price ? Math.round((1-p.price/p.compare_at_price)*100) : 0
 const isOOS = p => p.track_inventory && p.stock_qty <= 0
@@ -670,33 +702,32 @@ function renderCard(p, cardOpts){
 
   let ctrlHTML
   if(oos) ctrlHTML=`<div class="cart-controls" ${ctrlData}><span class="out-of-stock-label">Out of stock</span></div>`
-  else if(qty>0) ctrlHTML=`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
-  else ctrlHTML=`<div class="cart-controls" ${ctrlData}></div>`
+  else if(qty>0) ctrlHTML=`<div class="cart-controls" ${ctrlData}><div class="cart-qty-row"><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();decCart('${p._id}')">−</button><span class="qty-value">${qty}</span><button class="qty-btn" onclick="event.preventDefault();event.stopPropagation();incCart('${p._id}','${sn}',${p.price},'${si}')">+</button></div></div>`
+  else ctrlHTML=`<div class="cart-controls" ${ctrlData}><button class="btn-add" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')"><span>🛒</span> ${esc(label)}</button></div>`
 
   if(style==='overlay'){
     return`<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
-      <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
+      <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
         <div class="product-img" style="${gradBg}aspect-ratio:3/4">
           ${badge}${wish}${imgTag}${fallback}
-          <div class="ov-layer" style="background:linear-gradient(0deg,${cardBg} 0%,rgba(0,0,0,0) 100%)">
+          <div class="ov-layer">
             <div class="ov-name">${esc(p.name)}</div>
             <div class="ov-price-row">
               <span class="ov-price" ${priceStyle}>${currency}${p.price.toFixed(2)}</span>
               ${showOrig&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''}
               ${d?`<span class="ov-discount">−${d}%</span>`:''}
             </div>
-            ${!oos?`<button class="ov-btn" style="background:${cardBg};color:${priceColor}" onclick="event.preventDefault();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button>`:'<span style="opacity:.5;font-size:12px">Out of stock</span>'}
+            ${!oos?`<button class="ov-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button>`:'<span style="opacity:.5;font-size:12px">Out of stock</span>'}
           </div>
         </div>
       </a>
     </div>`
   }
 
-  const hoverAtc=oos||qty>0?'':
-    `<div class="card-atc-overlay"><button class="card-atc-btn" style="background:${cardBg};color:${priceColor}" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
+  const hoverAtc=oos||qty>0?'':`<div class="card-atc-overlay"><button class="card-atc-btn" onclick="event.preventDefault();event.stopPropagation();addToCart('${p._id}','${sn}',${p.price},'${si}')">🛒 ${esc(label)}</button></div>`
 
   return`<div class="product-card${qty>0?' in-cart':''}" data-btn-label="${esc(label)}" style="${cardBgStyle}">
-    <a class="card-link" href="product.html?store=${slug}&id=${p._id}">
+    <a class="card-link" href="product.html?store=${slug}&id=${p._id}" onclick="event.stopPropagation()">
       <div class="product-img" style="${gradBg}">
         ${badge}${wish}${imgTag}${fallback}${hoverAtc}
       </div>
@@ -718,13 +749,10 @@ function renderCard(p, cardOpts){
 
 function initCartButtons(){
   document.querySelectorAll('.cart-controls').forEach(el=>{
-    if(el.innerHTML.trim()!=='')return
-    const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image,sn=esa(n),si=esa(img)
-    const card=el.closest('.product-card')
-    const lbl=card?.dataset.btnLabel||'Add to Cart'
-    const cardBg = card?.style?.background || globalCardSettings.cardBg || '#ffffff'
-    const priceColor = globalCardSettings.priceColor || '#000000'
-    el.innerHTML=`<button class="btn-add" style="background:${cardBg} !important;color:${priceColor} !important" onclick="event.preventDefault();addToCart('${id}','${sn}',${p},'${si}')"><span>🛒</span> ${esc(lbl)}</button>`
+    const id=el.dataset.pid,n=el.dataset.name,p=parseFloat(el.dataset.price),img=el.dataset.image
+    if(id && n && !isNaN(p)){
+      updateCC(id)
+    }
   })
 }
 
@@ -1316,6 +1344,9 @@ function enforceCardStyles() {
       prices.forEach(p => p.style.setProperty('color', globalCardSettings.priceColor, 'important'))
     }
   })
+  
+  // Ensure all cart controls are properly initialized
+  initCartButtons()
 }
 
 // ═══════════════════════════════════════════
@@ -1447,6 +1478,7 @@ function renderSections(sections){
   setTimeout(() => {
     startCountdowns()
     enforceCardStyles() // Enforce styles after all sections are rendered
+    updateCartUI() // Ensure cart UI is up to date
   }, 100)
 
   window.addEventListener('resize',()=>{
