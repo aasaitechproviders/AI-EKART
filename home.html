@@ -83,6 +83,125 @@
   .cspr-mag-small { flex: 1; display: flex; flex-direction: column; gap: 3px; }
   .cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 2px; }
   .card-style-opt.active .cspr-mag-big, .card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
+
+  /* ── CUSTOM DOMAIN WIDGET ── */
+  @keyframes domain-pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(1.55); }
+  }
+  .domain-section {
+    border-top: 1px solid var(--border);
+    margin: 0 -18px 12px;
+    padding: 10px 18px 0;
+  }
+  .domain-section-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    margin-bottom: 7px;
+  }
+  .domain-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .domain-status-row.pending {
+    border: 1px solid rgba(245,158,11,0.3);
+    background: rgba(245,158,11,0.07);
+  }
+  .domain-status-row.connected {
+    border: 1px solid rgba(34,197,94,0.3);
+    background: rgba(34,197,94,0.07);
+  }
+  .domain-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .domain-dot.pending   { background: #f59e0b; animation: domain-pulse 1.3s ease-in-out infinite; }
+  .domain-dot.connected { background: #22c55e; }
+  .domain-value {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .domain-value.pending   { color: #d97706; }
+  .domain-value.connected { color: #16a34a; }
+  .domain-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .domain-badge.pending   { color: #b45309; }
+  .domain-badge.connected { color: #15803d; }
+  .domain-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 13px;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color .15s;
+  }
+  .domain-action-btn:hover { color: var(--accent2); }
+  .domain-action-btn.remove:hover { color: #ef4444; }
+  .domain-input-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .domain-input-row input {
+    flex: 1;
+    font-size: 11.5px;
+    font-family: 'DM Mono', monospace;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .domain-input-row input:focus { border-color: rgba(108,99,255,0.5); }
+  .domain-save-btn {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0 12px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s, color .15s;
+  }
+  .domain-save-btn:hover { border-color: rgba(108,99,255,0.4); color: var(--accent2); }
+  .domain-hint {
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+  .domain-hint code {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
 </style>
 <script>
 ;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/home.html')}})()
@@ -106,7 +225,6 @@
     <div class="skel-main">
       <div class="skel-topbar">
         <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
-        
       </div>
       <div class="skel-body">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
@@ -156,6 +274,7 @@
     </div>
     <div id="page-content" class="content page-enter" style="display:none;"></div>
   </div>
+
 <!-- CREATE/EDIT STORE MODAL -->
 <div class="modal-overlay" id="storeModal">
   <div class="modal" style="max-width:560px;">
@@ -240,7 +359,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 async function loadAll() {
   const pc = document.getElementById('page-content')
-  // Remove stale stats row before re-rendering
   pc.querySelector('.stats-row')?.remove()
   await Promise.all([loadStores(), loadDashStats()])
 }
@@ -254,7 +372,6 @@ async function loadStores() {
 async function loadDashStats() {
   try {
     const d = await apiFetch('/dashboard')
-    // Remove any existing stats row first
     document.getElementById('page-content')?.querySelector('.stats-row')?.remove()
     const statsHtml = `
       <div class="stats-row">
@@ -282,10 +399,48 @@ async function loadStoreKPIs(s) {
   } catch {}
 }
 
+// ── DOMAIN WIDGET RENDERER ───────────────────────────────────────────────────
+
+function renderDomainWidget(s) {
+  const domain = (s.custom_domain || '').trim()
+  const status = s.domain_status || (domain ? 'pending' : '')
+
+  if (domain && status === 'connected') {
+    return `
+      <div class="domain-status-row connected">
+        <div class="domain-dot connected"></div>
+        <span class="domain-value connected" title="${domain}">${domain}</span>
+        <span class="domain-badge connected">Connected ✓</span>
+        <button class="domain-action-btn remove" onclick="clearDomain('${s._id}')" title="Remove domain">✕</button>
+      </div>`
+  }
+
+  if (domain && status === 'pending') {
+    return `
+      <div class="domain-status-row pending">
+        <div class="domain-dot pending"></div>
+        <span class="domain-value pending" title="${domain}">${domain}</span>
+        <span class="domain-badge pending">Verifying…</span>
+        <button class="domain-action-btn" onclick="verifyDomain('${s._id}','${domain}')" title="Re-check now">↻</button>
+        <button class="domain-action-btn remove" onclick="clearDomain('${s._id}')" title="Remove domain">✕</button>
+      </div>
+      <div class="domain-hint">Point CNAME → <code>ekart.aasaitech.in</code> then click ↻ to verify</div>`
+  }
+
+  // No domain yet — show input
+  return `
+    <div class="domain-input-row">
+      <input type="text" id="domain-inp-${s._id}" placeholder="shop.yourbrand.com" value="${domain}">
+      <button class="domain-save-btn" onclick="saveDomain('${s._id}')">Save</button>
+    </div>
+    <div class="domain-hint">Point CNAME → <code>ekart.aasaitech.in</code> before saving</div>`
+}
+
+// ── STORE CARD RENDERER ──────────────────────────────────────────────────────
+
 function renderStores() {
   const container = document.getElementById('page-content')
-  const existing = container.querySelector('.stores-grid')
-  if (existing) existing.remove()
+  container.querySelector('.stores-grid')?.remove()
 
   if (!allStores.length) {
     container.insertAdjacentHTML('beforeend', `
@@ -305,6 +460,7 @@ function renderStores() {
     const logo = s.logo_url
       ? `<img class="store-banner-logo" src="${s.logo_url}" alt="">`
       : `<span class="store-banner-initials">${s.name.slice(0,2).toUpperCase()}</span>`
+
     return `<div class="store-card">
       <div class="store-banner" style="background:linear-gradient(135deg,${bg}ee,${bg}88);">${logo}</div>
       <div class="store-card-body">
@@ -312,7 +468,12 @@ function renderStores() {
         <div class="store-slug">/${s.slug}
           <button onclick="copyStoreUrl('${s.slug}')" title="Copy store URL" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 4px;vertical-align:middle;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">📋</button>
         </div>
-        ${s.custom_domain ? `<div style="font-size:11px;color:var(--accent2);font-family:'DM Mono',monospace;margin-bottom:6px;">🌐 ${s.custom_domain}</div>` : ''}
+
+        <div class="domain-section">
+          <div class="domain-section-label">Custom Domain</div>
+          ${renderDomainWidget(s)}
+        </div>
+
         <div class="store-badges">
           <span class="badge ${s.published ? 'badge-green' : 'badge-gray'}">${s.published ? '● Live' : '○ Draft'}</span>
           <span class="badge badge-gray">📦 ${s.product_count || 0}</span>
@@ -334,6 +495,84 @@ function renderStores() {
   }).join('')
   container.appendChild(grid)
 }
+
+// ── DOMAIN ACTIONS ───────────────────────────────────────────────────────────
+
+async function saveDomain(storeId) {
+  const input = document.getElementById(`domain-inp-${storeId}`)
+  const domain = (input?.value || '').trim()
+  if (!domain) return toast('Enter a domain name', 'error')
+
+  // Basic format check
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/.test(domain)) {
+    return toast('Enter a valid domain (e.g. shop.yourbrand.com)', 'error')
+  }
+
+  try {
+    const fd = new FormData()
+    fd.append('custom_domain', domain)
+    const res = await fetch(API + `/stores/${storeId}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
+
+    // Optimistically set to pending in local state
+    const s = allStores.find(x => x._id === storeId)
+    if (s) { s.custom_domain = domain; s.domain_status = 'pending' }
+
+    toast('Domain saved! Waiting for DNS propagation…', 'info')
+    renderStores()
+    allStores.forEach(st => loadStoreKPIs(st))
+
+    // Auto-verify after 8 seconds — give DNS a moment
+    setTimeout(() => verifyDomain(storeId, domain), 8000)
+  } catch (e) { toast(e.message, 'error') }
+}
+
+async function verifyDomain(storeId, domain) {
+  try {
+    const data = await apiFetch(`/stores/${storeId}/verify-domain`)
+    const s = allStores.find(x => x._id === storeId)
+    if (!s) return
+
+    if (data.connected) {
+      s.domain_status = 'connected'
+      toast(`✓ ${domain} is connected!`, 'success')
+    } else {
+      s.domain_status = 'pending'
+      toast('DNS not verified yet. Make sure your CNAME points to ekart.aasaitech.in', 'info')
+    }
+    renderStores()
+    allStores.forEach(st => loadStoreKPIs(st))
+  } catch (e) {
+    toast('Could not verify domain right now. Try again shortly.', 'error')
+  }
+}
+
+async function clearDomain(storeId) {
+  if (!confirm('Remove custom domain from this store?')) return
+  try {
+    const fd = new FormData()
+    fd.append('custom_domain', '')
+    const res = await fetch(API + `/stores/${storeId}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
+
+    const s = allStores.find(x => x._id === storeId)
+    if (s) { s.custom_domain = ''; s.domain_status = '' }
+
+    toast('Custom domain removed', 'info')
+    renderStores()
+    allStores.forEach(st => loadStoreKPIs(st))
+  } catch (e) { toast(e.message, 'error') }
+}
+
+// ── STORE CRUD ───────────────────────────────────────────────────────────────
 
 function openCreateStore() {
   document.getElementById('storeModalTitle').textContent = 'Create New Store'
@@ -371,14 +610,17 @@ function openEditStore(id) {
   if (s.logo_url) {
     document.getElementById('storeLogoImg').src = s.logo_url
     document.getElementById('storeLogoPreview').style.display = 'block'
-  } else document.getElementById('storeLogoPreview').style.display = 'none'
+  } else {
+    document.getElementById('storeLogoPreview').style.display = 'none'
+  }
   openModal('storeModal')
 }
 
 async function saveStore() {
-  const id = document.getElementById('storeEditId').value
+  const id   = document.getElementById('storeEditId').value
   const name = document.getElementById('storeName').value.trim()
   if (!name) return toast('Store name is required', 'error')
+
   const fd = new FormData()
   fd.append('name', name)
   fd.append('tagline', document.getElementById('storeTagline').value.trim())
@@ -389,9 +631,11 @@ async function saveStore() {
   fd.append('brand_color', document.getElementById('storeBrandColor').value)
   fd.append('card_style', document.getElementById('storeCardStyle').value || 'grid')
   fd.append('custom_domain', document.getElementById('storeCustomDomain').value.trim())
+
   const logoFile = document.getElementById('storeLogoFile').files[0]
   if (logoFile) fd.append('logo', logoFile)
   else fd.append('logo_url', document.getElementById('storeLogoExisting').value || '')
+
   try {
     const url = id ? `/stores/${id}` : '/stores'
     const res = await fetch(API + url, {
@@ -408,7 +652,9 @@ async function saveStore() {
 
 function copyStoreUrl(slug) {
   const url = `https://ekart.aasaitech.in/${slug}`
-  navigator.clipboard.writeText(url).then(() => toast('Store URL copied!', 'success')).catch(() => toast(url, 'info'))
+  navigator.clipboard.writeText(url)
+    .then(() => toast('Store URL copied!', 'success'))
+    .catch(() => toast(url, 'info'))
 }
 
 async function publishStore(id) {
@@ -438,10 +684,12 @@ function selectCardStyle(style, el) {
 function previewLogo(input) {
   if (!input.files[0]) return
   const r = new FileReader()
-  r.onload = e => { document.getElementById('storeLogoImg').src = e.target.result; document.getElementById('storeLogoPreview').style.display = 'block' }
+  r.onload = e => {
+    document.getElementById('storeLogoImg').src = e.target.result
+    document.getElementById('storeLogoPreview').style.display = 'block'
+  }
   r.readAsDataURL(input.files[0])
 }
 </script>
 </body>
-</html>
 </html>
