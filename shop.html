@@ -82,7 +82,7 @@ a{color:inherit;text-decoration:none}
   background:var(--p);color:#fff;
   text-align:center;padding:9px 48px;
   font-size:12px;font-weight:500;letter-spacing:.04em;
-  position:relative;
+  position:relative;z-index:201;
   display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
 }
 .ann-close{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;flex-shrink:0;position:absolute;right:16px;transition:color .15s}
@@ -353,59 +353,90 @@ body.cart-bar-open{padding-bottom:66px}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ═══════════════════════════════════════════════════════════════
-   NAVBAR — FIXED: logo left | links centered | cart right
-   The bug was margin-left:auto on nav-right was collapsing
-   the gap between logo and nav-links. Fixed with flex:1 center.
+   NAVBAR — 3-column grid layout (bulletproof, no flex collapse)
+   Col 1 (logo): auto width, left-aligned
+   Col 2 (links): 1fr, center-aligned
+   Col 3 (actions): auto width, right-aligned
+   Grid never collapses — each column is independent.
 ═══════════════════════════════════════════════════════════════ */
 .tc-navbar{
+  width:100%;
+  box-sizing:border-box;
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  /* No border by default — added via inline style only when navbar has no custom bgColor */
   border-bottom:none;
   padding:0 40px;
   height:var(--navbar-h);
-  display:flex;
+  /* 3-column grid: logo | links | actions */
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:center;
-  gap:24px;
+  gap:16px;
   position:sticky;top:0;z-index:200;
 }
 .nav-logo{
-  font-family:var(--font-display);font-size:19px;font-weight:400;letter-spacing:-.01em;
-  cursor:pointer;display:flex;align-items:center;gap:10px;
-  white-space:nowrap;flex-shrink:0; /* Never shrink */
-  min-width:0;
+  font-family:var(--font-display);
+  font-size:20px;font-weight:400;letter-spacing:-.02em;
+  cursor:pointer;
+  display:flex;align-items:center;gap:9px;
+  white-space:nowrap;
+  /* Grid col 1 */
+  justify-self:start;
 }
-.nav-logo-img{height:28px;object-fit:contain;border-radius:5px}
+.nav-logo span{
+  /* Ensure store name text is always visible */
+  line-height:1;
+}
+.nav-logo-img{height:30px;width:auto;object-fit:contain;border-radius:6px;flex-shrink:0}
+/* Nav links — grid col 2, always centered */
 .nav-links{
-  display:flex;gap:24px;
-  flex:1;              /* ← KEY FIX: takes all available space */
-  justify-content:center; /* ← centers the links in that space */
+  display:flex;
+  align-items:center;
+  gap:28px;
+  justify-content:center; /* center within the 1fr column */
   min-width:0;
+  overflow:hidden;
 }
 .nav-links a{
   font-size:13px;font-weight:500;
-  transition:color .15s,opacity .15s;
   white-space:nowrap;
-  opacity:.85;
+  opacity:.82;
+  transition:opacity .15s;
+  flex-shrink:0;
 }
 .nav-links a:hover{opacity:1}
+/* Nav right actions — grid col 3, always right-aligned */
 .nav-right{
-  display:flex;align-items:center;gap:8px;
-  flex-shrink:0; /* Never shrink */
-  /* NO margin-left:auto — the flex:1 on nav-links handles spacing */
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-self:end;
+  flex-shrink:0;
 }
+/* Cart button — solid pill, always readable on any bg */
 .nav-cart-btn{
-  display:flex;align-items:center;gap:7px;
-  padding:8px 18px;border-radius:var(--btn-r);
-  font-size:13px;font-weight:600;border:none;cursor:pointer;
-  font-family:var(--font);text-decoration:none;
-  transition:background .2s,transform .15s var(--ease-spring),box-shadow .2s;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 18px;
+  border-radius:var(--btn-r);
+  font-size:13px;font-weight:600;
+  border:none;cursor:pointer;
+  font-family:var(--font);
+  text-decoration:none;
+  white-space:nowrap;
+  transition:opacity .15s,transform .15s var(--ease-spring);
+  /* default: dark pill — overridden inline for colored navbars */
+  background:rgba(0,0,0,.75);
+  color:#fff;
 }
-.nav-cart-btn:hover{transform:translateY(-1px);box-shadow:var(--sh1)}
+.nav-cart-btn:hover{opacity:.88;transform:translateY(-1px)}
+/* Cart count badge inside button */
 .nav-cart-count{
-  font-size:11px;font-weight:700;
-  min-width:18px;height:18px;border-radius:9px;
   display:inline-flex;align-items:center;justify-content:center;
-  padding:0 4px;background:rgba(255,255,255,.2);
+  min-width:20px;height:20px;
+  border-radius:10px;
+  font-size:11px;font-weight:700;
+  padding:0 5px;
+  background:rgba(255,255,255,.22);
+  line-height:1;
 }
 
 /* ── HERO SECTION ── */
@@ -608,8 +639,12 @@ body.cart-bar-open{padding-bottom:66px}
 }
 @media(max-width:768px){
   :root{--navbar-h:54px;--card-gap:8px}
-  .hdr-inner,.tc-navbar{padding:0 16px;gap:12px}
+  /* On mobile: 2-col grid — logo | cart (links hidden) */
+  .tc-navbar{padding:0 16px;gap:8px;grid-template-columns:auto auto}
+  .hdr-inner{padding:0 16px;gap:12px}
   .hdr-nav,.nav-links{display:none}
+  /* Push cart to the right on mobile 2-col grid */
+  .nav-right{justify-self:end}
   .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,
   .tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,
   .tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,
@@ -1125,35 +1160,38 @@ function buildSec(sec,isMobile){
     }
 
     case 'navbar':{
-      /* ─────────────────────────────────────────
-         NAVBAR FIX: flex:1 on nav-links centers them.
-         No margin-left:auto on nav-right.
-         The logo and cart never collapse together.
-      ───────────────────────────────────────── */
-      const lt=d.logoText||storeConfig.name||'My Store'
-      let links=d.navLinks?.length?d.navLinks:[1,2,3,4,5].map(i=>d[`link${i}Text`]?{text:d[`link${i}Text`],url:d[`link${i}Url`]}:null).filter(Boolean)
-      const lh=links.map(l=>{
-        const url=l.url||l.href||'#',isA=url.startsWith('#'),sid=isA?url.slice(1):null
-        const oc=isA?(sid===''||sid==='mainAnchor'?`onclick="event.preventDefault();smoothScroll()"`:(`onclick="event.preventDefault();scrollToEl('${sid}')"`)):''
-        const linkStyle=d.linkColor?`style="color:${d.linkColor}"`:'';
-        return`<a href="${esc(url)}" ${oc} ${linkStyle}>${esc(l.text||l.txt||'')}</a>`
+      const lt = d.logoText || storeConfig.name || 'My Store'
+      let links = d.navLinks?.length ? d.navLinks : [1,2,3,4,5].map(i => d[`link${i}Text`] ? {text:d[`link${i}Text`],url:d[`link${i}Url`]} : null).filter(Boolean)
+      const pos = d.sticky !== 'no' ? 'sticky' : 'relative'
+      const navBg = d.bgColor || ''
+      /* Auto-detect if nav background is dark → use white text/logo */
+      const navIsDark = navBg ? isColorDark(navBg) : false
+      /* Link color: explicit > auto-contrast > inherit */
+      const linkColor = d.linkColor || (navIsDark ? '#ffffff' : '')
+      /* Logo color: explicit > auto-contrast > inherit */
+      const logoColor = d.logoColor || linkColor || (navIsDark ? '#ffffff' : '')
+      /* Cart button: on dark nav use a frosted white pill; on light nav use dark pill */
+      const cartBtnStyle = navIsDark
+        ? 'background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.28);backdrop-filter:blur(8px)'
+        : 'background:#111;color:#fff;border:none'
+      /* Border: only show separator when nav has no custom bg (transparent/light nav) */
+      const navBorderStyle = navBg ? 'border-bottom:none' : 'border-bottom:1px solid rgba(0,0,0,.07)'
+      const navStyle = `${navBg ? 'background:'+navBg+';' : ''}${navBorderStyle};position:${pos};top:0;z-index:200;`
+
+      /* Build nav links HTML */
+      const linksHtml = links.map(l => {
+        const url = l.url || l.href || '#'
+        const isAnchor = url.startsWith('#')
+        const sid = isAnchor ? url.slice(1) : null
+        const onClick = isAnchor ? (sid === '' || sid === 'mainAnchor' ? `onclick="event.preventDefault();smoothScroll()"` : `onclick="event.preventDefault();scrollToEl('${sid}')"`) : ''
+        return `<a href="${esc(url)}" ${onClick}>${esc(l.text||l.txt||'')}</a>`
       }).join('')
-      const pos=d.sticky!=='no'?'sticky':'relative'
-      /* Nav background — if dark, give links/logo light color automatically */
-      const navBg=d.bgColor||''
-      const navTextColor=d.linkColor||(navBg&&isColorDark(navBg)?'#ffffff':'')
-      const logoColorStyle=d.logoColor?`color:${d.logoColor};`:(navTextColor?`color:${navTextColor};`:'')
-      const navStyle=`${navBg?'background:'+navBg+';border-bottom:none;':'border-bottom:1px solid rgba(0,0,0,.07);'}position:${pos};top:0;z-index:200;`
-      return`<nav class="tc-navbar" id="themeNavbar" style="${navStyle}">
-        <div class="nav-logo" style="${logoColorStyle}" onclick="scrollTop()">
-          ${d.logoUrl?`<img src="${esc(d.logoUrl)}" class="nav-logo-img" alt="${esc(lt)}">`:''}
-          <span ${d.logoUrl?'class="hidden"':''}>${esc(lt)}</span>
-        </div>
-        ${!isMobile&&links.length?`<div class="nav-links" style="${navTextColor?'color:'+navTextColor:''}">${lh}</div>`:''}
-        <div class="nav-right">
-          ${d.showCart!=='no'?`<a href="cart.html?store=${slug}" class="nav-cart-btn" style="${navBg&&isColorDark(navBg)?'background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)':'background:var(--p);color:#fff'}">🛒 ${esc(d.cartText)} <span class="nav-cart-count theme-cart-qty">0</span></a>`:''}
-        </div>
-      </nav>`
+
+      /* Logo: image takes priority over text, both shown at correct size */
+      const logoImgHtml = d.logoUrl ? `<img src="${esc(d.logoUrl)}" class="nav-logo-img" alt="${esc(lt)}">` : ''
+      const logoTextHtml = `<span class="${d.logoUrl ? 'hidden' : ''}" style="font-family:var(--font-display);font-size:20px;font-weight:400;letter-spacing:-.02em">${esc(lt)}</span>`
+
+      return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${!isMobile && links.length ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>` : '<div></div>'}${d.showCart !== 'no' ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>` : '<div></div>'}</nav>`
     }
 
     case 'hero':{
