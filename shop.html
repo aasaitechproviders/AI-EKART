@@ -348,68 +348,65 @@ body.cart-bar-open{padding-bottom:66px}
 .tc-navbar{
   width:100%;
   box-sizing:border-box;
-  /* Solid fallback so navbar is never transparent over coloured hero */
+  /* FLEX row — simpler and more reliable than grid for navbar */
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  /* Logo takes its natural width, links fill center, cart at end */
+  gap:0;
+  padding:0 40px;
+  height:var(--navbar-h);
+  /* Default bg — overridden per-instance by inline style */
   background:rgba(250,250,250,.97);
   backdrop-filter:blur(24px);
   -webkit-backdrop-filter:blur(24px);
   border-bottom:1px solid rgba(0,0,0,.07);
-  padding:0 40px;
-  height:var(--navbar-h);
-  /* strict height — never taller than navbar-h */
-  max-height:var(--navbar-h);
-  overflow:visible;
-  /* 3-column grid: logo | links | actions */
-  display:grid;
-  grid-template-columns:auto 1fr auto;
-  align-items:center;
-  gap:16px;
   position:sticky;
   top:0;
   z-index:200;
 }
 
-/* Logo — grid col 1 */
+/* Logo — left side, natural width */
 .nav-logo{
   font-family:var(--font-display);
   font-size:20px;
   font-weight:400;
   letter-spacing:-.02em;
   cursor:pointer;
-  /* FIX: flex centering so the logo image/text are vertically middle */
   display:flex;
+  flex-direction:row;
   align-items:center;
   gap:9px;
   white-space:nowrap;
-  justify-self:start;
-  /* FIX: align-self centers within the grid row height */
-  align-self:center;
-  /* FIX: ensure no extra height bleeds from font metrics */
+  flex-shrink:0;
   line-height:1;
+  height:100%;
 }
 .nav-logo span{
   line-height:1;
-  /* FIX: prevent font descenders from pushing text off-center */
-  display:inline-flex;
+  display:flex;
   align-items:center;
 }
 .nav-logo-img{
-  height:30px;
+  height:32px;
   width:auto;
+  max-width:120px;
   object-fit:contain;
   border-radius:6px;
   flex-shrink:0;
-  /* FIX: block removes inline baseline gap */
   display:block;
+  vertical-align:middle;
 }
 
-/* Nav links — grid col 2 */
+/* Nav links — fills center via flex:1, centered */
 .nav-links{
+  flex:1;
   display:flex;
+  flex-direction:row;
   align-items:center;
-  gap:28px;
   justify-content:center;
-  /* FIX: self-align centers within grid cell */
-  align-self:center;
+  gap:28px;
+  height:100%;
   min-width:0;
   overflow:hidden;
 }
@@ -420,23 +417,22 @@ body.cart-bar-open{padding-bottom:66px}
   opacity:.82;
   transition:opacity .15s;
   flex-shrink:0;
-  /* FIX: line-height:1 removes baseline gap */
   line-height:1;
-  /* FIX: inline-flex so anchor is vertically centered too */
-  display:inline-flex;
+  display:flex;
   align-items:center;
+  height:100%;
 }
 .nav-links a:hover{opacity:1}
 
-/* Nav right actions — grid col 3 */
+/* Nav right actions — right side, natural width */
 .nav-right{
   display:flex;
+  flex-direction:row;
   align-items:center;
   gap:8px;
-  justify-self:end;
-  /* FIX: self-align centers within grid cell */
-  align-self:center;
   flex-shrink:0;
+  margin-left:auto;
+  height:100%;
 }
 
 /* Cart button */
@@ -444,7 +440,8 @@ body.cart-bar-open{padding-bottom:66px}
   display:inline-flex;
   align-items:center;
   gap:8px;
-  padding:9px 18px;
+  padding:0 18px;
+  height:38px;
   border-radius:var(--btn-r);
   font-size:13px;
   font-weight:600;
@@ -453,14 +450,11 @@ body.cart-bar-open{padding-bottom:66px}
   font-family:var(--font);
   text-decoration:none;
   white-space:nowrap;
+  line-height:1;
+  box-sizing:border-box;
   transition:opacity .15s,transform .15s var(--ease-spring);
   background:rgba(0,0,0,.75);
   color:#fff;
-  /* FIX: line-height:1 prevents button from being taller than needed */
-  line-height:1;
-  /* FIX: explicit height matches navbar rhythm */
-  height:38px;
-  box-sizing:border-box;
 }
 .nav-cart-btn:hover{opacity:.88;transform:translateY(-1px)}
 
@@ -679,7 +673,7 @@ body.cart-bar-open{padding-bottom:66px}
 @media(max-width:768px){
   :root{--navbar-h:54px;--card-gap:8px}
   /* On mobile: 2-col grid — logo | cart (links hidden) */
-  .tc-navbar{padding:0 16px;gap:8px;grid-template-columns:auto auto}
+  .tc-navbar{padding:0 16px;gap:0}
   .hdr-inner{padding:0 16px;gap:12px}
   .hdr-nav,.nav-links{display:none}
   .nav-right{justify-self:end}
@@ -1214,10 +1208,10 @@ function buildSec(sec,isMobile){
       const logoTextHtml = `<span style="${logoSrc ? 'display:none' : ''}">${esc(lt)}</span>`
       const middleCol = (!isMobile && links.length)
         ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>`
-        : `<div></div>`
+        : ``
       const rightCol = d.showCart !== 'no'
         ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>`
-        : `<div></div>`
+        : ``
       return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${middleCol}${rightCol}</nav>`
     }
 
