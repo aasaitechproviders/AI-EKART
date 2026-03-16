@@ -348,15 +348,18 @@ body.cart-bar-open{padding-bottom:66px}
 .tc-navbar{
   width:100%;
   box-sizing:border-box;
-  /* FLEX row — simpler and more reliable than grid for navbar */
-  display:flex;
-  flex-direction:row;
-  align-items:center;
-  /* Logo takes its natural width, links fill center, cart at end */
+  /* !important ensures inline style on <nav> never breaks the flex row */
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
   gap:0;
   padding:0 40px;
   height:var(--navbar-h);
-  /* Default bg — overridden per-instance by inline style */
+  min-height:var(--navbar-h);
+  max-height:var(--navbar-h);
+  overflow:hidden;
+  /* Default bg — inline style overrides background/border only */
   background:rgba(250,250,250,.97);
   backdrop-filter:blur(24px);
   -webkit-backdrop-filter:blur(24px);
@@ -380,7 +383,6 @@ body.cart-bar-open{padding-bottom:66px}
   white-space:nowrap;
   flex-shrink:0;
   line-height:1;
-  height:100%;
 }
 .nav-logo span{
   line-height:1;
@@ -406,7 +408,6 @@ body.cart-bar-open{padding-bottom:66px}
   align-items:center;
   justify-content:center;
   gap:28px;
-  height:100%;
   min-width:0;
   overflow:hidden;
 }
@@ -420,7 +421,6 @@ body.cart-bar-open{padding-bottom:66px}
   line-height:1;
   display:flex;
   align-items:center;
-  height:100%;
 }
 .nav-links a:hover{opacity:1}
 
@@ -432,7 +432,6 @@ body.cart-bar-open{padding-bottom:66px}
   gap:8px;
   flex-shrink:0;
   margin-left:auto;
-  height:100%;
 }
 
 /* Cart button */
@@ -676,7 +675,7 @@ body.cart-bar-open{padding-bottom:66px}
   .tc-navbar{padding:0 16px;gap:0}
   .hdr-inner{padding:0 16px;gap:12px}
   .hdr-nav,.nav-links{display:none}
-  .nav-right{justify-self:end}
+  .nav-right{margin-left:auto}
   .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,
   .tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,
   .tc-richtext-section,.tc-imagetext-section,.tc-brands-section,.tc-offers-section,
@@ -1189,30 +1188,34 @@ function buildSec(sec,isMobile){
       const linkColor = d.linkColor || (navIsDark ? '#ffffff' : '')
       const logoColor = d.logoColor || linkColor || (navIsDark ? '#ffffff' : '')
       const cartBtnStyle = navIsDark
-        ? 'background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.28);backdrop-filter:blur(8px)'
+        ? 'background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.28)'
         : 'background:#111111;color:#fff;border:none'
-      const navBgStyle = navBg
-        ? `background:${navBg};`
-        : 'background:rgba(250,250,250,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'
-      const navBorderStyle = navBg ? 'border-bottom:none;' : 'border-bottom:1px solid rgba(0,0,0,.07);'
-      const navStyle = `${navBgStyle}${navBorderStyle}position:${pos};top:0;z-index:200;`
+      const navBgStyle = navBg ? `background:${navBg};` : ''
+      const navStyle = `${navBgStyle}position:${pos};top:0;z-index:200;`
       const linksHtml = links.map(l => {
         const url = l.url || l.href || '#'
         const isAnchor = url.startsWith('#')
         const sid = isAnchor ? url.slice(1) : null
-        const onClick = isAnchor ? (sid === '' || sid === 'mainAnchor' ? `onclick="event.preventDefault();smoothScroll()"` : `onclick="event.preventDefault();scrollToEl('${sid}')"`) : ''
+        const onClick = isAnchor
+          ? (sid===''||sid==='mainAnchor' ? 'onclick="event.preventDefault();smoothScroll()"' : `onclick="event.preventDefault();scrollToEl('${sid}')"`)
+          : ''
         return `<a href="${esc(url)}" ${onClick}>${esc(l.text||l.txt||'')}</a>`
       }).join('')
       const logoSrc = d.logoUrl || storeConfig.logo_url || ''
-      const logoImgHtml = logoSrc ? `<img src="${esc(logoSrc)}" class="nav-logo-img" alt="${esc(lt)}" onerror="this.style.display='none';this.nextElementSibling.style.display=''">` : ''
-      const logoTextHtml = `<span style="${logoSrc ? 'display:none' : ''}">${esc(lt)}</span>`
-      const middleCol = (!isMobile && links.length)
-        ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>`
-        : ``
-      const rightCol = d.showCart !== 'no'
+      let logoInner = ''
+      if(logoSrc){
+        logoInner = `<img src="${esc(logoSrc)}" class="nav-logo-img" alt="${esc(lt)}">`
+        logoInner += `<span class="nav-logo-txt hidden">${esc(lt)}</span>`
+      } else {
+        logoInner = `<span class="nav-logo-txt">${esc(lt)}</span>`
+      }
+      const navLinks = (!isMobile && links.length)
+        ? `<div class="nav-links"${linkColor ? ` style="color:${linkColor}"` : ''}>${linksHtml}</div>`
+        : ''
+      const navCart = d.showCart !== 'no'
         ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>`
-        : ``
-      return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${middleCol}${rightCol}</nav>`
+        : ''
+      return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo"${logoColor ? ` style="color:${logoColor}"` : ''} onclick="scrollTop()">${logoInner}</div>${navLinks}${navCart}</nav>`
     }
 
 
