@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#09090f">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eKart — AI Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="api.js"></script>
+  <style>
+    :root{
+      --bg:#09090f;--surface:#0e0e17;--surface2:#13131e;--surface3:#181826;
+      --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+      --accent:#5b5cf6;--accent2:#818cf8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+      --topbar-h:52px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+    /* ═══ TOPBAR ═══ */
+    #topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:200}
+    .tb-logo{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);letter-spacing:-.04em;text-decoration:none;padding-right:12px;border-right:1px solid var(--border2);margin-right:4px}
+    .tb-logo em{color:var(--accent2);font-style:normal}
+    .tb-badge{background:linear-gradient(135deg,#5b5cf6,#818cf8);color:white;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;letter-spacing:.04em}
+    .tb-spacer{flex:1}
+    .tb-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;white-space:nowrap}
+    .tb-btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+    .tb-btn-ghost:hover{border-color:var(--border3);color:var(--text)}
+    .tb-btn-primary{background:var(--accent);color:white}
+    .tb-btn-primary:hover{background:#4f4de0;box-shadow:0 4px 16px rgba(91,92,246,.4)}
+    .tb-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .tb-lang{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px}
+
+    /* ═══ MAIN LAYOUT ═══ */
+    #main-wrap{display:flex;flex:1;overflow:hidden}
+
+    /* ═══ CHAT PANEL ═══ */
+    #chat-panel{width:420px;min-width:380px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .chat-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .chat-header-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+    .chat-header-title{font-size:14px;font-weight:800;color:var(--text)}
+    .chat-header-sub{font-size:11.5px;color:var(--text3)}
+    .ai-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6);animation:pulse 2s infinite;flex-shrink:0}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .step-progress{padding:10px 16px 0;display:flex;gap:4px;flex-shrink:0}
+    .step-dot{height:3px;flex:1;border-radius:999px;background:var(--border2);transition:background .4s}
+    .step-dot.done{background:var(--green)}
+    .step-dot.active{background:var(--accent)}
+
+    /* ═══ MESSAGES ═══ */
+    #chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+    #chat-messages::-webkit-scrollbar{width:3px}
+    #chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+    .msg{display:flex;gap:9px;align-items:flex-end}
+    .msg.user{flex-direction:row-reverse}
+    .msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+    .msg.ai .msg-avatar{background:linear-gradient(135deg,#5b5cf6,#818cf8)}
+    .msg.user .msg-avatar{background:var(--surface3);font-size:11px}
+    .msg-body{display:flex;flex-direction:column;max-width:82%;min-width:0}
+    .msg.user .msg-body{align-items:flex-end}
+    .msg-bubble{padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.6;word-break:break-word}
+    .msg.ai .msg-bubble{background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px;color:var(--text)}
+    .msg.user .msg-bubble{background:var(--accent);color:white;border-bottom-right-radius:4px}
+    .msg-time{font-size:9px;color:var(--text3);margin-top:3px;padding:0 2px}
+    .typing-dots{display:flex;gap:4px;padding:3px 2px;align-items:center}
+    .typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:tdot 1.2s infinite}
+    .typing-dots span:nth-child(2){animation-delay:.2s}
+    .typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    /* ═══ WIDGETS ═══ */
+    .chat-widget{margin-top:9px}
+    .widget-label{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:7px;letter-spacing:.05em;text-transform:uppercase}
+    .widget-chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:999px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+    .chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(91,92,246,.08)}
+    .chip.selected{border-color:var(--accent);background:rgba(91,92,246,.15);color:var(--accent2)}
+    .widget-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .wcard{background:var(--surface3);border:1.5px solid var(--border2);border-radius:10px;padding:10px;cursor:pointer;transition:all .15s;text-align:center}
+    .wcard:hover{border-color:var(--accent);background:rgba(91,92,246,.07)}
+    .wcard.selected{border-color:var(--accent);background:rgba(91,92,246,.13)}
+    .wcard-icon{font-size:22px;margin-bottom:4px}
+    .wcard-label{font-size:12px;font-weight:700;color:var(--text2)}
+    .wcard-desc{font-size:10px;color:var(--text3);margin-top:2px}
+    .color-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .color-chip{width:30px;height:30px;border-radius:8px;border:2.5px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
+    .color-chip:hover{transform:scale(1.2)}
+    .color-chip.selected{border-color:white;box-shadow:0 0 0 2px var(--accent)}
+
+    /* ═══ QUICK REPLIES ═══ */
+    #quick-replies{padding:8px 14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0}
+    #quick-replies:empty{padding:0;border-top:none}
+    .qr{padding:5px 11px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:999px;font-size:11.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+    .qr:hover{border-color:var(--accent);color:var(--accent2)}
+
+    /* ═══ INPUT ═══ */
+    #chat-input-wrap{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;flex-shrink:0}
+    #chat-input{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:none;min-height:40px;max-height:96px;line-height:1.5;transition:border-color .15s}
+    #chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.1)}
+    #chat-input::placeholder{color:var(--text3)}
+    .ibtn{width:36px;height:36px;border-radius:9px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
+    #mic-btn{background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2)}
+    #mic-btn:hover{border-color:var(--accent);color:var(--accent2)}
+    #mic-btn.recording{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red);animation:micpulse 1s infinite}
+    @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+    #send-btn{background:var(--accent);color:white}
+    #send-btn:hover{background:#4f4de0}
+    #send-btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ═══ PREVIEW PANEL ═══ */
+    #preview-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+    .preview-topbar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
+    .preview-url{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 11px;font-size:11.5px;color:var(--text3);display:flex;align-items:center;gap:6px}
+    .preview-device-btns{display:flex;gap:3px}
+    .pdb{width:28px;height:28px;border-radius:6px;border:none;background:var(--surface2);color:var(--text3);cursor:pointer;font-size:13px;transition:all .12s;display:flex;align-items:center;justify-content:center}
+    .pdb.active{background:var(--surface3);color:var(--accent2)}
+    #built-bar{padding:7px 14px;background:var(--surface);border-bottom:1px solid var(--border);display:none;align-items:center;gap:7px;flex-wrap:wrap;flex-shrink:0}
+    .built-pill{display:flex;align-items:center;gap:4px;background:rgba(91,92,246,.1);border:1px solid rgba(91,92,246,.2);border-radius:999px;padding:2px 9px;font-size:10.5px;font-weight:700;color:var(--accent2)}
+    .preview-canvas{flex:1;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:20px;background:var(--bg)}
+    .preview-canvas::-webkit-scrollbar{width:4px;height:4px}
+    .preview-canvas::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+    .device-shell{background:white;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px var(--border2),0 24px 60px rgba(0,0,0,.4);transition:all .3s;flex-shrink:0}
+    .device-shell.desktop{width:100%;max-width:960px}
+    .device-shell.tablet{width:768px}
+    .device-shell.mobile{width:390px}
+    #preview-iframe{width:100%;border:none;display:block}
+    .preview-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);text-align:center;padding:32px}
+    .preview-empty-icon{font-size:52px;opacity:.25}
+    .preview-empty-title{font-size:15px;font-weight:700;color:var(--text2)}
+    .preview-empty-sub{font-size:13px;line-height:1.6;max-width:260px}
+
+    /* ═══ TOASTS ═══ */
+    .built-toast{position:fixed;top:calc(var(--topbar-h)+10px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(91,92,246,.96),rgba(129,140,248,.96));backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(91,92,246,.3);z-index:500;opacity:0;transition:opacity .3s;pointer-events:none}
+    .built-toast.show{opacity:1}
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:1000}
+    .toast{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);transition:all .3s;max-width:300px}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.success{border-color:rgba(34,197,94,.3)}
+    .toast.error{border-color:rgba(239,68,68,.3)}
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <a class="tb-logo" href="home.html">e<em>K</em>art</a>
+  <span class="tb-badge">✨ AI Builder</span>
+  <div class="tb-spacer"></div>
+  <div class="tb-lang">🌐 <span id="lang-label">Auto Detect</span></div>
+  <button class="tb-btn tb-btn-ghost" onclick="location.href='website-builder.html'">🎨 Classic Builder</button>
+  <button class="tb-btn tb-btn-primary" id="publish-btn" onclick="publishSite()" disabled>🚀 Save &amp; Publish</button>
+</div>
+
+<div id="main-wrap">
+
+  <!-- ═══ CHAT PANEL ═══ -->
+  <div id="chat-panel">
+    <div class="chat-header">
+      <div class="chat-header-row">
+        <div class="ai-dot"></div>
+        <div class="chat-header-title">eKart AI — Build Your Store</div>
+      </div>
+      <div class="chat-header-sub">Type or speak in any language • Preview builds live →</div>
+    </div>
+    <div class="step-progress" id="step-progress">
+      <div class="step-dot active" id="sp0"></div>
+      <div class="step-dot" id="sp1"></div>
+      <div class="step-dot" id="sp2"></div>
+      <div class="step-dot" id="sp3"></div>
+      <div class="step-dot" id="sp4"></div>
+      <div class="step-dot" id="sp5"></div>
+      <div class="step-dot" id="sp6"></div>
+    </div>
+    <div id="chat-messages"></div>
+    <div id="quick-replies"></div>
+    <div id="chat-input-wrap">
+      <textarea id="chat-input" placeholder="Type in any language… or tap 🎤" rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="ibtn" id="mic-btn" onclick="toggleVoice()" title="Speak in any language">🎤</button>
+      <button class="ibtn" id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- ═══ PREVIEW PANEL ═══ -->
+  <div id="preview-panel">
+    <div class="preview-topbar">
+      <div class="preview-url">
+        <span>🔒</span>
+        <span id="preview-url-text">ekart.aasaitech.in/your-store</span>
+      </div>
+      <div class="preview-device-btns">
+        <button class="pdb active" onclick="setDevice('desktop',this)">🖥</button>
+        <button class="pdb" onclick="setDevice('tablet',this)">▭</button>
+        <button class="pdb" onclick="setDevice('mobile',this)">📱</button>
+      </div>
+    </div>
+    <div id="built-bar"></div>
+    <div class="preview-canvas" id="preview-canvas">
+      <div class="preview-empty" id="preview-empty">
+        <div class="preview-empty-icon">✨</div>
+        <div class="preview-empty-title">Your store preview will appear here</div>
+        <div class="preview-empty-sub">Chat with the AI on the left — your site builds live as you talk.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="built-toast" id="built-toast">✅ <span id="built-toast-msg">Section added!</span></div>
+<div id="toast-container"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let siteState = {
+  storeName:'', storeSlug:'', businessType:'',
+  description:'', logoEmoji:'🛍️',
+  tagline:'', heroSubtext:'', ctaText:'',
+  theme:{
+    primaryColor:'#5b5cf6', bgColor:'#09090f', textColor:'#f1f5f9',
+    cardBg:'#13131e', navBg:'#0e0e17', font:'Outfit',
+    cols:'3', radius:'12px', btnStyle:'rounded',
+    cardStyle:'classic', cardSize:'medium',
+    announcementText:'✨ Free shipping on orders over ₹999!'
+  },
+  sections:[]
+}
+
+let chatHistory = []   // [{role:'user'|'assistant', content:'...'}]
+let currentStep = 0
+let currentDevice = 'desktop'
+let isThinking = false
+let speechRec = null
+let isRecording = false
+
+const STEPS = ['brand','business','hero','products','theme','extras','done']
+
+const THEME_PALETTES = [
+  {name:'Midnight',  primary:'#5b5cf6',bg:'#09090f',text:'#f1f5f9',card:'#13131e',nav:'#0e0e17'},
+  {name:'Clean',     primary:'#5b5cf6',bg:'#ffffff',text:'#111111',card:'#f8f9fa',nav:'#ffffff'},
+  {name:'Forest',    primary:'#16a34a',bg:'#052e16',text:'#f0fdf4',card:'#14532d',nav:'#052e16'},
+  {name:'Rose',      primary:'#e11d48',bg:'#fff1f2',text:'#4c0519',card:'#ffe4e6',nav:'#fff1f2'},
+  {name:'Ocean',     primary:'#0284c7',bg:'#0c4a6e',text:'#e0f2fe',card:'#075985',nav:'#0c4a6e'},
+  {name:'Sunset',    primary:'#ea580c',bg:'#431407',text:'#fff7ed',card:'#7c2d12',nav:'#431407'},
+]
+
+const SAMPLE_PRODUCTS = [
+  {name:'Nike Air Max 270',price:7999,compare:11999,disc:33,cat:'Footwear',img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',badge:'Bestseller'},
+  {name:'Samsung Galaxy Buds',price:8499,compare:12999,disc:35,cat:'Electronics',img:'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=400&fit=crop',badge:'New'},
+  {name:'Floral Summer Dress',price:1299,compare:2499,disc:48,cat:'Fashion',img:'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=400&fit=crop',badge:'Trending'},
+  {name:'Apple Watch Series 9',price:38999,compare:45999,disc:15,cat:'Electronics',img:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop',badge:'Hot'},
+  {name:'Minimalist Backpack',price:2499,compare:3999,disc:38,cat:'Accessories',img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',badge:''},
+  {name:'Botanical Face Serum',price:899,compare:1499,disc:40,cat:'Beauty',img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop',badge:'New'},
+  {name:'Ceramic Dinner Set',price:3499,compare:5999,disc:42,cat:'Home',img:'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&h=400&fit=crop',badge:''},
+  {name:'Wireless Keyboard',price:4999,compare:7999,disc:38,cat:'Electronics',img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&h=400&fit=crop',badge:'Sale'},
+]
+
+const SAMPLE_CATEGORIES = [
+  {name:'Fashion',    count:'1,240+',img:'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&h=300&fit=crop'},
+  {name:'Electronics',count:'980+',  img:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&h=300&fit=crop'},
+  {name:'Home & Living',count:'2,100+',img:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop'},
+  {name:'Beauty',     count:'750+',  img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=300&fit=crop'},
+]
+
+/* ══════════════════════════════════════════════════
+   SYSTEM PROMPT — sent to your backend
+══════════════════════════════════════════════════ */
+function buildSystemPrompt() {
+  return `You are eKart AI, a friendly conversational website builder for Indian ecommerce stores. You help users build their store website step by step through natural conversation.
+
+CRITICAL RULES:
+1. AUTO-DETECT user's language and ALWAYS respond in that SAME language. Tamil→Tamil, Hindi→Hindi, Telugu→Telugu, English→English. Match exactly.
+2. Ask ONE focused question at a time. Never overwhelm.
+3. Be warm, encouraging — like a helpful friend building something together.
+4. Keep responses SHORT (2-4 sentences max). UI widgets do the heavy lifting.
+5. Extract structured data from every message and return it in a <DATA> JSON block.
+
+CURRENT SITE STATE:
+${JSON.stringify(siteState, null, 2)}
+
+CURRENT STEP: ${STEPS[currentStep]} (${currentStep + 1}/${STEPS.length})
+
+FLOW:
+- brand: Get store name, logo emoji
+- business: What they sell, short description (enhance it with AI)
+- hero: Tagline, subtext, CTA button text
+- products: Product count, layout preference
+- theme: Color theme and font choice
+- extras: Extra sections they want (testimonials/about/faq/newsletter/contact)
+- done: Congratulate, offer to publish
+
+RESPONSE FORMAT — always return a <DATA> JSON block FIRST, then your message:
+
+<DATA>
+{
+  "step": "brand|business|hero|products|theme|extras|done",
+  "detectedLang": "en|ta|hi|te|ml|kn|bn|mr|gu|pa|ar",
+  "extracted": {
+    "storeName": "",
+    "storeSlug": "",
+    "businessType": "",
+    "description": "",
+    "logoEmoji": "",
+    "tagline": "",
+    "heroSubtext": "",
+    "ctaText": "",
+    "themeIndex": null
+  },
+  "sectionsToBuild": [],
+  "widget": {
+    "type": "chips|cards|color_chips|none",
+    "label": "",
+    "options": [{"label":"","value":"","icon":"","desc":""}]
+  },
+  "quickReplies": ["", ""]
+}
+</DATA>
+
+Your conversational message here (in user's detected language).
+
+SECTION BUILD TRIGGERS:
+- When step becomes "hero" → sectionsToBuild: ["navbar","hero"]
+- When step becomes "products" → sectionsToBuild: ["trustbadges","featured","categories"]
+- When theme chosen → sectionsToBuild: [] (just re-render)
+- When step becomes "extras" → sectionsToBuild: whatever sections user wants
+- When step becomes "done" → sectionsToBuild: ["newsletter","footer"]`
+}
+
+/* ══════════════════════════════════════════════════
+   CHAT UI
+══════════════════════════════════════════════════ */
+function addMsg(role, html, widget = null) {
+  const msgs = document.getElementById('chat-messages')
+  const wrap = document.createElement('div')
+  wrap.className = `msg ${role}`
+  const now = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+  wrap.innerHTML = `
+    <div class="msg-avatar">${role==='ai'?'🤖':'👤'}</div>
+    <div class="msg-body">
+      <div class="msg-bubble">${html}${widget ? buildWidgetHTML(widget) : ''}</div>
+      <div class="msg-time">${now}</div>
+    </div>`
+  msgs.appendChild(wrap)
+  msgs.scrollTop = msgs.scrollHeight
+}
+
+function buildWidgetHTML(w) {
+  if (!w || w.type === 'none') return ''
+  let h = `<div class="chat-widget">`
+  if (w.label) h += `<div class="widget-label">${w.label}</div>`
+  if (w.type === 'chips') {
+    h += `<div class="widget-chips">`
+    ;(w.options||[]).forEach(o => {
+      const val = typeof o==='object' ? o.value : o
+      const lbl = typeof o==='object' ? o.label : o
+      h += `<div class="chip" onclick="chipClick(this,'${esc(val)}')">${lbl}</div>`
+    })
+    h += `</div>`
+  } else if (w.type === 'cards') {
+    h += `<div class="widget-cards">`
+    ;(w.options||[]).forEach(o => {
+      h += `<div class="wcard" onclick="chipClick(this,'${esc(o.value||o.label)}')">
+        <div class="wcard-icon">${o.icon||'📦'}</div>
+        <div class="wcard-label">${o.label}</div>
+        ${o.desc?`<div class="wcard-desc">${o.desc}</div>`:''}
+      </div>`
+    })
+    h += `</div>`
+  } else if (w.type === 'color_chips') {
+    h += `<div class="color-chips">`
+    THEME_PALETTES.forEach((p,i) => {
+      h += `<div class="color-chip" style="background:${p.primary}" onclick="themeClick(${i})" title="${p.name}"></div>`
+    })
+    h += `</div><div style="font-size:10px;color:var(--text3);margin-top:18px">Tap a color to preview instantly</div>`
+  }
+  return h + `</div>`
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages')
+  const d = document.createElement('div')
+  d.className = 'msg ai'; d.id = 'typing-ind'
+  d.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-body"><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight
+}
+function removeTyping() { document.getElementById('typing-ind')?.remove() }
+
+function setQR(replies) {
+  const qr = document.getElementById('quick-replies')
+  qr.innerHTML = ''
+  ;(replies||[]).forEach(r => {
+    const b = document.createElement('button')
+    b.className = 'qr'; b.textContent = r
+    b.onclick = () => sendUserMsg(r)
+    qr.appendChild(b)
+  })
+}
+
+/* ══════════════════════════════════════════════════
+   WIDGET HANDLERS
+══════════════════════════════════════════════════ */
+function chipClick(el, value) {
+  el.closest('.widget-chips,.widget-cards')?.querySelectorAll('.chip,.wcard').forEach(c=>c.classList.remove('selected'))
+  el.classList.add('selected')
+  setTimeout(() => sendUserMsg(value), 250)
+}
+
+function themeClick(idx) {
+  const p = THEME_PALETTES[idx]
+  Object.assign(siteState.theme, {primaryColor:p.primary,bgColor:p.bg,textColor:p.text,cardBg:p.card,navBg:p.nav})
+  document.querySelectorAll('.color-chip').forEach((c,i) => c.classList.toggle('selected', i===idx))
+  renderPreview()
+  setTimeout(() => sendUserMsg(p.name + ' theme'), 300)
+}
+
+/* ══════════════════════════════════════════════════
+   SEND / RECEIVE
+══════════════════════════════════════════════════ */
+async function sendUserMsg(text) {
+  if (!text.trim() || isThinking) return
+  document.getElementById('quick-replies').innerHTML = ''
+  addMsg('user', esc(text))
+  document.getElementById('chat-input').value = ''
+  autoResize(document.getElementById('chat-input'))
+  chatHistory.push({role:'user', content:text})
+  await callAI(text)
+}
+
+function sendMessage() {
+  const v = document.getElementById('chat-input').value.trim()
+  if (v) sendUserMsg(v)
+}
+function handleKey(e) {
+  if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); sendMessage() }
+}
+function autoResize(el) {
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 96) + 'px'
+}
+
+/* ══════════════════════════════════════════════════
+   API CALL — same apiFetch pattern as ai.html, products.html
+══════════════════════════════════════════════════ */
+async function callAI(userMsg) {
+  isThinking = true
+  document.getElementById('send-btn').disabled = true
+  showTyping()
+
+  try {
+    // Exact same pattern as: apiFetch('/ai/store-setup', { method:'POST', body: JSON.stringify({...}) })
+    const r = await apiFetch('/ai/website-builder', {
+      method: 'POST',
+      body: JSON.stringify({
+        message: userMsg,
+        history: chatHistory.slice(-14),        // last 7 turns context
+        system_prompt: buildSystemPrompt(),
+        site_state: siteState
+      })
+    })
+
+    removeTyping()
+
+    // Backend returns { reply: "..." } — same shape as other /ai/ endpoints
+    const fullText = r.reply || r.text || r.response || JSON.stringify(r)
+    processResponse(fullText)
+
+  } catch (e) {
+    removeTyping()
+    console.error('AI builder error:', e)
+    addMsg('ai', `Sorry, I had a hiccup! Please try again 😅<br><small style="opacity:.5">${esc(e.message)}</small>`)
+    setQR(['Try again', 'Refresh page'])
+  }
+
+  isThinking = false
+  document.getElementById('send-btn').disabled = false
+}
+
+/* ══════════════════════════════════════════════════
+   PROCESS RESPONSE
+══════════════════════════════════════════════════ */
+function processResponse(text) {
+  // Parse <DATA> JSON block
+  let parsed = null
+  const match = text.match(/<DATA>([\s\S]*?)<\/DATA>/)
+  if (match) {
+    try { parsed = JSON.parse(match[1].trim()) } catch(e) { console.warn('JSON parse fail:', e) }
+  }
+
+  // Message = everything after </DATA>
+  const msgText = text.replace(/<DATA>[\s\S]*?<\/DATA>/g,'').trim()
+
+  // Apply extracted data
+  if (parsed?.extracted) {
+    const ex = parsed.extracted
+    if (ex.storeName)    siteState.storeName    = ex.storeName
+    if (ex.storeSlug)    siteState.storeSlug    = ex.storeSlug.toLowerCase().replace(/\s+/g,'-')
+    if (ex.businessType) siteState.businessType = ex.businessType
+    if (ex.description)  siteState.description  = ex.description
+    if (ex.logoEmoji)    siteState.logoEmoji    = ex.logoEmoji
+    if (ex.tagline)      siteState.tagline      = ex.tagline
+    if (ex.heroSubtext)  siteState.heroSubtext  = ex.heroSubtext
+    if (ex.ctaText)      siteState.ctaText      = ex.ctaText
+    if (typeof ex.themeIndex === 'number' && THEME_PALETTES[ex.themeIndex]) {
+      const p = THEME_PALETTES[ex.themeIndex]
+      Object.assign(siteState.theme,{primaryColor:p.primary,bgColor:p.bg,textColor:p.text,cardBg:p.card,navBg:p.nav})
+    }
+  }
+
+  // Language
+  if (parsed?.detectedLang) {
+    document.getElementById('lang-label').textContent = getLangName(parsed.detectedLang)
+  }
+
+  // Step advance
+  if (parsed?.step) {
+    const idx = STEPS.indexOf(parsed.step)
+    if (idx >= 0 && idx >= currentStep) { currentStep = idx; updateSteps() }
+  }
+
+  // Build sections
+  ;(parsed?.sectionsToBuild || []).forEach(type => buildSection(type, parsed?.extracted || {}))
+
+  // Show message
+  if (msgText) {
+    addMsg('ai', msgText.replace(/\n/g,'<br>'), parsed?.widget || null)
+    chatHistory.push({role:'assistant', content:text})
+  }
+
+  setQR(parsed?.quickReplies || [])
+
+  if (parsed?.step === 'done') {
+    document.getElementById('publish-btn').disabled = false
+    renderPreview()
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   SECTION BUILDING
+══════════════════════════════════════════════════ */
+function buildSection(type, extracted) {
+  const id = `sec_${type}_${Date.now()}`
+  const T = siteState.theme
+  const isLight = isLightColor(T.bgColor)
+  let data = {}
+
+  switch(type) {
+    case 'navbar':
+      data = {logoText:siteState.storeName||'My Store',logoEmoji:siteState.logoEmoji||'🛍️',link1Text:'Home',link1Url:'#',link2Text:'Shop',link2Url:'#products',link3Text:'About',link3Url:'#about',link4Text:'Contact',link4Url:'#contact'}; break
+    case 'hero':
+      data = {heading:siteState.tagline||`Welcome to ${siteState.storeName||'Our Store'}`,subtext:siteState.heroSubtext||siteState.description||'Discover amazing products at unbeatable prices.',ctaText:siteState.ctaText||'Shop Now',ctaLink:'#products',bgColor:T.primaryColor}; break
+    case 'featured':
+      data = {title:extracted.productsTitle||'Featured Products',subtitle:'Handpicked just for you',count:extracted.productCount||'8',columns:T.cols||'3',btnText:'Add to Cart',viewAllText:'View All',showOldPrice:'yes',showBadge:'yes',cardStyle:T.cardStyle,cardSize:T.cardSize}; break
+    case 'categories':
+      data = {title:'Browse by Category',subtitle:'Find what you love',columns:'4',style:'image',showCount:'yes'}; break
+    case 'banner':
+      data = {heading:extracted.bannerHeading||'Limited Time Offer',subtext:extracted.bannerSubtext||'Get 20% off your first order.',ctaText:'Claim Offer',bgColor:T.primaryColor,couponCode:extracted.couponCode||'SAVE20'}; break
+    case 'testimonials':
+      data = {title:'What Our Customers Say',t1name:'Priya S.',t1text:'Absolutely love this store! Amazing quality.',t1stars:'5',t2name:'Rahul K.',t2text:'Best shopping experience. Fast delivery!',t2stars:'5',t3name:'Anita M.',t3text:'Great products and excellent service.',t3stars:'5',columns:'3'}; break
+    case 'newsletter':
+      data = {heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address',btnColor:T.primaryColor}; break
+    case 'trustbadges':
+      data = {badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}; break
+    case 'about':
+      data = {title:`About ${siteState.storeName||'Us'}`,body:siteState.description||'We started with a simple mission: to bring quality products to every household.',ctaText:'Learn More',layout:'no-image'}; break
+    case 'faq':
+      data = {title:'Frequently Asked Questions',q1:'How long does shipping take?',a1:'Typically 3–7 business days.',q2:'What is your return policy?',a2:'30-day returns guaranteed.',q3:'Do you offer Cash on Delivery?',a3:'Yes! COD available across India.',q4:'How do I track my order?',a4:'You will receive a tracking link via SMS/Email.'}; break
+    case 'contact':
+      data = {title:'Get in Touch',subtitle:"We'd love to hear from you!",btnText:'Send Message',email:extracted.email||'',phone:extracted.phone||''}; break
+    case 'footer':
+      data = {logoText:siteState.storeName||'My Store',tagline:(siteState.description||'Quality products, delivered to your door.').slice(0,80),footerText:`© ${new Date().getFullYear()} ${siteState.storeName||'My Store'}. All rights reserved.`,col1Title:'Quick Links',col1Links:'Home,Shop,About,Contact',col2Title:'Customer Care',col2Links:'Shipping Policy,Returns,FAQ,Track Order',showSocial:'yes',bgColor:T.navBg,textColor:T.textColor}; break
+    case 'announcement':
+      data = {text:T.announcementText,bgColor:T.primaryColor,textColor:'#ffffff'}; break
+  }
+
+  const ORDER = ['announcement','navbar','hero','trustbadges','featured','categories','banner','testimonials','about','newsletter','faq','contact','footer']
+  const pos = ORDER.indexOf(type)
+  const section = {id, type, enabled:true, data}
+
+  const existing = siteState.sections.findIndex(s => s.type===type)
+  if (existing >= 0) {
+    siteState.sections[existing] = section
+  } else {
+    let at = siteState.sections.length
+    for (let i = siteState.sections.length - 1; i >= 0; i--) {
+      if (ORDER.indexOf(siteState.sections[i].type) <= pos) { at = i+1; break }
+      at = i
+    }
+    siteState.sections.splice(at, 0, section)
+  }
+
+  renderPreview()
+  updateBuiltBar()
+  showBuiltToast(type)
+}
+
+function updateBuiltBar() {
+  const bar = document.getElementById('built-bar')
+  if (!siteState.sections.length) { bar.style.display='none'; return }
+  bar.style.display='flex'
+  const icons = {navbar:'🧭',hero:'🌅',featured:'🛍️',categories:'📂',banner:'📣',testimonials:'💬',newsletter:'📧',footer:'🔗',about:'ℹ️',trustbadges:'🛡️',faq:'❓',contact:'📞',announcement:'📢'}
+  bar.innerHTML = `<span style="font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap;margin-right:2px">Built:</span>` +
+    siteState.sections.map(s=>`<div class="built-pill">${icons[s.type]||'📦'} ${s.type}</div>`).join('')
+}
+
+function showBuiltToast(type) {
+  const names = {navbar:'Navbar',hero:'Hero',featured:'Products',categories:'Categories',banner:'Banner',testimonials:'Testimonials',newsletter:'Newsletter',footer:'Footer',about:'About',trustbadges:'Trust Badges',faq:'FAQ',contact:'Contact',announcement:'Announcement'}
+  document.getElementById('built-toast-msg').textContent = `${names[type]||type} section added!`
+  const t = document.getElementById('built-toast')
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 2200)
+}
+
+function updateSteps() {
+  for (let i = 0; i <= 6; i++) {
+    const d = document.getElementById('sp'+i)
+    if (!d) continue
+    if (i < currentStep) d.className = 'step-dot done'
+    else if (i === currentStep) d.className = 'step-dot active'
+    else d.className = 'step-dot'
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   PREVIEW RENDER
+══════════════════════════════════════════════════ */
+function renderPreview() {
+  const empty = document.getElementById('preview-empty')
+  const shell = document.getElementById('device-shell')
+  if (!siteState.sections.length || !shell) { if(empty) empty.style.display=''; return }
+  if (empty) empty.style.display = 'none'
+
+  const isMobile = currentDevice === 'mobile'
+  const T = siteState.theme
+  const isLight = isLightColor(T.bgColor)
+  const borderRgb = isLight ? '0,0,0' : '255,255,255'
+  const btnRadius = T.btnStyle==='pill'?'999px':T.btnStyle==='square'?'3px':(T.radius||'12px')
+  const fontEnc = encodeURIComponent(T.font||'Outfit')
+  const txtC = isLight ? T.bgColor : 'white'
+
+  const sectHTML = siteState.sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile,T,btnRadius,borderRgb,isLight,txtC)).join('\n')
+
+  const html = `<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'${T.font||'Outfit'}',sans-serif;background:${T.bgColor};color:${T.textColor}}
+:root{--primary:${T.primaryColor};--bg:${T.bgColor};--text:${T.textColor};--card-bg:${T.cardBg};--nav-bg:${T.navBg};--radius:${T.radius};--border:rgba(${borderRgb},.1);--border2:rgba(${borderRgb},.15)}
+a{text-decoration:none;color:inherit}
+.btn-cta{display:inline-block;background:var(--primary);color:${txtC};padding:12px 28px;border-radius:${btnRadius};font-weight:700;font-size:14px;border:none;cursor:pointer}
+.btn-white{display:inline-block;background:white;padding:12px 28px;border-radius:${btnRadius};font-weight:700;font-size:14px;border:none;cursor:pointer}
+.ann{background:var(--primary);color:${txtC};text-align:center;padding:8px 16px;font-size:13px;font-weight:600}
+.nav{background:var(--nav-bg);border-bottom:1px solid var(--border);padding:0 ${isMobile?'16px':'28px'};height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:20px;font-weight:900;display:flex;align-items:center;gap:8px}
+.nav-links{display:flex;gap:20px;flex:1;margin-left:8px}
+.nav-links a{font-size:13px;font-weight:600;opacity:.7}
+.nav-cta{background:var(--primary);color:${txtC};padding:7px 18px;border-radius:${btnRadius};font-size:13px;font-weight:700;white-space:nowrap}
+.hero{padding:${isMobile?'52px 20px':'88px 40px'};text-align:center;background:linear-gradient(135deg,${T.primaryColor}22,${T.bgColor} 70%)}
+.hero h1{font-size:${isMobile?'28px':'50px'};font-weight:900;margin-bottom:16px;line-height:1.12}
+.hero p{font-size:${isMobile?'14px':'17px'};opacity:.7;max-width:520px;margin:0 auto 28px;line-height:1.65}
+.sec{padding:${isMobile?'32px 16px':'56px 40px'}}
+.sec-title{font-size:${isMobile?'20px':'26px'};font-weight:900;margin-bottom:6px}
+.sec-sub{font-size:${isMobile?'13px':'15px'};opacity:.6;margin-bottom:22px}
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.view-all{font-size:13px;font-weight:700;color:var(--primary)}
+.pgrid{display:grid;gap:14px;grid-template-columns:repeat(var(--cols,3),1fr)}
+.tc{display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.tc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.tc-img{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--border)}
+.tc-img img{width:100%;height:100%;object-fit:cover}
+.tc-badge{position:absolute;top:7px;left:7px;background:var(--primary);color:${txtC};font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px}
+.tc-info{padding:10px 12px 6px}
+.tc-cat{font-size:9.5px;opacity:.5;font-weight:700;text-transform:uppercase;margin-bottom:3px}
+.tc-name{font-size:12.5px;font-weight:700;margin-bottom:5px}
+.tc-prow{display:flex;align-items:center;gap:5px}
+.tc-price{font-size:14px;font-weight:900;color:var(--primary)}
+.tc-old{font-size:11px;opacity:.4;text-decoration:line-through}
+.tc-disc{font-size:9.5px;font-weight:800;color:#22c55e}
+.tc-btnw{padding:5px 12px 12px}
+.tc-btn{width:100%;padding:9px;background:var(--primary);color:${txtC};border:none;border-radius:${btnRadius};font-size:11.5px;font-weight:700;cursor:pointer}
+.cgrid{display:grid;gap:12px}
+.ccard{position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;border:1px solid var(--border)}
+.cimg{aspect-ratio:1/1;overflow:hidden}
+.cimg img{width:100%;height:100%;object-fit:cover}
+.cinfo{position:absolute;bottom:0;left:0;right:0;padding:14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.68))}
+.cname{font-size:14px;font-weight:800;color:white}
+.ccount{font-size:11px;color:rgba(255,255,255,.6)}
+.banner{padding:${isMobile?'44px 20px':'64px 40px'};text-align:center}
+.banner h2{font-size:${isMobile?'24px':'34px'};font-weight:900;margin-bottom:8px;color:white}
+.banner p{font-size:${isMobile?'13px':'15px'};opacity:.85;margin-bottom:16px;color:white}
+.coupon{display:inline-block;background:rgba(255,255,255,.2);padding:6px 18px;border-radius:999px;font-size:14px;font-weight:800;margin-bottom:20px;color:white}
+.tmns{padding:${isMobile?'32px 16px':'56px 40px'};background:var(--card-bg)}
+.tgrid{display:grid;gap:14px}
+.tcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.tstars{color:#f59e0b;font-size:15px;margin-bottom:7px}
+.ttext{font-size:13.5px;line-height:1.65;opacity:.8;font-style:italic;margin-bottom:12px}
+.tauthor{display:flex;align-items:center;gap:9px}
+.tavatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${txtC}}
+.tname{font-size:12.5px;font-weight:700}
+.nltr{padding:${isMobile?'44px 20px':'64px 40px'};text-align:center;background:var(--card-bg)}
+.nltr h2{font-size:${isMobile?'22px':'28px'};font-weight:900;margin-bottom:7px}
+.nltr p{opacity:.65;margin-bottom:22px;font-size:14px}
+.nform{display:flex;gap:9px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.ninput{flex:1;min-width:190px;padding:11px 15px;border-radius:${btnRadius};border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.trust{padding:${isMobile?'24px 16px':'36px 40px'}}
+.trgrid{display:grid;gap:14px}
+.tritem{display:flex;align-items:center;gap:12px}
+.tricon{font-size:26px}
+.trlbl{font-size:13.5px;font-weight:700}
+.trsub{font-size:11.5px;opacity:.5}
+.about{padding:${isMobile?'32px 16px':'56px 40px'}}
+.faq{padding:${isMobile?'32px 16px':'56px 40px'}}
+.faqitem{border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:9px}
+.faqq{font-size:13.5px;font-weight:700;margin-bottom:5px}
+.faqa{font-size:13px;opacity:.65;line-height:1.6}
+.ctact{padding:${isMobile?'32px 16px':'56px 40px'}}
+.cinput{width:100%;background:var(--card-bg);border:1.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;color:var(--text);font-family:inherit;outline:none;margin-bottom:9px}
+.ctarea{min-height:72px;resize:vertical}
+.footer{background:var(--nav-bg);padding:${isMobile?'32px 16px 20px':'48px 40px 24px'};border-top:1px solid var(--border)}
+.ftop{display:grid;grid-template-columns:${isMobile?'1fr':'1.5fr 1fr 1fr'};gap:28px;margin-bottom:24px}
+.flogo{font-size:20px;font-weight:900;margin-bottom:7px}
+.ftagline{font-size:13px;opacity:.55;line-height:1.6;margin-bottom:10px}
+.fct{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.5;margin-bottom:10px}
+.fcl{display:flex;flex-direction:column;gap:7px}
+.fcl a{font-size:12.5px;opacity:.6;cursor:pointer}
+.fbot{border-top:1px solid var(--border);padding-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.fcopy{font-size:11.5px;opacity:.45}
+.fsoc{display:flex;gap:7px}
+.sb{width:32px;height:32px;border-radius:7px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer}
+</style></head><body>${sectHTML}</body></html>`
+
+  let iframe = document.getElementById('preview-iframe')
+  if (!iframe) {
+    iframe = document.createElement('iframe')
+    iframe.id = 'preview-iframe'
+    iframe.style.cssText = 'width:100%;border:none;display:block'
+    shell.appendChild(iframe)
+  }
+  iframe.height = {desktop:700,tablet:900,mobile:780}[currentDevice]||700
+  iframe.srcdoc = html
+
+  if (siteState.storeSlug) document.getElementById('preview-url-text').textContent = `ekart.aasaitech.in/${siteState.storeSlug}`
+}
+
+function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, txtC) {
+  const d = section.data || {}
+  const E = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const w = inner => `<div data-sid="${section.id}" data-type="${section.type}">${inner}</div>`
+
+  switch(section.type) {
+    case 'announcement': return w(`<div class="ann">${E(d.text||'✨ Free shipping on orders over ₹999!')}</div>`)
+    case 'navbar': return w(`<nav class="nav">
+      <div class="nav-logo">${E(d.logoEmoji||'🛍️')} ${E(d.logoText||'My Store')}</div>
+      ${!isMobile?`<div class="nav-links">${[1,2,3,4].map(i=>d[`link${i}Text`]?`<a href="${d[`link${i}Url`]||'#'}">${E(d[`link${i}Text`])}</a>`:'').join('')}</div>`:''}
+      <div style="flex:1"></div>
+      <a href="#products" class="nav-cta">Shop Now</a>
+    </nav>`)
+    case 'hero': return w(`<div class="hero">
+      <h1>${E(d.heading||`Welcome to ${siteState.storeName||'Our Store'}`)}</h1>
+      <p>${E(d.subtext||'Discover amazing products at unbeatable prices.')}</p>
+      <a href="${d.ctaLink||'#products'}" class="btn-cta">${E(d.ctaText||'Shop Now')}</a>
+    </div>`)
+    case 'featured': {
+      const cols = isMobile?2:(parseInt(d.columns)||parseInt(T.cols)||3)
+      const cnt = Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length)
+      return w(`<div class="sec" id="products">
+        <div class="sec-hdr">
+          <div><div class="sec-title">${E(d.title||'Featured Products')}</div><div class="sec-sub">${E(d.subtitle||'')}</div></div>
+          ${d.viewAllText?`<a class="view-all">${E(d.viewAllText)} →</a>`:''}
+        </div>
+        <div class="pgrid" style="--cols:${cols}">
+          ${SAMPLE_PRODUCTS.slice(0,cnt).map(p=>`<div class="tc">
+            <div class="tc-img">${p.badge?`<div class="tc-badge">${p.badge}</div>`:''}<img src="${p.img}" alt="${E(p.name)}" loading="lazy"></div>
+            <div class="tc-info"><div class="tc-cat">${E(p.cat)}</div><div class="tc-name">${E(p.name)}</div>
+              <div class="tc-prow"><span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span><span class="tc-old">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span></div>
+            </div>
+            <div class="tc-btnw"><button class="tc-btn">🛒 ${E(d.btnText||'Add to Cart')}</button></div>
+          </div>`).join('')}
+        </div>
+      </div>`)
+    }
+    case 'categories': {
+      const cols = isMobile?2:(parseInt(d.columns)||4)
+      return w(`<div class="sec">
+        <div class="sec-title">${E(d.title||'Browse by Category')}</div><div class="sec-sub">${E(d.subtitle||'')}</div>
+        <div class="cgrid" style="grid-template-columns:repeat(${cols},1fr)">
+          ${SAMPLE_CATEGORIES.slice(0,cols*2).map(c=>`<div class="ccard">
+            <div class="cimg"><img src="${c.img}" alt="${E(c.name)}" loading="lazy"></div>
+            <div class="cinfo"><div class="cname">${E(c.name)}</div><div class="ccount">${c.count} items</div></div>
+          </div>`).join('')}
+        </div>
+      </div>`)
+    }
+    case 'banner': {
+      const bg = d.bgColor||T.primaryColor
+      return w(`<div class="banner" style="background:${bg}">
+        <h2>${E(d.heading||'Limited Time Offer')}</h2>
+        <p>${E(d.subtext||'Get 20% off your first order.')}</p>
+        ${d.couponCode?`<div class="coupon">🎫 ${E(d.couponCode)}</div>`:''}
+        <a href="${d.ctaLink||'#'}" class="btn-white" style="color:${bg}">${E(d.ctaText||'Claim Offer')}</a>
+      </div>`)
+    }
+    case 'testimonials': {
+      const cols = isMobile?1:(parseInt(d.columns)||3)
+      return w(`<div class="tmns">
+        <div class="sec-title" style="margin-bottom:20px">${E(d.title||'What Our Customers Say')}</div>
+        <div class="tgrid" style="grid-template-columns:repeat(${cols},1fr)">
+          ${[[d.t1name||'Priya S.',d.t1text||'Absolutely love this store!'],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.'],[d.t3name||'Anita M.',d.t3text||'Great customer service.']].map(([name,text])=>`<div class="tcard">
+            <div class="tstars">★★★★★</div><div class="ttext">"${E(text)}"</div>
+            <div class="tauthor"><div class="tavatar">${name[0]}</div><div class="tname">${E(name)}</div></div>
+          </div>`).join('')}
+        </div>
+      </div>`)
+    }
+    case 'newsletter': return w(`<div class="nltr">
+      <h2>${E(d.heading||'Stay in the loop')}</h2>
+      <p>${E(d.subtext||'Get exclusive deals straight to your inbox.')}</p>
+      <div class="nform">
+        <input class="ninput" type="email" placeholder="${E(d.inputPlaceholder||'Enter your email')}">
+        <button class="btn-cta" style="background:${d.btnColor||T.primaryColor};color:${txtC}">${E(d.btnText||'Subscribe')} →</button>
+      </div>
+    </div>`)
+    case 'trustbadges': {
+      const cols = isMobile?2:4
+      return w(`<div class="trust">
+        <div class="trgrid" style="grid-template-columns:repeat(${cols},1fr)">
+          ${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],[d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe'],[d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day policy'],[d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here']].map(([icon,lbl,sub])=>`<div class="tritem"><span class="tricon">${E(icon)}</span><div><div class="trlbl">${E(lbl)}</div><div class="trsub">${E(sub)}</div></div></div>`).join('')}
+        </div>
+      </div>`)
+    }
+    case 'about': return w(`<div class="about" id="about">
+      <h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;margin-bottom:12px">${E(d.title||'Our Story')}</h2>
+      <p style="opacity:.65;line-height:1.75;max-width:640px;margin-bottom:18px">${E(d.body||'We started with a simple mission.')}</p>
+      ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${E(d.ctaText)}</a>`:''}
+    </div>`)
+    case 'faq': return w(`<div class="faq">
+      <div class="sec-title" style="margin-bottom:18px">${E(d.title||'FAQ')}</div>
+      ${[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q).map(([q,a])=>`<div class="faqitem"><div class="faqq">${E(q)}</div><div class="faqa">${E(a)}</div></div>`).join('')}
+    </div>`)
+    case 'contact': return w(`<div class="ctact" id="contact">
+      <div class="sec-title" style="margin-bottom:6px">${E(d.title||'Get in Touch')}</div>
+      <div class="sec-sub">${E(d.subtitle||'')}</div>
+      <div style="display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:20px">
+        ${d.email||d.phone?`<div style="padding-top:8px">${d.email?`<div style="font-size:14px;margin-bottom:12px">✉️ ${E(d.email)}</div>`:''}${d.phone?`<div style="font-size:14px">📞 ${E(d.phone)}</div>`:''}</div>`:''}
+        <div>
+          <input class="cinput" placeholder="Your Name">
+          <input class="cinput" placeholder="Email Address">
+          <textarea class="cinput ctarea" placeholder="Your message..."></textarea>
+          <button class="btn-cta">${E(d.btnText||'Send Message')}</button>
+        </div>
+      </div>
+    </div>`)
+    case 'footer': return w(`<footer class="footer">
+      <div class="ftop">
+        <div>
+          <div class="flogo">${E(d.logoText||siteState.storeName||'My Store')}</div>
+          ${d.tagline?`<div class="ftagline">${E(d.tagline)}</div>`:''}
+          ${d.email?`<div style="font-size:12.5px;opacity:.55">✉️ ${E(d.email)}</div>`:''}
+        </div>
+        ${!isMobile?`<div><div class="fct">${E(d.col1Title||'Quick Links')}</div><div class="fcl">${(d.col1Links||'Home,Shop,About,Contact').split(',').map(l=>`<a>${E(l.trim())}</a>`).join('')}</div></div>
+        <div><div class="fct">${E(d.col2Title||'Customer Care')}</div><div class="fcl">${(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').map(l=>`<a>${E(l.trim())}</a>`).join('')}</div></div>`:''}
+      </div>
+      <div class="fbot">
+        <div class="fcopy">${E(d.footerText||`© ${new Date().getFullYear()} My Store`)}</div>
+        <div class="fsoc"><div class="sb">📸</div><div class="sb">📘</div><div class="sb">🐦</div></div>
+      </div>
+    </footer>`)
+    default: return ''
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   DEVICE SWITCH
+══════════════════════════════════════════════════ */
+function setDevice(device, btn) {
+  currentDevice = device
+  document.querySelectorAll('.pdb').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  renderPreview()
+}
+
+/* ══════════════════════════════════════════════════
+   VOICE INPUT — Web Speech API, auto language detect
+══════════════════════════════════════════════════ */
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SR) { toast('Voice not supported. Try Chrome!','error'); return }
+  if (isRecording) { speechRec?.stop(); return }
+
+  speechRec = new SR()
+  speechRec.continuous = false
+  speechRec.interimResults = true
+  speechRec.lang = ''  // browser auto-detects language
+
+  const mic = document.getElementById('mic-btn')
+  const inp = document.getElementById('chat-input')
+
+  speechRec.onstart = () => { isRecording=true; mic.classList.add('recording'); mic.textContent='⏹'; inp.placeholder='🎤 Listening…' }
+  speechRec.onresult = e => { inp.value=Array.from(e.results).map(r=>r[0].transcript).join(''); autoResize(inp) }
+  speechRec.onend = () => {
+    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Type in any language… or tap 🎤'
+    const t = inp.value.trim()
+    if (t) setTimeout(() => sendUserMsg(t), 350)
+  }
+  speechRec.onerror = e => {
+    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Type in any language… or tap 🎤'
+    if (e.error!=='no-speech') toast('Voice error: '+e.error,'error')
+  }
+  speechRec.start()
+}
+
+/* ══════════════════════════════════════════════════
+   PUBLISH — same apiFetch pattern
+══════════════════════════════════════════════════ */
+async function publishSite() {
+  if (!siteState.storeName) { toast('Complete the setup first!','error'); return }
+  const btn = document.getElementById('publish-btn')
+  btn.disabled=true; btn.textContent='⏳ Saving…'
+  try {
+    const storeId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
+    if (storeId && storeId !== 'demo') {
+      const T = siteState.theme
+      await apiFetch(`/stores/${storeId}/theme/settings`, {
+        method:'PUT',
+        body: JSON.stringify({
+          primary_color:T.primaryColor, secondary_color:T.bgColor,
+          accent_color:T.textColor, card_bg:T.cardBg, nav_bg:T.navBg,
+          font_heading:T.font, cols:parseInt(T.cols)||3,
+          radius:T.radius, button_style:T.btnStyle
+        })
+      })
+      await apiFetch(`/stores/${storeId}/theme/sections`, {
+        method:'PUT',
+        body: JSON.stringify({sections: siteState.sections.map((s,i)=>({id:s.id,type:s.type,order:i+1,is_visible:s.enabled,settings:s.data||{}}))})
+      })
+      await apiFetch(`/stores/${storeId}/theme/publish`, {method:'POST'})
+      toast('Site saved & published! 🚀','success')
+      setTimeout(() => location.href='website-builder.html', 2000)
+    } else {
+      sessionStorage.setItem('ekart_ai_sections', JSON.stringify(siteState.sections))
+      sessionStorage.setItem('ekart_ai_theme', JSON.stringify(siteState.theme))
+      toast('Saved! Redirecting to Classic Builder… 🎨','success')
+      setTimeout(() => location.href='website-builder.html', 1800)
+    }
+  } catch(e) {
+    toast('Save failed: '+e.message,'error')
+    btn.disabled=false; btn.textContent='🚀 Save & Publish'
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════ */
+function isLightColor(hex){const c=(hex||'').replace('#','');if(c.length!==6)return true;const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return(r*299+g*587+b*114)/1000>128}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function getLangName(code){return{en:'English',ta:'தமிழ்',hi:'हिंदी',te:'తెలుగు',ml:'Malayalam',kn:'ಕನ್ನಡ',bn:'বাংলা',mr:'मराठी',gu:'ગુજરાતી',pa:'ਪੰਜਾਬੀ',ar:'Arabic',es:'Spanish',fr:'French'}[code]||code.toUpperCase()}
+function toast(msg,type='success'){const el=document.createElement('div');el.className=`toast ${type}`;el.innerHTML=`<span>${type==='success'?'✅':'❌'}</span> ${esc(msg)}`;document.getElementById('toast-container').appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3000)}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Create device shell
+  const canvas = document.getElementById('preview-canvas')
+  const shell = document.createElement('div')
+  shell.id = 'device-shell'; shell.className = 'device-shell desktop'
+  canvas.appendChild(shell)
+
+  // Opening greeting with example chips
+  setTimeout(() => {
+    addMsg('ai',
+      `👋 <strong>Welcome to eKart AI Builder!</strong><br><br>
+      I'll help you build your store website step by step — just chat naturally.<br><br>
+      You can type or speak in <strong>any language</strong> — Tamil, Hindi, Telugu, English, anything! 🌐<br><br>
+      Let's start 🚀 — <strong>what's the name of your store?</strong>`,
+      {
+        type:'chips',
+        label:'Quick examples — tap to use',
+        options:[
+          {label:'🛍️ Sri Murugan Silks', value:'Sri Murugan Silks'},
+          {label:'📱 Tech Galaxy Store',  value:'Tech Galaxy Store'},
+          {label:'🥦 FreshMart Grocery',  value:'FreshMart Grocery'},
+          {label:'👗 StyleHub Fashion',   value:'StyleHub Fashion'},
+        ]
+      }
+    )
+    setQR(["I'll type my store name","🎤 Let me speak it","தமிழில் பேசலாமா?","हिंदी में बात करें"])
+  }, 400)
+})
+</script>
+</body>
+</html>
