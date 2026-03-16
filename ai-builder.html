@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script>
     /* ── apiFetch — same as api.js, inlined so this page works standalone ── */
-    const API_BASE = 'https://apiv2.aasaitech.in'  // same origin — backend serves frontend
+    const API_BASE = ''  // same origin — backend serves frontend
     function apiFetch(path, opts = {}) {
       const token = localStorage.getItem('ekart_token')
       return fetch(API_BASE + path, {
@@ -149,6 +149,19 @@
     .preview-empty-title{font-size:15px;font-weight:700;color:var(--text2)}
     .preview-empty-sub{font-size:13px;line-height:1.6;max-width:260px}
 
+    /* ═══ STORE PILL ═══ */
+    .tb-store-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px 5px 8px;cursor:pointer;transition:all .15s;min-width:0;flex-shrink:0}
+    .tb-store-pill:hover{border-color:var(--accent)}
+    .tb-store-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px rgba(34,197,94,.6)}
+    .tb-store-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+    .tb-store-chevron{color:var(--text3);font-size:10px;flex-shrink:0}
+    .store-dropdown{position:absolute;top:calc(var(--topbar-h) + 4px);left:120px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:600;min-width:200px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+    .store-dropdown.open{display:block}
+    .store-dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:600;color:var(--text2)}
+    .store-dropdown-item:hover{background:var(--surface3);color:var(--text)}
+    .store-dropdown-item.active{color:var(--accent2)}
+    .store-dropdown-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+
     /* ═══ TOASTS ═══ */
     .built-toast{position:fixed;top:calc(var(--topbar-h)+10px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(91,92,246,.96),rgba(129,140,248,.96));backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(91,92,246,.3);z-index:500;opacity:0;transition:opacity .3s;pointer-events:none}
     .built-toast.show{opacity:1}
@@ -161,13 +174,19 @@
 </head>
 <body>
 
-<div id="topbar">
+<div id="topbar" style="position:relative">
   <a class="tb-logo" href="home.html">e<em>K</em>art</a>
   <span class="tb-badge">✨ AI Builder</span>
+  <div class="tb-store-pill" onclick="toggleStoreDropdown()" id="store-pill">
+    <div class="tb-store-dot"></div>
+    <div class="tb-store-name" id="store-name-display">Loading…</div>
+    <div class="tb-store-chevron">▾</div>
+  </div>
+  <div class="store-dropdown" id="store-dropdown"></div>
   <div class="tb-spacer"></div>
   <div class="tb-lang">🌐 <span id="lang-label">Auto Detect</span></div>
   <button class="tb-btn tb-btn-ghost" onclick="location.href='website-builder.html'">🎨 Classic Builder</button>
-  <button class="tb-btn tb-btn-primary" id="publish-btn" onclick="publishSite()" disabled>🚀 Save &amp; Publish</button>
+  <button class="tb-btn tb-btn-primary" id="publish-btn" onclick="publishSite()">🚀 Save &amp; Publish</button>
 </div>
 
 <div id="main-wrap">
@@ -252,6 +271,8 @@ let currentDevice = 'desktop'
 let isThinking = false
 let speechRec = null
 let isRecording = false
+let allStores = []
+let currentStoreId = null
 
 const STEPS = ['brand','business','hero','products','theme','extras','done']
 
@@ -930,41 +951,92 @@ function toggleVoice() {
 }
 
 /* ══════════════════════════════════════════════════
+   STORE SELECTOR — same as website-builder.html
+══════════════════════════════════════════════════ */
+function renderStorePill() {
+  const s = allStores.find(x => x._id === currentStoreId)
+  document.getElementById('store-name-display').textContent = s?.name || 'Select Store'
+}
+
+function renderStoreDropdown() {
+  const dd = document.getElementById('store-dropdown')
+  dd.innerHTML = allStores.map(s =>
+    `<div class="store-dropdown-item ${s._id===currentStoreId?'active':''}" onclick="switchStore('${s._id}')">
+      <div class="store-dropdown-dot"></div>${esc(s.name)}
+    </div>`
+  ).join('') +
+  `<hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+   <div class="store-dropdown-item" onclick="location.href='home.html'"><span>+</span> Manage Stores</div>`
+}
+
+function toggleStoreDropdown() {
+  document.getElementById('store-dropdown').classList.toggle('open')
+}
+
+function switchStore(id) {
+  currentStoreId = id
+  sessionStorage.setItem('ekart_current_store', id)
+  localStorage.setItem('ekart_store_id', id)
+  document.getElementById('store-dropdown').classList.remove('open')
+  renderStorePill()
+  renderStoreDropdown()
+  toast('Store switched — sections will publish to this store', 'success')
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#store-pill') && !e.target.closest('#store-dropdown'))
+    document.getElementById('store-dropdown').classList.remove('open')
+})
+
+/* ══════════════════════════════════════════════════
    PUBLISH — same apiFetch pattern
 ══════════════════════════════════════════════════ */
 async function publishSite() {
-  if (!siteState.storeName) { toast('Complete the setup first!','error'); return }
   const btn = document.getElementById('publish-btn')
-  btn.disabled=true; btn.textContent='⏳ Saving…'
+
+  // If no sections built yet, warn
+  if (!siteState.sections.length) {
+    toast('Build at least one section first by chatting with the AI!', 'error')
+    return
+  }
+
+  if (!currentStoreId || currentStoreId === 'demo') {
+    toast('Please select a store first using the store picker above', 'error')
+    return
+  }
+
+  btn.disabled = true; btn.textContent = '⏳ Saving…'
   try {
-    const storeId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
-    if (storeId && storeId !== 'demo') {
-      const T = siteState.theme
-      await apiFetch(`/stores/${storeId}/theme/settings`, {
-        method:'PUT',
-        body: JSON.stringify({
-          primary_color:T.primaryColor, secondary_color:T.bgColor,
-          accent_color:T.textColor, card_bg:T.cardBg, nav_bg:T.navBg,
-          font_heading:T.font, cols:parseInt(T.cols)||3,
-          radius:T.radius, button_style:T.btnStyle
-        })
+    const T = siteState.theme
+    await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        primary_color:  T.primaryColor,
+        secondary_color:T.bgColor,
+        accent_color:   T.textColor,
+        card_bg:        T.cardBg,
+        nav_bg:         T.navBg,
+        font_heading:   T.font,
+        cols:           parseInt(T.cols) || 3,
+        radius:         T.radius,
+        button_style:   T.btnStyle
       })
-      await apiFetch(`/stores/${storeId}/theme/sections`, {
-        method:'PUT',
-        body: JSON.stringify({sections: siteState.sections.map((s,i)=>({id:s.id,type:s.type,order:i+1,is_visible:s.enabled,settings:s.data||{}}))})
+    })
+    await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        sections: siteState.sections.map((s, i) => ({
+          id: s.id, type: s.type, order: i + 1,
+          is_visible: s.enabled, settings: s.data || {}
+        }))
       })
-      await apiFetch(`/stores/${storeId}/theme/publish`, {method:'POST'})
-      toast('Site saved & published! 🚀','success')
-      setTimeout(() => location.href='website-builder.html', 2000)
-    } else {
-      sessionStorage.setItem('ekart_ai_sections', JSON.stringify(siteState.sections))
-      sessionStorage.setItem('ekart_ai_theme', JSON.stringify(siteState.theme))
-      toast('Saved! Redirecting to Classic Builder… 🎨','success')
-      setTimeout(() => location.href='website-builder.html', 1800)
-    }
-  } catch(e) {
-    toast('Save failed: '+e.message,'error')
-    btn.disabled=false; btn.textContent='🚀 Save & Publish'
+    })
+    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method: 'POST' })
+    toast('Site saved & published! 🚀', 'success')
+    setTimeout(() => location.href = 'website-builder.html', 2000)
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'error')
+    btn.disabled = false; btn.textContent = '🚀 Save & Publish'
   }
 }
 
@@ -979,12 +1051,31 @@ function toast(msg,type='success'){const el=document.createElement('div');el.cla
 /* ══════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   // Create device shell
   const canvas = document.getElementById('preview-canvas')
   const shell = document.createElement('div')
   shell.id = 'device-shell'; shell.className = 'device-shell desktop'
   canvas.appendChild(shell)
+
+  // Load stores — same as website-builder.html
+  try {
+    const r = await apiFetch('/stores')
+    allStores = Array.isArray(r) ? r : (r?.stores || [])
+    currentStoreId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
+    if (!currentStoreId || !allStores.find(s => s._id === currentStoreId)) {
+      currentStoreId = allStores[0]?._id || null
+    }
+    if (currentStoreId) {
+      sessionStorage.setItem('ekart_current_store', currentStoreId)
+      localStorage.setItem('ekart_store_id', currentStoreId)
+    }
+    renderStorePill()
+    renderStoreDropdown()
+  } catch (e) {
+    console.warn('Could not load stores:', e.message)
+    document.getElementById('store-name-display').textContent = 'No store'
+  }
 
   // Opening greeting with example chips
   setTimeout(() => {
