@@ -89,6 +89,7 @@
     0%,100% { opacity: 1; transform: scale(1); }
     50%      { opacity: 0.45; transform: scale(1.55); }
   }
+
   .domain-section {
     border-top: 1px solid var(--border);
     margin: 0 -18px 12px;
@@ -119,88 +120,182 @@
     background: rgba(34,197,94,0.07);
   }
   .domain-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
+    width: 8px; height: 8px;
+    border-radius: 50%; flex-shrink: 0;
   }
   .domain-dot.pending   { background: #f59e0b; animation: domain-pulse 1.3s ease-in-out infinite; }
   .domain-dot.connected { background: #22c55e; }
   .domain-value {
     font-size: 11px;
     font-family: 'DM Mono', monospace;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    flex: 1; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
   }
   .domain-value.pending   { color: #d97706; }
   .domain-value.connected { color: #16a34a; }
-  .domain-badge {
-    font-size: 9.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
+  .domain-badge { font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; flex-shrink: 0; }
   .domain-badge.pending   { color: #b45309; }
   .domain-badge.connected { color: #15803d; }
   .domain-action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text3);
-    font-size: 13px;
-    padding: 0 2px;
-    line-height: 1;
-    flex-shrink: 0;
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 13px;
+    padding: 0 2px; line-height: 1; flex-shrink: 0;
     transition: color .15s;
   }
-  .domain-action-btn:hover { color: var(--accent2); }
+  .domain-action-btn:hover        { color: var(--accent2); }
   .domain-action-btn.remove:hover { color: #ef4444; }
+
+  /* Domain input row */
   .domain-input-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 6px;
+    display: flex; gap: 6px; margin-bottom: 6px;
   }
   .domain-input-row input {
-    flex: 1;
-    font-size: 11.5px;
+    flex: 1; font-size: 11.5px;
     font-family: 'DM Mono', monospace;
-    height: 32px;
-    padding: 0 10px;
+    height: 32px; padding: 0 10px;
     border-radius: 8px;
     border: 1px solid var(--border2);
-    background: var(--bg);
-    color: var(--text);
-    outline: none;
-    transition: border-color .15s;
+    background: var(--bg); color: var(--text);
+    outline: none; transition: border-color .15s;
   }
   .domain-input-row input:focus { border-color: rgba(108,99,255,0.5); }
   .domain-save-btn {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 0 12px;
-    height: 32px;
+    font-size: 11px; font-weight: 700;
+    padding: 0 12px; height: 32px;
     border-radius: 8px;
     border: 1px solid var(--border2);
-    background: var(--surface2);
-    color: var(--text);
-    cursor: pointer;
-    white-space: nowrap;
+    background: var(--surface2); color: var(--text);
+    cursor: pointer; white-space: nowrap;
     transition: border-color .15s, color .15s;
   }
   .domain-save-btn:hover { border-color: rgba(108,99,255,0.4); color: var(--accent2); }
-  .domain-hint {
-    font-size: 10px;
+
+  /* ── DNS GUIDE PANEL ── */
+  .dns-guide {
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: 10px;
+    background: rgba(108,99,255,0.05);
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .dns-guide-header {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 11px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+  .dns-guide-header:hover { background: rgba(108,99,255,0.08); }
+  .dns-guide-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--accent2); flex: 1;
+  }
+  .dns-guide-chevron {
+    font-size: 10px; color: var(--text3);
+    transition: transform .2s;
+  }
+  .dns-guide-chevron.open { transform: rotate(180deg); }
+  .dns-guide-body {
+    display: none;
+    padding: 0 11px 10px;
+    border-top: 1px solid rgba(108,99,255,0.15);
+  }
+  .dns-guide-body.open { display: block; }
+
+  /* Registrar tabs */
+  .reg-tabs {
+    display: flex; gap: 4px;
+    margin: 9px 0 10px; flex-wrap: wrap;
+  }
+  .reg-tab {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: none; color: var(--text3);
+    cursor: pointer; transition: all .15s;
+    letter-spacing: 0.03em;
+  }
+  .reg-tab:hover { border-color: rgba(108,99,255,0.4); color: var(--text); }
+  .reg-tab.active {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.12);
+    color: var(--accent2);
+  }
+
+  /* DNS steps */
+  .dns-steps { display: flex; flex-direction: column; gap: 6px; }
+  .dns-step {
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .dns-step-num {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(108,99,255,0.2);
+    color: var(--accent2); font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .dns-step-text {
+    font-size: 11px; color: var(--text2); line-height: 1.5; flex: 1;
+  }
+  .dns-step-text strong { color: var(--text); font-weight: 700; }
+
+  /* DNS record box */
+  .dns-record-box {
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 8px 0 4px;
+    font-family: 'DM Mono', monospace;
+  }
+  .dns-record-box-header {
+    padding: 5px 10px;
+    background: var(--surface2);
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
     color: var(--text3);
-    line-height: 1.5;
+  }
+  .dns-record-row {
+    display: flex; align-items: center;
+    padding: 5px 10px; gap: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .dns-rec-key {
+    font-size: 9.5px; font-weight: 700; color: var(--text3);
+    width: 44px; flex-shrink: 0;
+  }
+  .dns-rec-val {
+    font-size: 11px; color: var(--text); flex: 1;
+  }
+  .dns-rec-val.accent { color: var(--accent2); }
+  .dns-copy-btn {
+    background: none; border: 1px solid var(--border2);
+    border-radius: 5px; cursor: pointer;
+    color: var(--text3); font-size: 10px;
+    padding: 2px 6px; line-height: 1.4;
+    transition: all .15s; white-space: nowrap;
+  }
+  .dns-copy-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* Domain hint */
+  .domain-hint {
+    font-size: 10px; color: var(--text3); line-height: 1.5;
   }
   .domain-hint code {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    background: var(--surface2);
-    padding: 1px 5px;
-    border-radius: 4px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    background: var(--surface2); padding: 1px 5px; border-radius: 4px;
+  }
+
+  /* Pending DNS steps hint */
+  .dns-pending-hint {
+    font-size: 10px; color: #92400e; line-height: 1.5;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 8px; padding: 7px 10px;
+    margin-top: 6px;
+  }
+  .dns-pending-hint code {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    background: rgba(0,0,0,0.15); padding: 1px 5px; border-radius: 4px;
   }
 </style>
 <script>
@@ -336,7 +431,7 @@
     <div class="field">
       <label>Custom Domain (optional)</label>
       <input type="text" id="storeCustomDomain" placeholder="e.g. shop.yourbrand.com">
-      <div class="field-hint">Point your domain's CNAME to <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;">ekart.aasaitech.in</code> first</div>
+      <div class="field-hint">Point your domain's CNAME to <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;">storefront.aasaitech.in</code> first</div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
@@ -348,63 +443,144 @@
 <script>
 let currentUser = null, allStores = []
 
-window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('stores')
-  if (!nav) return
-  currentUser = nav.user
-  document.getElementById('storeEmail').value = currentUser.email || ''
-  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>`)
-  await loadAll()
-})
+// ── REGISTRAR DNS STEPS DATA ─────────────────────────────────────────────────
+const CNAME_TARGET = 'storefront.aasaitech.in'
 
-async function loadAll() {
-  const pc = document.getElementById('page-content')
-  pc.querySelector('.stats-row')?.remove()
-  await Promise.all([loadStores(), loadDashStats()])
+const REGISTRAR_STEPS = {
+  godaddy: {
+    label: 'GoDaddy',
+    steps: [
+      'Log in to <strong>GoDaddy</strong> → My Products → find your domain → click <strong>DNS</strong>',
+      'Click <strong>Add New Record</strong>',
+      'Fill in the record exactly as shown below, then click <strong>Save</strong>',
+      'DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min'
+    ]
+  },
+  namecheap: {
+    label: 'Namecheap',
+    steps: [
+      'Log in to <strong>Namecheap</strong> → Domain List → click <strong>Manage</strong> next to your domain',
+      'Go to the <strong>Advanced DNS</strong> tab',
+      'Click <strong>Add New Record</strong> and fill in the values below, then click ✔',
+      'DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min'
+    ]
+  },
+  cloudflare: {
+    label: 'Cloudflare',
+    steps: [
+      'Log in to <strong>Cloudflare</strong> → select your domain → click <strong>DNS</strong>',
+      'Click <strong>Add record</strong>',
+      'Fill in the values below. Set <strong>Proxy status to DNS only</strong> (grey cloud 🌧)', 
+      'Click <strong>Save</strong>. DNS propagates in seconds on Cloudflare'
+    ]
+  },
+  bigrock: {
+    label: 'BigRock',
+    steps: [
+      'Log in to <strong>BigRock</strong> → Domains → click your domain → <strong>DNS</strong>',
+      'Under <strong>CNAME Records</strong> click <strong>Add CNAME Record</strong>',
+      'Fill in the values below, then click <strong>Update</strong>',
+      'DNS changes can take <strong>up to 48 hours</strong>'
+    ]
+  },
+  other: {
+    label: 'Other',
+    steps: [
+      'Log in to your domain registrar or DNS provider',
+      'Navigate to <strong>DNS Settings / DNS Management / Zone Editor</strong>',
+      'Add a new <strong>CNAME</strong> record with the values below',
+      'Save / confirm. DNS changes can take <strong>up to 48 hours</strong>'
+    ]
+  }
 }
 
-async function loadStores() {
-  allStores = await apiFetch('/stores')
-  renderStores()
-  allStores.forEach(s => loadStoreKPIs(s))
-}
+// ── DNS GUIDE HTML BUILDER ────────────────────────────────────────────────────
 
-async function loadDashStats() {
-  try {
-    const d = await apiFetch('/dashboard')
-    document.getElementById('page-content')?.querySelector('.stats-row')?.remove()
-    const statsHtml = `
-      <div class="stats-row">
-        <div class="stat-card"><span class="stat-icon">🏪</span><div><div class="stat-label">Total Stores</div><div class="stat-value">${d.stores_count}</div></div></div>
-        <div class="stat-card"><span class="stat-icon">📦</span><div><div class="stat-label">Total Orders</div><div class="stat-value">${d.total_orders}</div></div></div>
-        <div class="stat-card"><span class="stat-icon">🕐</span><div><div class="stat-label">Today\'s Orders</div><div class="stat-value">${d.today_orders}</div></div></div>
-        <div class="stat-card"><span class="stat-icon">💰</span><div><div class="stat-label">Total Revenue</div><div class="stat-value">₹${(d.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div></div>
+function buildDnsGuideHtml(storeId) {
+  const tabsHtml = Object.entries(REGISTRAR_STEPS).map(([key, r]) =>
+    `<button class="reg-tab${key==='godaddy'?' active':''}" onclick="switchRegTab('${storeId}','${key}',this)">${r.label}</button>`
+  ).join('')
+
+  const allPanels = Object.entries(REGISTRAR_STEPS).map(([key, r]) => {
+    const stepsHtml = r.steps.map((s,i) =>
+      `<div class="dns-step">
+        <div class="dns-step-num">${i+1}</div>
+        <div class="dns-step-text">${s}</div>
       </div>`
-    document.getElementById('page-content').insertAdjacentHTML('afterbegin', statsHtml)
-  } catch {}
+    ).join('')
+
+    // For Cloudflare the Name is just the subdomain prefix, others vary slightly in hint
+    const nameHint = key === 'cloudflare' ? 'www <span style="font-size:9px;color:var(--text3)">(subdomain only)</span>' : 'www'
+
+    return `<div class="reg-panel" data-reg="${key}" style="display:${key==='godaddy'?'block':'none'}">
+      <div class="dns-steps">${stepsHtml}</div>
+      <div class="dns-record-box">
+        <div class="dns-record-box-header">DNS Record to Add</div>
+        <div class="dns-record-row">
+          <span class="dns-rec-key">Type</span>
+          <span class="dns-rec-val accent">CNAME</span>
+        </div>
+        <div class="dns-record-row">
+          <span class="dns-rec-key">Name</span>
+          <span class="dns-rec-val">${nameHint}</span>
+        </div>
+        <div class="dns-record-row">
+          <span class="dns-rec-key">Value</span>
+          <span class="dns-rec-val accent" style="word-break:break-all;">${CNAME_TARGET}</span>
+          <button class="dns-copy-btn" onclick="copyText('${CNAME_TARGET}','Copied!')">Copy</button>
+        </div>
+        <div class="dns-record-row">
+          <span class="dns-rec-key">TTL</span>
+          <span class="dns-rec-val">1 hour (3600)</span>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+
+  return `<div class="dns-guide" id="dns-guide-${storeId}">
+    <div class="dns-guide-header" onclick="toggleDnsGuide('${storeId}')">
+      <span style="font-size:14px;">📖</span>
+      <span class="dns-guide-title">How to set up your domain →</span>
+      <span class="dns-guide-chevron" id="dns-chevron-${storeId}">▼</span>
+    </div>
+    <div class="dns-guide-body" id="dns-body-${storeId}">
+      <div class="reg-tabs" id="reg-tabs-${storeId}">${tabsHtml}</div>
+      <div id="reg-panels-${storeId}">${allPanels}</div>
+    </div>
+  </div>`
 }
 
-async function loadStoreKPIs(s) {
-  try {
-    const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
-    const cur = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
-    const rev = data.total_revenue || 0
-    const revStr = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L' : rev >= 1000 ? cur + (rev/1000).toFixed(1)+'k' : cur + rev.toFixed(0)
-    const revEl = document.getElementById(`kpi-rev-${s._id}`)
-    const ordEl = document.getElementById(`kpi-ord-${s._id}`)
-    const todEl = document.getElementById(`kpi-today-${s._id}`)
-    if (revEl) { revEl.textContent = revStr; revEl.classList.remove('loading'); revEl.classList.add('rev') }
-    if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
-    if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
-  } catch {}
+function toggleDnsGuide(storeId) {
+  const body = document.getElementById(`dns-body-${storeId}`)
+  const chev = document.getElementById(`dns-chevron-${storeId}`)
+  if (!body) return
+  const open = body.classList.toggle('open')
+  if (chev) chev.classList.toggle('open', open)
 }
 
-// ── DOMAIN WIDGET RENDERER ───────────────────────────────────────────────────
+function switchRegTab(storeId, key, btn) {
+  // Update tabs
+  document.querySelectorAll(`#reg-tabs-${storeId} .reg-tab`).forEach(t => t.classList.remove('active'))
+  btn.classList.add('active')
+  // Update panels
+  document.querySelectorAll(`#reg-panels-${storeId} .reg-panel`).forEach(p => {
+    p.style.display = p.dataset.reg === key ? 'block' : 'none'
+  })
+}
+
+function copyText(text, msg) {
+  navigator.clipboard.writeText(text)
+    .then(() => toast(msg || 'Copied!', 'success'))
+    .catch(() => toast(text, 'info'))
+}
+
+// ── DOMAIN WIDGET RENDERER ────────────────────────────────────────────────────
 
 function renderDomainWidget(s) {
   const domain = (s.custom_domain || '').trim()
   const status = s.domain_status || (domain ? 'pending' : '')
 
+  // ── CONNECTED ──
   if (domain && status === 'connected') {
     return `
       <div class="domain-status-row connected">
@@ -415,6 +591,7 @@ function renderDomainWidget(s) {
       </div>`
   }
 
+  // ── PENDING / VERIFYING ──
   if (domain && status === 'pending') {
     return `
       <div class="domain-status-row pending">
@@ -424,16 +601,20 @@ function renderDomainWidget(s) {
         <button class="domain-action-btn" onclick="verifyDomain('${s._id}','${domain}')" title="Re-check now">↻</button>
         <button class="domain-action-btn remove" onclick="clearDomain('${s._id}')" title="Remove domain">✕</button>
       </div>
-      <div class="domain-hint">Point CNAME → <code>ekart.aasaitech.in</code> then click ↻ to verify</div>`
+      <div class="dns-pending-hint">
+        ⏳ Waiting for DNS. Make sure you've added a CNAME record pointing to
+        <code>${CNAME_TARGET}</code> at your registrar, then click ↻ to recheck.
+      </div>
+      ${buildDnsGuideHtml(s._id)}`
   }
 
-  // No domain yet — show input
+  // ── NO DOMAIN YET — show input + guide ──
   return `
     <div class="domain-input-row">
       <input type="text" id="domain-inp-${s._id}" placeholder="shop.yourbrand.com" value="${domain}">
       <button class="domain-save-btn" onclick="saveDomain('${s._id}')">Save</button>
     </div>
-    <div class="domain-hint">Point CNAME → <code>ekart.aasaitech.in</code> before saving</div>`
+    ${buildDnsGuideHtml(s._id)}`
 }
 
 // ── STORE CARD RENDERER ──────────────────────────────────────────────────────
@@ -496,14 +677,66 @@ function renderStores() {
   container.appendChild(grid)
 }
 
-// ── DOMAIN ACTIONS ───────────────────────────────────────────────────────────
+// ── PAGE INIT ────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('stores')
+  if (!nav) return
+  currentUser = nav.user
+  document.getElementById('storeEmail').value = currentUser.email || ''
+  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>`)
+  await loadAll()
+})
+
+async function loadAll() {
+  const pc = document.getElementById('page-content')
+  pc.querySelector('.stats-row')?.remove()
+  await Promise.all([loadStores(), loadDashStats()])
+}
+
+async function loadStores() {
+  allStores = await apiFetch('/stores')
+  renderStores()
+  allStores.forEach(s => loadStoreKPIs(s))
+}
+
+async function loadDashStats() {
+  try {
+    const d = await apiFetch('/dashboard')
+    document.getElementById('page-content')?.querySelector('.stats-row')?.remove()
+    const statsHtml = `
+      <div class="stats-row">
+        <div class="stat-card"><span class="stat-icon">🏪</span><div><div class="stat-label">Total Stores</div><div class="stat-value">${d.stores_count}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">📦</span><div><div class="stat-label">Total Orders</div><div class="stat-value">${d.total_orders}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">🕐</span><div><div class="stat-label">Today\'s Orders</div><div class="stat-value">${d.today_orders}</div></div></div>
+        <div class="stat-card"><span class="stat-icon">💰</span><div><div class="stat-label">Total Revenue</div><div class="stat-value">₹${(d.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div></div>
+      </div>`
+    document.getElementById('page-content').insertAdjacentHTML('afterbegin', statsHtml)
+  } catch {}
+}
+
+async function loadStoreKPIs(s) {
+  try {
+    const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
+    const cur = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
+    const rev = data.total_revenue || 0
+    const revStr = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L' : rev >= 1000 ? cur + (rev/1000).toFixed(1)+'k' : cur + rev.toFixed(0)
+    const revEl = document.getElementById(`kpi-rev-${s._id}`)
+    const ordEl = document.getElementById(`kpi-ord-${s._id}`)
+    const todEl = document.getElementById(`kpi-today-${s._id}`)
+    if (revEl) { revEl.textContent = revStr; revEl.classList.remove('loading'); revEl.classList.add('rev') }
+    if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
+    if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
+  } catch {}
+}
+
+// ── DOMAIN ACTIONS ────────────────────────────────────────────────────────────
 
 async function saveDomain(storeId) {
   const input = document.getElementById(`domain-inp-${storeId}`)
   const domain = (input?.value || '').trim()
   if (!domain) return toast('Enter a domain name', 'error')
 
-  // Basic format check
   if (!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/.test(domain)) {
     return toast('Enter a valid domain (e.g. shop.yourbrand.com)', 'error')
   }
@@ -518,15 +751,14 @@ async function saveDomain(storeId) {
     })
     if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
 
-    // Optimistically set to pending in local state
     const s = allStores.find(x => x._id === storeId)
     if (s) { s.custom_domain = domain; s.domain_status = 'pending' }
 
-    toast('Domain saved! Waiting for DNS propagation…', 'info')
+    toast('Domain saved! Now add the CNAME record at your registrar.', 'info')
     renderStores()
     allStores.forEach(st => loadStoreKPIs(st))
 
-    // Auto-verify after 8 seconds — give DNS a moment
+    // Auto-verify after 8 seconds
     setTimeout(() => verifyDomain(storeId, domain), 8000)
   } catch (e) { toast(e.message, 'error') }
 }
@@ -542,7 +774,7 @@ async function verifyDomain(storeId, domain) {
       toast(`✓ ${domain} is connected!`, 'success')
     } else {
       s.domain_status = 'pending'
-      toast('DNS not verified yet. Make sure your CNAME points to ekart.aasaitech.in', 'info')
+      toast('DNS not verified yet — check your CNAME record and try again shortly.', 'info')
     }
     renderStores()
     allStores.forEach(st => loadStoreKPIs(st))
@@ -572,7 +804,7 @@ async function clearDomain(storeId) {
   } catch (e) { toast(e.message, 'error') }
 }
 
-// ── STORE CRUD ───────────────────────────────────────────────────────────────
+// ── STORE CRUD ────────────────────────────────────────────────────────────────
 
 function openCreateStore() {
   document.getElementById('storeModalTitle').textContent = 'Create New Store'
