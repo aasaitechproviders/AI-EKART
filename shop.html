@@ -169,7 +169,6 @@ a{color:inherit;text-decoration:none}
 }
 .ptb-view-btn.active{background:var(--bg2);color:var(--p)}
 .ptb-view-btn:hover:not(.active){background:var(--bg2);color:var(--p)}
-/* Divider between view buttons */
 .ptb-view-btn+.ptb-view-btn{border-left:1.5px solid var(--border)}
 
 /* No results state */
@@ -341,33 +340,88 @@ a{color:inherit;text-decoration:none}
 [data-style="elevated"] .product-card.in-cart{box-shadow:0 0 0 2px var(--primary),0 4px 18px rgba(0,0,0,.07)}
 [data-style="elevated"] .product-card.in-cart::before{display:none}
 
-/* COMPACT */
-[data-style="compact"].products-grid{gap:8px}
+/* ─────────────────────────────────────────────────────────────
+   FIX: COMPACT — was using hardcoded px, now uses CSS vars
+───────────────────────────────────────────────────────────── */
+[data-style="compact"].products-grid{gap:var(--card-gap,8px)}
 [data-style="compact"] .product-img{aspect-ratio:1/1}
 [data-style="compact"] .product-info{padding:6px 8px 3px}
-[data-style="compact"] .product-name{font-size:11px;-webkit-line-clamp:1;margin-bottom:2px}
-[data-style="compact"] .product-price{font-size:12px}
+[data-style="compact"] .product-name{
+  font-size:calc(var(--card-name-fs,12.5px) * 0.86);
+  -webkit-line-clamp:1;
+  margin-bottom:2px;
+}
+[data-style="compact"] .product-price{font-size:calc(var(--card-price-fs,14px) * 0.86)}
 [data-style="compact"] .product-cat,
 [data-style="compact"] .product-compare,
 [data-style="compact"] .product-discount{display:none}
 [data-style="compact"] .cart-controls-wrap{padding:3px 8px 8px}
-[data-style="compact"] .btn-add{height:32px;font-size:10.5px;border-radius:6px}
-[data-style="compact"] .cart-qty-row{height:32px;border-radius:6px}
-[data-style="compact"] .qty-btn{flex:0 0 32px;font-size:15px}
+[data-style="compact"] .btn-add{
+  height:calc(var(--card-btn-h,38px) * 0.84);
+  font-size:calc(var(--card-btn-fs,11.5px) * 0.9);
+  border-radius:6px;
+}
+[data-style="compact"] .cart-qty-row{
+  height:calc(var(--card-btn-h,38px) * 0.84);
+  border-radius:6px;
+}
+[data-style="compact"] .qty-btn{
+  flex:0 0 calc(var(--card-btn-h,38px) * 0.84);
+  font-size:15px;
+}
 [data-style="compact"] .qty-value{font-size:11.5px}
 
-/* LIST */
+/* ─────────────────────────────────────────────────────────────
+   FIX: LIST — image dimensions now scale with card size vars
+───────────────────────────────────────────────────────────── */
 [data-style="list"].products-grid{gap:10px}
-[data-style="list"] .product-card{flex-direction:row;height:140px;align-items:stretch;border-radius:12px}
+[data-style="list"] .product-card{
+  flex-direction:row;
+  height:calc(var(--card-btn-h,38px) * 3.7);  /* scales with size token */
+  min-height:120px;
+  max-height:180px;
+  align-items:stretch;
+  border-radius:12px;
+}
 [data-style="list"] .card-link{flex-direction:row;flex:1;min-width:0}
-[data-style="list"] .product-img{width:140px;min-width:140px;height:140px;aspect-ratio:unset;border-radius:0;flex-shrink:0}
-[data-style="list"] .product-info{flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid var(--border);min-width:0}
-[data-style="list"] .product-name{-webkit-line-clamp:2;white-space:normal}
+[data-style="list"] .product-img{
+  /* Width and height both driven by card-btn-h so they scale across small/medium/large */
+  width:calc(var(--card-btn-h,38px) * 3.7);
+  min-width:calc(var(--card-btn-h,38px) * 3.7);
+  max-width:180px;
+  height:100%;
+  aspect-ratio:unset;
+  border-radius:0;
+  flex-shrink:0;
+}
+[data-style="list"] .product-info{
+  flex:1;
+  padding:14px 16px;
+  display:flex;flex-direction:column;justify-content:center;
+  border-left:1px solid var(--border);
+  min-width:0;
+}
+[data-style="list"] .product-info .product-name{
+  font-size:var(--card-name-fs,12.5px);
+  -webkit-line-clamp:2;
+  white-space:normal;
+}
+[data-style="list"] .product-info .product-price{font-size:var(--card-price-fs,14px)}
+[data-style="list"] .product-info .product-cat{font-size:var(--card-cat-fs,9.5px)}
 [data-style="list"] .product-card:hover{transform:none;box-shadow:0 6px 20px rgba(0,0,0,.09)}
-[data-style="list"] .cart-controls-wrap{padding:0 16px;display:flex;align-items:center;flex-shrink:0;width:168px;border-left:1px solid var(--border)}
+[data-style="list"] .cart-controls-wrap{
+  padding:0 16px;
+  display:flex;align-items:center;flex-shrink:0;
+  width:168px;
+  border-left:1px solid var(--border);
+}
 [data-style="list"] .cart-controls{width:100%}
-[data-style="list"] .btn-add{white-space:nowrap;height:38px;font-size:11.5px}
-[data-style="list"] .cart-qty-row{height:38px}
+[data-style="list"] .btn-add{
+  white-space:nowrap;
+  height:var(--card-btn-h,38px);
+  font-size:var(--card-btn-fs,11.5px);
+}
+[data-style="list"] .cart-qty-row{height:var(--card-btn-h,38px)}
 [data-style="list"] .wish-btn{opacity:1}
 [data-style="list"] .card-atc-overlay{display:none}
 [data-style="list"] .product-card.in-cart::before{display:none}
@@ -381,25 +435,66 @@ a{color:inherit;text-decoration:none}
 [data-style="magazine"] .product-card:first-child .product-price{font-size:calc(var(--card-price-fs) * 1.2)}
 [data-style="magazine"] .product-card:first-child .cart-controls-wrap{padding:8px 16px 16px}
 
-/* OVERLAY */
+/* ─────────────────────────────────────────────────────────────
+   FIX: OVERLAY — all hardcoded values replaced with CSS vars
+───────────────────────────────────────────────────────────── */
 [data-style="overlay"] .product-card{overflow:hidden}
-[data-style="overlay"] .product-img{aspect-ratio:3/4}
+[data-style="overlay"] .product-img{aspect-ratio:var(--card-aspect,3/4)}   /* FIX: was hardcoded 3/4 */
 [data-style="overlay"] .product-info,
 [data-style="overlay"] .cart-controls-wrap{display:none}
 [data-style="overlay"] .product-card::before{display:none}
 [data-style="overlay"] .product-card.in-cart{border:2px solid var(--primary)}
-.ov-layer{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.38) 55%,transparent 100%);padding:24px 12px 12px;color:#fff;z-index:3}
-.ov-name{font-size:13px;font-weight:700;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.ov-layer{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.38) 55%,transparent 100%);
+  padding:24px 12px 12px;color:#fff;z-index:3;
+}
+.ov-name{
+  font-size:var(--card-name-fs,12.5px);    /* FIX: was hardcoded 13px */
+  font-weight:700;
+  margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
 .ov-price-row{display:flex;align-items:center;gap:6px;margin-bottom:9px;flex-wrap:wrap}
-.ov-price{font-size:15px;font-weight:700;color:#fff}
+.ov-price{
+  font-size:var(--card-price-fs,14px);     /* FIX: was hardcoded 15px */
+  font-weight:700;color:#fff;
+}
 .ov-compare{font-size:11.5px;text-decoration:line-through;opacity:.55}
 .ov-discount{font-size:10px;font-weight:700;background:rgba(239,68,68,.88);padding:2px 7px;border-radius:4px}
-.ov-btn{width:100%;height:36px;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.32);color:#fff;border-radius:var(--btn-r,8px);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .15s,transform .1s}
+.ov-btn{
+  width:100%;
+  height:var(--card-btn-h,38px);           /* FIX: was hardcoded 36px */
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  background:rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.32);color:#fff;
+  border-radius:var(--btn-r,8px);
+  font-size:var(--card-btn-fs,11.5px);     /* FIX: was hardcoded 12px */
+  font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:background .15s,transform .1s;
+}
 .ov-btn:hover{background:rgba(255,255,255,.28);transform:translateY(-1px)}
-.ov-qty-row{display:flex;align-items:center;height:36px;border-radius:var(--btn-r,8px);overflow:hidden;border:1px solid rgba(255,255,255,.38);width:100%;background:rgba(255,255,255,.1);backdrop-filter:blur(6px)}
-.ov-qty-btn{flex:0 0 36px;height:100%;border:none;background:transparent;color:#fff;font-size:17px;cursor:pointer;font-weight:400;display:flex;align-items:center;justify-content:center;transition:background .12s;flex-shrink:0}
+.ov-qty-row{
+  display:flex;align-items:center;
+  height:var(--card-btn-h,38px);           /* FIX: was hardcoded 36px */
+  border-radius:var(--btn-r,8px);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.38);
+  width:100%;
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(6px);
+}
+.ov-qty-btn{
+  flex:0 0 var(--card-btn-h,38px);         /* FIX: was hardcoded 36px */
+  height:100%;border:none;background:transparent;color:#fff;
+  font-size:17px;cursor:pointer;font-weight:400;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .12s;flex-shrink:0;
+}
 .ov-qty-btn:hover{background:rgba(255,255,255,.2)}
-.ov-qty-val{flex:1;text-align:center;font-size:13px;font-weight:700;color:#fff}
+.ov-qty-val{flex:1;text-align:center;font-size:var(--card-btn-fs,11.5px);font-weight:700;color:#fff} /* FIX: was hardcoded 13px */
 
 /* ── SKELETON ── */
 @keyframes shimmer{0%{background-position:-800px 0}100%{background-position:800px 0}}
@@ -652,9 +747,9 @@ a{color:inherit;text-decoration:none}
   .tc-trust-item{border-right:none;border-bottom:1px solid var(--border)}
   .tc-testimonials-grid{grid-template-columns:1fr}
   .products-grid:not([data-style="list"]){grid-template-columns:repeat(2,1fr);gap:8px}
-  [data-style="list"] .product-card{height:auto;flex-direction:column}
+  [data-style="list"] .product-card{height:auto;min-height:unset;max-height:unset;flex-direction:column}
   [data-style="list"] .card-link{flex-direction:column}
-  [data-style="list"] .product-img{width:100%;min-width:unset;height:180px;aspect-ratio:unset}
+  [data-style="list"] .product-img{width:100%;min-width:unset;max-width:unset;height:180px;aspect-ratio:unset}
   [data-style="list"] .product-info{border-left:none;border-top:1px solid var(--border)}
   [data-style="list"] .cart-controls-wrap{width:100%;border-left:none;border-top:1px solid var(--border);padding:8px 12px}
   [data-style="magazine"] .product-card:first-child{grid-column:span 1;grid-row:span 1}
@@ -728,8 +823,8 @@ let activeStyle = 'classic', activeSize = 'medium'
 let globalCardSettings = {}
 
 /* Per-section product store for filter/sort */
-const sectionProducts = {}   /* secId → full product array */
-const sectionFilters  = {}   /* secId → { cat, search, sort, view } */
+const sectionProducts = {}
+const sectionFilters  = {}
 
 const ALL_CARD_STYLES = new Set(['classic','minimal','bold','elevated','compact','list','magazine','overlay'])
 
@@ -951,7 +1046,7 @@ function renderCard(p,cardOpts,styleOverride){
     if(oos) ovCtrlHTML=`<div class="ov-ctrl" ${ctrlData}><span style="opacity:.5;font-size:11.5px">Out of stock</span></div>`
     else if(qty>0) ovCtrlHTML=`<div class="ov-ctrl" ${ctrlData}><div class="ov-qty-row"><button class="ov-qty-btn" data-action="dec" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">−</button><span class="ov-qty-val">${qty}</span><button class="ov-qty-btn" data-action="inc" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">+</button></div></div>`
     else ovCtrlHTML=`<div class="ov-ctrl" ${ctrlData}><button class="ov-btn" data-action="add" data-pid="${pid}" onclick="event.preventDefault();event.stopPropagation();handleCartBtn(this)">🛒 ${esc(label)}</button></div>`
-    return`<div class="product-card${qty>0?' in-cart':''}" data-pid="${pid}" data-btn-label="${esc(label)}" style="${cardBgStyle}"><div class="card-link" onclick="cardClick(event,'${pid}','${slug}')"><div class="product-img" style="${gradBg}aspect-ratio:3/4">${badge}${wish}${imgTag}${fallback}<div class="ov-layer"><div class="ov-name">${esc(p.name)}</div><div class="ov-price-row"><span class="ov-price" ${priceStyle}>${currency}${p.price.toFixed(2)}</span>${showOrig&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''} ${d?`<span class="ov-discount">−${d}%</span>`:''}</div>${ovCtrlHTML}</div></div></div></div>`
+    return`<div class="product-card${qty>0?' in-cart':''}" data-pid="${pid}" data-btn-label="${esc(label)}" style="${cardBgStyle}"><div class="card-link" onclick="cardClick(event,'${pid}','${slug}')"><div class="product-img" style="${gradBg}"><div class="img-fallback-icon">🛍️</div>${badge}${wish}${imgTag}<div class="ov-layer"><div class="ov-name">${esc(p.name)}</div><div class="ov-price-row"><span class="ov-price" ${priceStyle}>${currency}${p.price.toFixed(2)}</span>${showOrig&&p.compare_at_price?`<span class="ov-compare">${currency}${p.compare_at_price.toFixed(2)}</span>`:''} ${d?`<span class="ov-discount">−${d}%</span>`:''}</div>${ovCtrlHTML}</div></div></div></div>`
   }
 
   let ctrlInner
@@ -980,29 +1075,24 @@ function applyFilters(secId){
 
   let filtered = [...prods]
 
-  /* Category filter */
   if(filter.cat && filter.cat !== '_all'){
     filtered = filtered.filter(p=>(p.category_name||'').toLowerCase() === filter.cat.toLowerCase())
   }
-  /* Search */
   if(filter.search){
     const q = filter.search.toLowerCase()
     filtered = filtered.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.category_name||'').toLowerCase().includes(q))
   }
-  /* Sort */
   switch(filter.sort){
     case 'price_asc':  filtered.sort((a,b)=>a.price-b.price);break
     case 'price_desc': filtered.sort((a,b)=>b.price-a.price);break
     case 'name_asc':   filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||''));break
     case 'discount':   filtered.sort((a,b)=>discPct(b)-discPct(a));break
-    default: break /* featured — keep API order */
+    default: break
   }
 
-  /* Update count label */
   const countEl = document.getElementById(`${secId}-count`)
   if(countEl) countEl.textContent=`${filtered.length} product${filtered.length!==1?'s':''}`
 
-  /* Update pill active states */
   if(toolbar){
     toolbar.querySelectorAll('.ptb-filter-pill[data-cat]').forEach(pill=>{
       const isAll = pill.dataset.cat==='_all'
@@ -1010,21 +1100,16 @@ function applyFilters(secId){
     })
   }
 
-  /* Determine section card style */
   const secEl   = document.getElementById(secId)
   const secStyle= grid.getAttribute('data-style') || activeStyle
-
-  /* Resolve view mode override */
   const view = filter.view || secStyle
   applyStyleToGrid(grid, view)
 
-  /* Re-apply section size vars (view toggle may have reset grid; size cascades from secEl) */
   const sizeKeyF=(grid._cardOpts&&grid._cardOpts.cardSize)||activeSize
   const sizeVarsF=CARD_SIZE_VARS[sizeKeyF]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
   const secElF=document.getElementById(secId)
   if(secElF) Object.entries(sizeVarsF).forEach(([k,v])=>secElF.style.setProperty(k,v))
 
-  /* Render */
   const cardOpts = grid._cardOpts || {}
   if(!filtered.length){
     grid.innerHTML=`<div class="products-empty"><span>🔍</span>No products match your search</div>`
@@ -1035,12 +1120,10 @@ function applyFilters(secId){
   updateCartUI()
 }
 
-/* Setup toolbar for a section */
 function setupToolbar(secId, prods, cardOpts){
   const toolbar = document.getElementById(`${secId}-toolbar`)
   if(!toolbar) return
 
-  /* Build unique categories */
   const cats = [...new Set(prods.map(p=>p.category_name).filter(Boolean))]
 
   let pillsHTML = `<button class="ptb-filter-pill active" data-cat="_all" onclick="setCatFilter('${secId}','_all')">All</button>`
@@ -1091,7 +1174,6 @@ function setSortFilter(secId,val){
 function setViewFilter(secId,view,btn){
   if(!sectionFilters[secId]) sectionFilters[secId]={}
   sectionFilters[secId].view = view
-  /* Toggle active on view buttons */
   const toolbar=document.getElementById(`${secId}-toolbar`)
   if(toolbar) toolbar.querySelectorAll('.ptb-view-btn').forEach(b=>b.classList.toggle('active',b===btn))
   applyFilters(secId)
@@ -1214,7 +1296,6 @@ function buildSec(sec,isMobile){
       const skCount=isMobile?2:(fc||4)
       const secCardStyle=d.cardStyle||readKey(sec.data||{},'cardStyle','card_style')||readKey(sec.settings||{},'cardStyle','card_style')||activeStyle
       const secStyle=ALL_CARD_STYLES.has(secCardStyle)?secCardStyle:activeStyle
-      /* Per-section card size — section setting overrides global */
       const secCardSize=d.cardSize||readKey(sec.data||{},'cardSize','card_size')||readKey(sec.settings||{},'cardSize','card_size')||activeSize
       const secSizeVars=CARD_SIZE_VARS[secCardSize]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
       const secSizeStyle=Object.entries(secSizeVars).map(([k,v])=>k+':'+v).join(';')
@@ -1347,27 +1428,22 @@ async function fillFeatured(secId,count,cardOpts){
     const prods=data.products||[]
     if(!prods.length){ const s=grid.closest('section'); if(s)s.style.display='none'; return }
 
-    /* Store products for later filter/sort */
     sectionProducts[secId]=prods
     sectionFilters[secId]={ cat:'_all', search:'', sort:'featured', view:null }
 
-    /* Cache cardOpts on the grid element */
     grid._cardOpts=cardOpts
 
     const sectionStyle=cardOpts.cardStyle||activeStyle
     grid.className='products-grid'
     applyStyleToGrid(grid,sectionStyle)
 
-    /* Apply per-section card size vars to section element so CSS tokens cascade */
     const sizeKey=cardOpts.cardSize||activeSize
     const sizeVarsNow=CARD_SIZE_VARS[sizeKey]||CARD_SIZE_VARS[activeSize]||CARD_SIZE_VARS.medium
     const secEl=document.getElementById(secId)
     if(secEl) Object.entries(sizeVarsNow).forEach(([k,v])=>secEl.style.setProperty(k,v))
 
-    /* Build toolbar */
     setupToolbar(secId,prods,cardOpts)
 
-    /* Render initial */
     grid.innerHTML=prods.map(p=>renderCard(p,cardOpts,sectionStyle)).join('')
     restoreWish(); updateCartUI()
   }catch(e){
