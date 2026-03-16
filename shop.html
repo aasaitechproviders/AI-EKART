@@ -51,7 +51,6 @@ body{
   color:var(--p);
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
-  /* padding-bottom added dynamically via .cart-bar-open */
   transition:padding-bottom .3s var(--ease);
 }
 img{display:block;max-width:100%}
@@ -59,16 +58,9 @@ button,input,select,textarea{font-family:inherit}
 a{color:inherit;text-decoration:none}
 .hidden{display:none!important}
 
-/* ── PAGE SECTIONS — block layout, zero gaps ── */
-#page-sections{
-  display:block; /* NOT flex — flex causes micro-gap issues */
-}
-/* Ensure every direct child section is full-width block with no margin */
-#page-sections > *{
-  display:block;
-  width:100%;
-  margin:0;
-}
+/* ── PAGE SECTIONS ── */
+#page-sections{display:block}
+#page-sections > *{display:block;width:100%;margin:0}
 
 /* ── LOADER ── */
 #loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .4s var(--ease)}
@@ -77,12 +69,19 @@ a{color:inherit;text-decoration:none}
 .ld-text{font-size:11.5px;color:var(--p3);letter-spacing:.06em;font-weight:500}
 @keyframes ldSpin{to{transform:rotate(360deg)}}
 
-/* ── ANNOUNCEMENT ── */
+/* ══════════════════════════════════════════════════════════════
+   FIX 1 — ANNOUNCEMENT BAR
+   z-index MUST be below navbar (200) so it never overlaps
+   the sticky nav when scrolling.
+   Old value was 201 — that caused it to scroll over the nav.
+══════════════════════════════════════════════════════════════ */
 .announcement-bar{
   background:var(--p);color:#fff;
   text-align:center;padding:9px 48px;
   font-size:12px;font-weight:500;letter-spacing:.04em;
-  position:relative;z-index:201;
+  position:relative;
+  /* z-index LOWER than navbar (200) so nav always sits on top */
+  z-index:100;
   display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
 }
 .ann-close{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;flex-shrink:0;position:absolute;right:16px;transition:color .15s}
@@ -294,8 +293,7 @@ a{color:inherit;text-decoration:none}
 .skeleton *{visibility:hidden}
 
 /* ═══════════════════════════════════════════════════════════════
-   CART BAR — off-screen when empty, slides up when items added
-   NEVER creates empty space at bottom of page
+   CART BAR
 ═══════════════════════════════════════════════════════════════ */
 .cart-bar{
   position:fixed;bottom:0;left:0;right:0;
@@ -305,46 +303,21 @@ a{color:inherit;text-decoration:none}
   display:flex;align-items:center;justify-content:space-between;
   z-index:300;
   box-shadow:0 -1px 0 rgba(255,255,255,.05),0 -12px 40px rgba(0,0,0,.22);
-  /* Hidden: translated fully off screen — takes zero layout space */
   transform:translateY(100%);
   transition:transform .3s var(--ease);
   pointer-events:none;
 }
-.cart-bar.on{
-  transform:translateY(0);
-  pointer-events:auto;
-}
-/* Body only gets padding when cart bar is actually showing */
+.cart-bar.on{transform:translateY(0);pointer-events:auto}
 body.cart-bar-open{padding-bottom:66px}
 
 .cbar-left{display:flex;align-items:center;gap:14px}
-.cbar-icon{
-  width:38px;height:38px;border-radius:10px;
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.12);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;
-}
+.cbar-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .cbar-info{display:flex;flex-direction:column;gap:1px}
 .cbar-meta{font-size:10.5px;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.04em;text-transform:uppercase}
 .cbar-total{font-size:16px;font-weight:700;color:#fff;line-height:1.2;letter-spacing:-.01em}
 .cbar-actions{display:flex;align-items:center;gap:10px}
-.cbar-pill{
-  padding:5px 13px;
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:999px;
-  font-size:12px;font-weight:600;color:rgba(255,255,255,.75);
-  white-space:nowrap;
-}
-.cbar-btn{
-  padding:10px 24px;
-  background:#fff;color:var(--p);
-  border-radius:var(--btn-r);font-size:13px;font-weight:700;
-  transition:opacity .15s,transform .15s var(--ease-spring);
-  text-decoration:none;border:none;cursor:pointer;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:6px;
-}
+.cbar-pill{padding:5px 13px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:12px;font-weight:600;color:rgba(255,255,255,.75);white-space:nowrap}
+.cbar-btn{padding:10px 24px;background:#fff;color:var(--p);border-radius:var(--btn-r);font-size:13px;font-weight:700;transition:opacity .15s,transform .15s var(--ease-spring);text-decoration:none;border:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .cbar-btn:hover{opacity:.92;transform:translateY(-1px)}
 .cbar-btn::after{content:'→';font-size:14px}
 
@@ -352,88 +325,151 @@ body.cart-bar-open{padding-bottom:66px}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(12,12,12,.95);color:#fff;border-radius:10px;padding:9px 18px;font-size:12.5px;font-weight:500;opacity:0;transition:all .22s var(--ease);z-index:400;white-space:nowrap;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.07)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ═══════════════════════════════════════════════════════════════
-   NAVBAR — 3-column grid layout (bulletproof, no flex collapse)
-   Col 1 (logo): auto width, left-aligned
-   Col 2 (links): 1fr, center-aligned
-   Col 3 (actions): auto width, right-aligned
-   Grid never collapses — each column is independent.
-═══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   FIX 2 — NAVBAR (tc-navbar)
+   Problems in original:
+   1. Logo "Aasai" text was rendering slightly above center because
+      font-display has descenders that throw off grid alignment.
+   2. The 3-col grid align-items:center was correct but child
+      elements (logo span, nav links, cart btn) needed explicit
+      vertical centering reinforcement.
+   3. z-index was set per-instance via inline style — now locked
+      to 200 here, which is ABOVE the announcement bar (100).
+
+   Fixes applied:
+   - align-items:center on the grid (already correct, kept)
+   - .nav-logo: align-self:center + line-height:var(--navbar-h)
+     removed — replaced with explicit flex vertical centering
+   - .nav-links: align-self:center (centers the link row in its cell)
+   - .nav-right: align-self:center (centers cart btn in its cell)
+   - All children use display:flex + align-items:center
+   - z-index:200 is hardcoded so it's always above ann-bar (100)
+══════════════════════════════════════════════════════════════ */
 .tc-navbar{
   width:100%;
   box-sizing:border-box;
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:none;
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
   padding:0 40px;
   height:var(--navbar-h);
   /* 3-column grid: logo | links | actions */
   display:grid;
   grid-template-columns:auto 1fr auto;
+  /* FIX: explicit center alignment for all grid cells */
   align-items:center;
   gap:16px;
-  position:sticky;top:0;z-index:200;
+  position:sticky;
+  top:0;
+  /* FIX: always 200, above ann-bar's 100 */
+  z-index:200;
 }
+
+/* Logo — grid col 1 */
 .nav-logo{
   font-family:var(--font-display);
-  font-size:20px;font-weight:400;letter-spacing:-.02em;
+  font-size:20px;
+  font-weight:400;
+  letter-spacing:-.02em;
   cursor:pointer;
-  display:flex;align-items:center;gap:9px;
+  /* FIX: flex centering so the logo image/text are vertically middle */
+  display:flex;
+  align-items:center;
+  gap:9px;
   white-space:nowrap;
-  /* Grid col 1 */
   justify-self:start;
-}
-.nav-logo span{
-  /* Ensure store name text is always visible */
+  /* FIX: align-self centers within the grid row height */
+  align-self:center;
+  /* FIX: ensure no extra height bleeds from font metrics */
   line-height:1;
 }
-.nav-logo-img{height:30px;width:auto;object-fit:contain;border-radius:6px;flex-shrink:0}
-/* Nav links — grid col 2, always centered */
+.nav-logo span{
+  line-height:1;
+  /* FIX: prevent font descenders from pushing text off-center */
+  display:inline-flex;
+  align-items:center;
+}
+.nav-logo-img{
+  height:30px;
+  width:auto;
+  object-fit:contain;
+  border-radius:6px;
+  flex-shrink:0;
+  /* FIX: block removes inline baseline gap */
+  display:block;
+}
+
+/* Nav links — grid col 2 */
 .nav-links{
   display:flex;
   align-items:center;
   gap:28px;
-  justify-content:center; /* center within the 1fr column */
+  justify-content:center;
+  /* FIX: self-align centers within grid cell */
+  align-self:center;
   min-width:0;
   overflow:hidden;
 }
 .nav-links a{
-  font-size:13px;font-weight:500;
+  font-size:13px;
+  font-weight:500;
   white-space:nowrap;
   opacity:.82;
   transition:opacity .15s;
   flex-shrink:0;
+  /* FIX: line-height:1 removes baseline gap */
+  line-height:1;
+  /* FIX: inline-flex so anchor is vertically centered too */
+  display:inline-flex;
+  align-items:center;
 }
 .nav-links a:hover{opacity:1}
-/* Nav right actions — grid col 3, always right-aligned */
+
+/* Nav right actions — grid col 3 */
 .nav-right{
   display:flex;
   align-items:center;
   gap:8px;
   justify-self:end;
+  /* FIX: self-align centers within grid cell */
+  align-self:center;
   flex-shrink:0;
 }
-/* Cart button — solid pill, always readable on any bg */
+
+/* Cart button */
 .nav-cart-btn{
-  display:inline-flex;align-items:center;gap:8px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
   padding:9px 18px;
   border-radius:var(--btn-r);
-  font-size:13px;font-weight:600;
-  border:none;cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  border:none;
+  cursor:pointer;
   font-family:var(--font);
   text-decoration:none;
   white-space:nowrap;
   transition:opacity .15s,transform .15s var(--ease-spring);
-  /* default: dark pill — overridden inline for colored navbars */
   background:rgba(0,0,0,.75);
   color:#fff;
+  /* FIX: line-height:1 prevents button from being taller than needed */
+  line-height:1;
+  /* FIX: explicit height matches navbar rhythm */
+  height:38px;
+  box-sizing:border-box;
 }
 .nav-cart-btn:hover{opacity:.88;transform:translateY(-1px)}
+
 /* Cart count badge inside button */
 .nav-cart-count{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:20px;height:20px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
   border-radius:10px;
-  font-size:11px;font-weight:700;
+  font-size:11px;
+  font-weight:700;
   padding:0 5px;
   background:rgba(255,255,255,.22);
   line-height:1;
@@ -453,7 +489,6 @@ body.cart-bar-open{padding-bottom:66px}
 .btn-cta:hover{opacity:.88;transform:translateY(-1px)}
 .btn-cta-ghost{background:rgba(255,255,255,.14);color:#fff;border:1.5px solid rgba(255,255,255,.28);backdrop-filter:blur(6px)}
 .btn-cta-ghost:hover{background:rgba(255,255,255,.22);opacity:1}
-/* Dark-bg hero overrides */
 .tc-hero.hero-dark .btn-cta-ghost{background:rgba(0,0,0,.06);color:var(--p);border-color:rgba(0,0,0,.14)}
 .tc-hero.hero-dark p{color:var(--p2)}
 .tc-hero.hero-dark .hero-badge-pill{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1)}
@@ -643,7 +678,6 @@ body.cart-bar-open{padding-bottom:66px}
   .tc-navbar{padding:0 16px;gap:8px;grid-template-columns:auto auto}
   .hdr-inner{padding:0 16px;gap:12px}
   .hdr-nav,.nav-links{display:none}
-  /* Push cart to the right on mobile 2-col grid */
   .nav-right{justify-self:end}
   .tc-section,.tc-trust-section,.tc-newsletter,.tc-promo-banner,.tc-footer,
   .tc-faq-section,.tc-countdown-section,.tc-gallery-section,.tc-video-section,.tc-about-section,
@@ -713,7 +747,6 @@ body.cart-bar-open{padding-bottom:66px}
 
 <div id="page-sections"></div>
 
-<!-- Cart bar: always in DOM, slides in/out via transform. Never occupies space when empty. -->
 <div class="cart-bar" id="cartBar">
   <div class="cbar-left">
     <div class="cbar-icon">🛒</div>
@@ -781,11 +814,6 @@ function applyCardSizeVars(size){
   Object.entries(vars).forEach(([k,v]) => R.style.setProperty(k,v))
 }
 
-/* ─────────────────────────────────────────
-   DARK BG AUTO-CONTRAST
-   Returns 'color:#fff;' if the bgColor hex
-   is dark, so text is always readable.
-───────────────────────────────────────── */
 function isColorDark(hex){
   const c=(hex||'').replace('#','')
   if(c.length!==6)return false
@@ -886,8 +914,6 @@ function refreshProductCard(id){
 
 /* ═══════════════════════════════════════════
    UPDATE CART UI
-   — slides bar in/out
-   — adds/removes body padding
 ═══════════════════════════════════════════ */
 function updateCartUI(){
   const cart=getCart()
@@ -1143,13 +1169,10 @@ function resolveType(t){ return TYPE_ALIASES[t]||t }
 
 /* ═══════════════════════════════════════════
    BUILD SECTION HTML
-   All sections use autoContrastText() so dark
-   bgColors automatically get white text.
 ═══════════════════════════════════════════ */
 function buildSec(sec,isMobile){
   const d=gd(sec)
   const bgS=d.bgColor?`background:${d.bgColor};`:''
-  /* AUTO-CONTRAST: if bgColor is dark and no explicit textColor, use white */
   const tcS=autoContrastText(d.bgColor, d.textColor)
 
   switch(sec.type){
@@ -1164,21 +1187,16 @@ function buildSec(sec,isMobile){
       let links = d.navLinks?.length ? d.navLinks : [1,2,3,4,5].map(i => d[`link${i}Text`] ? {text:d[`link${i}Text`],url:d[`link${i}Url`]} : null).filter(Boolean)
       const pos = d.sticky !== 'no' ? 'sticky' : 'relative'
       const navBg = d.bgColor || ''
-      /* Auto-detect if nav background is dark → use white text/logo */
       const navIsDark = navBg ? isColorDark(navBg) : false
-      /* Link color: explicit > auto-contrast > inherit */
       const linkColor = d.linkColor || (navIsDark ? '#ffffff' : '')
-      /* Logo color: explicit > auto-contrast > inherit */
       const logoColor = d.logoColor || linkColor || (navIsDark ? '#ffffff' : '')
-      /* Cart button: on dark nav use a frosted white pill; on light nav use dark pill */
       const cartBtnStyle = navIsDark
         ? 'background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.28);backdrop-filter:blur(8px)'
         : 'background:#111;color:#fff;border:none'
-      /* Border: only show separator when nav has no custom bg (transparent/light nav) */
       const navBorderStyle = navBg ? 'border-bottom:none' : 'border-bottom:1px solid rgba(0,0,0,.07)'
+      /* FIX: z-index:200 always in inline style too — overrides any theme color inline style conflict */
       const navStyle = `${navBg ? 'background:'+navBg+';' : ''}${navBorderStyle};position:${pos};top:0;z-index:200;`
 
-      /* Build nav links HTML */
       const linksHtml = links.map(l => {
         const url = l.url || l.href || '#'
         const isAnchor = url.startsWith('#')
@@ -1187,9 +1205,8 @@ function buildSec(sec,isMobile){
         return `<a href="${esc(url)}" ${onClick}>${esc(l.text||l.txt||'')}</a>`
       }).join('')
 
-      /* Logo: image takes priority over text, both shown at correct size */
       const logoImgHtml = d.logoUrl ? `<img src="${esc(d.logoUrl)}" class="nav-logo-img" alt="${esc(lt)}">` : ''
-      const logoTextHtml = `<span class="${d.logoUrl ? 'hidden' : ''}" style="font-family:var(--font-display);font-size:20px;font-weight:400;letter-spacing:-.02em">${esc(lt)}</span>`
+      const logoTextHtml = `<span class="${d.logoUrl ? 'hidden' : ''}">${esc(lt)}</span>`
 
       return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${!isMobile && links.length ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>` : '<div></div>'}${d.showCart !== 'no' ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>` : '<div></div>'}</nav>`
     }
@@ -1203,7 +1220,6 @@ function buildSec(sec,isMobile){
       const ovOp=(parseInt(d.overlayOpacity)||40)/100
       const align=d.textAlign||'center'
       const justMap={left:'flex-start',right:'flex-end',center:'center'}
-      /* Determine if hero bg is dark → use light text for content */
       const heroDark=hasBg||(d.bgColor&&isColorDark(d.bgColor))
       const contentColor=d.textColor||(heroDark?'#ffffff':null)
       const heroClass=`tc-hero${heroDark&&!d.textColor?' hero-dark':''}`
@@ -1285,7 +1301,6 @@ function buildSec(sec,isMobile){
       const layout=d.layout||'row'
       const gridCols=layout==='2x2'?2:layout==='column'?1:(isMobile?2:4)
       const badges=[[d.badge1Icon,d.badge1,d.badge1sub],[d.badge2Icon,d.badge2,d.badge2sub],[d.badge3Icon,d.badge3,d.badge3sub],[d.badge4Icon,d.badge4,d.badge4sub]]
-      /* trust badges: exclude the bad default textColor from config (#ececf3) */
       const trustBg=d.bgColor||''
       const trustTcS=d.textColor&&d.textColor!=='#ececf3'?`color:${d.textColor};`:autoContrastText(trustBg,'')
       return`<section class="tc-trust-section" style="${trustBg?'background:'+trustBg+';':''}${trustTcS}">
@@ -1552,9 +1567,6 @@ function applySettings(s){
 
 /* ═══════════════════════════════════════════
    RENDER SECTIONS
-   Uses <template> + DocumentFragment to inject
-   sections as raw nodes — no wrapper divs,
-   no stray whitespace, zero layout gaps.
 ═══════════════════════════════════════════ */
 function renderSections(sections){
   const isMobile=window.innerWidth<=768
@@ -1572,7 +1584,6 @@ function renderSections(sections){
   const page=document.getElementById('page-sections')
   page.innerHTML=''
 
-  /* Build all HTML as one string, parse once via template — cleanest approach */
   const allHtml = visible.map(sec=>buildSec(sec,isMobile)).filter(Boolean).join('')
   const tmpl = document.createElement('template')
   tmpl.innerHTML = allHtml
