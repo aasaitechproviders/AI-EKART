@@ -348,19 +348,23 @@ body.cart-bar-open{padding-bottom:66px}
 .tc-navbar{
   width:100%;
   box-sizing:border-box;
+  /* Solid fallback so navbar is never transparent over coloured hero */
+  background:rgba(250,250,250,.97);
   backdrop-filter:blur(24px);
   -webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(0,0,0,.07);
   padding:0 40px;
   height:var(--navbar-h);
+  /* strict height — never taller than navbar-h */
+  max-height:var(--navbar-h);
+  overflow:visible;
   /* 3-column grid: logo | links | actions */
   display:grid;
   grid-template-columns:auto 1fr auto;
-  /* FIX: explicit center alignment for all grid cells */
   align-items:center;
   gap:16px;
   position:sticky;
   top:0;
-  /* FIX: always 200, above ann-bar's 100 */
   z-index:200;
 }
 
@@ -1192,11 +1196,12 @@ function buildSec(sec,isMobile){
       const logoColor = d.logoColor || linkColor || (navIsDark ? '#ffffff' : '')
       const cartBtnStyle = navIsDark
         ? 'background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.28);backdrop-filter:blur(8px)'
-        : 'background:#111;color:#fff;border:none'
-      const navBorderStyle = navBg ? 'border-bottom:none' : 'border-bottom:1px solid rgba(0,0,0,.07)'
-      /* FIX: z-index:200 always in inline style too — overrides any theme color inline style conflict */
-      const navStyle = `${navBg ? 'background:'+navBg+';' : ''}${navBorderStyle};position:${pos};top:0;z-index:200;`
-
+        : 'background:#111111;color:#fff;border:none'
+      const navBgStyle = navBg
+        ? `background:${navBg};`
+        : 'background:rgba(250,250,250,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);'
+      const navBorderStyle = navBg ? 'border-bottom:none;' : 'border-bottom:1px solid rgba(0,0,0,.07);'
+      const navStyle = `${navBgStyle}${navBorderStyle}position:${pos};top:0;z-index:200;`
       const linksHtml = links.map(l => {
         const url = l.url || l.href || '#'
         const isAnchor = url.startsWith('#')
@@ -1204,12 +1209,18 @@ function buildSec(sec,isMobile){
         const onClick = isAnchor ? (sid === '' || sid === 'mainAnchor' ? `onclick="event.preventDefault();smoothScroll()"` : `onclick="event.preventDefault();scrollToEl('${sid}')"`) : ''
         return `<a href="${esc(url)}" ${onClick}>${esc(l.text||l.txt||'')}</a>`
       }).join('')
-
-      const logoImgHtml = d.logoUrl ? `<img src="${esc(d.logoUrl)}" class="nav-logo-img" alt="${esc(lt)}">` : ''
-      const logoTextHtml = `<span class="${d.logoUrl ? 'hidden' : ''}">${esc(lt)}</span>`
-
-      return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${!isMobile && links.length ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>` : '<div></div>'}${d.showCart !== 'no' ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>` : '<div></div>'}</nav>`
+      const logoSrc = d.logoUrl || storeConfig.logo_url || ''
+      const logoImgHtml = logoSrc ? `<img src="${esc(logoSrc)}" class="nav-logo-img" alt="${esc(lt)}" onerror="this.style.display='none';this.nextElementSibling.style.display=''">` : ''
+      const logoTextHtml = `<span style="${logoSrc ? 'display:none' : ''}">${esc(lt)}</span>`
+      const middleCol = (!isMobile && links.length)
+        ? `<div class="nav-links" style="${linkColor ? 'color:'+linkColor : ''}">${linksHtml}</div>`
+        : `<div></div>`
+      const rightCol = d.showCart !== 'no'
+        ? `<div class="nav-right"><a href="cart.html?store=${slug}" class="nav-cart-btn" style="${cartBtnStyle}">🛒 ${esc(d.cartText||'Cart')} <span class="nav-cart-count theme-cart-qty">0</span></a></div>`
+        : `<div></div>`
+      return `<nav class="tc-navbar" id="themeNavbar" style="${navStyle}"><div class="nav-logo" style="${logoColor ? 'color:'+logoColor : ''}" onclick="scrollTop()">${logoImgHtml}${logoTextHtml}</div>${middleCol}${rightCol}</nav>`
     }
+
 
     case 'hero':{
       const pads={compact:isMobile?'44px 5% 36px':'64px 5% 52px',normal:isMobile?'56px 5% 48px':'96px 5% 80px',tall:isMobile?'80px 5% 64px':'144px 5% 112px',fullscreen:isMobile?'96px 5%':'168px 5%'}
