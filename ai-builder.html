@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script>
-    /* ── apiFetch — same as api.js, inlined so this page works standalone ── */
-    const API_BASE = ''  // same origin — backend serves frontend
+    /* ── apiFetch ── */
+    const API_BASE = ''
     function apiFetch(path, opts = {}) {
       const token = localStorage.getItem('ekart_token')
       return fetch(API_BASE + path, {
@@ -37,7 +37,7 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
-    /* ═══ TOPBAR ═══ */
+    /* TOPBAR */
     #topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:200}
     .tb-logo{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);letter-spacing:-.04em;text-decoration:none;padding-right:12px;border-right:1px solid var(--border2);margin-right:4px}
     .tb-logo em{color:var(--accent2);font-style:normal}
@@ -51,11 +51,11 @@
     .tb-btn-primary:disabled{opacity:.5;cursor:not-allowed}
     .tb-lang{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px}
 
-    /* ═══ MAIN LAYOUT ═══ */
+    /* MAIN */
     #main-wrap{display:flex;flex:1;overflow:hidden}
 
-    /* ═══ CHAT PANEL ═══ */
-    #chat-panel{width:420px;min-width:380px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    /* CHAT PANEL */
+    #chat-panel{width:440px;min-width:400px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
     .chat-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
     .chat-header-row{display:flex;align-items:center;gap:8px;margin-bottom:3px}
     .chat-header-title{font-size:14px;font-weight:800;color:var(--text)}
@@ -66,8 +66,12 @@
     .step-dot{height:3px;flex:1;border-radius:999px;background:var(--border2);transition:background .4s}
     .step-dot.done{background:var(--green)}
     .step-dot.active{background:var(--accent)}
+    .step-labels{padding:4px 16px 8px;display:flex;justify-content:space-between;flex-shrink:0}
+    .step-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;transition:color .3s}
+    .step-lbl.active{color:var(--accent2)}
+    .step-lbl.done{color:var(--green)}
 
-    /* ═══ MESSAGES ═══ */
+    /* MESSAGES */
     #chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
     #chat-messages::-webkit-scrollbar{width:3px}
     #chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -76,7 +80,7 @@
     .msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
     .msg.ai .msg-avatar{background:linear-gradient(135deg,#5b5cf6,#818cf8)}
     .msg.user .msg-avatar{background:var(--surface3);font-size:11px}
-    .msg-body{display:flex;flex-direction:column;max-width:82%;min-width:0}
+    .msg-body{display:flex;flex-direction:column;max-width:88%;min-width:0}
     .msg.user .msg-body{align-items:flex-end}
     .msg-bubble{padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.6;word-break:break-word}
     .msg.ai .msg-bubble{background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px;color:var(--text)}
@@ -88,11 +92,11 @@
     .typing-dots span:nth-child(3){animation-delay:.4s}
     @keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 
-    /* ═══ WIDGETS ═══ */
-    .chat-widget{margin-top:9px}
-    .widget-label{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:7px;letter-spacing:.05em;text-transform:uppercase}
+    /* WIDGETS */
+    .chat-widget{margin-top:10px}
+    .widget-label{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
     .widget-chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:999px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+    .chip{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:999px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
     .chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(91,92,246,.08)}
     .chip.selected{border-color:var(--accent);background:rgba(91,92,246,.15);color:var(--accent2)}
     .widget-cards{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -102,18 +106,46 @@
     .wcard-icon{font-size:22px;margin-bottom:4px}
     .wcard-label{font-size:12px;font-weight:700;color:var(--text2)}
     .wcard-desc{font-size:10px;color:var(--text3);margin-top:2px}
-    .color-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-    .color-chip{width:30px;height:30px;border-radius:8px;border:2.5px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
+    .color-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .color-chip{width:32px;height:32px;border-radius:8px;border:2.5px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s;position:relative;flex-shrink:0}
     .color-chip:hover{transform:scale(1.2)}
     .color-chip.selected{border-color:white;box-shadow:0 0 0 2px var(--accent)}
+    .theme-palette{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+    .tpal-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .15s}
+    .tpal-row:hover{border-color:var(--accent)}
+    .tpal-row.selected{border-color:var(--accent);background:rgba(91,92,246,.1)}
+    .tpal-swatch{width:20px;height:20px;border-radius:5px;flex-shrink:0}
+    .tpal-bg{width:14px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,.2);flex-shrink:0}
+    .tpal-name{font-size:12px;font-weight:700;color:var(--text2);flex:1}
+    /* Section toggle widget */
+    .section-toggles{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+    .stgl{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:9px;cursor:pointer;transition:all .15s}
+    .stgl:hover{border-color:var(--accent)}
+    .stgl.active{border-color:var(--green);background:rgba(34,197,94,.05)}
+    .stgl-left{display:flex;align-items:center;gap:8px}
+    .stgl-icon{font-size:16px}
+    .stgl-name{font-size:12.5px;font-weight:700;color:var(--text2)}
+    .stgl-desc{font-size:10.5px;color:var(--text3)}
+    .stgl-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);background:transparent;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;flex-shrink:0}
+    .stgl.active .stgl-check{background:var(--green);border-color:var(--green);color:white}
+    /* Hero text options */
+    .text-options{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+    .topt{padding:9px 12px;background:var(--surface3);border:1.5px solid var(--border2);border-radius:9px;cursor:pointer;transition:all .15s}
+    .topt:hover{border-color:var(--accent)}
+    .topt.selected{border-color:var(--accent);background:rgba(91,92,246,.1)}
+    .topt-main{font-size:12.5px;font-weight:700;color:var(--text)}
+    .topt-sub{font-size:11px;color:var(--text3);margin-top:2px}
+    /* CTA confirm button */
+    .confirm-btn{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:9px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif}
+    .confirm-btn:hover{background:#4f4de0;box-shadow:0 4px 16px rgba(91,92,246,.35)}
 
-    /* ═══ QUICK REPLIES ═══ */
+    /* QUICK REPLIES */
     #quick-replies{padding:8px 14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0}
     #quick-replies:empty{padding:0;border-top:none}
-    .qr{padding:5px 11px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:999px;font-size:11.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+    .qr{padding:6px 12px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:999px;font-size:11.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
     .qr:hover{border-color:var(--accent);color:var(--accent2)}
 
-    /* ═══ INPUT ═══ */
+    /* INPUT */
     #chat-input-wrap{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;flex-shrink:0}
     #chat-input{flex:1;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:none;min-height:40px;max-height:96px;line-height:1.5;transition:border-color .15s}
     #chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.1)}
@@ -127,7 +159,7 @@
     #send-btn:hover{background:#4f4de0}
     #send-btn:disabled{opacity:.4;cursor:not-allowed}
 
-    /* ═══ PREVIEW PANEL ═══ */
+    /* PREVIEW */
     #preview-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
     .preview-topbar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
     .preview-url{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 11px;font-size:11.5px;color:var(--text3);display:flex;align-items:center;gap:6px}
@@ -139,17 +171,17 @@
     .preview-canvas{flex:1;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:20px;background:var(--bg)}
     .preview-canvas::-webkit-scrollbar{width:4px;height:4px}
     .preview-canvas::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-    .device-shell{background:white;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px var(--border2),0 24px 60px rgba(0,0,0,.4);transition:all .3s;flex-shrink:0}
-    .device-shell.desktop{width:100%;max-width:960px}
-    .device-shell.tablet{width:768px}
-    .device-shell.mobile{width:390px}
-    #preview-iframe{width:100%;border:none;display:block}
+    .device-shell{background:white;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px var(--border2),0 24px 60px rgba(0,0,0,.4);transition:all .3s;flex-shrink:0;width:100%}
+    .device-shell.desktop{max-width:960px}
+    .device-shell.tablet{width:768px;max-width:768px}
+    .device-shell.mobile{width:390px;max-width:390px}
+    #preview-iframe{width:100%;border:none;display:block;transition:height .3s}
     .preview-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);text-align:center;padding:32px}
     .preview-empty-icon{font-size:52px;opacity:.25}
     .preview-empty-title{font-size:15px;font-weight:700;color:var(--text2)}
     .preview-empty-sub{font-size:13px;line-height:1.6;max-width:260px}
 
-    /* ═══ STORE PILL ═══ */
+    /* STORE PILL */
     .tb-store-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px 5px 8px;cursor:pointer;transition:all .15s;min-width:0;flex-shrink:0}
     .tb-store-pill:hover{border-color:var(--accent)}
     .tb-store-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px rgba(34,197,94,.6)}
@@ -162,14 +194,24 @@
     .store-dropdown-item.active{color:var(--accent2)}
     .store-dropdown-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
 
-    /* ═══ TOASTS ═══ */
+    /* TOASTS */
     .built-toast{position:fixed;top:calc(var(--topbar-h)+10px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(91,92,246,.96),rgba(129,140,248,.96));backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;color:white;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(91,92,246,.3);z-index:500;opacity:0;transition:opacity .3s;pointer-events:none}
     .built-toast.show{opacity:1}
     #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:1000}
-    .toast{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);transition:all .3s;max-width:300px}
+    .toast{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 15px;font-size:13px;font-weight:600;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);transition:all .3s;max-width:320px}
     .toast.show{opacity:1;transform:translateY(0)}
     .toast.success{border-color:rgba(34,197,94,.3)}
     .toast.error{border-color:rgba(239,68,68,.3)}
+    .toast.info{border-color:rgba(91,92,246,.3)}
+
+    /* DEBUG LOG */
+    #debug-log{position:fixed;bottom:0;left:0;right:0;max-height:140px;overflow-y:auto;background:rgba(0,0,0,.9);border-top:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:10px;padding:6px 10px;z-index:2000;display:none}
+    #debug-log.visible{display:block}
+    #debug-log .log-line{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    #debug-log .log-line.err{color:#ef4444}
+    #debug-log .log-line.ok{color:#22c55e}
+    #debug-log .log-line.info{color:#818cf8}
+    .debug-toggle{position:fixed;bottom:8px;right:8px;width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;z-index:2001}
   </style>
 </head>
 <body>
@@ -184,21 +226,20 @@
   </div>
   <div class="store-dropdown" id="store-dropdown"></div>
   <div class="tb-spacer"></div>
-  <div class="tb-lang">🌐 <span id="lang-label">Auto Detect</span></div>
-  <button class="tb-btn tb-btn-ghost" onclick="location.href='website-builder.html'">🎨 Classic Builder</button>
-  <button class="tb-btn tb-btn-primary" id="publish-btn" onclick="publishSite()">🚀 Save &amp; Publish</button>
+  <div class="tb-lang">🌐 <span id="lang-label">Auto</span></div>
+  <button class="tb-btn tb-btn-ghost" onclick="location.href='website-builder.html'">🎨 Classic</button>
+  <button class="tb-btn tb-btn-primary" id="publish-btn" onclick="publishSite()" disabled>🚀 Save &amp; Publish</button>
 </div>
 
 <div id="main-wrap">
-
-  <!-- ═══ CHAT PANEL ═══ -->
+  <!-- CHAT -->
   <div id="chat-panel">
     <div class="chat-header">
       <div class="chat-header-row">
         <div class="ai-dot"></div>
         <div class="chat-header-title">eKart AI — Build Your Store</div>
       </div>
-      <div class="chat-header-sub">Type or speak in any language • Preview builds live →</div>
+      <div class="chat-header-sub">Tap choices below — your store builds live →</div>
     </div>
     <div class="step-progress" id="step-progress">
       <div class="step-dot active" id="sp0"></div>
@@ -209,17 +250,26 @@
       <div class="step-dot" id="sp5"></div>
       <div class="step-dot" id="sp6"></div>
     </div>
+    <div class="step-labels">
+      <span class="step-lbl active" id="sl0">Brand</span>
+      <span class="step-lbl" id="sl1">Business</span>
+      <span class="step-lbl" id="sl2">Hero</span>
+      <span class="step-lbl" id="sl3">Products</span>
+      <span class="step-lbl" id="sl4">Theme</span>
+      <span class="step-lbl" id="sl5">Extras</span>
+      <span class="step-lbl" id="sl6">Done</span>
+    </div>
     <div id="chat-messages"></div>
     <div id="quick-replies"></div>
     <div id="chat-input-wrap">
-      <textarea id="chat-input" placeholder="Type in any language… or tap 🎤" rows="1"
+      <textarea id="chat-input" placeholder="Or type here… any language" rows="1"
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
       <button class="ibtn" id="mic-btn" onclick="toggleVoice()" title="Speak in any language">🎤</button>
       <button class="ibtn" id="send-btn" onclick="sendMessage()">➤</button>
     </div>
   </div>
 
-  <!-- ═══ PREVIEW PANEL ═══ -->
+  <!-- PREVIEW -->
   <div id="preview-panel">
     <div class="preview-topbar">
       <div class="preview-url">
@@ -227,34 +277,56 @@
         <span id="preview-url-text">ekart.aasaitech.in/your-store</span>
       </div>
       <div class="preview-device-btns">
-        <button class="pdb active" onclick="setDevice('desktop',this)">🖥</button>
-        <button class="pdb" onclick="setDevice('tablet',this)">▭</button>
-        <button class="pdb" onclick="setDevice('mobile',this)">📱</button>
+        <button class="pdb active" onclick="setDevice('desktop',this)" title="Desktop">🖥</button>
+        <button class="pdb" onclick="setDevice('tablet',this)" title="Tablet">▭</button>
+        <button class="pdb" onclick="setDevice('mobile',this)" title="Mobile">📱</button>
       </div>
     </div>
     <div id="built-bar"></div>
     <div class="preview-canvas" id="preview-canvas">
-      <div class="preview-empty" id="preview-empty">
-        <div class="preview-empty-icon">✨</div>
-        <div class="preview-empty-title">Your store preview will appear here</div>
-        <div class="preview-empty-sub">Chat with the AI on the left — your site builds live as you talk.</div>
+      <div class="device-shell desktop" id="device-shell">
+        <div class="preview-empty" id="preview-empty">
+          <div class="preview-empty-icon">✨</div>
+          <div class="preview-empty-title">Your store preview appears here</div>
+          <div class="preview-empty-sub">Chat with the AI on the left — your site builds live as you answer.</div>
+        </div>
       </div>
     </div>
   </div>
-
 </div>
 
 <div class="built-toast" id="built-toast">✅ <span id="built-toast-msg">Section added!</span></div>
 <div id="toast-container"></div>
+<div id="debug-log"></div>
+<button class="debug-toggle" onclick="toggleDebug()" title="Toggle debug log">🐛</button>
 
 <script>
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
+   DEBUG LOGGER
+══════════════════════════════════════════════ */
+const dbgLog = document.getElementById('debug-log')
+let dbgVisible = false
+function toggleDebug(){ dbgVisible=!dbgVisible; dbgLog.classList.toggle('visible',dbgVisible) }
+
+function log(msg, type='info'){
+  const now = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+  const line = document.createElement('div')
+  line.className = `log-line ${type}`
+  line.textContent = `[${now}] ${msg}`
+  dbgLog.appendChild(line)
+  dbgLog.scrollTop = dbgLog.scrollHeight
+  // Also console
+  if(type==='err') console.error(`[eKart AI] ${msg}`)
+  else console.log(`[eKart AI] ${msg}`)
+}
+
+/* ══════════════════════════════════════════════
    STATE
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 let siteState = {
   storeName:'', storeSlug:'', businessType:'',
   description:'', logoEmoji:'🛍️',
-  tagline:'', heroSubtext:'', ctaText:'',
+  tagline:'', heroSubtext:'', ctaText:'Shop Now',
   theme:{
     primaryColor:'#5b5cf6', bgColor:'#09090f', textColor:'#f1f5f9',
     cardBg:'#13131e', navBg:'#0e0e17', font:'Outfit',
@@ -265,7 +337,7 @@ let siteState = {
   sections:[]
 }
 
-let chatHistory = []   // [{role:'user'|'assistant', content:'...'}]
+let chatHistory = []
 let currentStep = 0
 let currentDevice = 'desktop'
 let isThinking = false
@@ -273,16 +345,21 @@ let speechRec = null
 let isRecording = false
 let allStores = []
 let currentStoreId = null
+// Track which extra sections user has selected
+let selectedExtras = new Set()
 
 const STEPS = ['brand','business','hero','products','theme','extras','done']
+const STEP_NAMES = ['Brand','Business','Hero','Products','Theme','Extras','Done']
 
 const THEME_PALETTES = [
-  {name:'Midnight',  primary:'#5b5cf6',bg:'#09090f',text:'#f1f5f9',card:'#13131e',nav:'#0e0e17'},
-  {name:'Clean',     primary:'#5b5cf6',bg:'#ffffff',text:'#111111',card:'#f8f9fa',nav:'#ffffff'},
-  {name:'Forest',    primary:'#16a34a',bg:'#052e16',text:'#f0fdf4',card:'#14532d',nav:'#052e16'},
-  {name:'Rose',      primary:'#e11d48',bg:'#fff1f2',text:'#4c0519',card:'#ffe4e6',nav:'#fff1f2'},
-  {name:'Ocean',     primary:'#0284c7',bg:'#0c4a6e',text:'#e0f2fe',card:'#075985',nav:'#0c4a6e'},
-  {name:'Sunset',    primary:'#ea580c',bg:'#431407',text:'#fff7ed',card:'#7c2d12',nav:'#431407'},
+  {name:'Midnight',  emoji:'🌙', primary:'#5b5cf6',bg:'#09090f',text:'#f1f5f9',card:'#13131e',nav:'#0e0e17'},
+  {name:'Clean',     emoji:'☀️', primary:'#5b5cf6',bg:'#ffffff',text:'#111111',card:'#f8f9fa',nav:'#ffffff'},
+  {name:'Forest',    emoji:'🌿', primary:'#16a34a',bg:'#052e16',text:'#f0fdf4',card:'#14532d',nav:'#052e16'},
+  {name:'Rose',      emoji:'🌸', primary:'#e11d48',bg:'#fff1f2',text:'#4c0519',card:'#ffe4e6',nav:'#fff1f2'},
+  {name:'Ocean',     emoji:'🌊', primary:'#0284c7',bg:'#0c4a6e',text:'#e0f2fe',card:'#075985',nav:'#0c4a6e'},
+  {name:'Sunset',    emoji:'🔥', primary:'#ea580c',bg:'#431407',text:'#fff7ed',card:'#7c2d12',nav:'#431407'},
+  {name:'Lavender',  emoji:'💜', primary:'#9333ea',bg:'#1e0b36',text:'#f3e8ff',card:'#2d1055',nav:'#1e0b36'},
+  {name:'Gold',      emoji:'✨', primary:'#ca8a04',bg:'#1c1400',text:'#fefce8',card:'#2d2000',nav:'#1c1400'},
 ]
 
 const SAMPLE_PRODUCTS = [
@@ -303,39 +380,30 @@ const SAMPLE_CATEGORIES = [
   {name:'Beauty',     count:'750+',  img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300&h=300&fit=crop'},
 ]
 
-/* ══════════════════════════════════════════════════
-   SYSTEM PROMPT — sent to your backend
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   SYSTEM PROMPT (concise — avoids token waste)
+══════════════════════════════════════════════ */
 function buildSystemPrompt() {
-  return `You are eKart AI, a friendly conversational website builder for Indian ecommerce stores. You help users build their store website step by step through natural conversation.
+  return `You are eKart AI, a friendly ecommerce website builder. You guide users step by step through building their store. The frontend shows interactive widgets (chips, cards, color pickers) so users rarely need to type — you just need to acknowledge their selections and advance the flow.
 
-CRITICAL RULES:
-1. AUTO-DETECT user's language and ALWAYS respond in that SAME language. Tamil→Tamil, Hindi→Hindi, Telugu→Telugu, English→English. Match exactly.
-2. Ask ONE focused question at a time. Never overwhelm.
-3. Be warm, encouraging — like a helpful friend building something together.
-4. Keep responses SHORT (2-4 sentences max). UI widgets do the heavy lifting.
-5. Extract structured data from every message and return it in a <DATA> JSON block.
+LANGUAGE: Auto-detect user's language and always reply in that SAME language.
+BREVITY: Keep replies to 1-3 sentences max. Widgets handle the heavy lifting.
+TONE: Warm, encouraging, like a helpful friend.
 
-CURRENT SITE STATE:
-${JSON.stringify(siteState, null, 2)}
+CURRENT STATE:
+- Step: ${STEPS[currentStep]} (${currentStep+1}/${STEPS.length})
+- Store: "${siteState.storeName || 'not set'}"
+- Business: "${siteState.businessType || 'not set'}"
+- Tagline: "${siteState.tagline || 'not set'}"
 
-CURRENT STEP: ${STEPS[currentStep]} (${currentStep + 1}/${STEPS.length})
+STEPS: brand → business → hero → products → theme → extras → done
 
-FLOW:
-- brand: Get store name, logo emoji
-- business: What they sell, short description (enhance it with AI)
-- hero: Tagline, subtext, CTA button text
-- products: Product count, layout preference
-- theme: Color theme and font choice
-- extras: Extra sections they want (testimonials/about/faq/newsletter/contact)
-- done: Congratulate, offer to publish
-
-RESPONSE FORMAT — always return a <DATA> JSON block FIRST, then your message:
+ALWAYS return a <DATA> block first, then your message:
 
 <DATA>
 {
   "step": "brand|business|hero|products|theme|extras|done",
-  "detectedLang": "en|ta|hi|te|ml|kn|bn|mr|gu|pa|ar",
+  "detectedLang": "en|ta|hi|te|ml|kn",
   "extracted": {
     "storeName": "",
     "storeSlug": "",
@@ -344,33 +412,165 @@ RESPONSE FORMAT — always return a <DATA> JSON block FIRST, then your message:
     "logoEmoji": "",
     "tagline": "",
     "heroSubtext": "",
-    "ctaText": "",
-    "themeIndex": null
+    "ctaText": ""
   },
-  "sectionsToBuild": [],
-  "widget": {
-    "type": "chips|cards|color_chips|none",
-    "label": "",
-    "options": [{"label":"","value":"","icon":"","desc":""}]
-  },
-  "quickReplies": ["", ""]
+  "buildSections": [],
+  "quickReplies": []
 }
 </DATA>
 
-Your conversational message here (in user's detected language).
+buildSections values to trigger: "navbar","hero","trustbadges","featured","categories","newsletter","footer","testimonials","about","faq","contact","banner","announcement"
 
-SECTION BUILD TRIGGERS:
-- When step becomes "hero" → sectionsToBuild: ["navbar","hero"]
-- When step becomes "products" → sectionsToBuild: ["trustbadges","featured","categories"]
-- When theme chosen → sectionsToBuild: [] (just re-render)
-- When step becomes "extras" → sectionsToBuild: whatever sections user wants
-- When step becomes "done" → sectionsToBuild: ["newsletter","footer"]`
+Trigger rules:
+- On brand confirmation → buildSections: ["announcement","navbar"]  
+- On business confirmed → buildSections: ["hero","trustbadges","featured","categories"]
+- On theme pick → buildSections: [] (frontend re-renders)
+- On extras confirmed → buildSections: [whatever sections user picked]
+- On done → buildSections: ["newsletter","footer"]`
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
+   PREDEFINED FLOWS (no AI needed for widget clicks)
+   These handle the UX locally for speed
+══════════════════════════════════════════════ */
+
+// Step 0: Brand — user picks/types store name
+function showBrandStep() {
+  addMsg('ai',
+    `👋 <strong>Welcome to eKart AI Builder!</strong><br><br>Let's build your store in a few taps. First — <strong>what's your store called?</strong> Pick an example or type your own:`,
+    {
+      type:'chips',
+      label:'Quick examples',
+      options:[
+        {label:'🛍️ Sri Murugan Silks', value:'Sri Murugan Silks'},
+        {label:'📱 Tech Galaxy', value:'Tech Galaxy'},
+        {label:'🥦 FreshMart', value:'FreshMart'},
+        {label:'👗 StyleHub', value:'StyleHub'},
+        {label:'💄 GlowUp Beauty', value:'GlowUp Beauty'},
+        {label:'🏠 HomeNest', value:'HomeNest'},
+        {label:'🍕 TastyBites', value:'TastyBites'},
+        {label:'⚽ SportZone', value:'SportZone'},
+      ]
+    }
+  )
+  setQR(['🎤 Let me speak it','தமிழில் பேசலாமா?','हिंदी में बात करें'])
+}
+
+// Step 1: Business type — after store name confirmed
+function showBusinessStep(storeName) {
+  addMsg('ai',
+    `Love the name <strong>${esc(storeName)}</strong>! 🎉<br>What kind of products do you sell?`,
+    {
+      type:'cards',
+      label:'Choose your business type',
+      options:[
+        {icon:'👗',label:'Fashion & Clothes',value:'Fashion clothing, apparel and accessories'},
+        {icon:'📱',label:'Electronics',value:'Electronics, gadgets and tech products'},
+        {icon:'🥦',label:'Grocery & Food',value:'Grocery, fresh produce and food items'},
+        {icon:'💄',label:'Beauty & Skincare',value:'Beauty products, skincare and cosmetics'},
+        {icon:'🏠',label:'Home & Living',value:'Home decor, furniture and lifestyle products'},
+        {icon:'⚽',label:'Sports & Fitness',value:'Sports equipment and fitness accessories'},
+        {icon:'📚',label:'Books & Education',value:'Books, stationery and educational products'},
+        {icon:'🎁',label:'Gifts & Handicrafts',value:'Gifts, handicrafts and handmade products'},
+      ]
+    }
+  )
+  setQR(['Something else — I\'ll type it'])
+}
+
+// Step 2: Hero — after business confirmed
+function showHeroStep() {
+  const suggestions = getTaglineSuggestions()
+  addMsg('ai',
+    `Great! Now let's set up your <strong>homepage headline</strong>. Pick one or type your own:`,
+    {type:'text_options', label:'Choose a tagline', options: suggestions}
+  )
+}
+
+function getTaglineSuggestions() {
+  const b = siteState.businessType.toLowerCase()
+  const n = siteState.storeName
+  if(b.includes('fashion')||b.includes('cloth')) return [
+    {main:`Style That Speaks for You`, sub:'Discover the latest trends'},
+    {main:`Fashion Forward, Always`, sub:'Premium quality at great prices'},
+    {main:`Wear Your Story`, sub:'Curated fashion for every occasion'},
+    {main:`${n} — Where Style Meets Comfort`, sub:'Shop the latest collection'},
+  ]
+  if(b.includes('electron')||b.includes('tech')) return [
+    {main:`Tech That Powers Your Life`, sub:'Latest gadgets, best prices'},
+    {main:`Future Is Here`, sub:'Cutting-edge electronics at your fingertips'},
+    {main:`Smarter Living Starts Here`, sub:'Top brands, unbeatable deals'},
+    {main:`${n} — Your Tech Destination`, sub:'Explore the world of technology'},
+  ]
+  if(b.includes('grocery')||b.includes('food')) return [
+    {main:`Fresh From Farm to Your Door`, sub:'Quality groceries delivered fast'},
+    {main:`Eat Fresh, Live Better`, sub:'Handpicked produce every day'},
+    {main:`Your Daily Essentials, Delivered`, sub:'Fresh groceries at doorstep prices'},
+    {main:`${n} — Fresh Every Day`, sub:'Because quality matters'},
+  ]
+  if(b.includes('beauty')||b.includes('skin')) return [
+    {main:`Glow Up, Every Day`, sub:'Premium beauty products you\'ll love'},
+    {main:`Your Skin Deserves the Best`, sub:'Natural ingredients, stunning results'},
+    {main:`Beauty Without Compromise`, sub:'Explore our curated collection'},
+    {main:`${n} — Radiance Starts Here`, sub:'Because you deserve to glow'},
+  ]
+  return [
+    {main:`Welcome to ${n}`, sub:'Discover amazing products at great prices'},
+    {main:`Quality You Can Trust`, sub:'Shop our curated collection today'},
+    {main:`Your One-Stop Shop`, sub:'Everything you need, all in one place'},
+    {main:`Best Deals. Best Quality.`, sub:'Shop smart, live better'},
+  ]
+}
+
+// Step 3: Products layout
+function showProductsStep() {
+  addMsg('ai',
+    `Looking great! How do you want to display your products?`,
+    {
+      type:'cards',
+      label:'Product grid layout',
+      options:[
+        {icon:'▦',label:'3 Columns',value:'3 columns - standard grid',desc:'Most popular'},
+        {icon:'▣',label:'4 Columns',value:'4 columns - compact grid',desc:'More products visible'},
+        {icon:'▤',label:'2 Columns',value:'2 columns - large cards',desc:'Bigger images'},
+        {icon:'☰',label:'List View',value:'list view - full width',desc:'Detailed listings'},
+      ]
+    }
+  )
+}
+
+// Step 4: Theme
+function showThemeStep() {
+  addMsg('ai',
+    `Your store is taking shape! 🎨 Pick a color theme:`,
+    {type:'theme_palette', label:'Choose your theme'}
+  )
+}
+
+// Step 5: Extras
+function showExtrasStep() {
+  selectedExtras = new Set(['testimonials','faq'])
+  addMsg('ai',
+    `Almost done! Select extra sections for your store:`,
+    {
+      type:'section_toggles',
+      label:'Toggle sections on/off',
+      options:[
+        {id:'testimonials', icon:'💬', name:'Customer Reviews', desc:'Show 3 star ratings', default:true},
+        {id:'about',        icon:'ℹ️', name:'About Us',         desc:'Your story section', default:false},
+        {id:'faq',          icon:'❓', name:'FAQ',              desc:'Common questions', default:true},
+        {id:'contact',      icon:'📞', name:'Contact Form',     desc:'Let customers reach you', default:false},
+        {id:'banner',       icon:'📣', name:'Promo Banner',     desc:'Discount / offer banner', default:false},
+      ]
+    }
+  )
+  setQR(['✅ Add these sections','⏭️ Skip extras'])
+}
+
+/* ══════════════════════════════════════════════
    CHAT UI
-══════════════════════════════════════════════════ */
-function addMsg(role, html, widget = null) {
+══════════════════════════════════════════════ */
+function addMsg(role, html, widget=null) {
   const msgs = document.getElementById('chat-messages')
   const wrap = document.createElement('div')
   wrap.className = `msg ${role}`
@@ -378,7 +578,7 @@ function addMsg(role, html, widget = null) {
   wrap.innerHTML = `
     <div class="msg-avatar">${role==='ai'?'🤖':'👤'}</div>
     <div class="msg-body">
-      <div class="msg-bubble">${html}${widget ? buildWidgetHTML(widget) : ''}</div>
+      <div class="msg-bubble">${html}${widget?buildWidgetHTML(widget):''}</div>
       <div class="msg-time">${now}</div>
     </div>`
   msgs.appendChild(wrap)
@@ -386,20 +586,22 @@ function addMsg(role, html, widget = null) {
 }
 
 function buildWidgetHTML(w) {
-  if (!w || w.type === 'none') return ''
+  if(!w||w.type==='none') return ''
   let h = `<div class="chat-widget">`
-  if (w.label) h += `<div class="widget-label">${w.label}</div>`
-  if (w.type === 'chips') {
+  if(w.label) h += `<div class="widget-label">${w.label}</div>`
+
+  if(w.type==='chips') {
     h += `<div class="widget-chips">`
-    ;(w.options||[]).forEach(o => {
-      const val = typeof o==='object' ? o.value : o
-      const lbl = typeof o==='object' ? o.label : o
+    ;(w.options||[]).forEach(o=>{
+      const val = typeof o==='object'?o.value:o
+      const lbl = typeof o==='object'?o.label:o
       h += `<div class="chip" onclick="chipClick(this,'${esc(val)}')">${lbl}</div>`
     })
     h += `</div>`
-  } else if (w.type === 'cards') {
+  }
+  else if(w.type==='cards') {
     h += `<div class="widget-cards">`
-    ;(w.options||[]).forEach(o => {
+    ;(w.options||[]).forEach(o=>{
       h += `<div class="wcard" onclick="chipClick(this,'${esc(o.value||o.label)}')">
         <div class="wcard-icon">${o.icon||'📦'}</div>
         <div class="wcard-label">${o.label}</div>
@@ -407,13 +609,47 @@ function buildWidgetHTML(w) {
       </div>`
     })
     h += `</div>`
-  } else if (w.type === 'color_chips') {
-    h += `<div class="color-chips">`
-    THEME_PALETTES.forEach((p,i) => {
-      h += `<div class="color-chip" style="background:${p.primary}" onclick="themeClick(${i})" title="${p.name}"></div>`
-    })
-    h += `</div><div style="font-size:10px;color:var(--text3);margin-top:18px">Tap a color to preview instantly</div>`
   }
+  else if(w.type==='theme_palette') {
+    h += `<div class="theme-palette">`
+    THEME_PALETTES.forEach((p,i)=>{
+      h += `<div class="tpal-row" onclick="themeClick(${i},this)" id="tpal_${i}">
+        <div class="tpal-swatch" style="background:${p.primary}"></div>
+        <div class="tpal-bg" style="background:${p.bg}"></div>
+        <div class="tpal-name">${p.emoji} ${p.name}</div>
+      </div>`
+    })
+    h += `</div>`
+  }
+  else if(w.type==='section_toggles') {
+    h += `<div class="section-toggles">`
+    ;(w.options||[]).forEach(o=>{
+      const isActive = o.default || selectedExtras.has(o.id)
+      if(isActive) selectedExtras.add(o.id)
+      h += `<div class="stgl ${isActive?'active':''}" id="stgl_${o.id}" onclick="toggleExtra('${o.id}',this)">
+        <div class="stgl-left">
+          <span class="stgl-icon">${o.icon}</span>
+          <div><div class="stgl-name">${o.name}</div><div class="stgl-desc">${o.desc}</div></div>
+        </div>
+        <div class="stgl-check">${isActive?'✓':''}</div>
+      </div>`
+    })
+    h += `</div>
+    <button class="confirm-btn" onclick="confirmExtras()">✅ Add selected sections →</button>`
+  }
+  else if(w.type==='text_options') {
+    h += `<div class="text-options">`
+    ;(w.options||[]).forEach((o,i)=>{
+      const val = typeof o==='object'?(o.main||o.value):o
+      const sub = typeof o==='object'?o.sub:''
+      h += `<div class="topt" onclick="textOptClick(this,'${esc(val)}','${esc(sub)}')">
+        <div class="topt-main">${typeof o==='object'?o.main:o}</div>
+        ${sub?`<div class="topt-sub">${sub}</div>`:''}
+      </div>`
+    })
+    h += `</div>`
+  }
+
   return h + `</div>`
 }
 
@@ -424,209 +660,413 @@ function showTyping() {
   d.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-body"><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`
   msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight
 }
-function removeTyping() { document.getElementById('typing-ind')?.remove() }
+function removeTyping(){ document.getElementById('typing-ind')?.remove() }
 
 function setQR(replies) {
   const qr = document.getElementById('quick-replies')
   qr.innerHTML = ''
-  ;(replies||[]).forEach(r => {
+  ;(replies||[]).forEach(r=>{
     const b = document.createElement('button')
     b.className = 'qr'; b.textContent = r
-    b.onclick = () => sendUserMsg(r)
+    b.onclick = ()=>sendUserMsg(r)
     qr.appendChild(b)
   })
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    WIDGET HANDLERS
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function chipClick(el, value) {
   el.closest('.widget-chips,.widget-cards')?.querySelectorAll('.chip,.wcard').forEach(c=>c.classList.remove('selected'))
   el.classList.add('selected')
-  setTimeout(() => sendUserMsg(value), 250)
+  log(`chip clicked: "${value}"`)
+  setTimeout(()=>sendUserMsg(value), 250)
 }
 
-function themeClick(idx) {
+function textOptClick(el, main, sub) {
+  el.closest('.text-options')?.querySelectorAll('.topt').forEach(t=>t.classList.remove('selected'))
+  el.classList.add('selected')
+  siteState.tagline = main
+  siteState.heroSubtext = sub
+  log(`tagline selected: "${main}"`)
+  // Immediately render + advance
+  buildSection('navbar',{})
+  buildSection('hero',{})
+  setTimeout(()=>sendUserMsg(main), 250)
+}
+
+function themeClick(idx, el) {
   const p = THEME_PALETTES[idx]
   Object.assign(siteState.theme, {primaryColor:p.primary,bgColor:p.bg,textColor:p.text,cardBg:p.card,navBg:p.nav})
-  document.querySelectorAll('.color-chip').forEach((c,i) => c.classList.toggle('selected', i===idx))
+  document.querySelectorAll('.tpal-row').forEach(r=>r.classList.remove('selected'))
+  el.classList.add('selected')
+  log(`theme selected: ${p.name} (primary:${p.primary} bg:${p.bg})`)
   renderPreview()
-  setTimeout(() => sendUserMsg(p.name + ' theme'), 300)
+  toast(`Theme: ${p.emoji} ${p.name}`, 'info')
+  setTimeout(()=>sendUserMsg(`${p.name} theme`), 300)
 }
 
-/* ══════════════════════════════════════════════════
+function toggleExtra(id, el) {
+  el.classList.toggle('active')
+  const check = el.querySelector('.stgl-check')
+  const isActive = el.classList.contains('active')
+  check.textContent = isActive ? '✓' : ''
+  if(isActive) selectedExtras.add(id)
+  else selectedExtras.delete(id)
+  log(`extra toggled: ${id} → ${isActive?'on':'off'}`)
+}
+
+function confirmExtras() {
+  const extras = [...selectedExtras]
+  log(`extras confirmed: ${extras.join(', ')}`)
+  extras.forEach(type=>buildSection(type,{}))
+  sendUserMsg(`Add sections: ${extras.join(', ')}`)
+}
+
+/* ══════════════════════════════════════════════
+   LOCAL FLOW HANDLER (handles most steps locally
+   without AI call, for speed & reliability)
+══════════════════════════════════════════════ */
+function handleLocalFlow(userMsg) {
+  const msg = userMsg.trim()
+
+  // STEP 0: Brand — capture store name
+  if(currentStep === 0) {
+    siteState.storeName = msg
+    siteState.storeSlug = msg.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
+    // Pick emoji based on name hints
+    siteState.logoEmoji = guessEmoji(msg)
+    log(`store name set: "${msg}" slug: "${siteState.storeSlug}" emoji: ${siteState.logoEmoji}`)
+    advanceStep(1)
+    buildSection('announcement',{})
+    showBusinessStep(msg)
+    return true
+  }
+
+  // STEP 1: Business type
+  if(currentStep === 1) {
+    siteState.businessType = msg
+    siteState.description = msg
+    log(`business type set: "${msg}"`)
+    advanceStep(2)
+    buildSection('navbar',{})
+    buildSection('trustbadges',{})
+    showHeroStep()
+    return true
+  }
+
+  // STEP 2: Hero tagline
+  if(currentStep === 2) {
+    if(!siteState.tagline) siteState.tagline = msg
+    if(!siteState.ctaText) siteState.ctaText = 'Shop Now'
+    log(`tagline set: "${siteState.tagline}"`)
+    advanceStep(3)
+    buildSection('hero',{})
+    buildSection('featured',{})
+    buildSection('categories',{})
+    showProductsStep()
+    return true
+  }
+
+  // STEP 3: Products layout
+  if(currentStep === 3) {
+    if(msg.includes('4')||msg.includes('four')||msg.toLowerCase().includes('compact')) siteState.theme.cols='4'
+    else if(msg.includes('2')||msg.includes('two')||msg.toLowerCase().includes('large')) siteState.theme.cols='2'
+    else if(msg.toLowerCase().includes('list')) siteState.theme.cols='1'
+    else siteState.theme.cols='3'
+    log(`columns set: ${siteState.theme.cols}`)
+    advanceStep(4)
+    renderPreview()
+    showThemeStep()
+    return true
+  }
+
+  // STEP 4: Theme — handled by themeClick(), but if user types
+  if(currentStep === 4) {
+    const tIdx = THEME_PALETTES.findIndex(p=>msg.toLowerCase().includes(p.name.toLowerCase()))
+    if(tIdx>=0) {
+      const p = THEME_PALETTES[tIdx]
+      Object.assign(siteState.theme,{primaryColor:p.primary,bgColor:p.bg,textColor:p.text,cardBg:p.card,navBg:p.nav})
+      renderPreview()
+      log(`theme from text: ${p.name}`)
+    }
+    advanceStep(5)
+    showExtrasStep()
+    return true
+  }
+
+  // STEP 5: Extras — handled by confirmExtras(), but text "skip" or "add"
+  if(currentStep === 5) {
+    if(msg.toLowerCase().includes('skip')||msg.toLowerCase().includes('done')||msg.toLowerCase().includes('no')) {
+      advanceStep(6)
+      buildSection('newsletter',{})
+      buildSection('footer',{})
+      showDoneStep()
+      return true
+    }
+    // User typed section names
+    const secNames = ['testimonials','about','faq','contact','banner']
+    secNames.forEach(s=>{ if(msg.toLowerCase().includes(s)) { selectedExtras.add(s); buildSection(s,{}) } })
+    advanceStep(6)
+    buildSection('newsletter',{})
+    buildSection('footer',{})
+    showDoneStep()
+    return true
+  }
+
+  return false // not handled locally — fall through to AI
+}
+
+function showDoneStep() {
+  addMsg('ai',
+    `🎉 <strong>Your store is ready!</strong><br><br>
+    Here's what we built:<br>
+    ${siteState.sections.map(s=>`• ${getSectionName(s.type)}`).join('<br>')}<br><br>
+    Hit <strong>Save & Publish</strong> to go live! 🚀`,
+    null
+  )
+  document.getElementById('publish-btn').disabled = false
+  setQR(['🔁 Change theme','✏️ Edit tagline','🚀 Publish now'])
+}
+
+function getSectionName(t){
+  return {navbar:'Navigation',hero:'Hero Banner',featured:'Products Grid',categories:'Categories',banner:'Promo Banner',testimonials:'Customer Reviews',newsletter:'Newsletter',footer:'Footer',about:'About Us',trustbadges:'Trust Badges',faq:'FAQ',contact:'Contact Form',announcement:'Announcement Bar'}[t]||t
+}
+
+function guessEmoji(name){
+  const n = name.toLowerCase()
+  if(n.includes('fashion')||n.includes('cloth')||n.includes('silk')||n.includes('wear')||n.includes('style')) return '👗'
+  if(n.includes('tech')||n.includes('electr')||n.includes('gadget')||n.includes('mobile')) return '📱'
+  if(n.includes('food')||n.includes('fresh')||n.includes('mart')||n.includes('grocery')||n.includes('farm')) return '🥦'
+  if(n.includes('beauty')||n.includes('glow')||n.includes('skin')||n.includes('cosmet')) return '💄'
+  if(n.includes('home')||n.includes('living')||n.includes('decor')||n.includes('furniture')) return '🏠'
+  if(n.includes('sport')||n.includes('fit')||n.includes('gym')||n.includes('zone')) return '⚽'
+  if(n.includes('book')||n.includes('read')||n.includes('edu')||n.includes('learn')) return '📚'
+  if(n.includes('gift')||n.includes('craft')||n.includes('handmade')) return '🎁'
+  if(n.includes('jewel')||n.includes('gold')||n.includes('diamond')) return '💎'
+  return '🛍️'
+}
+
+function advanceStep(step) {
+  currentStep = step
+  updateSteps()
+  if(siteState.storeSlug) document.getElementById('preview-url-text').textContent = `ekart.aasaitech.in/${siteState.storeSlug}`
+}
+
+function updateSteps() {
+  for(let i=0;i<=6;i++){
+    const d=document.getElementById('sp'+i)
+    const l=document.getElementById('sl'+i)
+    if(!d) continue
+    if(i<currentStep){ d.className='step-dot done'; if(l){l.className='step-lbl done'} }
+    else if(i===currentStep){ d.className='step-dot active'; if(l){l.className='step-lbl active'} }
+    else{ d.className='step-dot'; if(l){l.className='step-lbl'} }
+  }
+}
+
+/* ══════════════════════════════════════════════
    SEND / RECEIVE
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 async function sendUserMsg(text) {
-  if (!text.trim() || isThinking) return
-  document.getElementById('quick-replies').innerHTML = ''
+  if(!text.trim()||isThinking) return
+  document.getElementById('quick-replies').innerHTML=''
   addMsg('user', esc(text))
-  document.getElementById('chat-input').value = ''
+  document.getElementById('chat-input').value=''
   autoResize(document.getElementById('chat-input'))
   chatHistory.push({role:'user', content:text})
+  log(`user: "${text.slice(0,80)}"`)
+
+  // Try local flow first — fast & reliable
+  const handledLocally = handleLocalFlow(text)
+  if(handledLocally) {
+    chatHistory.push({role:'assistant', content:`[local flow — step ${currentStep}]`})
+    log(`handled locally — step now: ${STEPS[currentStep]}`, 'ok')
+    return
+  }
+
+  // Fallback to AI for freeform messages
+  log('falling back to AI call...')
   await callAI(text)
 }
 
 function sendMessage() {
   const v = document.getElementById('chat-input').value.trim()
-  if (v) sendUserMsg(v)
+  if(v) sendUserMsg(v)
 }
-function handleKey(e) {
-  if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); sendMessage() }
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage() }
 }
-function autoResize(el) {
-  el.style.height = 'auto'
-  el.style.height = Math.min(el.scrollHeight, 96) + 'px'
+function autoResize(el){
+  el.style.height='auto'
+  el.style.height=Math.min(el.scrollHeight,96)+'px'
 }
 
-/* ══════════════════════════════════════════════════
-   API CALL — same apiFetch pattern as ai.html, products.html
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   AI API CALL (fallback for freeform text)
+══════════════════════════════════════════════ */
 async function callAI(userMsg) {
-  isThinking = true
-  document.getElementById('send-btn').disabled = true
+  isThinking=true
+  document.getElementById('send-btn').disabled=true
   showTyping()
+  log(`calling /ai/website-builder with msg: "${userMsg.slice(0,60)}"`)
 
   try {
-    // Exact same pattern as: apiFetch('/ai/store-setup', { method:'POST', body: JSON.stringify({...}) })
+    const payload = {
+      message: userMsg,
+      history: chatHistory.slice(-10),
+      system_prompt: buildSystemPrompt(),
+      site_state: {
+        storeName: siteState.storeName,
+        businessType: siteState.businessType,
+        currentStep: STEPS[currentStep]
+      }
+    }
+    log(`payload size: ${JSON.stringify(payload).length} chars`)
+
     const r = await apiFetch('/ai/website-builder', {
-      method: 'POST',
-      body: JSON.stringify({
-        message: userMsg,
-        history: chatHistory.slice(-14),        // last 7 turns context
-        system_prompt: buildSystemPrompt(),
-        site_state: siteState
-      })
+      method:'POST',
+      body: JSON.stringify(payload)
     })
 
     removeTyping()
+    log(`AI response received, length: ${(r.reply||'').length}`, 'ok')
+    processAIResponse(r.reply || r.text || r.response || '')
 
-    // Backend returns { reply: "..." } — same shape as other /ai/ endpoints
-    const fullText = r.reply || r.text || r.response || JSON.stringify(r)
-    processResponse(fullText)
-
-  } catch (e) {
+  } catch(e) {
     removeTyping()
-    console.error('AI builder error:', e)
-    addMsg('ai', `Sorry, I had a hiccup! Please try again 😅<br><small style="opacity:.5">${esc(e.message)}</small>`)
-    setQR(['Try again', 'Refresh page'])
+    log(`AI call FAILED: ${e.message}`, 'err')
+    addMsg('ai', `Hmm, I had a hiccup! Let's keep going — use the buttons above 😊<br><small style="opacity:.5">${esc(e.message)}</small>`)
+    // Recover by showing the appropriate step widget
+    recoverStep()
   }
 
-  isThinking = false
-  document.getElementById('send-btn').disabled = false
+  isThinking=false
+  document.getElementById('send-btn').disabled=false
 }
 
-/* ══════════════════════════════════════════════════
-   PROCESS RESPONSE
-══════════════════════════════════════════════════ */
-function processResponse(text) {
-  // Parse <DATA> JSON block
+function recoverStep() {
+  log(`recovering UI for step: ${STEPS[currentStep]}`)
+  if(currentStep===0) showBrandStep()
+  else if(currentStep===1) showBusinessStep(siteState.storeName||'your store')
+  else if(currentStep===2) showHeroStep()
+  else if(currentStep===3) showProductsStep()
+  else if(currentStep===4) showThemeStep()
+  else if(currentStep===5) showExtrasStep()
+  else showDoneStep()
+}
+
+/* ══════════════════════════════════════════════
+   PROCESS AI RESPONSE
+══════════════════════════════════════════════ */
+function processAIResponse(text) {
+  if(!text){ log('empty AI response','err'); return }
+
   let parsed = null
   const match = text.match(/<DATA>([\s\S]*?)<\/DATA>/)
-  if (match) {
-    try { parsed = JSON.parse(match[1].trim()) } catch(e) { console.warn('JSON parse fail:', e) }
+  if(match) {
+    try {
+      parsed = JSON.parse(match[1].trim())
+      log(`AI data parsed: step=${parsed.step} lang=${parsed.detectedLang}`, 'ok')
+    } catch(e) {
+      log(`JSON parse error in AI response: ${e.message}`, 'err')
+    }
+  } else {
+    log('No <DATA> block in AI response','err')
   }
 
-  // Message = everything after </DATA>
   const msgText = text.replace(/<DATA>[\s\S]*?<\/DATA>/g,'').trim()
 
   // Apply extracted data
-  if (parsed?.extracted) {
+  if(parsed?.extracted) {
     const ex = parsed.extracted
-    if (ex.storeName)    siteState.storeName    = ex.storeName
-    if (ex.storeSlug)    siteState.storeSlug    = ex.storeSlug.toLowerCase().replace(/\s+/g,'-')
-    if (ex.businessType) siteState.businessType = ex.businessType
-    if (ex.description)  siteState.description  = ex.description
-    if (ex.logoEmoji)    siteState.logoEmoji    = ex.logoEmoji
-    if (ex.tagline)      siteState.tagline      = ex.tagline
-    if (ex.heroSubtext)  siteState.heroSubtext  = ex.heroSubtext
-    if (ex.ctaText)      siteState.ctaText      = ex.ctaText
-    if (typeof ex.themeIndex === 'number' && THEME_PALETTES[ex.themeIndex]) {
-      const p = THEME_PALETTES[ex.themeIndex]
-      Object.assign(siteState.theme,{primaryColor:p.primary,bgColor:p.bg,textColor:p.text,cardBg:p.card,navBg:p.nav})
-    }
+    if(ex.storeName)    { siteState.storeName=ex.storeName; log(`extracted storeName: ${ex.storeName}`) }
+    if(ex.storeSlug)    siteState.storeSlug=ex.storeSlug.toLowerCase().replace(/\s+/g,'-')
+    if(ex.businessType) { siteState.businessType=ex.businessType; log(`extracted businessType: ${ex.businessType}`) }
+    if(ex.description)  siteState.description=ex.description
+    if(ex.logoEmoji)    siteState.logoEmoji=ex.logoEmoji
+    if(ex.tagline)      { siteState.tagline=ex.tagline; log(`extracted tagline: ${ex.tagline}`) }
+    if(ex.heroSubtext)  siteState.heroSubtext=ex.heroSubtext
+    if(ex.ctaText)      siteState.ctaText=ex.ctaText
   }
 
-  // Language
-  if (parsed?.detectedLang) {
+  if(parsed?.detectedLang) {
     document.getElementById('lang-label').textContent = getLangName(parsed.detectedLang)
   }
 
-  // Step advance
-  if (parsed?.step) {
+  if(parsed?.step) {
     const idx = STEPS.indexOf(parsed.step)
-    if (idx >= 0 && idx >= currentStep) { currentStep = idx; updateSteps() }
+    if(idx>=0 && idx>=currentStep) { advanceStep(idx) }
   }
 
-  // Build sections
-  ;(parsed?.sectionsToBuild || []).forEach(type => buildSection(type, parsed?.extracted || {}))
+  ;(parsed?.buildSections||[]).forEach(type=>{
+    log(`AI triggered buildSection: ${type}`)
+    buildSection(type,parsed?.extracted||{})
+  })
 
-  // Show message
-  if (msgText) {
-    addMsg('ai', msgText.replace(/\n/g,'<br>'), parsed?.widget || null)
+  if(msgText) {
+    addMsg('ai', msgText.replace(/\n/g,'<br>'))
     chatHistory.push({role:'assistant', content:text})
   }
 
-  setQR(parsed?.quickReplies || [])
-
-  if (parsed?.step === 'done') {
-    document.getElementById('publish-btn').disabled = false
-    renderPreview()
-  }
+  setQR(parsed?.quickReplies||[])
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    SECTION BUILDING
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function buildSection(type, extracted) {
+  log(`building section: ${type}`)
   const id = `sec_${type}_${Date.now()}`
   const T = siteState.theme
   const isLight = isLightColor(T.bgColor)
+  const txtC = isLight ? T.bgColor : 'white'
   let data = {}
 
   switch(type) {
-    case 'navbar':
-      data = {logoText:siteState.storeName||'My Store',logoEmoji:siteState.logoEmoji||'🛍️',link1Text:'Home',link1Url:'#',link2Text:'Shop',link2Url:'#products',link3Text:'About',link3Url:'#about',link4Text:'Contact',link4Url:'#contact'}; break
-    case 'hero':
-      data = {heading:siteState.tagline||`Welcome to ${siteState.storeName||'Our Store'}`,subtext:siteState.heroSubtext||siteState.description||'Discover amazing products at unbeatable prices.',ctaText:siteState.ctaText||'Shop Now',ctaLink:'#products',bgColor:T.primaryColor}; break
-    case 'featured':
-      data = {title:extracted.productsTitle||'Featured Products',subtitle:'Handpicked just for you',count:extracted.productCount||'8',columns:T.cols||'3',btnText:'Add to Cart',viewAllText:'View All',showOldPrice:'yes',showBadge:'yes',cardStyle:T.cardStyle,cardSize:T.cardSize}; break
-    case 'categories':
-      data = {title:'Browse by Category',subtitle:'Find what you love',columns:'4',style:'image',showCount:'yes'}; break
-    case 'banner':
-      data = {heading:extracted.bannerHeading||'Limited Time Offer',subtext:extracted.bannerSubtext||'Get 20% off your first order.',ctaText:'Claim Offer',bgColor:T.primaryColor,couponCode:extracted.couponCode||'SAVE20'}; break
-    case 'testimonials':
-      data = {title:'What Our Customers Say',t1name:'Priya S.',t1text:'Absolutely love this store! Amazing quality.',t1stars:'5',t2name:'Rahul K.',t2text:'Best shopping experience. Fast delivery!',t2stars:'5',t3name:'Anita M.',t3text:'Great products and excellent service.',t3stars:'5',columns:'3'}; break
-    case 'newsletter':
-      data = {heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address',btnColor:T.primaryColor}; break
-    case 'trustbadges':
-      data = {badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}; break
-    case 'about':
-      data = {title:`About ${siteState.storeName||'Us'}`,body:siteState.description||'We started with a simple mission: to bring quality products to every household.',ctaText:'Learn More',layout:'no-image'}; break
-    case 'faq':
-      data = {title:'Frequently Asked Questions',q1:'How long does shipping take?',a1:'Typically 3–7 business days.',q2:'What is your return policy?',a2:'30-day returns guaranteed.',q3:'Do you offer Cash on Delivery?',a3:'Yes! COD available across India.',q4:'How do I track my order?',a4:'You will receive a tracking link via SMS/Email.'}; break
-    case 'contact':
-      data = {title:'Get in Touch',subtitle:"We'd love to hear from you!",btnText:'Send Message',email:extracted.email||'',phone:extracted.phone||''}; break
-    case 'footer':
-      data = {logoText:siteState.storeName||'My Store',tagline:(siteState.description||'Quality products, delivered to your door.').slice(0,80),footerText:`© ${new Date().getFullYear()} ${siteState.storeName||'My Store'}. All rights reserved.`,col1Title:'Quick Links',col1Links:'Home,Shop,About,Contact',col2Title:'Customer Care',col2Links:'Shipping Policy,Returns,FAQ,Track Order',showSocial:'yes',bgColor:T.navBg,textColor:T.textColor}; break
     case 'announcement':
-      data = {text:T.announcementText,bgColor:T.primaryColor,textColor:'#ffffff'}; break
+      data={text:T.announcementText,bgColor:T.primaryColor,textColor:'#ffffff'}; break
+    case 'navbar':
+      data={logoText:siteState.storeName||'My Store',logoEmoji:siteState.logoEmoji||'🛍️',link1Text:'Home',link1Url:'#',link2Text:'Shop',link2Url:'#products',link3Text:'About',link3Url:'#about',link4Text:'Contact',link4Url:'#contact'}; break
+    case 'hero':
+      data={heading:siteState.tagline||`Welcome to ${siteState.storeName||'Our Store'}`,subtext:siteState.heroSubtext||siteState.description||'Discover amazing products at unbeatable prices.',ctaText:siteState.ctaText||'Shop Now',ctaLink:'#products',bgColor:T.primaryColor}; break
+    case 'featured':
+      data={title:'Featured Products',subtitle:'Handpicked just for you',count:'8',columns:T.cols||'3',btnText:'Add to Cart',viewAllText:'View All',showOldPrice:'yes',showBadge:'yes',cardStyle:T.cardStyle,cardSize:T.cardSize}; break
+    case 'categories':
+      data={title:'Browse by Category',subtitle:'Find what you love',columns:'4',style:'image',showCount:'yes'}; break
+    case 'banner':
+      data={heading:'Limited Time Offer',subtext:'Get 20% off your first order.',ctaText:'Claim Offer',bgColor:T.primaryColor,couponCode:'SAVE20'}; break
+    case 'testimonials':
+      data={title:'What Our Customers Say',t1name:'Priya S.',t1text:'Absolutely love this store! Amazing quality.',t1stars:'5',t2name:'Rahul K.',t2text:'Best shopping experience. Fast delivery!',t2stars:'5',t3name:'Anita M.',t3text:'Great products and excellent service.',t3stars:'5',columns:'3'}; break
+    case 'newsletter':
+      data={heading:'Stay in the loop',subtext:'Get exclusive deals and offers straight to your inbox.',btnText:'Subscribe',inputPlaceholder:'Enter your email address',btnColor:T.primaryColor}; break
+    case 'trustbadges':
+      data={badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}; break
+    case 'about':
+      data={title:`About ${siteState.storeName||'Us'}`,body:siteState.description||'We started with a simple mission: to bring quality products to every household.',ctaText:'Learn More',layout:'no-image'}; break
+    case 'faq':
+      data={title:'Frequently Asked Questions',q1:'How long does shipping take?',a1:'Typically 3–7 business days.',q2:'What is your return policy?',a2:'30-day returns guaranteed.',q3:'Do you offer Cash on Delivery?',a3:'Yes! COD available across India.',q4:'How do I track my order?',a4:'You will receive a tracking link via SMS/Email.'}; break
+    case 'contact':
+      data={title:'Get in Touch',subtitle:"We'd love to hear from you!",btnText:'Send Message',email:'',phone:''}; break
+    case 'footer':
+      data={logoText:siteState.storeName||'My Store',tagline:(siteState.description||'Quality products, delivered to your door.').slice(0,80),footerText:`© ${new Date().getFullYear()} ${siteState.storeName||'My Store'}. All rights reserved.`,col1Title:'Quick Links',col1Links:'Home,Shop,About,Contact',col2Title:'Customer Care',col2Links:'Shipping Policy,Returns,FAQ,Track Order',showSocial:'yes',bgColor:T.navBg,textColor:T.textColor}; break
   }
 
-  const ORDER = ['announcement','navbar','hero','trustbadges','featured','categories','banner','testimonials','about','newsletter','faq','contact','footer']
-  const pos = ORDER.indexOf(type)
-  const section = {id, type, enabled:true, data}
+  const ORDER=['announcement','navbar','hero','trustbadges','featured','categories','banner','testimonials','about','newsletter','faq','contact','footer']
+  const pos=ORDER.indexOf(type)
+  const section={id,type,enabled:true,data}
 
-  const existing = siteState.sections.findIndex(s => s.type===type)
-  if (existing >= 0) {
-    siteState.sections[existing] = section
+  const existing=siteState.sections.findIndex(s=>s.type===type)
+  if(existing>=0) {
+    siteState.sections[existing]=section
+    log(`section updated: ${type}`)
   } else {
-    let at = siteState.sections.length
-    for (let i = siteState.sections.length - 1; i >= 0; i--) {
-      if (ORDER.indexOf(siteState.sections[i].type) <= pos) { at = i+1; break }
-      at = i
+    let at=siteState.sections.length
+    for(let i=siteState.sections.length-1;i>=0;i--){
+      if(ORDER.indexOf(siteState.sections[i].type)<=pos){at=i+1;break}
+      at=i
     }
-    siteState.sections.splice(at, 0, section)
+    siteState.sections.splice(at,0,section)
+    log(`section inserted at ${at}: ${type}`)
   }
 
   renderPreview()
@@ -636,164 +1076,191 @@ function buildSection(type, extracted) {
 
 function updateBuiltBar() {
   const bar = document.getElementById('built-bar')
-  if (!siteState.sections.length) { bar.style.display='none'; return }
+  if(!siteState.sections.length){bar.style.display='none';return}
   bar.style.display='flex'
-  const icons = {navbar:'🧭',hero:'🌅',featured:'🛍️',categories:'📂',banner:'📣',testimonials:'💬',newsletter:'📧',footer:'🔗',about:'ℹ️',trustbadges:'🛡️',faq:'❓',contact:'📞',announcement:'📢'}
-  bar.innerHTML = `<span style="font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap;margin-right:2px">Built:</span>` +
+  const icons={navbar:'🧭',hero:'🌅',featured:'🛍️',categories:'📂',banner:'📣',testimonials:'💬',newsletter:'📧',footer:'🔗',about:'ℹ️',trustbadges:'🛡️',faq:'❓',contact:'📞',announcement:'📢'}
+  bar.innerHTML=`<span style="font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap;margin-right:2px">Built:</span>`+
     siteState.sections.map(s=>`<div class="built-pill">${icons[s.type]||'📦'} ${s.type}</div>`).join('')
 }
 
 function showBuiltToast(type) {
-  const names = {navbar:'Navbar',hero:'Hero',featured:'Products',categories:'Categories',banner:'Banner',testimonials:'Testimonials',newsletter:'Newsletter',footer:'Footer',about:'About',trustbadges:'Trust Badges',faq:'FAQ',contact:'Contact',announcement:'Announcement'}
-  document.getElementById('built-toast-msg').textContent = `${names[type]||type} section added!`
-  const t = document.getElementById('built-toast')
+  const names={navbar:'Navbar',hero:'Hero',featured:'Products',categories:'Categories',banner:'Banner',testimonials:'Reviews',newsletter:'Newsletter',footer:'Footer',about:'About',trustbadges:'Trust Badges',faq:'FAQ',contact:'Contact',announcement:'Announcement'}
+  document.getElementById('built-toast-msg').textContent=`${names[type]||type} added!`
+  const t=document.getElementById('built-toast')
   t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2200)
+  setTimeout(()=>t.classList.remove('show'),2200)
 }
 
-function updateSteps() {
-  for (let i = 0; i <= 6; i++) {
-    const d = document.getElementById('sp'+i)
-    if (!d) continue
-    if (i < currentStep) d.className = 'step-dot done'
-    else if (i === currentStep) d.className = 'step-dot active'
-    else d.className = 'step-dot'
-  }
-}
-
-/* ══════════════════════════════════════════════════
-   PREVIEW RENDER
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   PREVIEW RENDER — FIXED
+══════════════════════════════════════════════ */
 function renderPreview() {
-  const empty = document.getElementById('preview-empty')
   const shell = document.getElementById('device-shell')
-  if (!siteState.sections.length || !shell) { if(empty) empty.style.display=''; return }
-  if (empty) empty.style.display = 'none'
+  const empty = document.getElementById('preview-empty')
 
-  const isMobile = currentDevice === 'mobile'
+  if(!shell) {
+    log('renderPreview: device-shell not found!', 'err')
+    return
+  }
+
+  if(!siteState.sections.length) {
+    if(empty) empty.style.display='flex'
+    log('renderPreview: no sections yet')
+    return
+  }
+
+  // Hide empty state
+  if(empty) empty.style.display='none'
+
+  const isMobile = currentDevice==='mobile'
+  const isTablet = currentDevice==='tablet'
   const T = siteState.theme
   const isLight = isLightColor(T.bgColor)
-  const borderRgb = isLight ? '0,0,0' : '255,255,255'
+  const borderRgb = isLight?'0,0,0':'255,255,255'
   const btnRadius = T.btnStyle==='pill'?'999px':T.btnStyle==='square'?'3px':(T.radius||'12px')
   const fontEnc = encodeURIComponent(T.font||'Outfit')
-  const txtC = isLight ? T.bgColor : 'white'
+  const txtC = isLight?T.bgColor:'white'
 
-  const sectHTML = siteState.sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile,T,btnRadius,borderRgb,isLight,txtC)).join('\n')
+  const sectHTML = siteState.sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile||isTablet,T,btnRadius,borderRgb,isLight,txtC)).join('\n')
 
   const html = `<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'${T.font||'Outfit'}',sans-serif;background:${T.bgColor};color:${T.textColor}}
+body{font-family:'${T.font||'Outfit'}',sans-serif;background:${T.bgColor};color:${T.textColor};min-height:100vh}
 :root{--primary:${T.primaryColor};--bg:${T.bgColor};--text:${T.textColor};--card-bg:${T.cardBg};--nav-bg:${T.navBg};--radius:${T.radius};--border:rgba(${borderRgb},.1);--border2:rgba(${borderRgb},.15)}
 a{text-decoration:none;color:inherit}
 .btn-cta{display:inline-block;background:var(--primary);color:${txtC};padding:12px 28px;border-radius:${btnRadius};font-weight:700;font-size:14px;border:none;cursor:pointer}
 .btn-white{display:inline-block;background:white;padding:12px 28px;border-radius:${btnRadius};font-weight:700;font-size:14px;border:none;cursor:pointer}
 .ann{background:var(--primary);color:${txtC};text-align:center;padding:8px 16px;font-size:13px;font-weight:600}
-.nav{background:var(--nav-bg);border-bottom:1px solid var(--border);padding:0 ${isMobile?'16px':'28px'};height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.nav-logo{font-size:20px;font-weight:900;display:flex;align-items:center;gap:8px}
-.nav-links{display:flex;gap:20px;flex:1;margin-left:8px}
+.nav{background:var(--nav-bg);border-bottom:1px solid var(--border);padding:0 ${isMobile?'14px':'28px'};height:58px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:18px;font-weight:900;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.nav-links{display:flex;gap:18px;flex:1;margin-left:8px}
 .nav-links a{font-size:13px;font-weight:600;opacity:.7}
-.nav-cta{background:var(--primary);color:${txtC};padding:7px 18px;border-radius:${btnRadius};font-size:13px;font-weight:700;white-space:nowrap}
-.hero{padding:${isMobile?'52px 20px':'88px 40px'};text-align:center;background:linear-gradient(135deg,${T.primaryColor}22,${T.bgColor} 70%)}
-.hero h1{font-size:${isMobile?'28px':'50px'};font-weight:900;margin-bottom:16px;line-height:1.12}
-.hero p{font-size:${isMobile?'14px':'17px'};opacity:.7;max-width:520px;margin:0 auto 28px;line-height:1.65}
-.sec{padding:${isMobile?'32px 16px':'56px 40px'}}
-.sec-title{font-size:${isMobile?'20px':'26px'};font-weight:900;margin-bottom:6px}
-.sec-sub{font-size:${isMobile?'13px':'15px'};opacity:.6;margin-bottom:22px}
-.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.nav-cta{background:var(--primary);color:${txtC};padding:7px 16px;border-radius:${btnRadius};font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.hero{padding:${isMobile?'48px 16px':'80px 40px'};text-align:center;background:linear-gradient(135deg,${T.primaryColor}22,${T.bgColor} 70%)}
+.hero h1{font-size:${isMobile?'26px':'48px'};font-weight:900;margin-bottom:14px;line-height:1.12}
+.hero p{font-size:${isMobile?'13px':'16px'};opacity:.7;max-width:500px;margin:0 auto 26px;line-height:1.65}
+.sec{padding:${isMobile?'28px 14px':'52px 40px'}}
+.sec-title{font-size:${isMobile?'18px':'24px'};font-weight:900;margin-bottom:5px}
+.sec-sub{font-size:${isMobile?'12px':'14px'};opacity:.6;margin-bottom:20px}
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
 .view-all{font-size:13px;font-weight:700;color:var(--primary)}
-.pgrid{display:grid;gap:14px;grid-template-columns:repeat(var(--cols,3),1fr)}
+.pgrid{display:grid;gap:12px;grid-template-columns:repeat(var(--cols,3),1fr)}
 .tc{display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;background:var(--card-bg);border:1px solid var(--border);cursor:pointer;transition:transform .2s,box-shadow .2s}
 .tc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.tc-img{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--border)}
+.tc-img{position:relative;aspect-ratio:3/4;overflow:hidden}
 .tc-img img{width:100%;height:100%;object-fit:cover}
-.tc-badge{position:absolute;top:7px;left:7px;background:var(--primary);color:${txtC};font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px}
-.tc-info{padding:10px 12px 6px}
-.tc-cat{font-size:9.5px;opacity:.5;font-weight:700;text-transform:uppercase;margin-bottom:3px}
-.tc-name{font-size:12.5px;font-weight:700;margin-bottom:5px}
-.tc-prow{display:flex;align-items:center;gap:5px}
-.tc-price{font-size:14px;font-weight:900;color:var(--primary)}
-.tc-old{font-size:11px;opacity:.4;text-decoration:line-through}
-.tc-disc{font-size:9.5px;font-weight:800;color:#22c55e}
-.tc-btnw{padding:5px 12px 12px}
-.tc-btn{width:100%;padding:9px;background:var(--primary);color:${txtC};border:none;border-radius:${btnRadius};font-size:11.5px;font-weight:700;cursor:pointer}
-.cgrid{display:grid;gap:12px}
+.tc-badge{position:absolute;top:7px;left:7px;background:var(--primary);color:${txtC};font-size:9px;font-weight:800;padding:3px 8px;border-radius:999px}
+.tc-info{padding:9px 11px 5px}
+.tc-cat{font-size:9px;opacity:.5;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.tc-name{font-size:12px;font-weight:700;margin-bottom:5px;line-height:1.3}
+.tc-prow{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.tc-price{font-size:13px;font-weight:900;color:var(--primary)}
+.tc-old{font-size:10px;opacity:.4;text-decoration:line-through}
+.tc-disc{font-size:9px;font-weight:800;color:#22c55e}
+.tc-btnw{padding:5px 11px 11px}
+.tc-btn{width:100%;padding:8px;background:var(--primary);color:${txtC};border:none;border-radius:${btnRadius};font-size:11px;font-weight:700;cursor:pointer}
+.cgrid{display:grid;gap:10px}
 .ccard{position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;border:1px solid var(--border)}
 .cimg{aspect-ratio:1/1;overflow:hidden}
 .cimg img{width:100%;height:100%;object-fit:cover}
-.cinfo{position:absolute;bottom:0;left:0;right:0;padding:14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.68))}
-.cname{font-size:14px;font-weight:800;color:white}
-.ccount{font-size:11px;color:rgba(255,255,255,.6)}
-.banner{padding:${isMobile?'44px 20px':'64px 40px'};text-align:center}
-.banner h2{font-size:${isMobile?'24px':'34px'};font-weight:900;margin-bottom:8px;color:white}
-.banner p{font-size:${isMobile?'13px':'15px'};opacity:.85;margin-bottom:16px;color:white}
-.coupon{display:inline-block;background:rgba(255,255,255,.2);padding:6px 18px;border-radius:999px;font-size:14px;font-weight:800;margin-bottom:20px;color:white}
-.tmns{padding:${isMobile?'32px 16px':'56px 40px'};background:var(--card-bg)}
-.tgrid{display:grid;gap:14px}
-.tcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
-.tstars{color:#f59e0b;font-size:15px;margin-bottom:7px}
-.ttext{font-size:13.5px;line-height:1.65;opacity:.8;font-style:italic;margin-bottom:12px}
-.tauthor{display:flex;align-items:center;gap:9px}
-.tavatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${txtC}}
-.tname{font-size:12.5px;font-weight:700}
-.nltr{padding:${isMobile?'44px 20px':'64px 40px'};text-align:center;background:var(--card-bg)}
-.nltr h2{font-size:${isMobile?'22px':'28px'};font-weight:900;margin-bottom:7px}
-.nltr p{opacity:.65;margin-bottom:22px;font-size:14px}
-.nform{display:flex;gap:9px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center}
-.ninput{flex:1;min-width:190px;padding:11px 15px;border-radius:${btnRadius};border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none;font-family:inherit}
-.trust{padding:${isMobile?'24px 16px':'36px 40px'}}
-.trgrid{display:grid;gap:14px}
-.tritem{display:flex;align-items:center;gap:12px}
-.tricon{font-size:26px}
-.trlbl{font-size:13.5px;font-weight:700}
-.trsub{font-size:11.5px;opacity:.5}
-.about{padding:${isMobile?'32px 16px':'56px 40px'}}
-.faq{padding:${isMobile?'32px 16px':'56px 40px'}}
-.faqitem{border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:9px}
-.faqq{font-size:13.5px;font-weight:700;margin-bottom:5px}
-.faqa{font-size:13px;opacity:.65;line-height:1.6}
-.ctact{padding:${isMobile?'32px 16px':'56px 40px'}}
-.cinput{width:100%;background:var(--card-bg);border:1.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;color:var(--text);font-family:inherit;outline:none;margin-bottom:9px}
-.ctarea{min-height:72px;resize:vertical}
-.footer{background:var(--nav-bg);padding:${isMobile?'32px 16px 20px':'48px 40px 24px'};border-top:1px solid var(--border)}
-.ftop{display:grid;grid-template-columns:${isMobile?'1fr':'1.5fr 1fr 1fr'};gap:28px;margin-bottom:24px}
-.flogo{font-size:20px;font-weight:900;margin-bottom:7px}
-.ftagline{font-size:13px;opacity:.55;line-height:1.6;margin-bottom:10px}
-.fct{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.5;margin-bottom:10px}
-.fcl{display:flex;flex-direction:column;gap:7px}
-.fcl a{font-size:12.5px;opacity:.6;cursor:pointer}
-.fbot{border-top:1px solid var(--border);padding-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.fcopy{font-size:11.5px;opacity:.45}
-.fsoc{display:flex;gap:7px}
-.sb{width:32px;height:32px;border-radius:7px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer}
+.cinfo{position:absolute;bottom:0;left:0;right:0;padding:12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.cname{font-size:13px;font-weight:800;color:white}
+.ccount{font-size:10px;color:rgba(255,255,255,.6)}
+.banner{padding:${isMobile?'40px 16px':'60px 40px'};text-align:center}
+.banner h2{font-size:${isMobile?'22px':'32px'};font-weight:900;margin-bottom:8px;color:white}
+.banner p{font-size:${isMobile?'13px':'15px'};opacity:.85;margin-bottom:14px;color:white}
+.coupon{display:inline-block;background:rgba(255,255,255,.2);padding:5px 16px;border-radius:999px;font-size:13px;font-weight:800;margin-bottom:18px;color:white}
+.tmns{padding:${isMobile?'28px 14px':'52px 40px'};background:var(--card-bg)}
+.tgrid{display:grid;gap:12px}
+.tcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.tstars{color:#f59e0b;font-size:14px;margin-bottom:6px}
+.ttext{font-size:13px;line-height:1.6;opacity:.8;font-style:italic;margin-bottom:10px}
+.tauthor{display:flex;align-items:center;gap:8px}
+.tavatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:${txtC}}
+.tname{font-size:12px;font-weight:700}
+.nltr{padding:${isMobile?'40px 16px':'60px 40px'};text-align:center;background:var(--card-bg)}
+.nltr h2{font-size:${isMobile?'20px':'26px'};font-weight:900;margin-bottom:7px}
+.nltr p{opacity:.65;margin-bottom:20px;font-size:13px}
+.nform{display:flex;gap:8px;max-width:400px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.ninput{flex:1;min-width:180px;padding:10px 14px;border-radius:${btnRadius};border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.trust{padding:${isMobile?'20px 14px':'32px 40px'}}
+.trgrid{display:grid;gap:12px}
+.tritem{display:flex;align-items:center;gap:10px}
+.tricon{font-size:24px}
+.trlbl{font-size:13px;font-weight:700}
+.trsub{font-size:11px;opacity:.5}
+.about{padding:${isMobile?'28px 14px':'52px 40px'}}
+.faq{padding:${isMobile?'28px 14px':'52px 40px'}}
+.faqitem{border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:8px}
+.faqq{font-size:13px;font-weight:700;margin-bottom:4px}
+.faqa{font-size:12.5px;opacity:.65;line-height:1.6}
+.ctact{padding:${isMobile?'28px 14px':'52px 40px'}}
+.cinput{width:100%;background:var(--card-bg);border:1.5px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;margin-bottom:8px}
+.ctarea{min-height:68px;resize:vertical}
+.footer{background:var(--nav-bg);padding:${isMobile?'28px 14px 16px':'44px 40px 22px'};border-top:1px solid var(--border)}
+.ftop{display:grid;grid-template-columns:${isMobile?'1fr':'1.5fr 1fr 1fr'};gap:24px;margin-bottom:22px}
+.flogo{font-size:18px;font-weight:900;margin-bottom:6px}
+.ftagline{font-size:12px;opacity:.55;line-height:1.6;margin-bottom:9px}
+.fct{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.5;margin-bottom:9px}
+.fcl{display:flex;flex-direction:column;gap:6px}
+.fcl a{font-size:12px;opacity:.6;cursor:pointer}
+.fbot{border-top:1px solid var(--border);padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.fcopy{font-size:11px;opacity:.45}
+.fsoc{display:flex;gap:6px}
+.sb{width:30px;height:30px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
 </style></head><body>${sectHTML}</body></html>`
 
+  // Get or create iframe
   let iframe = document.getElementById('preview-iframe')
-  if (!iframe) {
+  if(!iframe) {
     iframe = document.createElement('iframe')
     iframe.id = 'preview-iframe'
     iframe.style.cssText = 'width:100%;border:none;display:block'
+    // Remove empty div from shell if present
+    shell.innerHTML = ''
     shell.appendChild(iframe)
+    log('iframe created and appended to shell')
+  } else if(!iframe.parentElement) {
+    // iframe got detached
+    shell.innerHTML = ''
+    shell.appendChild(iframe)
+    log('iframe re-attached to shell')
   }
-  iframe.height = {desktop:700,tablet:900,mobile:780}[currentDevice]||700
-  iframe.srcdoc = html
 
-  if (siteState.storeSlug) document.getElementById('preview-url-text').textContent = `ekart.aasaitech.in/${siteState.storeSlug}`
+  // Set height based on device
+  const heights = {desktop:720,tablet:900,mobile:812}
+  iframe.height = heights[currentDevice]||720
+
+  iframe.srcdoc = html
+  log(`preview rendered: ${siteState.sections.length} sections, device:${currentDevice}`, 'ok')
+
+  // After iframe loads, auto-adjust height
+  iframe.onload = () => {
+    try {
+      const body = iframe.contentDocument?.body
+      if(body) {
+        const h = Math.max(body.scrollHeight, heights[currentDevice]||720)
+        iframe.height = h
+        log(`iframe height adjusted to ${h}px`)
+      }
+    } catch(e) { /* cross-origin, ignore */ }
+  }
 }
 
 function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, txtC) {
-  const d = section.data || {}
-  const E = s => String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-  const w = inner => `<div data-sid="${section.id}" data-type="${section.type}">${inner}</div>`
+  const d=section.data||{}
+  const E=s=>String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const w=inner=>`<div data-sid="${section.id}" data-type="${section.type}">${inner}</div>`
 
   switch(section.type) {
     case 'announcement': return w(`<div class="ann">${E(d.text||'✨ Free shipping on orders over ₹999!')}</div>`)
     case 'navbar': return w(`<nav class="nav">
       <div class="nav-logo">${E(d.logoEmoji||'🛍️')} ${E(d.logoText||'My Store')}</div>
-      ${!isMobile?`<div class="nav-links">${[1,2,3,4].map(i=>d[`link${i}Text`]?`<a href="${d[`link${i}Url`]||'#'}">${E(d[`link${i}Text`])}</a>`:'').join('')}</div>`:''}
-      <div style="flex:1"></div>
+      ${!isMobile?`<div class="nav-links">${[1,2,3,4].map(i=>d[`link${i}Text`]?`<a href="${d[`link${i}Url`]||'#'}">${E(d[`link${i}Text`])}</a>`:'').join('')}</div>`:'<div style="flex:1"></div>'}
+      <div style="${isMobile?'':'flex:0'}"></div>
       <a href="#products" class="nav-cta">Shop Now</a>
     </nav>`)
     case 'hero': return w(`<div class="hero">
@@ -802,8 +1269,8 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       <a href="${d.ctaLink||'#products'}" class="btn-cta">${E(d.ctaText||'Shop Now')}</a>
     </div>`)
     case 'featured': {
-      const cols = isMobile?2:(parseInt(d.columns)||parseInt(T.cols)||3)
-      const cnt = Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length)
+      const cols=isMobile?2:(parseInt(d.columns)||parseInt(T.cols)||3)
+      const cnt=Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length)
       return w(`<div class="sec" id="products">
         <div class="sec-hdr">
           <div><div class="sec-title">${E(d.title||'Featured Products')}</div><div class="sec-sub">${E(d.subtitle||'')}</div></div>
@@ -821,11 +1288,11 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       </div>`)
     }
     case 'categories': {
-      const cols = isMobile?2:(parseInt(d.columns)||4)
+      const cols=isMobile?2:(parseInt(d.columns)||4)
       return w(`<div class="sec">
         <div class="sec-title">${E(d.title||'Browse by Category')}</div><div class="sec-sub">${E(d.subtitle||'')}</div>
         <div class="cgrid" style="grid-template-columns:repeat(${cols},1fr)">
-          ${SAMPLE_CATEGORIES.slice(0,cols*2).map(c=>`<div class="ccard">
+          ${SAMPLE_CATEGORIES.slice(0,cols).map(c=>`<div class="ccard">
             <div class="cimg"><img src="${c.img}" alt="${E(c.name)}" loading="lazy"></div>
             <div class="cinfo"><div class="cname">${E(c.name)}</div><div class="ccount">${c.count} items</div></div>
           </div>`).join('')}
@@ -833,7 +1300,7 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       </div>`)
     }
     case 'banner': {
-      const bg = d.bgColor||T.primaryColor
+      const bg=d.bgColor||T.primaryColor
       return w(`<div class="banner" style="background:${bg}">
         <h2>${E(d.heading||'Limited Time Offer')}</h2>
         <p>${E(d.subtext||'Get 20% off your first order.')}</p>
@@ -842,9 +1309,9 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       </div>`)
     }
     case 'testimonials': {
-      const cols = isMobile?1:(parseInt(d.columns)||3)
+      const cols=isMobile?1:(parseInt(d.columns)||3)
       return w(`<div class="tmns">
-        <div class="sec-title" style="margin-bottom:20px">${E(d.title||'What Our Customers Say')}</div>
+        <div class="sec-title" style="margin-bottom:18px">${E(d.title||'What Our Customers Say')}</div>
         <div class="tgrid" style="grid-template-columns:repeat(${cols},1fr)">
           ${[[d.t1name||'Priya S.',d.t1text||'Absolutely love this store!'],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.'],[d.t3name||'Anita M.',d.t3text||'Great customer service.']].map(([name,text])=>`<div class="tcard">
             <div class="tstars">★★★★★</div><div class="ttext">"${E(text)}"</div>
@@ -862,7 +1329,7 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       </div>
     </div>`)
     case 'trustbadges': {
-      const cols = isMobile?2:4
+      const cols=isMobile?2:4
       return w(`<div class="trust">
         <div class="trgrid" style="grid-template-columns:repeat(${cols},1fr)">
           ${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],[d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe'],[d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day policy'],[d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here']].map(([icon,lbl,sub])=>`<div class="tritem"><span class="tricon">${E(icon)}</span><div><div class="trlbl">${E(lbl)}</div><div class="trsub">${E(sub)}</div></div></div>`).join('')}
@@ -870,25 +1337,22 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
       </div>`)
     }
     case 'about': return w(`<div class="about" id="about">
-      <h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;margin-bottom:12px">${E(d.title||'Our Story')}</h2>
-      <p style="opacity:.65;line-height:1.75;max-width:640px;margin-bottom:18px">${E(d.body||'We started with a simple mission.')}</p>
+      <h2 style="font-size:${isMobile?'22px':'30px'};font-weight:900;margin-bottom:12px">${E(d.title||'Our Story')}</h2>
+      <p style="opacity:.65;line-height:1.75;max-width:620px;margin-bottom:16px">${E(d.body||'We started with a simple mission.')}</p>
       ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${E(d.ctaText)}</a>`:''}
     </div>`)
     case 'faq': return w(`<div class="faq">
-      <div class="sec-title" style="margin-bottom:18px">${E(d.title||'FAQ')}</div>
+      <div class="sec-title" style="margin-bottom:16px">${E(d.title||'FAQ')}</div>
       ${[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q).map(([q,a])=>`<div class="faqitem"><div class="faqq">${E(q)}</div><div class="faqa">${E(a)}</div></div>`).join('')}
     </div>`)
     case 'contact': return w(`<div class="ctact" id="contact">
-      <div class="sec-title" style="margin-bottom:6px">${E(d.title||'Get in Touch')}</div>
+      <div class="sec-title" style="margin-bottom:5px">${E(d.title||'Get in Touch')}</div>
       <div class="sec-sub">${E(d.subtitle||'')}</div>
-      <div style="display:grid;grid-template-columns:${isMobile?'1fr':'1fr 1fr'};gap:20px">
-        ${d.email||d.phone?`<div style="padding-top:8px">${d.email?`<div style="font-size:14px;margin-bottom:12px">✉️ ${E(d.email)}</div>`:''}${d.phone?`<div style="font-size:14px">📞 ${E(d.phone)}</div>`:''}</div>`:''}
-        <div>
-          <input class="cinput" placeholder="Your Name">
-          <input class="cinput" placeholder="Email Address">
-          <textarea class="cinput ctarea" placeholder="Your message..."></textarea>
-          <button class="btn-cta">${E(d.btnText||'Send Message')}</button>
-        </div>
+      <div style="max-width:480px;margin-top:16px">
+        <input class="cinput" placeholder="Your Name">
+        <input class="cinput" placeholder="Email Address">
+        <textarea class="cinput ctarea" placeholder="Your message..."></textarea>
+        <button class="btn-cta">${E(d.btnText||'Send Message')}</button>
       </div>
     </div>`)
     case 'footer': return w(`<footer class="footer">
@@ -896,7 +1360,6 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
         <div>
           <div class="flogo">${E(d.logoText||siteState.storeName||'My Store')}</div>
           ${d.tagline?`<div class="ftagline">${E(d.tagline)}</div>`:''}
-          ${d.email?`<div style="font-size:12.5px;opacity:.55">✉️ ${E(d.email)}</div>`:''}
         </div>
         ${!isMobile?`<div><div class="fct">${E(d.col1Title||'Quick Links')}</div><div class="fcl">${(d.col1Links||'Home,Shop,About,Contact').split(',').map(l=>`<a>${E(l.trim())}</a>`).join('')}</div></div>
         <div><div class="fct">${E(d.col2Title||'Customer Care')}</div><div class="fcl">${(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').map(l=>`<a>${E(l.trim())}</a>`).join('')}</div></div>`:''}
@@ -910,193 +1373,212 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
   }
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    DEVICE SWITCH
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 function setDevice(device, btn) {
   currentDevice = device
   document.querySelectorAll('.pdb').forEach(b=>b.classList.remove('active'))
   btn.classList.add('active')
+  const shell = document.getElementById('device-shell')
+  if(shell) {
+    shell.className = `device-shell ${device}`
+    log(`device switched to: ${device}`)
+  }
   renderPreview()
 }
 
-/* ══════════════════════════════════════════════════
-   VOICE INPUT — Web Speech API, auto language detect
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   VOICE
+══════════════════════════════════════════════ */
 function toggleVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { toast('Voice not supported. Try Chrome!','error'); return }
-  if (isRecording) { speechRec?.stop(); return }
-
-  speechRec = new SR()
-  speechRec.continuous = false
-  speechRec.interimResults = true
-  speechRec.lang = ''  // browser auto-detects language
-
-  const mic = document.getElementById('mic-btn')
-  const inp = document.getElementById('chat-input')
-
-  speechRec.onstart = () => { isRecording=true; mic.classList.add('recording'); mic.textContent='⏹'; inp.placeholder='🎤 Listening…' }
-  speechRec.onresult = e => { inp.value=Array.from(e.results).map(r=>r[0].transcript).join(''); autoResize(inp) }
-  speechRec.onend = () => {
-    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Type in any language… or tap 🎤'
-    const t = inp.value.trim()
-    if (t) setTimeout(() => sendUserMsg(t), 350)
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition
+  if(!SR){ toast('Voice not supported. Try Chrome!','error'); return }
+  if(isRecording){ speechRec?.stop(); return }
+  speechRec=new SR()
+  speechRec.continuous=false; speechRec.interimResults=true; speechRec.lang=''
+  const mic=document.getElementById('mic-btn')
+  const inp=document.getElementById('chat-input')
+  speechRec.onstart=()=>{ isRecording=true; mic.classList.add('recording'); mic.textContent='⏹'; inp.placeholder='🎤 Listening…' }
+  speechRec.onresult=e=>{ inp.value=Array.from(e.results).map(r=>r[0].transcript).join(''); autoResize(inp) }
+  speechRec.onend=()=>{
+    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Or type here… any language'
+    const t=inp.value.trim(); if(t) setTimeout(()=>sendUserMsg(t),350)
   }
-  speechRec.onerror = e => {
-    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Type in any language… or tap 🎤'
-    if (e.error!=='no-speech') toast('Voice error: '+e.error,'error')
+  speechRec.onerror=e=>{
+    isRecording=false; mic.classList.remove('recording'); mic.textContent='🎤'; inp.placeholder='Or type here… any language'
+    if(e.error!=='no-speech') toast('Voice error: '+e.error,'error')
+    log(`voice error: ${e.error}`, 'err')
   }
   speechRec.start()
+  log('voice started')
 }
 
-/* ══════════════════════════════════════════════════
-   STORE SELECTOR — same as website-builder.html
-══════════════════════════════════════════════════ */
-function renderStorePill() {
-  const s = allStores.find(x => x._id === currentStoreId)
-  document.getElementById('store-name-display').textContent = s?.name || 'Select Store'
+/* ══════════════════════════════════════════════
+   STORE SELECTOR
+══════════════════════════════════════════════ */
+function renderStorePill(){
+  const s=allStores.find(x=>x._id===currentStoreId)
+  document.getElementById('store-name-display').textContent=s?.name||'Select Store'
 }
-
-function renderStoreDropdown() {
-  const dd = document.getElementById('store-dropdown')
-  dd.innerHTML = allStores.map(s =>
-    `<div class="store-dropdown-item ${s._id===currentStoreId?'active':''}" onclick="switchStore('${s._id}')">
-      <div class="store-dropdown-dot"></div>${esc(s.name)}
-    </div>`
-  ).join('') +
+function renderStoreDropdown(){
+  const dd=document.getElementById('store-dropdown')
+  dd.innerHTML=allStores.map(s=>`<div class="store-dropdown-item ${s._id===currentStoreId?'active':''}" onclick="switchStore('${s._id}')">
+    <div class="store-dropdown-dot"></div>${esc(s.name)}</div>`).join('')+
   `<hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
    <div class="store-dropdown-item" onclick="location.href='home.html'"><span>+</span> Manage Stores</div>`
 }
-
-function toggleStoreDropdown() {
-  document.getElementById('store-dropdown').classList.toggle('open')
-}
-
-function switchStore(id) {
-  currentStoreId = id
-  sessionStorage.setItem('ekart_current_store', id)
-  localStorage.setItem('ekart_store_id', id)
+function toggleStoreDropdown(){ document.getElementById('store-dropdown').classList.toggle('open') }
+function switchStore(id){
+  currentStoreId=id
+  sessionStorage.setItem('ekart_current_store',id); localStorage.setItem('ekart_store_id',id)
   document.getElementById('store-dropdown').classList.remove('open')
-  renderStorePill()
-  renderStoreDropdown()
-  toast('Store switched — sections will publish to this store', 'success')
+  renderStorePill(); renderStoreDropdown()
+  toast('Store switched','success')
+  log(`store switched to: ${id}`)
 }
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('#store-pill') && !e.target.closest('#store-dropdown'))
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#store-pill')&&!e.target.closest('#store-dropdown'))
     document.getElementById('store-dropdown').classList.remove('open')
 })
 
-/* ══════════════════════════════════════════════════
-   PUBLISH — same apiFetch pattern
-══════════════════════════════════════════════════ */
-async function publishSite() {
-  const btn = document.getElementById('publish-btn')
-
-  // If no sections built yet, warn
-  if (!siteState.sections.length) {
-    toast('Build at least one section first by chatting with the AI!', 'error')
-    return
-  }
-
-  if (!currentStoreId || currentStoreId === 'demo') {
-    toast('Please select a store first using the store picker above', 'error')
-    return
-  }
-
-  btn.disabled = true; btn.textContent = '⏳ Saving…'
+/* ══════════════════════════════════════════════
+   PUBLISH
+══════════════════════════════════════════════ */
+async function publishSite(){
+  const btn=document.getElementById('publish-btn')
+  if(!siteState.sections.length){ toast('Build at least one section first!','error'); return }
+  if(!currentStoreId||currentStoreId==='demo'){ toast('Please select a store first','error'); return }
+  btn.disabled=true; btn.textContent='⏳ Saving…'
+  log('publishing site...')
   try {
-    const T = siteState.theme
-    await apiFetch(`/stores/${currentStoreId}/theme/settings`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        primary_color:  T.primaryColor,
-        secondary_color:T.bgColor,
-        accent_color:   T.textColor,
-        card_bg:        T.cardBg,
-        nav_bg:         T.navBg,
-        font_heading:   T.font,
-        cols:           parseInt(T.cols) || 3,
-        radius:         T.radius,
-        button_style:   T.btnStyle
+    const T=siteState.theme
+    await apiFetch(`/stores/${currentStoreId}/theme/settings`,{
+      method:'PUT',
+      body:JSON.stringify({
+        primary_color:T.primaryColor,secondary_color:T.bgColor,accent_color:T.textColor,
+        card_bg:T.cardBg,nav_bg:T.navBg,font_heading:T.font,
+        cols:parseInt(T.cols)||3,radius:T.radius,button_style:T.btnStyle
       })
     })
-    await apiFetch(`/stores/${currentStoreId}/theme/sections`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        sections: siteState.sections.map((s, i) => ({
-          id: s.id, type: s.type, order: i + 1,
-          is_visible: s.enabled, settings: s.data || {}
-        }))
-      })
+    await apiFetch(`/stores/${currentStoreId}/theme/sections`,{
+      method:'PUT',
+      body:JSON.stringify({sections:siteState.sections.map((s,i)=>({id:s.id,type:s.type,order:i+1,is_visible:s.enabled,settings:s.data||{}}))})
     })
-    await apiFetch(`/stores/${currentStoreId}/theme/publish`, { method: 'POST' })
-    toast('Site saved & published! 🚀', 'success')
-    setTimeout(() => location.href = 'website-builder.html', 2000)
-  } catch (e) {
-    toast('Save failed: ' + e.message, 'error')
-    btn.disabled = false; btn.textContent = '🚀 Save & Publish'
+    await apiFetch(`/stores/${currentStoreId}/theme/publish`,{method:'POST'})
+    log('published successfully!','ok')
+    toast('Site saved & published! 🚀','success')
+    setTimeout(()=>location.href='website-builder.html',2000)
+  } catch(e){
+    log(`publish failed: ${e.message}`,'err')
+    toast('Save failed: '+e.message,'error')
+    btn.disabled=false; btn.textContent='🚀 Save & Publish'
   }
 }
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    UTILS
-══════════════════════════════════════════════════ */
-function isLightColor(hex){const c=(hex||'').replace('#','');if(c.length!==6)return true;const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return(r*299+g*587+b*114)/1000>128}
+══════════════════════════════════════════════ */
+function isLightColor(hex){const c=(hex||'').replace('#','');if(c.length!==6)return false;const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return(r*299+g*587+b*114)/1000>128}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function getLangName(code){return{en:'English',ta:'தமிழ்',hi:'हिंदी',te:'తెలుగు',ml:'Malayalam',kn:'ಕನ್ನಡ',bn:'বাংলা',mr:'मराठी',gu:'ગુજરાતી',pa:'ਪੰਜਾਬੀ',ar:'Arabic',es:'Spanish',fr:'French'}[code]||code.toUpperCase()}
-function toast(msg,type='success'){const el=document.createElement('div');el.className=`toast ${type}`;el.innerHTML=`<span>${type==='success'?'✅':'❌'}</span> ${esc(msg)}`;document.getElementById('toast-container').appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3000)}
+function getLangName(code){return{en:'English',ta:'தமிழ்',hi:'हिंदी',te:'తెలుగు',ml:'Malayalam',kn:'ಕನ್ನಡ',bn:'বাংলা',mr:'मराठी',gu:'ગુજરાતી',pa:'ਪੰਜਾਬੀ',ar:'Arabic'}[code]||code.toUpperCase()}
+function toast(msg,type='success'){
+  const el=document.createElement('div')
+  el.className=`toast ${type}`
+  el.innerHTML=`<span>${type==='success'?'✅':type==='info'?'ℹ️':'❌'}</span> ${esc(msg)}`
+  document.getElementById('toast-container').appendChild(el)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')))
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3000)
+}
 
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    INIT
-══════════════════════════════════════════════════ */
+══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  // Create device shell
-  const canvas = document.getElementById('preview-canvas')
-  const shell = document.createElement('div')
-  shell.id = 'device-shell'; shell.className = 'device-shell desktop'
-  canvas.appendChild(shell)
+  log('eKart AI Builder initializing...', 'info')
 
-  // Load stores — same as website-builder.html
+  // ── Step 1: Extract token from URL if present (e.g. after Google OAuth redirect)
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlToken  = urlParams.get('token')
+  if (urlToken) {
+    localStorage.setItem('ekart_token', urlToken)
+    log(`token saved from URL param (len=${urlToken.length})`, 'ok')
+    // Clean the URL without reloading
+    const cleanUrl = window.location.pathname + window.location.hash
+    window.history.replaceState({}, document.title, cleanUrl)
+  } else {
+    const existing = localStorage.getItem('ekart_token')
+    log(`token from localStorage: ${existing ? `present (len=${existing.length})` : 'MISSING'}`, existing ? 'ok' : 'err')
+  }
+
+  // ── Step 2: Verify auth — do this FIRST before anything else
+  log('verifying auth...')
+  try {
+    const me = await apiFetch('/auth/me')
+    log(`auth OK — user: ${me.name || me.email || me._id}`, 'ok')
+  } catch(e) {
+    log(`auth FAILED: ${e.message} — redirecting to login`, 'err')
+    // Show a brief message before redirecting
+    document.getElementById('store-name-display').textContent = 'Not logged in'
+    toast('Session expired — redirecting to login…', 'error')
+    setTimeout(() => {
+      // Redirect back here after login
+      const returnUrl = encodeURIComponent(window.location.pathname)
+      location.href = `/?redirect=${returnUrl}`
+    }, 1500)
+    return // Stop init — don't load stores or show UI
+  }
+
+  // ── Step 3: Load stores
+  log('loading stores...')
   try {
     const r = await apiFetch('/stores')
     allStores = Array.isArray(r) ? r : (r?.stores || [])
+    log(`fetched ${allStores.length} stores`, allStores.length > 0 ? 'ok' : 'err')
+
+    if (allStores.length === 0) {
+      log('no stores found — showing create store prompt', 'err')
+      document.getElementById('store-name-display').textContent = 'No store'
+      // Show a helpful message in the store pill area
+      toast('No stores found — please create a store first', 'error')
+      // Still show the builder but warn user
+      addMsg('ai',
+        `⚠️ <strong>No store found!</strong><br><br>
+        You need to create a store first before building a website.<br><br>
+        <a href="home.html" style="color:var(--accent2);text-decoration:underline">Go to dashboard → Create Store</a>`,
+        null
+      )
+      return
+    }
+
+    // Restore previously selected store, fall back to first store
     currentStoreId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
     if (!currentStoreId || !allStores.find(s => s._id === currentStoreId)) {
-      currentStoreId = allStores[0]?._id || null
+      currentStoreId = allStores[0]._id
+      log(`no valid stored store ID — defaulting to first: ${currentStoreId}`)
+    } else {
+      log(`restored store ID: ${currentStoreId}`)
     }
-    if (currentStoreId) {
-      sessionStorage.setItem('ekart_current_store', currentStoreId)
-      localStorage.setItem('ekart_store_id', currentStoreId)
-    }
+
+    sessionStorage.setItem('ekart_current_store', currentStoreId)
+    localStorage.setItem('ekart_store_id', currentStoreId)
+
     renderStorePill()
     renderStoreDropdown()
-  } catch (e) {
-    console.warn('Could not load stores:', e.message)
-    document.getElementById('store-name-display').textContent = 'No store'
+    log(`store loaded: "${allStores.find(s=>s._id===currentStoreId)?.name}" (${currentStoreId})`, 'ok')
+
+  } catch(e) {
+    log(`store load FAILED: ${e.message}`, 'err')
+    document.getElementById('store-name-display').textContent = 'Load failed'
+    toast('Could not load stores: ' + e.message, 'error')
+    // Still show the builder — user can try to continue
   }
 
-  // Opening greeting with example chips
+  // ── Step 4: Start chat flow
   setTimeout(() => {
-    addMsg('ai',
-      `👋 <strong>Welcome to eKart AI Builder!</strong><br><br>
-      I'll help you build your store website step by step — just chat naturally.<br><br>
-      You can type or speak in <strong>any language</strong> — Tamil, Hindi, Telugu, English, anything! 🌐<br><br>
-      Let's start 🚀 — <strong>what's the name of your store?</strong>`,
-      {
-        type:'chips',
-        label:'Quick examples — tap to use',
-        options:[
-          {label:'🛍️ Sri Murugan Silks', value:'Sri Murugan Silks'},
-          {label:'📱 Tech Galaxy Store',  value:'Tech Galaxy Store'},
-          {label:'🥦 FreshMart Grocery',  value:'FreshMart Grocery'},
-          {label:'👗 StyleHub Fashion',   value:'StyleHub Fashion'},
-        ]
-      }
-    )
-    setQR(["I'll type my store name","🎤 Let me speak it","தமிழில் பேசலாமா?","हिंदी में बात करें"])
-  }, 400)
+    showBrandStep()
+    log('initial UI shown', 'ok')
+  }, 300)
 })
 </script>
 </body>
