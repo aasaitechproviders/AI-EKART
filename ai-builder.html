@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- TOKEN: run synchronously before anything else — mirrors website-builder.html pattern -->
+  <!-- TOKEN: run synchronously before anything else -->
   <script>
     ;(function(){
       var p = new URLSearchParams(location.search), t = p.get('token')
@@ -19,7 +19,7 @@
     })()
   </script>
 
-  <!-- apiFetch — identical to website-builder.html inline -->
+  <!-- apiFetch — same as website-builder -->
   <script>
     function apiFetch(path, opts) {
       opts = opts || {}
@@ -220,7 +220,7 @@
   <a class="tb-logo" href="home.html">e<em>K</em>art</a>
   <span class="tb-badge">✨ AI Builder</span>
   <div class="tb-store-pill" onclick="toggleStoreDropdown()" id="store-pill">
-    <div class="tb-store-dot" id="store-dot"></div>
+    <div class="tb-store-dot offline" id="store-dot"></div>
     <div class="tb-store-name" id="store-name-display">Loading…</div>
     <div class="tb-store-chevron">▾</div>
   </div>
@@ -382,7 +382,7 @@ function toast(msg,type){
 }
 
 /* ══════════════════════════════════════
-   STORE SELECTOR — CRITICAL FOR LOADING
+   STORE SELECTOR — FIXED DROPDOWN & LOADING
 ══════════════════════════════════════ */
 function renderStorePill(){
   var s=allStores.find(function(x){return x._id===currentStoreId})
@@ -401,9 +401,24 @@ function renderStoreDropdown(){
   +'<div class="store-dropdown-item" onclick="location.href=\'home.html\'"><span>↗</span> Manage Stores</div>'
 }
 
-function toggleStoreDropdown(){ document.getElementById('store-dropdown').classList.toggle('open') }
+function toggleStoreDropdown(){ 
+  document.getElementById('store-dropdown').classList.toggle('open') 
+}
+
+// Improved outside-click handler
+document.addEventListener('click',function(e){
+  var pill = document.getElementById('store-pill')
+  var dd = document.getElementById('store-dropdown')
+  if(!pill.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('open')
+  }
+})
 
 function switchStore(id){
+  if(id === currentStoreId) {
+    document.getElementById('store-dropdown').classList.remove('open')
+    return
+  }
   currentStoreId=id
   isDemo=(id==='demo')
   sessionStorage.setItem('ekart_current_store',id)
@@ -411,13 +426,75 @@ function switchStore(id){
   document.getElementById('store-dropdown').classList.remove('open')
   renderStorePill()
   renderStoreDropdown()
-  toast('Store switched','success')
+  // Load the new store's website data
+  loadStoreData(id)
 }
 
-document.addEventListener('click',function(e){
-  if(!e.target.closest('#store-pill')&&!e.target.closest('#store-dropdown'))
-    document.getElementById('store-dropdown').classList.remove('open')
-})
+/* ══════════════════════════════════════
+   LOAD STORE WEBSITE DATA (from backend)
+══════════════════════════════════════ */
+async function loadStoreData(storeId) {
+  if (!storeId || storeId === 'demo') {
+    // Reset to default demo state
+    siteState = { ...defaultSiteState() }
+    currentStep = 0
+    renderPreview()
+    updateBuiltBar()
+    addMsg('ai', '✨ You are in demo mode. Start building your store!')
+    return
+  }
+
+  setLoading('Loading store website…', 70)
+  try {
+    // Fetch store details (theme, sections) – adjust endpoints to match your backend
+    // Example: GET /stores/{id}/website returns { theme, sections, storeName, etc. }
+    const websiteData = await apiFetch('/stores/' + storeId + '/website')
+    
+    // Merge with default state
+    siteState.storeName = websiteData.storeName || websiteData.name || ''
+    siteState.storeSlug = websiteData.slug || siteState.storeName.toLowerCase().replace(/[^a-z0-9]+/g,'-')
+    siteState.businessType = websiteData.businessType || ''
+    siteState.tagline = websiteData.tagline || ''
+    siteState.theme = { ...siteState.theme, ...(websiteData.theme || {}) }
+    siteState.sections = websiteData.sections || []
+
+    // Update preview and built bar
+    renderPreview()
+    updateBuiltBar()
+    
+    // Optionally reset chat and steps? For now just show a message.
+    addMsg('ai', '✅ Loaded existing website for <strong>' + esc(siteState.storeName) + '</strong>. You can continue editing.')
+    
+    // Update step indicators based on existing sections? 
+    // For simplicity we keep currentStep = 0, but you could set it to the last completed step.
+    currentStep = 0
+    updateSteps()
+
+  } catch (e) {
+    console.error('[eKart AI] Failed to load store data:', e)
+    toast('Could not load store website: ' + e.message, 'error')
+    // Reset to default
+    siteState = defaultSiteState()
+    renderPreview()
+    updateBuiltBar()
+  } finally {
+    setLoading('Ready!', 100)
+    hideLoading()
+  }
+}
+
+function defaultSiteState() {
+  return {
+    storeName:'', storeSlug:'', businessType:'', description:'', logoEmoji:'🛍️', logoUrl:'',
+    tagline:'', heroSubtext:'', ctaText:'Shop Now',
+    theme:{
+      primaryColor:'#5b5cf6', bgColor:'#09090f', textColor:'#f1f5f9',
+      cardBg:'#13131e', navBg:'#0e0e17', font:'Outfit',
+      cols:'3', radius:'12px', btnStyle:'rounded'
+    },
+    sections:[]
+  }
+}
 
 /* ══════════════════════════════════════
    INIT — CRITICAL STORE LOADING FIX
@@ -465,7 +542,7 @@ window.addEventListener('DOMContentLoaded', async function(){
       isDemo = true
     }
   } else {
-    // No token or auth failed — run demo mode like website-builder does
+    // No token or auth failed — run demo mode
     allStores = [{_id:'demo',name:'Demo Store',slug:'demo-store'}]
     currentStoreId = 'demo'
     isDemo = true
@@ -476,16 +553,24 @@ window.addEventListener('DOMContentLoaded', async function(){
   setLoading('Building UI…', 80)
   renderStorePill()
   renderStoreDropdown()
-  console.log('[eKart AI] UI rendered')
+
+  // Load the selected store's website data
+  await loadStoreData(currentStoreId)
 
   setLoading('Ready!', 100)
   hideLoading()
 
-  // Start the builder flow
-  setTimeout(function(){
-    showBrandStep()
-    console.log('[eKart AI] Flow started')
-  }, 300)
+  // Start the builder flow only if no sections exist yet
+  if (siteState.sections.length === 0) {
+    setTimeout(function(){
+      showBrandStep()
+      console.log('[eKart AI] Flow started')
+    }, 300)
+  } else {
+    // Already have data – maybe show a welcome back message
+    addMsg('ai', '👋 Welcome back! Your store website is loaded. Use the chat or buttons to make changes.')
+    setQR(['✏️ Edit nav','🖼 Edit hero','🎨 Change theme','🚀 Publish'])
+  }
 })
 
 /* ══════════════════════════════════════
@@ -568,7 +653,7 @@ function chipClick(el, value){
 }
 
 /* ══════════════════════════════════════
-   STEP FLOWS
+   STEP FLOWS (unchanged except for preview updates)
 ══════════════════════════════════════ */
 function showBrandStep(){
   addMsgWithWidget('ai',
@@ -663,7 +748,7 @@ function updateSteps(){
 }
 
 /* ══════════════════════════════════════
-   SEND / RECEIVE
+   SEND / RECEIVE (unchanged)
 ══════════════════════════════════════ */
 async function sendUserMsg(text){
   if(!text.trim()||isThinking) return
@@ -749,7 +834,7 @@ function handleLocalFlow(userMsg){
 }
 
 /* ══════════════════════════════════════
-   SECTION BUILDING
+   SECTION BUILDING (now triggers preview)
 ══════════════════════════════════════ */
 function buildSection(type, extracted){
   console.log('[eKart AI] building:', type)
@@ -804,17 +889,22 @@ function showEditPanel(type){
 }
 
 /* ══════════════════════════════════════
-   PREVIEW
+   PREVIEW — NOW RENDERS ACTUAL HTML
 ══════════════════════════════════════ */
 function renderPreview(){
   var shell = document.getElementById('device-shell')
   var empty = document.getElementById('preview-empty')
-  if(!siteState.sections.length){ if(empty) empty.style.display=''; return }
-  if(empty) empty.style.display='none'
+  
+  if(!siteState.sections.length){ 
+    empty.style.display = 'flex'
+    // Remove iframe if present
+    var oldIframe = document.getElementById('preview-iframe')
+    if(oldIframe) oldIframe.remove()
+    return 
+  }
+  empty.style.display = 'none'
 
-  var T = siteState.theme
-  var html = '<iframe srcdoc="<h1>Preview: '+siteState.storeName+'</h1>" style="width:100%;border:none;height:600px"></iframe>'
-
+  // Create or reuse iframe
   var iframe = document.getElementById('preview-iframe')
   if(!iframe){
     iframe = document.createElement('iframe')
@@ -824,8 +914,90 @@ function renderPreview(){
     shell.appendChild(iframe)
   }
 
-  iframe.height = 720
-  iframe.srcdoc = '<html><body style="font-family:sans-serif;margin:0"><h1>'+esc(siteState.storeName)+'</h1><p>'+esc(siteState.tagline)+'</p><p>'+siteState.sections.length+' sections built</p></body></html>'
+  // Generate full HTML from siteState
+  var html = generatePreviewHTML(siteState)
+  iframe.srcdoc = html
+  iframe.height = '720' // adjust as needed
+}
+
+function generatePreviewHTML(state) {
+  const T = state.theme
+  const sections = state.sections.filter(s => s.enabled !== false)
+
+  // Basic CSS reset and theme variables
+  let style = `
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body {
+        font-family: '${T.font}', sans-serif;
+        background-color: ${T.bgColor};
+        color: ${T.textColor};
+        line-height:1.5;
+      }
+      .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+      .btn {
+        background: ${T.primaryColor};
+        color: white;
+        padding: 10px 20px;
+        border-radius: ${T.radius};
+        border: none;
+        cursor: pointer;
+        font-weight:600;
+      }
+    </style>
+  `
+
+  // Build sections HTML
+  let body = ''
+  sections.forEach(sec => {
+    switch(sec.type) {
+      case 'announcement':
+        body += `<div style="background:${T.primaryColor}; color:white; text-align:center; padding:8px;">${esc(sec.data.text || 'Free shipping!')}</div>`
+        break
+      case 'navbar':
+        body += `
+          <nav style="background:${T.navBg}; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+            <div style="font-size:20px; font-weight:bold;">${esc(sec.data.logoEmoji || '🛍️')} ${esc(sec.data.logoText || 'Store')}</div>
+            <div><a href="#" style="color:${T.textColor}; margin:0 10px;">Shop</a><a href="#" style="color:${T.textColor};">Contact</a></div>
+          </nav>`
+        break
+      case 'hero':
+        body += `
+          <section style="background:${T.cardBg}; padding:60px 20px; text-align:center;">
+            <h1 style="font-size:48px; margin-bottom:20px;">${esc(sec.data.heading || 'Welcome')}</h1>
+            <p style="font-size:18px; margin-bottom:30px;">${esc(sec.data.subtext || 'Great products.')}</p>
+            <button class="btn">${esc(sec.data.ctaText || 'Shop Now')}</button>
+          </section>`
+        break
+      case 'featured':
+        body += `
+          <section style="padding:40px 20px;">
+            <h2 style="text-align:center; margin-bottom:30px;">${esc(sec.data.title || 'Featured Products')}</h2>
+            <div style="display:grid; grid-template-columns:repeat(${T.cols},1fr); gap:20px;">
+              ${SAMPLE_PRODUCTS.map(p => `
+                <div style="background:${T.cardBg}; border-radius:${T.radius}; padding:15px;">
+                  <img src="${esc(p.img)}" style="width:100%; border-radius:8px;" alt="${esc(p.name)}">
+                  <h3 style="margin:10px 0;">${esc(p.name)}</h3>
+                  <p><strong>₹${p.price}</strong> <s style="color:#888;">₹${p.compare}</s></p>
+                </div>
+              `).join('')}
+            </div>
+          </section>`
+        break
+      // Add other section types as needed (categories, newsletter, footer)
+      case 'footer':
+        body += `
+          <footer style="background:${T.navBg}; padding:30px 20px; text-align:center; border-top:1px solid rgba(255,255,255,0.1);">
+            © ${new Date().getFullYear()} ${esc(sec.data.logoText || 'Store')}
+          </footer>`
+        break
+      default:
+        // fallback
+        body += `<div style="padding:20px; background:${T.cardBg}; margin:10px;">[${sec.type} section]</div>`
+    }
+  })
+
+  return `<html><head>${style}</head><body>${body}</body></html>`
 }
 
 /* ══════════════════════════════════════
@@ -833,9 +1005,11 @@ function renderPreview(){
 ══════════════════════════════════════ */
 function setDevice(device, btn){
   currentDevice=device
+  var shell = document.getElementById('device-shell')
+  shell.className = 'device-shell ' + device
   document.querySelectorAll('.pdb').forEach(function(b){b.classList.remove('active')})
   btn.classList.add('active')
-  renderPreview()
+  // No need to re-render, iframe size will adjust via CSS
 }
 
 var _modalType = ''
@@ -867,12 +1041,13 @@ function closeModal(){ document.getElementById('modal-overlay').classList.remove
 
 function submitModal(){
   if(isDemo) { toast('Connect your store first','error'); closeModal(); return }
+  // In a real implementation, you would call an API to create the product/category/coupon
   addMsg('ai', '✅ Item would be saved in production mode.')
   closeModal()
 }
 
 /* ══════════════════════════════════════
-   PUBLISH
+   PUBLISH — NOW SAVES SECTIONS AS WELL
 ══════════════════════════════════════ */
 async function publishSite(){
   var btn=document.getElementById('publish-btn')
@@ -880,10 +1055,18 @@ async function publishSite(){
   if(!currentStoreId||isDemo){ toast('Please select a real store first','error'); return }
   btn.disabled=true; btn.textContent='⏳ Saving…'
   try {
+    // Save theme settings (existing)
     await apiFetch('/stores/'+currentStoreId+'/theme/settings',{method:'PUT',body:JSON.stringify({
       primary_color:siteState.theme.primaryColor,
-      secondary_color:siteState.theme.bgColor
+      secondary_color:siteState.theme.bgColor,
+      // add other theme fields as needed
     })})
+    // Save sections (adjust endpoint to match your backend)
+    // Example: PUT /stores/{id}/sections
+    await apiFetch('/stores/'+currentStoreId+'/sections',{method:'PUT',body:JSON.stringify({
+      sections: siteState.sections
+    })})
+    
     toast('🚀 Published! Your store is live.','success')
     addMsg('ai','🚀 <strong>Your store is live!</strong>')
     btn.textContent='✅ Published!'
