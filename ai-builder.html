@@ -1150,7 +1150,13 @@ function guessEmoji(name){
 function advanceStep(step){
   currentStep = step
   updateSteps()
-  if(siteState.storeSlug) document.getElementById('preview-url-text').textContent = 'ekart.aasaitech.in/'+siteState.storeSlug
+  // Update preview URL with store slug from the actual store object
+  var storeObj = allStores.find(function(s){ return s._id === currentStoreId })
+  if(storeObj && storeObj.slug) {
+    document.getElementById('preview-url-text').textContent = 'ekart.aasaitech.in/' + storeObj.slug
+  } else if(siteState.storeSlug) {
+    document.getElementById('preview-url-text').textContent = 'ekart.aasaitech.in/' + siteState.storeSlug
+  }
 }
 
 function updateSteps(){
@@ -1582,6 +1588,95 @@ function buildSectionHTML(section, isMobile, T, btnRadius, borderRgb, isLight, t
 }
 
 /* ══════════════════════════════════════
+   LOAD / SAVE THEME FROM BACKEND
+══════════════════════════════════════ */
+async function loadThemeForStore(storeId) {
+  if (!storeId || storeId === 'demo') {
+    useDefaults()
+    return
+  }
+  try {
+    log('loading theme for store: ' + storeId)
+    var data = await apiFetch('/stores/' + storeId + '/theme')
+    var doc = data.draft || data.published || null
+    applyThemeFromBackend(doc)
+    log('theme loaded, sections: ' + siteState.sections.length, 'ok')
+  } catch (e) {
+    log('theme load failed: ' + e.message, 'err')
+    useDefaults()
+  }
+  renderPreview()
+  updateBuiltBar()
+  // Update step based on whether sections exist
+  if (siteState.sections.length > 0) {
+    currentStep = 6
+    updateSteps()
+    // Optionally show a welcome message for existing store
+    addMsg('ai', '👋 Welcome back! Your existing store has been loaded. What would you like to edit?', null)
+    setQR(['✏️ Edit nav','🖼 Edit hero','🎨 Change theme','🚀 Publish now'])
+  } else {
+    // New store — start from brand step
+    currentStep = 0
+    updateSteps()
+    showBrandStep()
+  }
+}
+
+function applyThemeFromBackend(doc) {
+  if (!doc) {
+    useDefaults()
+    return
+  }
+  var s = doc.settings || {}
+  siteState.theme = {
+    primaryColor: s.primary_color || s.primaryColor || '#5b5cf6',
+    bgColor: s.secondary_color || s.bgColor || '#09090f',
+    textColor: s.accent_color || s.textColor || '#f1f5f9',
+    cardBg: s.card_bg || s.cardBg || '#13131e',
+    navBg: s.nav_bg || s.navBg || '#0e0e17',
+    font: s.font_heading || s.fontHeading || s.font || 'Outfit',
+    cols: String(s.cols || s.columns || 3),
+    radius: s.radius || s.border_radius || '12px',
+    btnStyle: s.button_style || s.btnStyle || 'rounded'
+  }
+
+  if (doc.sections && doc.sections.length) {
+    siteState.sections = doc.sections.map(function(bs) {
+      var type = bs.type
+      // Use default data if missing, but preserve backend settings
+      var data = bs.settings || {}
+      return {
+        id: bs.id || 'sec_' + type + '_' + Date.now(),
+        type: type,
+        enabled: bs.is_visible !== false,
+        data: data
+      }
+    })
+  } else {
+    // No sections — start with defaults (but we'll handle later)
+    useDefaults()
+  }
+}
+
+function useDefaults() {
+  // Default sections (like website-builder's DEFAULT_SECTIONS but adapted)
+  log('using default sections')
+  siteState.sections = []
+  siteState.storeName = 'My Store'
+  siteState.storeSlug = 'my-store'
+  siteState.theme = { ...THEME_PALETTES[0] } // Midnight theme
+  // Build default sections in correct order
+  buildSection('announcement', {})
+  buildSection('navbar', {})
+  buildSection('hero', {})
+  buildSection('trustbadges', {})
+  buildSection('featured', {})
+  buildSection('categories', {})
+  buildSection('newsletter', {})
+  buildSection('footer', {})
+}
+
+/* ══════════════════════════════════════
    DEVICE / VOICE
 ══════════════════════════════════════ */
 function setDevice(device, btn){
@@ -1631,11 +1726,22 @@ function renderStoreDropdown(){
   +'<div class="store-dropdown-item" onclick="location.href=\'home.html\'"><span>↗</span> Manage Stores</div>'
 }
 function toggleStoreDropdown(){ document.getElementById('store-dropdown').classList.toggle('open') }
-function switchStore(id){
-  currentStoreId=id; isDemo=(id==='demo')
-  sessionStorage.setItem('ekart_current_store',id); localStorage.setItem('ekart_store_id',id)
+async function switchStore(id){
+  currentStoreId = id
+  isDemo = (id === 'demo')
+  sessionStorage.setItem('ekart_current_store', id)
+  localStorage.setItem('ekart_store_id', id)
   document.getElementById('store-dropdown').classList.remove('open')
-  renderStorePill(); renderStoreDropdown()
+  renderStorePill()
+  renderStoreDropdown()
+  // Reload the store's theme
+  await loadThemeForStore(id)
+  // Update preview URL
+  var storeObj = allStores.find(function(s){ return s._id === currentStoreId })
+  if (storeObj && storeObj.slug) {
+    document.getElementById('preview-url-text').textContent = 'ekart.aasaitech.in/' + storeObj.slug
+  }
+  renderPreview()
   toast('Store switched','success')
 }
 document.addEventListener('click',function(e){
@@ -1664,8 +1770,10 @@ async function publishSite(){
     })})
     await apiFetch('/stores/'+currentStoreId+'/theme/publish',{method:'POST'})
     log('published!', 'ok')
+    var storeObj = allStores.find(function(s){ return s._id === currentStoreId })
+    var slug = storeObj ? storeObj.slug : siteState.storeSlug
     toast('🚀 Published! Your store is live.','success')
-    addMsg('ai','🚀 <strong>Your store is live!</strong><br><br>Want to open it in a new tab?<br><a href="https://ekart.aasaitech.in/'+siteState.storeSlug+'" target="_blank" style="color:var(--accent2);text-decoration:underline">ekart.aasaitech.in/'+siteState.storeSlug+' ↗</a>', null)
+    addMsg('ai','🚀 <strong>Your store is live!</strong><br><br>Want to open it in a new tab?<br><a href="https://ekart.aasaitech.in/'+slug+'" target="_blank" style="color:var(--accent2);text-decoration:underline">ekart.aasaitech.in/'+slug+' ↗</a>', null)
     btn.textContent='✅ Published!'
     setTimeout(function(){btn.textContent='🚀 Publish';btn.disabled=false},3000)
   } catch(e){
@@ -1749,20 +1857,26 @@ window.addEventListener('DOMContentLoaded', async function(){
   renderStorePill()
   renderStoreDropdown()
 
-  if(allStores.length&&!isDemo){
-    // Show a brief indicator that stores are loaded
-    var storeName = (allStores.find(function(s){return s._id===currentStoreId})||{}).name||'your store'
-    log('ready with store: "'+storeName+'"', 'ok')
+  // Load the actual store theme/sections (this is the key fix)
+  if (currentStoreId && !isDemo) {
+    await loadThemeForStore(currentStoreId)
+  } else {
+    useDefaults()
+    renderPreview()
+    updateBuiltBar()
+    // Start brand step for demo
+    currentStep = 0
+    updateSteps()
+    showBrandStep()
   }
 
   setLoading('Ready!', 100)
   hideLoading()
 
-  // Start the builder flow
-  setTimeout(function(){
-    showBrandStep()
-    log('UI flow started', 'ok')
-  }, 300)
+  // Start the builder flow if not already started (when sections exist, step=6)
+  if (currentStep === 0) {
+    // Already in brand step from loadThemeForStore or useDefaults
+  }
 })
 </script>
 </body>
