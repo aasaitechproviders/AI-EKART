@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- TOKEN: run synchronously before anything else — mirrors website-builder.html pattern -->
+  <!-- TOKEN: run synchronously before anything else -->
   <script>
     ;(function(){
       var p = new URLSearchParams(location.search), t = p.get('token')
@@ -19,7 +19,7 @@
     })()
   </script>
 
-  <!-- apiFetch — identical to api.js inline so no external dependency -->
+  <!-- apiFetch — identical to api.js inline -->
   <script>
     function apiFetch(path, opts) {
       opts = opts || {}
@@ -264,6 +264,15 @@
     .loading-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .3s ease}
     .loading-text{font-size:11.5px;color:var(--text3);font-weight:600}
 
+    /* AUTH REQUIRED OVERLAY */
+    #auth-required{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:10000}
+    #auth-required.show{display:flex}
+    .auth-icon{font-size:48px;opacity:.5}
+    .auth-title{font-size:20px;font-weight:900;color:var(--text);margin-bottom:4px}
+    .auth-message{font-size:14px;color:var(--text3);max-width:280px;text-align:center;line-height:1.6}
+    .auth-btn{background:var(--accent);color:white;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+    .auth-btn:hover{background:#4f4de0;transform:scale(1.02);box-shadow:0 6px 24px rgba(91,92,246,.4)}
+
     /* MODAL */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
     .modal-overlay.open{opacity:1;pointer-events:all}
@@ -291,6 +300,14 @@
   <div class="loading-logo">e<em>K</em>art</div>
   <div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div>
   <div class="loading-text" id="loading-text">Initializing…</div>
+</div>
+
+<!-- AUTH REQUIRED (shown if not logged in) -->
+<div id="auth-required">
+  <div class="auth-icon">🔒</div>
+  <div class="auth-title">Authentication Required</div>
+  <div class="auth-message">You need to be logged in to use the AI Builder. Please log in to continue.</div>
+  <a href="home.html?return=/ai-builder.html" class="auth-btn">→ Go to Login</a>
 </div>
 
 <!-- TOPBAR -->
@@ -1800,7 +1817,7 @@ function toast(msg,type){
 }
 
 /* ══════════════════════════════════════
-   INIT — mirrors website-builder.html pattern exactly
+   INIT — now with strict authentication
 ══════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async function(){
   log('eKart AI Builder starting...', 'info')
@@ -1817,40 +1834,46 @@ window.addEventListener('DOMContentLoaded', async function(){
       authOk = true
       log('auth OK: '+(currentUser.name||currentUser.email), 'ok')
     } catch(e){
-      log('auth failed: '+e.message+' — running demo mode', 'err')
+      log('auth failed: '+e.message, 'err')
+      // auth failed — treat as not authenticated
     }
   }
 
-  if(authOk){
-    try {
-      setLoading('Loading stores…', 55)
-      var r = await apiFetch('/stores')
-      allStores = Array.isArray(r)?r:(r&&r.stores?r.stores:[])
-      log('stores loaded: '+allStores.length, allStores.length>0?'ok':'err')
+  // Strict authentication: if not authenticated, show auth overlay and stop
+  if (!authOk) {
+    log('authentication required — blocking UI', 'err')
+    setLoading('', 0)
+    hideLoading()
+    document.getElementById('auth-required').classList.add('show')
+    // Disable all interactive elements (they can't be used anyway)
+    document.querySelectorAll('button, .qa-btn, #chat-input, #send-btn, #mic-btn').forEach(function(el){
+      el.disabled = true
+    })
+    return // stop execution — builder will not initialize
+  }
 
-      currentStoreId = sessionStorage.getItem('ekart_current_store')||localStorage.getItem('ekart_store_id')
-      if(!currentStoreId||!allStores.find(function(s){return s._id===currentStoreId})){
-        currentStoreId = allStores.length?allStores[0]._id:null
-      }
-      if(currentStoreId){
-        sessionStorage.setItem('ekart_current_store',currentStoreId)
-        localStorage.setItem('ekart_store_id',currentStoreId)
-        log('selected store: '+currentStoreId, 'ok')
-      }
-      isDemo = false
-    } catch(e){
-      log('stores failed: '+e.message+' — demo mode', 'err')
-      allStores = [{_id:'demo',name:'Demo Store',slug:'demo-store'}]
-      currentStoreId = 'demo'
-      isDemo = true
+  // If we reach here, user is authenticated
+  try {
+    setLoading('Loading stores…', 55)
+    var r = await apiFetch('/stores')
+    allStores = Array.isArray(r)?r:(r&&r.stores?r.stores:[])
+    log('stores loaded: '+allStores.length, allStores.length>0?'ok':'err')
+
+    currentStoreId = sessionStorage.getItem('ekart_current_store')||localStorage.getItem('ekart_store_id')
+    if(!currentStoreId||!allStores.find(function(s){return s._id===currentStoreId})){
+      currentStoreId = allStores.length?allStores[0]._id:null
     }
-  } else {
-    // No token or auth failed — run demo mode like website-builder does
+    if(currentStoreId){
+      sessionStorage.setItem('ekart_current_store',currentStoreId)
+      localStorage.setItem('ekart_store_id',currentStoreId)
+      log('selected store: '+currentStoreId, 'ok')
+    }
+    isDemo = false
+  } catch(e) {
+    log('stores failed: '+e.message, 'err')
     allStores = [{_id:'demo',name:'Demo Store',slug:'demo-store'}]
     currentStoreId = 'demo'
     isDemo = true
-    log('demo mode — no token', 'err')
-    toast('No login detected — running in preview mode. Some features require login.','error')
   }
 
   setLoading('Building UI…', 80)
@@ -1864,7 +1887,7 @@ window.addEventListener('DOMContentLoaded', async function(){
     useDefaults()
     renderPreview()
     updateBuiltBar()
-    // Start brand step for demo
+    // Start brand step for demo (but demo should not happen because we already blocked non-auth? Actually isDemo is only true if stores fetch failed, which is rare; but for completeness we handle)
     currentStep = 0
     updateSteps()
     showBrandStep()
@@ -1873,10 +1896,8 @@ window.addEventListener('DOMContentLoaded', async function(){
   setLoading('Ready!', 100)
   hideLoading()
 
-  // Start the builder flow if not already started (when sections exist, step=6)
-  if (currentStep === 0) {
-    // Already in brand step from loadThemeForStore or useDefaults
-  }
+  // If there were sections already (existing store), step is already set in loadThemeForStore
+  // If not, we are in brand step from above or loadThemeForStore triggered it.
 })
 </script>
 </body>
