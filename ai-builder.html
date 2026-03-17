@@ -32,6 +32,16 @@
     .tb-store-pill{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);flex-shrink:0;transition:all .15s}
     .tb-store-pill:hover{border-color:var(--accent)}
     .tb-store-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+    .tb-store-chevron{color:var(--text3);font-size:10px;flex-shrink:0}
+    .tb-store-pill.no-store{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.06)}
+    .tb-store-pill.no-store .tb-store-dot{background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,.6)}
+    .store-dropdown{position:absolute;top:calc(var(--topbar-h) + 4px);left:135px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:600;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+    .store-dropdown.open{display:block}
+    .store-dropdown-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:600;color:var(--text2)}
+    .store-dropdown-item:hover{background:var(--surface3);color:var(--text)}
+    .store-dropdown-item.active{color:var(--accent2)}
+    .store-dropdown-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+    .store-dropdown-divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     .tb-spacer{flex:1}
     .tb-unsaved{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--amber);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);padding:4px 10px;border-radius:6px;opacity:0;transition:opacity .3s;white-space:nowrap}
     .tb-unsaved.show{opacity:1}
@@ -156,10 +166,12 @@
 <div id="topbar">
   <a class="tb-logo" href="home.html">e<em>K</em>art</a>
   <div class="tb-badge"><div class="tb-badge-dot"></div>AI Builder</div>
-  <div class="tb-store-pill" id="store-pill">
-    <div class="tb-store-dot"></div>
+  <div class="tb-store-pill" id="store-pill" onclick="toggleStoreDropdown()">
+    <div class="tb-store-dot" id="store-dot"></div>
     <span id="store-name-display">Loading…</span>
+    <span class="tb-store-chevron">▾</span>
   </div>
+  <div class="store-dropdown" id="store-dropdown"></div>
   <div class="tb-spacer"></div>
   <div class="tb-unsaved" id="unsaved-indicator"><span>●</span> Unsaved changes</div>
   <button class="tb-btn tb-btn-ghost" onclick="window.location='website-builder.html'" title="Switch to manual builder">✏️ Manual Editor</button>
@@ -364,40 +376,124 @@ const THEME_PRESETS = {
    INIT
 ═══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const hasToken = !!localStorage.getItem('ekart_token')
-    if (hasToken) {
-      try { currentUser = await apiFetch('/auth/me') } catch(e) { console.warn('Auth:', e.message) }
-    }
-    try {
-      const r = await apiFetch('/stores')
-      allStores = Array.isArray(r) ? r : (r?.stores || [])
-    } catch(e) { allStores = [{_id:'demo',name:'Demo Store',slug:'demo-store'}] }
-
-    currentStoreId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
-    if (!currentStoreId || !allStores.find(s=>s._id===currentStoreId)) currentStoreId = allStores[0]?._id || null
-    if (currentStoreId) {
-      sessionStorage.setItem('ekart_current_store', currentStoreId)
-      localStorage.setItem('ekart_store_id', currentStoreId)
-    }
-
-    updateStorePill()
-
-    if (currentStoreId && currentStoreId !== 'demo') {
-      await loadTheme()
-    }
-
-    renderPreview()
-  } catch(e) {
-    console.error('Init error:', e)
-    renderPreview()
+  // Auth check first
+  const token = localStorage.getItem('ekart_token')
+  if (!token) {
+    window.location.href = 'index.html'
+    return
   }
+
+  try {
+    currentUser = await apiFetch('/auth/me')
+  } catch(e) {
+    console.warn('Auth failed:', e.message)
+    localStorage.removeItem('ekart_token')
+    window.location.href = 'index.html'
+    return
+  }
+
+  // Load stores for THIS user
+  try {
+    const r = await apiFetch('/stores')
+    allStores = Array.isArray(r) ? r : (r?.stores || [])
+  } catch(e) {
+    console.error('Failed to load stores:', e.message)
+    allStores = []
+  }
+
+  // Resolve current store — prefer saved ID, fall back to first store
+  const savedId = sessionStorage.getItem('ekart_current_store') || localStorage.getItem('ekart_store_id')
+  if (savedId && allStores.find(s => s._id === savedId)) {
+    currentStoreId = savedId
+  } else if (allStores.length > 0) {
+    currentStoreId = allStores[0]._id
+  } else {
+    currentStoreId = null
+  }
+
+  if (currentStoreId) {
+    sessionStorage.setItem('ekart_current_store', currentStoreId)
+    localStorage.setItem('ekart_store_id', currentStoreId)
+  }
+
+  updateStorePill()
+  renderStoreDropdown()
+
+  if (currentStoreId) {
+    await loadTheme()
+  } else {
+    // No stores — show warning in chat
+    document.getElementById('welcome-screen')?.remove()
+    appendMessageHTML('ai', `⚠️ <b>No stores found.</b> Please <a href="home.html" style="color:var(--accent2);text-decoration:underline">create a store first</a>, then come back here.`)
+  }
+
+  renderPreview()
 })
 
 function updateStorePill() {
   const s = allStores.find(x => x._id === currentStoreId)
-  document.getElementById('store-name-display').textContent = s?.name || 'Select Store'
-  document.getElementById('preview-url-text').textContent = `ekart.aasaitech.in/${s?.slug || 'your-store'}`
+  const pill = document.getElementById('store-pill')
+  const dot = document.getElementById('store-dot')
+  if (s) {
+    document.getElementById('store-name-display').textContent = s.name
+    document.getElementById('preview-url-text').textContent = `ekart.aasaitech.in/${s.slug || 'your-store'}`
+    pill.classList.remove('no-store')
+    if (dot) { dot.style.background = 'var(--green)'; dot.style.boxShadow = '0 0 6px rgba(34,197,94,.6)' }
+  } else {
+    document.getElementById('store-name-display').textContent = allStores.length ? 'Select Store' : 'No Stores'
+    document.getElementById('preview-url-text').textContent = 'ekart.aasaitech.in/your-store'
+    pill.classList.add('no-store')
+    if (dot) { dot.style.background = 'var(--amber)'; dot.style.boxShadow = '0 0 6px rgba(245,158,11,.6)' }
+  }
+}
+
+function renderStoreDropdown() {
+  const dd = document.getElementById('store-dropdown')
+  if (!dd) return
+  if (!allStores.length) {
+    dd.innerHTML = `<div class="store-dropdown-item" style="opacity:.5;cursor:default">No stores yet</div><hr class="store-dropdown-divider"><div class="store-dropdown-item" onclick="window.location='home.html'">＋ Create a Store</div>`
+    return
+  }
+  dd.innerHTML = allStores.map(s => `
+    <div class="store-dropdown-item ${s._id === currentStoreId ? 'active' : ''}" onclick="switchStore('${s._id}')">
+      <div class="store-dropdown-dot"></div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(s.name)}</span>
+      ${s._id === currentStoreId ? '<span style="font-size:10px;color:var(--accent2)">✓</span>' : ''}
+    </div>`).join('')
+    + `<hr class="store-dropdown-divider">
+       <div class="store-dropdown-item" onclick="window.location='home.html'"><span>＋</span> Manage Stores</div>`
+}
+
+function toggleStoreDropdown() {
+  document.getElementById('store-dropdown').classList.toggle('open')
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('#store-pill') && !e.target.closest('#store-dropdown')) {
+    document.getElementById('store-dropdown')?.classList.remove('open')
+  }
+})
+
+async function switchStore(id) {
+  if (id === currentStoreId) { toggleStoreDropdown(); return }
+  currentStoreId = id
+  sessionStorage.setItem('ekart_current_store', id)
+  localStorage.setItem('ekart_store_id', id)
+  document.getElementById('store-dropdown').classList.remove('open')
+  updateStorePill()
+  renderStoreDropdown()
+  // Reset state for new store
+  sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  themeData = {themeId:'modern',primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',cardBg:'#13131e',navBg:'#0e0e17',font:'Outfit',cols:'3',radius:'12px',btnStyle:'rounded',cardStyle:'classic',cardSize:'medium',announcementText:'✨ Free shipping on orders over ₹999!',footerText:'© 2025 My Store.'}
+  chatHistory = []
+  changeCount = 0
+  document.getElementById('changes-bar').classList.remove('show')
+  markUnsaved(false)
+  await loadTheme()
+  renderPreview()
+  appendMessage('ai', `✅ Switched to "${allStores.find(s=>s._id===id)?.name}". Ready to help you design it!`)
+  toast(`Switched store`, 'success')
 }
 
 async function loadTheme() {
