@@ -170,7 +170,6 @@
     .card-size-opt{border:1.5px solid var(--border2);border-radius:8px;padding:10px 4px 8px;cursor:pointer;text-align:center;transition:all .15s;user-select:none;display:flex;flex-direction:column;align-items:center;gap:4px}
     .card-size-opt:hover{border-color:var(--accent);background:rgba(91,92,246,.04)}
     .card-size-opt.active{border-color:var(--accent);background:rgba(91,92,246,.1)}
-    /* Visual previews for each size */
     .card-size-preview{width:100%;height:44px;border-radius:5px;overflow:hidden;position:relative;background:var(--surface3);display:flex;flex-direction:column;gap:2px;padding:3px}
     .card-size-preview-img{background:var(--border2);border-radius:3px;flex-shrink:0}
     .card-size-preview-line{background:var(--border3);border-radius:2px;width:70%;height:2px;margin-top:1px}
@@ -435,13 +434,16 @@
 <div id="toast-container"></div>
 
 <script>
-/* ═══════════════ STATE ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
 let currentUser=null,allStores=[],currentStoreId=null
 let currentDevice='desktop',activeLeftTab='sections',activeSectionId=null,hasUnsaved=false
 let selectedPaletteId=null
 let previewZoom=100
 let removedSectionBackup=null
 let undoTimer=null
+let previewDebounceTimer=null   // FIX: debounce rapid preview rebuilds
 
 let themeData={
   themeId:'modern',primaryColor:'#5b5cf6',bgColor:'#09090f',textColor:'#f1f5f9',
@@ -452,7 +454,11 @@ let themeData={
 }
 let sections=[]
 
-/* ═══════════════ CARD SIZE — synced with shop.html CARD_SIZE_VARS ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   CARD SIZE TOKENS — must match shop.html
+   FIX: These are used ONLY for per-section overrides.
+        When a section uses the GLOBAL size, these vars come from :root.
+═══════════════════════════════════════════════════════════════ */
 const CARD_SIZE_CSS={
   small:{
     '--pv-card-aspect':'1/1',
@@ -550,7 +556,9 @@ const FRONTEND_TO_BACKEND={navbar:'navbar',announcement:'announcement',hero:'her
 function resolveFrontendType(bt){if(SECTION_DEFS[bt])return bt;return BACKEND_TYPE_ALIASES[bt]||bt}
 function getSectionDef(type){return SECTION_DEFS[type]||SECTION_DEFS[resolveFrontendType(type)]||{icon:'📦',label:type,groups:[]}}
 
-/* ═══════════════ SECTION DEFINITIONS ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   SECTION DEFINITIONS
+═══════════════════════════════════════════════════════════════ */
 const SECTION_DEFS={
   announcement:{icon:'📢',label:'Announcement Bar',groups:[{label:'Content',fields:[{key:'text',label:'Message',type:'text',placeholder:'✨ Free shipping on orders over ₹999!'},{key:'linkText',label:'Link Text (optional)',type:'text',placeholder:'Shop Now'},{key:'linkUrl',label:'Link URL',type:'text',placeholder:'#products'}]},{label:'Style',fields:[{key:'bgColor',label:'Background Color',type:'color'},{key:'textColor',label:'Text Color',type:'color'},{key:'textSize',label:'Text Size',type:'select',opts:['small','normal','large']},{key:'bold',label:'Bold Text',type:'select',opts:['yes','no']},{key:'closable',label:'Allow Dismiss',type:'select',opts:['no','yes']}]}]},
   navbar:{icon:'🔝',label:'Navigation Bar',groups:[{label:'Branding',fields:[{key:'logoText',label:'Logo Text',type:'text',placeholder:'My Store'},{key:'logoColor',label:'Logo Color',type:'color'},{key:'tagline',label:'Tagline (optional)',type:'text',placeholder:'Quality Products'}]},{label:'Navigation Links',fields:[{key:'link1Text',label:'Link 1 Label',type:'text',placeholder:'Home'},{key:'link1Url',label:'Link 1 URL',type:'text',placeholder:'#'},{key:'link2Text',label:'Link 2 Label',type:'text',placeholder:'Products'},{key:'link2Url',label:'Link 2 URL',type:'text',placeholder:'#products'},{key:'link3Text',label:'Link 3 Label',type:'text',placeholder:'Categories'},{key:'link3Url',label:'Link 3 URL',type:'text',placeholder:'#categories'},{key:'link4Text',label:'Link 4 Label',type:'text',placeholder:'About'},{key:'link4Url',label:'Link 4 URL',type:'text',placeholder:'#about'},{key:'link5Text',label:'Link 5 (optional)',type:'text',placeholder:'Blog'},{key:'link5Url',label:'Link 5 URL',type:'text',placeholder:'#blog'}]},{label:'Appearance',fields:[{key:'bgColor',label:'Background',type:'color'},{key:'linkColor',label:'Link Color',type:'color'}]},{label:'Options',fields:[{key:'showCart',label:'Show Cart Button',type:'select',opts:['yes','no']},{key:'cartText',label:'Cart Button Text',type:'text',placeholder:'Cart'},{key:'sticky',label:'Sticky on Scroll',type:'select',opts:['yes','no']}]}]},
@@ -587,7 +595,9 @@ const DEFAULT_SECTIONS=[
   {id:'sec_announcement',type:'announcement',enabled:true,data:{text:'✨ Free shipping on all orders above ₹999!',bgColor:'#5b5cf6',textColor:'#ffffff'}},
   {id:'sec_navbar',type:'navbar',enabled:true,data:{logoText:'My Store',showCart:'yes',sticky:'yes',link1Text:'Home',link1Url:'#',link2Text:'Products',link2Url:'#products',link3Text:'Categories',link3Url:'#categories',link4Text:'About',link4Url:'#about',cartText:'Cart'}},
   {id:'sec_hero',type:'hero',enabled:true,data:{heading:'Welcome to our Store',subheading:'Discover amazing products at the best prices. Fast delivery across India.',ctaText:'Shop Now',ctaLink:'#products',textAlign:'center',size:'normal'}},
-  {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',showOldPrice:'yes',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products',cardStyle:'classic',cardSize:'medium'}},
+  /* FIX: Do NOT pre-set cardStyle/cardSize in defaults so global theme values take effect by default.
+     Per-section overrides are only applied when explicitly changed by the user. */
+  {id:'sec_featured',type:'featured',enabled:true,data:{title:'Featured Products',count:'8',columns:'3',showOldPrice:'yes',showBadge:'no',btnText:'Add to Cart',viewAllText:'View All Products'}},
   {id:'sec_categories',type:'categories',enabled:true,data:{title:'Browse by Category',columns:'4',style:'image',showCount:'yes'}},
   {id:'sec_banner',type:'banner',enabled:false,data:{heading:'Limited Time Offer',subtext:'Get 20% off your first order. Use code WELCOME20',ctaText:'Claim Offer',layout:'center'}},
   {id:'sec_trustbadges',type:'trustbadges',enabled:true,data:{badge1:'Free Shipping',badge1sub:'On orders above ₹499',badge1Icon:'🚚',badge2:'Secure Payment',badge2sub:'100% safe & encrypted',badge2Icon:'🔒',badge3:'Easy Returns',badge3sub:'30-day return policy',badge3Icon:'↩️',badge4:'24/7 Support',badge4sub:'Always here to help',badge4Icon:'💬',layout:'row'}},
@@ -611,7 +621,9 @@ const ADD_SECTION_TYPES=[
 
 const COLOR_PALETTE=['#5b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#8b5cf6','#f97316','#c9a84c','#111111']
 
-/* ═══════════════ KEYBOARD SHORTCUTS ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════════════════════ */
 document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();if(hasUnsaved)saveAndPublish();return}
   if(e.key==='Escape'){
@@ -621,11 +633,15 @@ document.addEventListener('keydown',e=>{
   }
 })
 
-/* ═══════════════ LOADING ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   LOADING
+═══════════════════════════════════════════════════════════════ */
 function setLoading(text,pct){const f=document.getElementById('loading-fill'),t=document.getElementById('loading-text');if(f)f.style.width=pct+'%';if(t)t.textContent=text}
 function hideLoading(){setTimeout(()=>document.getElementById('loading-overlay').classList.add('hidden'),400)}
 
-/* ═══════════════ INIT ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded',async()=>{
   try{
     setLoading('Authenticating…',15)
@@ -660,21 +676,29 @@ window.addEventListener('DOMContentLoaded',async()=>{
   }
 })
 
-/* ═══════════════ STORE UI ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   STORE UI
+═══════════════════════════════════════════════════════════════ */
 function renderStorePill(){const s=allStores.find(x=>x._id===currentStoreId);document.getElementById('store-name-display').textContent=s?.name||'Select Store';document.getElementById('preview-url-text').textContent=`ekart.aasaitech.in/${s?.slug||'your-store'}`}
 function renderStoreDropdown(){document.getElementById('store-dropdown').innerHTML=allStores.map(s=>`<div class="store-dropdown-item ${s._id===currentStoreId?'active':''}" onclick="switchStore('${s._id}')"><div class="store-dropdown-dot"></div>${escHtml(s.name)}</div>`).join('')+`<hr style="border:none;border-top:1px solid var(--border);margin:4px 0"><div class="store-dropdown-item" onclick="window.location='home.html'"><span>+</span> Manage Stores</div>`}
 function toggleStoreDropdown(){document.getElementById('store-dropdown').classList.toggle('open')}
 document.addEventListener('click',e=>{if(!e.target.closest('#store-pill')&&!e.target.closest('#store-dropdown'))document.getElementById('store-dropdown').classList.remove('open')})
 async function switchStore(id){currentStoreId=id;sessionStorage.setItem('ekart_current_store',id);localStorage.setItem('ekart_store_id',id);document.getElementById('store-dropdown').classList.remove('open');renderStorePill();renderStoreDropdown();await loadThemeForStore(id);renderSettingsPanel()}
 
-/* ═══════════════ ZOOM ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   ZOOM
+═══════════════════════════════════════════════════════════════ */
 function zoomPreview(delta){
   previewZoom=Math.max(50,Math.min(150,previewZoom+delta))
   document.getElementById('zoom-label').textContent=previewZoom+'%'
   document.getElementById('device-shell').style.transform=`scale(${previewZoom/100})`
 }
 
-/* ═══════════════ LOAD / SAVE ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   LOAD / SAVE
+   VERIFIED: Only saveAndPublish() ever calls apiFetch with
+   mutating methods (PUT/POST). All live edits are frontend-only.
+═══════════════════════════════════════════════════════════════ */
 async function loadThemeForStore(storeId){
   if(!storeId){useDefaults();return}
   try{const data=await apiFetch(`/stores/${storeId}/theme`);const doc=data.draft||data.published||null;applyThemeFromBackend(doc)}
@@ -684,7 +708,12 @@ async function loadThemeForStore(storeId){
   try{markThemeActive(themeData.themeId||'modern')}catch(e){}
   markUnsaved(false)
 }
-function useDefaults(){sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS));themeData={...THEMES[0].settings,themeId:'modern',cardStyle:'classic',cardSize:'medium',announcementText:'✨ Free shipping on orders over ₹999!',footerText:'© 2025 My Store.'}}
+
+function useDefaults(){
+  sections=JSON.parse(JSON.stringify(DEFAULT_SECTIONS))
+  themeData={...THEMES[0].settings,themeId:'modern',announcementText:'✨ Free shipping on orders over ₹999!',footerText:'© 2025 My Store.'}
+}
+
 function applyThemeFromBackend(doc){
   if(!doc){useDefaults();return}
   const s=doc.settings||{}
@@ -769,10 +798,14 @@ async function saveAndPublish(){
 }
 function markUnsaved(val){hasUnsaved=val;document.getElementById('unsaved-indicator').classList.toggle('show',val);window.onbeforeunload=val?()=>'You have unsaved changes. Leave without saving?':null}
 
-/* ═══════════════ LEFT PANEL TABS ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   LEFT PANEL TABS
+═══════════════════════════════════════════════════════════════ */
 function switchLeftTab(tab,el){activeLeftTab=tab;document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('tab-sections').style.display=tab==='sections'?'':'none';document.getElementById('tab-themes').style.display=tab==='themes'?'':'none';document.getElementById('tab-settings').style.display=tab==='settings'?'':'none';if(tab==='settings')renderSettingsPanel()}
 
-/* ═══════════════ SECTIONS LIST ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   SECTIONS LIST
+═══════════════════════════════════════════════════════════════ */
 function renderSectionsList(){
   const wrap=document.getElementById('sections-list-wrap');if(!wrap)return
   const enabled=sections.filter(s=>s.enabled),disabled=sections.filter(s=>!s.enabled)
@@ -842,7 +875,9 @@ function moveSectionDown(id){
   markUnsaved(true);renderPreview()
 }
 
-/* ═══════════════ SECTION EDITOR ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   SECTION EDITOR
+═══════════════════════════════════════════════════════════════ */
 function openSectionEditor(id){
   const s=sections.find(x=>x.id===id);if(!s)return;activeSectionId=id
   const def=getSectionDef(s.type)
@@ -857,7 +892,7 @@ function openSectionEditor(id){
       <span class="editor-panel-title">${def.label}</span>
       <span style="font-size:16px">${def.icon}</span>
     </div>
-    <div class="editor-fields" id="editor-fields-wrap">${renderEditorFields(def,s.data)}</div>
+    <div class="editor-fields" id="editor-fields-wrap">${renderEditorFields(def,s.data,id)}</div>
     <div class="editor-footer">
       <button class="ef-btn ef-btn-ghost ef-btn-icon" onclick="moveSectionUp('${id}');reopenEditor('${id}')" title="Move up" ${canUp?'':'disabled style="opacity:.35;cursor:not-allowed"'}>↑</button>
       <button class="ef-btn ef-btn-ghost ef-btn-icon" onclick="moveSectionDown('${id}');reopenEditor('${id}')" title="Move down" ${canDown?'':'disabled style="opacity:.35;cursor:not-allowed"'}>↓</button>
@@ -869,14 +904,21 @@ function openSectionEditor(id){
 }
 function reopenEditor(id){renderSectionsList();openSectionEditor(id)}
 function showSectionsListView(){activeSectionId=null;document.getElementById('tab-sections').innerHTML=`<div class="sections-panel" id="sections-list-wrap"></div>`;renderSectionsList();clearHighlight()}
-function renderEditorFields(def,data){
+
+/* FIX: Pass sectionId to renderEditorFields so picker callbacks can use it */
+function renderEditorFields(def,data,sectionId){
   const groups=def.groups||[]
   if(!groups.length)return`<div style="padding:28px 14px;text-align:center;color:var(--text3)"><div style="font-size:28px;margin-bottom:10px">🔒</div><div style="font-size:13px;color:var(--text2);font-weight:600">No editable fields</div></div>`
-  return groups.map(g=>`<div class="field-group"><span class="field-group-label">${g.label}</span>${g.fields.map(f=>renderField(f,data[f.key]??'')).join('')}</div>`).join('')
+  return groups.map(g=>`<div class="field-group"><span class="field-group-label">${g.label}</span>${g.fields.map(f=>renderField(f,data[f.key]??'',sectionId)).join('')}</div>`).join('')
 }
 
-/* ═══════════════ FIELD RENDERER — includes card_size_picker ═══════════════ */
-function renderField(f,value){
+/* ═══════════════════════════════════════════════════════════════
+   FIELD RENDERER
+   FIX: card_style_picker and card_size_picker now use unique
+   container IDs scoped to the section, with dedicated JS handler
+   functions instead of inline querySelectorAll hacks.
+═══════════════════════════════════════════════════════════════ */
+function renderField(f,value,sectionId){
   const id=`field_${f.key}`;let input='';const esc=escHtml(String(value))
 
   if(f.type==='text'||f.type==='number'){
@@ -891,49 +933,121 @@ function renderField(f,value){
   }else if(f.type==='range'){
     const v=parseInt(value)||0;const sfx=f.suffix||''
     input=`<div class="field-range-wrap"><input type="range" class="field-range" id="${id}" min="${f.min||0}" max="${f.max||100}" step="${f.step||1}" value="${v}" oninput="document.getElementById('${id}_v').textContent=this.value+'${sfx}';liveUpdateField('${f.key}',this.value+'${sfx}')"><span class="field-range-val" id="${id}_v">${v}${sfx}</span></div>`
+
+  /* ── CARD STYLE PICKER — FIX: scoped container ID + dedicated handler ── */
   }else if(f.type==='card_style_picker'){
     const effectiveStyle=value||themeData.cardStyle||'classic'
-    input=`<div class="card-style-grid">${CARD_STYLES.map(s=>`<div class="card-style-opt${effectiveStyle===s.id?' active':''}" onclick="liveUpdateField('${f.key}','${s.id}');document.querySelectorAll('#editor-fields-wrap .card-style-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>`
+    const containerId=`csg_${sectionId}`
+    input=`<div class="card-style-grid" id="${containerId}">${CARD_STYLES.map(s=>`<div class="card-style-opt${effectiveStyle===s.id?' active':''}" data-style-id="${s.id}" onclick="pickCardStyle('${containerId}','${f.key}','${s.id}',this)"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>`
 
-  /* ── CARD SIZE PICKER — NEW ── */
+  /* ── CARD SIZE PICKER — FIX: scoped container ID + dedicated handler ── */
   }else if(f.type==='card_size_picker'){
     const effectiveSize=value||themeData.cardSize||'medium'
-    // Visual previews: small=square compact, medium=portrait medium, large=portrait tall
+    const containerId=`cszg_${sectionId}`
     const previews={
-      small: `<div class="card-size-preview" style="padding:2px"><div class="card-size-preview-img" style="flex:1;background:var(--border2)"></div><div style="padding:2px 2px 0"><div class="card-size-preview-line" style="width:70%;height:2px;margin:1px 0"></div><div class="card-size-preview-line short" style="height:2px;margin:1px 0 2px"></div><div class="card-size-preview-btn" style="height:3px;background:var(--accent);border-radius:1px;width:80%"></div></div></div>`,
-      medium:`<div class="card-size-preview" style="padding:2px"><div class="card-size-preview-img" style="flex:1.4;background:var(--border2)"></div><div style="padding:2px 2px 0"><div class="card-size-preview-line" style="width:80%;height:2px;margin:1px 0"></div><div class="card-size-preview-line short" style="height:2px;margin:1px 0 2px"></div><div class="card-size-preview-btn" style="height:4px;background:var(--accent);border-radius:1px;width:85%"></div></div></div>`,
-      large: `<div class="card-size-preview" style="padding:2px"><div class="card-size-preview-img" style="flex:2;background:var(--border2)"></div><div style="padding:3px 2px 0"><div class="card-size-preview-line" style="width:85%;height:2.5px;margin:1px 0"></div><div class="card-size-preview-line short" style="height:2px;margin:1px 0 2px"></div><div class="card-size-preview-btn" style="height:5px;background:var(--accent);border-radius:1px;width:88%"></div></div></div>`,
+      small:`<div class="card-size-preview" style="padding:2px"><div style="flex:1;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:70%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:45%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:3px;background:var(--accent);border-radius:1px;width:80%"></div></div></div>`,
+      medium:`<div class="card-size-preview" style="padding:2px"><div style="flex:1.4;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:80%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:50%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:4px;background:var(--accent);border-radius:1px;width:85%"></div></div></div>`,
+      large:`<div class="card-size-preview" style="padding:2px"><div style="flex:2;background:var(--border2);border-radius:2px"></div><div style="padding:3px 2px 0"><div style="width:85%;height:2.5px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:55%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:5px;background:var(--accent);border-radius:1px;width:88%"></div></div></div>`,
     }
-    input=`<div class="card-size-grid">${CARD_SIZES.map(s=>`
-      <div class="card-size-opt${effectiveSize===s.id?' active':''}"
-        onclick="liveUpdateField('${f.key}','${s.id}');document.querySelectorAll('#editor-fields-wrap .card-size-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">
-        ${previews[s.id]||''}
-        <span class="card-size-label">${s.label}</span>
-        <span class="card-size-desc">${s.desc}</span>
-      </div>`).join('')}</div>`
+    input=`<div class="card-size-grid" id="${containerId}">${CARD_SIZES.map(s=>`<div class="card-size-opt${effectiveSize===s.id?' active':''}" data-size-id="${s.id}" onclick="pickCardSize('${containerId}','${f.key}','${s.id}',this)">${previews[s.id]||''}<span class="card-size-label">${s.label}</span><span class="card-size-desc">${s.desc}</span></div>`).join('')}</div>`
   }
 
   return`<div class="field-row"><div class="field-label">${f.label}</div>${input}</div>`
 }
 
-function liveUpdateField(key,value){if(!activeSectionId)return;const s=sections.find(x=>x.id===activeSectionId);if(!s)return;s.data[key]=value;markUnsaved(true);try{renderPreview()}catch(e){console.error('Preview update failed:',e)}}
+/* ═══════════════════════════════════════════════════════════════
+   PICKER HANDLERS — FIX: These replace the inline querySelectorAll
+   approach. They are scoped to the specific container so they
+   can't accidentally affect other pickers on the page.
+═══════════════════════════════════════════════════════════════ */
+
+/**
+ * FIX: Card style picker for per-section editor.
+ * Updates active class within the scoped container THEN updates
+ * section data and triggers preview. Uses requestAnimationFrame
+ * so the UI update is guaranteed to happen before preview rebuild.
+ */
+function pickCardStyle(containerId, fieldKey, styleId, clickedEl){
+  const container=document.getElementById(containerId)
+  if(container){
+    container.querySelectorAll('.card-style-opt').forEach(el=>el.classList.remove('active'))
+    clickedEl.classList.add('active')
+  }
+  liveUpdateField(fieldKey, styleId)
+}
+
+/**
+ * FIX: Card size picker for per-section editor.
+ * Same pattern as pickCardStyle.
+ */
+function pickCardSize(containerId, fieldKey, sizeId, clickedEl){
+  const container=document.getElementById(containerId)
+  if(container){
+    container.querySelectorAll('.card-size-opt').forEach(el=>el.classList.remove('active'))
+    clickedEl.classList.add('active')
+  }
+  liveUpdateField(fieldKey, sizeId)
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE UPDATE — FIX: Added debounce for text inputs to avoid
+   rebuilding preview on every keystroke.
+═══════════════════════════════════════════════════════════════ */
+function liveUpdateField(key, value){
+  if(!activeSectionId)return
+  const s=sections.find(x=>x.id===activeSectionId)
+  if(!s)return
+  s.data[key]=value
+  markUnsaved(true)
+  schedulePreviewUpdate()
+}
+
+/**
+ * FIX: Debounced preview scheduler.
+ * Immediate for picker changes (no typing lag), debounced for text/color inputs.
+ * This prevents iframe thrashing on rapid keystrokes.
+ */
+function schedulePreviewUpdate(immediate=false){
+  clearTimeout(previewDebounceTimer)
+  if(immediate){
+    try{renderPreview()}catch(e){console.error('Preview update failed:',e)}
+  }else{
+    previewDebounceTimer=setTimeout(()=>{
+      try{renderPreview()}catch(e){console.error('Preview update failed:',e)}
+    },80)
+  }
+}
+
 function applySectionChanges(id){toast('Section updated ✓','success');markUnsaved(true)}
 function resetSectionData(id){const s=sections.find(x=>x.id===id);const def=DEFAULT_SECTIONS.find(d=>d.type===s?.type);if(s&&def){s.data={...def.data};openSectionEditor(id);renderPreview();markUnsaved(true)}}
 
-/* ═══════════════ THEMES ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   THEMES
+═══════════════════════════════════════════════════════════════ */
 function renderThemesGrid(){document.getElementById('themes-grid').innerHTML=THEMES.map(t=>`<div class="theme-card" id="tcard_${t.id}" onclick="applyTheme('${t.id}')"><div class="theme-check">✓</div><div class="theme-preview">${t.previewHTML}</div><div class="theme-name">${t.name}</div></div>`).join('')}
 function markThemeActive(id){document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('active'));document.getElementById('tcard_'+id)?.classList.add('active')}
 function applyTheme(id){const t=THEMES.find(x=>x.id===id);if(!t)return;themeData={...themeData,...t.settings,themeId:id};markThemeActive(id);renderPreview();markUnsaved(true);renderSettingsPanel();toast(`"${t.name}" applied!`,'success')}
 
-/* ═══════════════ RESET COLORS MODAL ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   RESET COLORS MODAL
+═══════════════════════════════════════════════════════════════ */
 function openResetModal(){selectedPaletteId=null;document.getElementById('palette-presets-grid').innerHTML=COLOR_PALETTES.map(p=>`<div class="palette-preset" id="pp_${p.id}" onclick="selectPalette('${p.id}')"><div class="palette-swatches">${p.colors.map(c=>`<div class="palette-sw" style="background:${c}"></div>`).join('')}</div><div class="palette-name">${p.name}</div></div>`).join('');document.getElementById('reset-modal').classList.add('open')}
 function closeResetModal(){document.getElementById('reset-modal').classList.remove('open');selectedPaletteId=null}
 function selectPalette(id){selectedPaletteId=id;document.querySelectorAll('.palette-preset').forEach(p=>p.classList.remove('selected'));document.getElementById('pp_'+id)?.classList.add('selected')}
 function applySelectedPalette(){if(!selectedPaletteId){toast('Please select a palette first','error');return};const p=COLOR_PALETTES.find(x=>x.id===selectedPaletteId);if(!p)return;Object.assign(themeData,p.settings);markUnsaved(true);renderSettingsPanel();renderPreview();closeResetModal();toast(`"${p.name}" palette applied!`,'success')}
 document.getElementById('reset-modal').addEventListener('click',e=>{if(e.target===document.getElementById('reset-modal'))closeResetModal()})
 
-/* ═══════════════ SETTINGS PANEL ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   SETTINGS PANEL
+   FIX: Global card style/size pickers use scoped IDs and dedicated
+   updateGlobalCardStyle / updateGlobalCardSize handler functions.
+═══════════════════════════════════════════════════════════════ */
 function renderSettingsPanel(){
+  const cardSizePreviews={
+    small:`<div class="card-size-preview" style="padding:2px"><div style="flex:1;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:70%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:45%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:3px;background:var(--accent);border-radius:1px;width:80%"></div></div></div>`,
+    medium:`<div class="card-size-preview" style="padding:2px"><div style="flex:1.4;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:80%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:50%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:4px;background:var(--accent);border-radius:1px;width:85%"></div></div></div>`,
+    large:`<div class="card-size-preview" style="padding:2px"><div style="flex:2;background:var(--border2);border-radius:2px"></div><div style="padding:3px 2px 0"><div style="width:85%;height:2.5px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:55%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:5px;background:var(--accent);border-radius:1px;width:88%"></div></div></div>`,
+  }
   document.getElementById('settings-panel-content').innerHTML=`
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:12px 12px 0"><span class="panel-group-label" style="margin:0;padding:0">Brand Colors</span><button onclick="openResetModal()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">🎨 Reset Colors</button></div>
   <div style="padding:0 12px 8px">
@@ -949,44 +1063,71 @@ function renderSettingsPanel(){
   </div>
   <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
   <span class="panel-group-label" style="padding-top:12px">Layout & Shape</span>
-  <div class="field-row"><div class="field-label">Product Columns</div><select class="field-select" onchange="updateSetting('cols',this.value)">${['2','3','4'].map(v=>`<option value="${v}"${themeData.cols==v?' selected':''}>${v} Columns</option>`).join('')}</select></div>
-  <div class="field-row"><div class="field-label">Border Radius <span class="field-hint" id="radius-display">${themeData.radius}</span></div><div class="field-range-wrap"><input type="range" class="field-range" min="0" max="24" value="${parseInt(themeData.radius)||12}" oninput="const v=this.value+'px';updateSetting('radius',v);document.getElementById('radius-display').textContent=v"></div></div>
-  <div class="field-row"><div class="field-label">Button Style</div><select class="field-select" onchange="updateSetting('btnStyle',this.value)">${['rounded','pill','square'].map(v=>`<option value="${v}"${themeData.btnStyle===v?' selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div>
+  <div class="field-row"><div class="field-label">Product Columns</div><select class="field-select" onchange="updateThemeSetting('cols',this.value)">${['2','3','4'].map(v=>`<option value="${v}"${themeData.cols==v?' selected':''}>${v} Columns</option>`).join('')}</select></div>
+  <div class="field-row"><div class="field-label">Border Radius <span class="field-hint" id="radius-display">${themeData.radius}</span></div><div class="field-range-wrap"><input type="range" class="field-range" min="0" max="24" value="${parseInt(themeData.radius)||12}" oninput="const v=this.value+'px';updateThemeSetting('radius',v);document.getElementById('radius-display').textContent=v"></div></div>
+  <div class="field-row"><div class="field-label">Button Style</div><select class="field-select" onchange="updateThemeSetting('btnStyle',this.value)">${['rounded','pill','square'].map(v=>`<option value="${v}"${themeData.btnStyle===v?' selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div>
   </div>
   <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
   <span class="panel-group-label" style="padding-top:12px">Global Card Style</span>
   <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Default for all sections — overridable per section</div>
-  <div class="card-style-grid" id="global-card-style-grid">${CARD_STYLES.map(s=>`<div class="card-style-opt${themeData.cardStyle===s.id?' active':''}" onclick="updateSetting('cardStyle','${s.id}');syncCardStyleUI('${s.id}')"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>
+  <div class="card-style-grid" id="global-csg">${CARD_STYLES.map(s=>`<div class="card-style-opt${themeData.cardStyle===s.id?' active':''}" onclick="updateGlobalCardStyle('${s.id}',this)"><div class="card-style-preview ${s.icon}"></div><span class="cs-label">${s.name}</span></div>`).join('')}</div>
   </div>
   <div style="padding:0 12px 8px;border-top:1px solid var(--border)">
   <span class="panel-group-label" style="padding-top:12px">Global Card Size</span>
   <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Default size — overridable per section</div>
-  <div class="card-size-grid" id="global-card-size-grid">${CARD_SIZES.map(s=>{
-    const previews={
-      small:`<div class="card-size-preview" style="padding:2px"><div style="flex:1;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:70%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:45%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:3px;background:var(--accent);border-radius:1px;width:80%"></div></div></div>`,
-      medium:`<div class="card-size-preview" style="padding:2px"><div style="flex:1.4;background:var(--border2);border-radius:2px"></div><div style="padding:2px 2px 0"><div style="width:80%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:50%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:4px;background:var(--accent);border-radius:1px;width:85%"></div></div></div>`,
-      large:`<div class="card-size-preview" style="padding:2px"><div style="flex:2;background:var(--border2);border-radius:2px"></div><div style="padding:3px 2px 0"><div style="width:85%;height:2.5px;background:var(--border3);border-radius:1px;margin:1px 0"></div><div style="width:55%;height:2px;background:var(--border3);border-radius:1px;margin:1px 0 2px"></div><div style="height:5px;background:var(--accent);border-radius:1px;width:88%"></div></div></div>`,
-    }
-    return`<div class="card-size-opt${themeData.cardSize===s.id?' active':''}" onclick="updateSetting('cardSize','${s.id}');document.querySelectorAll('#global-card-size-grid .card-size-opt').forEach(e=>e.classList.remove('active'));this.classList.add('active')">${previews[s.id]}<span class="card-size-label">${s.label}</span><span class="card-size-desc">${s.desc}</span></div>`
-  }).join('')}</div>
+  <div class="card-size-grid" id="global-cszg">${CARD_SIZES.map(s=>`<div class="card-size-opt${themeData.cardSize===s.id?' active':''}" onclick="updateGlobalCardSize('${s.id}',this)">${cardSizePreviews[s.id]}<span class="card-size-label">${s.label}</span><span class="card-size-desc">${s.desc}</span></div>`).join('')}</div>
   </div>
   <div style="padding:0 12px 12px;border-top:1px solid var(--border)">
   <span class="panel-group-label" style="padding-top:12px">Store Info</span>
-  <div class="field-row"><div class="field-label">Announcement Bar Text</div><input type="text" class="field-input" value="${escHtml(themeData.announcementText)}" placeholder="Free shipping on orders over ₹999!" oninput="updateSetting('announcementText',this.value)"></div>
-  <div class="field-row"><div class="field-label">Footer Copyright</div><input type="text" class="field-input" value="${escHtml(themeData.footerText)}" placeholder="© 2025 My Store" oninput="updateSetting('footerText',this.value)"></div>
+  <div class="field-row"><div class="field-label">Announcement Bar Text</div><input type="text" class="field-input" value="${escHtml(themeData.announcementText)}" placeholder="Free shipping on orders over ₹999!" oninput="updateThemeSetting('announcementText',this.value)"></div>
+  <div class="field-row"><div class="field-label">Footer Copyright</div><input type="text" class="field-input" value="${escHtml(themeData.footerText)}" placeholder="© 2025 My Store" oninput="updateThemeSetting('footerText',this.value)"></div>
   </div>`
   loadFontForPreview(themeData.font)
 }
-function syncCardStyleUI(styleId){document.querySelectorAll('#global-card-style-grid .card-style-opt').forEach((el,i)=>{el.classList.toggle('active',CARD_STYLES[i]?.id===styleId)})}
-function onFontInput(val){themeData.font=val.trim()||'Outfit';updateSetting('font',themeData.font);showFontSuggestions(val);const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${themeData.font}',sans-serif`;badge.textContent=`Aa — ${themeData.font}`};loadFontForPreview(themeData.font)}
+
+/* FIX: Dedicated handlers for global card style/size in settings panel */
+function updateGlobalCardStyle(styleId, clickedEl){
+  const container=document.getElementById('global-csg')
+  if(container){
+    container.querySelectorAll('.card-style-opt').forEach(el=>el.classList.remove('active'))
+    clickedEl.classList.add('active')
+  }
+  updateThemeSetting('cardStyle', styleId)
+}
+
+function updateGlobalCardSize(sizeId, clickedEl){
+  const container=document.getElementById('global-cszg')
+  if(container){
+    container.querySelectorAll('.card-size-opt').forEach(el=>el.classList.remove('active'))
+    clickedEl.classList.add('active')
+  }
+  updateThemeSetting('cardSize', sizeId)
+}
+
+function onFontInput(val){themeData.font=val.trim()||'Outfit';updateThemeSetting('font',themeData.font);showFontSuggestions(val);const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${themeData.font}',sans-serif`;badge.textContent=`Aa — ${themeData.font}`};loadFontForPreview(themeData.font)}
 function showFontSuggestions(filter){const el=document.getElementById('font-suggestions');if(!el)return;const q=(filter||document.getElementById('font-free-input')?.value||'').toLowerCase();const matches=q?POPULAR_FONTS.filter(f=>f.toLowerCase().includes(q)).slice(0,8):POPULAR_FONTS.slice(0,8);el.innerHTML=matches.map(f=>`<div class="font-suggestion-item" onmousedown="selectFont('${f}')">${f}</div>`).join('');el.classList.add('open')}
 function hideFontSuggestions(){document.getElementById('font-suggestions')?.classList.remove('open')}
-function selectFont(f){themeData.font=f;const input=document.getElementById('font-free-input');if(input)input.value=f;const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${f}',sans-serif`;badge.textContent=`Aa — ${f}`};hideFontSuggestions();updateSetting('font',f);loadFontForPreview(f)}
+function selectFont(f){themeData.font=f;const input=document.getElementById('font-free-input');if(input)input.value=f;const badge=document.getElementById('font-preview-badge');if(badge){badge.style.fontFamily=`'${f}',sans-serif`;badge.textContent=`Aa — ${f}`};hideFontSuggestions();updateThemeSetting('font',f);loadFontForPreview(f)}
 function loadFontForPreview(fontName){const id='dyn-font-'+fontName.replace(/\s+/g,'-');if(!document.getElementById(id)){const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href=`https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700;900&display=swap`;document.head.appendChild(link)}}
-function colorField(label,key,val,withPalette=false){return`<div class="field-row"><div class="field-label">${label}</div><div class="field-color-row"><div class="field-color-swatch"><input type="color" id="s_${key}" value="${val||'#000000'}" oninput="updateSetting('${key}',this.value);document.getElementById('s_${key}_h').value=this.value"></div><input type="text" class="field-input" id="s_${key}_h" style="flex:1" value="${val||''}" placeholder="#000000" oninput="if(/^#[0-9a-fA-F]{3,6}$/.test(this.value)){const v=this.value.length===4?'#'+this.value[1]+this.value[1]+this.value[2]+this.value[2]+this.value[3]+this.value[3]:this.value;document.getElementById('s_${key}').value=v;updateSetting('${key}',v)}"></div>${withPalette?`<div class="color-palette">${COLOR_PALETTE.map(c=>`<div class="color-dot" style="background:${c}" onclick="updateSetting('primaryColor','${c}');document.getElementById('s_primaryColor').value='${c}';document.getElementById('s_primaryColor_h').value='${c}'"></div>`).join('')}</div>`:''}</div>`}
-function updateSetting(key,value){themeData[key]=value;markUnsaved(true);try{renderPreview()}catch(e){console.error('Preview update failed:',e)}}
+function colorField(label,key,val,withPalette=false){return`<div class="field-row"><div class="field-label">${label}</div><div class="field-color-row"><div class="field-color-swatch"><input type="color" id="s_${key}" value="${val||'#000000'}" oninput="updateThemeSetting('${key}',this.value);document.getElementById('s_${key}_h').value=this.value"></div><input type="text" class="field-input" id="s_${key}_h" style="flex:1" value="${val||''}" placeholder="#000000" oninput="if(/^#[0-9a-fA-F]{3,6}$/.test(this.value)){const v=this.value.length===4?'#'+this.value[1]+this.value[1]+this.value[2]+this.value[2]+this.value[3]+this.value[3]:this.value;document.getElementById('s_${key}').value=v;updateThemeSetting('${key}',v)}"></div>${withPalette?`<div class="color-palette">${COLOR_PALETTE.map(c=>`<div class="color-dot" style="background:${c}" onclick="updateThemeSetting('primaryColor','${c}');document.getElementById('s_primaryColor').value='${c}';document.getElementById('s_primaryColor_h').value='${c}'"></div>`).join('')}</div>`:''}</div>`}
 
-/* ═══════════════ ADD SECTION DRAWER ═══════════════ */
+/**
+ * FIX: Renamed from updateSetting to updateThemeSetting.
+ * Old name kept as alias for backwards compat.
+ * This ONLY updates themeData (global) and triggers preview.
+ * It does NOT touch sections[] or call any API.
+ */
+function updateThemeSetting(key,value){
+  themeData[key]=value
+  markUnsaved(true)
+  try{renderPreview()}catch(e){console.error('Preview update failed:',e)}
+}
+// Backwards-compatible alias
+const updateSetting=updateThemeSetting
+
+/* ═══════════════════════════════════════════════════════════════
+   ADD SECTION DRAWER
+═══════════════════════════════════════════════════════════════ */
 function renderAddSectionTypes(){document.getElementById('add-section-types').innerHTML=ADD_SECTION_TYPES.map(t=>`<div class="add-section-type" onclick="addSection('${t.type}','${t.name}','${t.icon}')"><span class="add-section-type-icon">${t.icon}</span><span class="add-section-type-name">${t.name}</span></div>`).join('')}
 function openAddDrawer(){document.getElementById('add-section-drawer').classList.add('open')}
 function closeAddDrawer(){document.getElementById('add-section-drawer').classList.remove('open')}
@@ -997,7 +1138,9 @@ function addSection(type,name,icon){
   closeAddDrawer();markUnsaved(true);activeSectionId=null;showSectionsListView();renderPreview()
 }
 
-/* ═══════════════ DRAG & DROP ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DRAG & DROP
+═══════════════════════════════════════════════════════════════ */
 let dragSrcId=null
 function initDragDrop(){
   document.querySelectorAll('.section-row[draggable]').forEach(row=>{
@@ -1009,15 +1152,21 @@ function initDragDrop(){
   })
 }
 
-/* ═══════════════ DEVICE ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DEVICE
+═══════════════════════════════════════════════════════════════ */
 function setDevice(device,btn){currentDevice=device;document.querySelectorAll('.tb-device-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const shell=document.getElementById('device-shell');const iframe=document.getElementById('preview-iframe');shell.className='device-shell '+device;iframe.height=device==='desktop'?720:device==='tablet'?900:800;previewZoom=100;document.getElementById('zoom-label').textContent='100%';shell.style.transform='';renderPreview()}
 function previewLive(){const s=allStores.find(x=>x._id===currentStoreId);window.open(s?.published_url||`https://ekart.aasaitech.in/${s?.slug||''}`,'_blank')}
 
-/* ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    PREVIEW RENDER
-   Key change: .tc-btn uses height:var(--pv-card-btn-h)
-   Key change: per-section cardSize applied as inline style vars on section element
-═══════════════════════════════════════════════════ */
+   FIX: Global :root gets card size vars from themeData.cardSize.
+   Per-section cardSize vars are ONLY applied as inline style when
+   the section has an EXPLICIT override different from the global.
+   This ensures:
+     - Global card size change → all sections update (via :root)
+     - Per-section override → only that section changes
+═══════════════════════════════════════════════════════════════ */
 function renderPreview(){
   const isMobile=currentDevice==='mobile'
   const isLight=isLightColor(themeData.bgColor||'#ffffff')
@@ -1025,15 +1174,16 @@ function renderPreview(){
   const fontName=themeData.font||'Outfit'
   const fontEnc=encodeURIComponent(fontName)
   const borderRgb=isLight?'0,0,0':'255,255,255'
-  const sizeVars=CARD_SIZE_CSS[themeData.cardSize]||CARD_SIZE_CSS.medium
-  const sizeVarsCSS=Object.entries(sizeVars).map(([k,v])=>`${k}:${v};`).join('')
-  const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
+  // Global size vars go on :root so ALL sections inherit unless overridden
+  const globalSizeVars=CARD_SIZE_CSS[themeData.cardSize]||CARD_SIZE_CSS.medium
+  const globalSizeVarsCSS=Object.entries(globalSizeVars).map(([k,v])=>`${k}:${v};`).join('')
+  const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile,borderRgb,btnRadius,fontName)).join('\n')
 
   const html=`<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=${fontEnc}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--primary:${themeData.primaryColor||'#5b5cf6'};--bg:${themeData.bgColor||'#09090f'};--text:${themeData.textColor||'#f1f5f9'};--card-bg:${themeData.cardBg||'#13131e'};--nav-bg:${themeData.navBg||'#0e0e17'};--radius:${themeData.radius||'12px'};--btn-r:${btnRadius};--font:'${fontName}',sans-serif;--cols:${isMobile?2:parseInt(themeData.cols||3)};--border-rgb:${borderRgb};${sizeVarsCSS}}
+:root{--primary:${themeData.primaryColor||'#5b5cf6'};--bg:${themeData.bgColor||'#09090f'};--text:${themeData.textColor||'#f1f5f9'};--card-bg:${themeData.cardBg||'#13131e'};--nav-bg:${themeData.navBg||'#0e0e17'};--radius:${themeData.radius||'12px'};--btn-r:${btnRadius};--font:'${fontName}',sans-serif;--cols:${isMobile?2:parseInt(themeData.cols||3)};--border-rgb:${borderRgb};${globalSizeVarsCSS}}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}.ann-link{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:4px;font-size:12px;font-weight:700}.ann-close{margin-left:auto;background:none;border:none;color:white;cursor:pointer;font-size:16px;opacity:.6;padding:0 8px}
 .navbar{background:var(--nav-bg);height:${isMobile?'52px':'62px'};display:flex;align-items:center;padding:0 5%;border-bottom:1px solid rgba(${borderRgb},.06);position:sticky;top:0;z-index:100}.nav-logo{font-size:${isMobile?'18px':'22px'};font-weight:900;letter-spacing:-.03em;flex-shrink:0}.nav-links-center{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65;pointer-events:none}.nav-links-center a{pointer-events:all}.nav-right{margin-left:auto;display:flex;align-items:center;gap:${isMobile?'8px':'14px'};flex-shrink:0;position:relative;z-index:1}.nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
@@ -1043,7 +1193,6 @@ function renderPreview(){
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:all .22s;display:block;color:inherit;text-decoration:none;border:1px solid rgba(${borderRgb},.08);box-shadow:0 1px 4px rgba(0,0,0,.06)}.tc:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.12)}
 .tc-img{width:100%;aspect-ratio:var(--pv-card-aspect,3/4);background:rgba(${borderRgb},.06);overflow:hidden;position:relative;flex-shrink:0}.tc-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;display:block}.tc:hover .tc-img img{transform:scale(1.04)}.tc-badge{position:absolute;top:8px;left:8px;background:var(--primary);color:white;font-size:10px;font-weight:800;padding:2px 8px;border-radius:4px;letter-spacing:.03em;z-index:2}.tc-wish{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;opacity:0;transition:opacity .15s}.tc:hover .tc-wish{opacity:1}
 .tc-info{padding:var(--pv-card-info-pad,10px 12px 5px);border-top:1px solid rgba(${borderRgb},.06)}.tc-cat{font-size:var(--pv-card-cat-fs,9.5px);font-weight:700;color:var(--primary);opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}.tc-name{font-size:var(--pv-card-name-fs,12.5px);font-weight:700;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.tc-price-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}.tc-price{font-size:var(--pv-card-price-fs,14px);font-weight:800;color:var(--primary)}.tc-compare{font-size:11.5px;text-decoration:line-through;opacity:.38}.tc-disc{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
-/* ── ADD TO CART BUTTON — uses height token, not padding ── */
 .tc-btn{width:100%;height:var(--pv-card-btn-h,38px);padding:0 13px;background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:var(--pv-card-btn-fs,11.5px);font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:5px}.tc-btn-wrap{padding:var(--pv-card-btn-pad,6px 12px 12px)}
 .classic-grid .tc:hover{box-shadow:0 12px 32px rgba(0,0,0,.14)}.minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12);box-shadow:none}.minimal-grid .tc:hover{border-color:var(--primary);transform:none;box-shadow:none}.bold-grid .tc{border-top:3px solid var(--primary)}.elevated-grid .tc{box-shadow:0 2px 14px rgba(0,0,0,.07)}.elevated-grid .tc:hover{transform:translateY(-5px);box-shadow:0 20px 52px rgba(0,0,0,.15)}.compact-grid{gap:8px!important}.compact-grid .tc-img{aspect-ratio:1/1!important;min-height:0!important}.compact-grid .tc-info{padding:6px 8px 4px!important}.compact-grid .tc-name{font-size:11px!important;-webkit-line-clamp:1;margin-bottom:2px}.compact-grid .tc-price{font-size:12px!important}.compact-grid .tc-btn-wrap{display:none!important}.list-grid{grid-template-columns:1fr!important}.list-grid .tc{display:flex;flex-direction:row;height:120px;box-shadow:none;border:1.5px solid rgba(${borderRgb},.1)}.list-grid .tc-img{width:120px;min-width:120px;aspect-ratio:auto!important;min-height:0!important;height:100%;border-radius:0}.list-grid .tc-info{flex:1;padding:12px 16px!important;display:flex;flex-direction:column;justify-content:center;border-top:none;border-left:1px solid rgba(${borderRgb},.06)}.list-grid .tc:hover{transform:none;box-shadow:0 4px 14px rgba(0,0,0,.1)}.list-grid .tc-btn-wrap{padding:0 12px!important;display:flex;align-items:center}.list-grid .tc-btn{height:36px;width:auto;padding:0 16px!important;white-space:nowrap}.magazine-grid{gap:14px!important}.magazine-grid .tc:first-child{grid-column:span 2;grid-row:span 2}.magazine-grid .tc:first-child .tc-img{aspect-ratio:auto!important;height:100%}.overlay-grid .tc{overflow:hidden}.overlay-grid .tc-img{aspect-ratio:3/4!important;min-height:0!important}.overlay-grid .tc-info{display:none!important}.overlay-grid .tc-btn-wrap{display:none!important}.overlay-grid .tc .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.4) 50%,transparent 100%);padding:${isMobile?'16px 12px 12px':'22px 16px 14px'};color:white;z-index:3}.overlay-grid .tc .ov-name{font-size:${isMobile?'12px':'14px'};font-weight:700;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.overlay-grid .tc .ov-price-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}.overlay-grid .tc .ov-price{font-size:${isMobile?'13px':'15px'};font-weight:800}.overlay-grid .tc .ov-compare{font-size:11px;text-decoration:line-through;opacity:.55}.overlay-grid .tc .ov-btn{width:100%;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:white;border-radius:var(--btn-r);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
 .cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}.cat-card{border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}.cat-card:hover{transform:translateY(-3px)}.cat-card:hover .cat-img img{transform:scale(1.06)}.cat-img{width:100%;aspect-ratio:1;overflow:hidden;background:rgba(${borderRgb},.06)}.cat-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s;display:block}.cat-info{padding:${isMobile?'10px 8px':'14px 12px'};background:var(--card-bg)}.cat-info.overlay-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,transparent 100%);padding:${isMobile?'16px 12px':'22px 16px'};color:white}.cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}.cat-count{font-size:11px;opacity:.45;margin-top:2px}
@@ -1074,26 +1223,63 @@ function renderPreview(){
   }catch(e){console.error('Preview render failed:',e.message,e.stack)}
 }
 
-/* ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    BUILD SECTION HTML
-   Key change in 'featured': per-section cardSize vars
-   applied as inline style on the section element
-═══════════════════════════════════════════════════ */
-function buildSectionHTML(sec,isMobile){
-  const d=sec.data||{};const wrap=(cls,content)=>`<div data-section-id="${sec.id}" class="${cls}">${content}</div>`
+   FIX for 'featured':
+   - Per-section cardSize inline style is ONLY applied when the
+     section has an EXPLICIT d.cardSize set AND it differs from
+     the global themeData.cardSize. This prevents the per-section
+     inline style from shadowing global :root changes.
+   - When there's no override (or override matches global), the
+     section inherits :root vars — so global changes propagate.
+═══════════════════════════════════════════════════════════════ */
+function buildSectionHTML(sec,isMobile,borderRgb,btnRadius,fontName){
+  const d=sec.data||{}
+  const wrap=(cls,content)=>`<div data-section-id="${sec.id}" class="${cls}">${content}</div>`
+
   switch(sec.type){
-    case 'announcement':{const sz=d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px';const fw=d.bold==='no'?'500':'700';return wrap('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};"><span>${escHtmlInner(d.text||themeData.announcementText)}</span>${d.linkText?`<span class="ann-link">${escHtmlInner(d.linkText)}</span>`:''}${d.closable==='yes'?`<button class="ann-close" onclick="this.closest('.announcement-bar').parentElement.style.display='none'">✕</button>`:''}</div>`)}
-    case 'navbar':{const logoStyle=d.logoColor?`color:${d.logoColor};`:'';const navStyle=d.bgColor?`background:${d.bgColor};`:'';const pos=d.sticky!=='no'?'sticky':'relative';const links=[];for(let i=1;i<=5;i++){const txt=d[`link${i}Text`],url=d[`link${i}Url`]||'#';if(txt)links.push({txt,url})};return wrap('',`<nav class="navbar" style="${navStyle}position:${pos};top:0;z-index:100;"><div class="nav-logo" style="${logoStyle}">${escHtmlInner(d.logoText||'My Store')}</div>${!isMobile&&links.length?`<div class="nav-links-center" style="${d.linkColor?'color:'+d.linkColor+';':''}">${links.map(l=>`<a href="${escHtml(l.url)}">${escHtmlInner(l.txt)}</a>`).join('')}</div>`:''}<div class="nav-right">${d.showCart!=='no'?`<button class="nav-cart">🛒 ${escHtmlInner(d.cartText||'Cart')} (0)</button>`:''}</div></nav>`)}
-    case 'hero':{const rawH=d.heading||'Welcome to our Store';const heading=rawH.replace(/(store|shop)/gi,m=>`<em>${m}</em>`);const align=d.textAlign||'center';const padMap={compact:isMobile?'32px 5% 28px':'48px 5% 40px',normal:isMobile?'48px 5% 40px':'80px 5% 72px',tall:isMobile?'72px 5% 60px':'120px 5% 100px',fullscreen:isMobile?'80px 5%':'160px 5%'};const pad=padMap[d.size||'normal'];const bgStyle=d.bgColor&&!d.bgImage?`background:${d.bgColor};`:`background:var(--bg);`;const overlayStyle=d.bgImage&&d.overlayColor?`background:${d.overlayColor};opacity:${(parseInt(d.overlayOpacity)||0)/100};`:'opacity:0;';return wrap('',`<section class="hero" style="${bgStyle}padding:${pad};text-align:${align};">${d.bgImage?`<div class="hero-bg" style="background-image:url('${d.bgImage}')"></div>`:''}<div class="hero-overlay" style="${overlayStyle}"></div><div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">${d.badge?`<div class="hero-badge">${escHtmlInner(d.badge)}</div>`:''}<h1>${heading}</h1><p>${escHtmlInner(d.subheading||'Discover amazing products at the best prices.')}</p><div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText||'Shop Now')} →</a>${d.cta2Text?`<a href="${d.cta2Link||'#'}" class="btn-cta btn-cta-ghost">${escHtmlInner(d.cta2Text)}</a>`:''}</div></div></section>`)}
+    case 'announcement':{
+      const sz=d.textSize==='large'?'15px':d.textSize==='small'?'11px':'13px'
+      const fw=d.bold==='no'?'500':'700'
+      return wrap('',`<div class="announcement-bar" style="${d.bgColor?'background:'+d.bgColor+';':''}${d.textColor?'color:'+d.textColor+';':''}font-size:${sz};font-weight:${fw};"><span>${escHtmlInner(d.text||themeData.announcementText)}</span>${d.linkText?`<span class="ann-link">${escHtmlInner(d.linkText)}</span>`:''}${d.closable==='yes'?`<button class="ann-close" onclick="this.closest('.announcement-bar').parentElement.style.display='none'">✕</button>`:''}</div>`)
+    }
+    case 'navbar':{
+      const logoStyle=d.logoColor?`color:${d.logoColor};`:''
+      const navStyle=d.bgColor?`background:${d.bgColor};`:''
+      const pos=d.sticky!=='no'?'sticky':'relative'
+      const links=[]
+      for(let i=1;i<=5;i++){const txt=d[`link${i}Text`],url=d[`link${i}Url`]||'#';if(txt)links.push({txt,url})}
+      return wrap('',`<nav class="navbar" style="${navStyle}position:${pos};top:0;z-index:100;"><div class="nav-logo" style="${logoStyle}">${escHtmlInner(d.logoText||'My Store')}</div>${!isMobile&&links.length?`<div class="nav-links-center" style="${d.linkColor?'color:'+d.linkColor+';':''}">${links.map(l=>`<a href="${escHtml(l.url)}">${escHtmlInner(l.txt)}</a>`).join('')}</div>`:''}<div class="nav-right">${d.showCart!=='no'?`<button class="nav-cart">🛒 ${escHtmlInner(d.cartText||'Cart')} (0)</button>`:''}</div></nav>`)
+    }
+    case 'hero':{
+      const rawH=d.heading||'Welcome to our Store'
+      const heading=rawH.replace(/(store|shop)/gi,m=>`<em>${m}</em>`)
+      const align=d.textAlign||'center'
+      const padMap={compact:isMobile?'32px 5% 28px':'48px 5% 40px',normal:isMobile?'48px 5% 40px':'80px 5% 72px',tall:isMobile?'72px 5% 60px':'120px 5% 100px',fullscreen:isMobile?'80px 5%':'160px 5%'}
+      const pad=padMap[d.size||'normal']
+      const bgStyle=d.bgColor&&!d.bgImage?`background:${d.bgColor};`:`background:var(--bg);`
+      const overlayStyle=d.bgImage&&d.overlayColor?`background:${d.overlayColor};opacity:${(parseInt(d.overlayOpacity)||0)/100};`:'opacity:0;'
+      return wrap('',`<section class="hero" style="${bgStyle}padding:${pad};text-align:${align};">${d.bgImage?`<div class="hero-bg" style="background-image:url('${d.bgImage}')"></div>`:''}<div class="hero-overlay" style="${overlayStyle}"></div><div class="hero-content" style="${d.textColor?'color:'+d.textColor+';':''}">${d.badge?`<div class="hero-badge">${escHtmlInner(d.badge)}</div>`:''}<h1>${heading}</h1><p>${escHtmlInner(d.subheading||'Discover amazing products at the best prices.')}</p><div class="hero-btns" style="justify-content:${align==='left'?'flex-start':align==='right'?'flex-end':'center'}"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText||'Shop Now')} →</a>${d.cta2Text?`<a href="${d.cta2Link||'#'}" class="btn-cta btn-cta-ghost">${escHtmlInner(d.cta2Text)}</a>`:''}</div></div></section>`)
+    }
 
     case 'featured':{
       /* Resolve card style — section overrides global */
       const sectionCardStyle=d.cardStyle
       const cardStyle=ALL_CARD_STYLES_SET.has(sectionCardStyle)?sectionCardStyle:(ALL_CARD_STYLES_SET.has(themeData.cardStyle)?themeData.cardStyle:'classic')
-      /* ── NEW: resolve per-section card size ── */
-      const sectionCardSize=d.cardSize
-      const sizeVarsForSection=CARD_SIZE_CSS[sectionCardSize]||null
-      const sectionSizeStyle=sizeVarsForSection?Object.entries(sizeVarsForSection).map(([k,v])=>`${k}:${v}`).join(';'):''
+
+      /*
+       * FIX: Per-section size override logic.
+       * Only apply inline style vars when the section has an EXPLICIT
+       * cardSize set AND it is DIFFERENT from the current global.
+       * When no override (or same as global), fall through to :root vars
+       * so global size changes propagate correctly.
+       */
+      const sectionCardSize=d.cardSize  // may be undefined/empty if user hasn't set it
+      const hasPerSectionSizeOverride=sectionCardSize&&CARD_SIZE_CSS[sectionCardSize]&&sectionCardSize!==themeData.cardSize
+      const sectionSizeStyle=hasPerSectionSizeOverride
+        ? Object.entries(CARD_SIZE_CSS[sectionCardSize]).map(([k,v])=>`${k}:${v}`).join(';')
+        : ''
+
       const count=Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length)
       const fCols=cardStyle==='list'?1:(isMobile?2:(parseInt(d.columns)||parseInt(themeData.cols)||3))
       const cBg=d.cardBg||themeData.cardBg||'var(--card-bg)'
@@ -1101,42 +1287,172 @@ function buildSectionHTML(sec,isMobile){
       const btnTxt=escHtmlInner(d.btnText||'Add to Cart')
       const showOld=d.showOldPrice!=='no'
       const showBadge=d.showBadge==='yes'
-      const cards=SAMPLE_PRODUCTS.slice(0,count).map((p,i)=>{
+
+      const cards=SAMPLE_PRODUCTS.slice(0,count).map((p)=>{
         const imgArea=`<div class="tc-img">${showBadge&&p.badge?`<div class="tc-badge">${escHtmlInner(p.badge)}</div>`:''}<button class="tc-wish">♡</button><img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>`
         if(cardStyle==='overlay'){return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-overlay"><div class="ov-name">${escHtmlInner(p.name)}</div><div class="ov-price-row"><span class="ov-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="ov-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}</div><button class="ov-btn">🛒 ${btnTxt}</button></div></a>`}
         return`<a class="tc" style="background:${cBg}">${imgArea}<div class="tc-info"><div class="tc-cat">${escHtmlInner(p.cat)}</div><div class="tc-name">${escHtmlInner(p.name)}</div><div class="tc-price-row"><span class="tc-price" style="color:${pColor}">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}</div></div>${cardStyle!=='compact'?`<div class="tc-btn-wrap"><button class="tc-btn">🛒 ${btnTxt}</button></div>`:''}</a>`
       }).join('')
-      /* Apply section size vars as inline style on the section so they cascade to cards */
-      return wrap('',`<section class="section" id="products" style="${sectionSizeStyle}"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}</div><div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div></section>`)
+
+      /*
+       * FIX: sectionSizeStyle goes on the <section> element (not the outer wrap div).
+       * CSS custom properties cascade down so .tc-btn inside sees them.
+       * The outer wrap div (from wrap()) just gets data-section-id.
+       */
+      return wrap('',`<section class="section" id="products"${sectionSizeStyle?` style="${sectionSizeStyle}"`:''}><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}</div><div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div></section>`)
     }
 
-    case 'categories':{const cCols=isMobile?2:(parseInt(d.columns)||4);const style=d.style||'image';const showCount=d.showCount!=='no';const catCards=SAMPLE_CATEGORIES.slice(0,cCols*2).map(cat=>{const imgHtml=`<div class="cat-img"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none'"></div>`;if(style==='image')return`<div class="cat-card" style="overflow:hidden;border-radius:var(--radius);position:relative">${imgHtml}<div class="cat-info overlay-info"><div class="cat-name" style="color:white">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count" style="color:rgba(255,255,255,.6)">${cat.count} items</div>`:''}</div></div>`;if(style==='circle')return`<div style="text-align:center;cursor:pointer"><div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid rgba(0,0,0,.1)"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div><div class="cat-name">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count}</div>`:''}</div>`;return`<div class="cat-card" style="border-radius:var(--radius)">${imgHtml}<div class="cat-info"><div class="cat-name">${cat.emoji} ${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count} items</div>`:''}</div></div>`}).join('');return wrap('',`<section class="section"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Browse by Category')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div></div><div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">${catCards}</div></section>`)}
-    case 'banner':{const bg=d.bgColor||themeData.primaryColor||'#5b5cf6';const tc=d.textColor||'#ffffff';const bgStyle=d.bgImage?`background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${d.bgImage}') center/cover;`:`background:${bg};`;return wrap('',`<section class="promo-banner" style="${bgStyle}color:${tc}"><div class="promo-content">${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px">${escHtmlInner(d.badgeText)}</div>`:''}<h2>${escHtmlInner(d.heading||'Limited Time Offer')}</h2><p>${escHtmlInner(d.subtext||'Get 20% off your first order.')}</p>${d.couponCode?`<div class="promo-coupon">🎫 ${escHtmlInner(d.couponCode)}</div>`:''}<button class="btn-white" style="color:${bg}">${escHtmlInner(d.ctaText||'Claim Offer')}</button></div></section>`)}
-    case 'testimonials':{const tCols=isMobile?1:(parseInt(d.columns)||3);const ts=[[d.t1name||'Sarah M.',d.t1text||'Absolutely love this store!',parseInt(d.t1stars||5)],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.',parseInt(d.t2stars||5)],[d.t3name||'Anita P.',d.t3text||'Great products and customer service.',parseInt(d.t3stars||5)]];return wrap('',`<section class="testimonials"><div class="section-header-row" style="margin-bottom:0"><div class="section-title">${escHtmlInner(d.title||'What Customers Say')}</div></div><div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">${ts.map(([n,t,stars])=>`<div class="testimonial"><div class="t-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="t-text">"${escHtmlInner(t)}"</div><div class="t-author"><div class="t-avatar">${n[0]}</div><div class="t-name">${escHtmlInner(n)}</div></div></div>`).join('')}</div></section>`)}
-    case 'newsletter':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';const btnBg=d.btnColor||themeData.primaryColor||'#5b5cf6';return wrap('',`<section class="newsletter" style="${bg}${tc}"><h2>${escHtmlInner(d.heading||'Stay in the loop')}</h2><p>${escHtmlInner(d.subtext||'Get exclusive deals and offers straight to your inbox.')}</p><div class="newsletter-form"><input class="newsletter-input" type="email" placeholder="${escHtmlInner(d.inputPlaceholder||'Enter your email address')}"><button class="btn-cta" style="background:${btnBg};white-space:nowrap">${escHtmlInner(d.btnText||'Subscribe')} →</button></div>${d.privacyText?`<div class="newsletter-privacy">${escHtmlInner(d.privacyText)}</div>`:''}</section>`)}
-    case 'footer':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';const col1Links=(d.col1Links||'Home,Products,Categories,About').split(',').filter(Boolean);const col2Links=(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').filter(Boolean);return wrap('',`<footer class="footer" style="${bg}${tc}"><div class="footer-top"><div class="footer-brand"><div class="footer-logo">${escHtmlInner(d.logoText||(sections.find(s=>s.type==='navbar')?.data?.logoText)||'My Store')}</div>${d.tagline?`<div class="footer-tagline">${escHtmlInner(d.tagline)}</div>`:''}<div class="footer-contact">${d.email?`<div>✉️ ${escHtmlInner(d.email)}</div>`:''}${d.phone?`<div>📞 ${escHtmlInner(d.phone)}</div>`:''}</div></div>${!isMobile?`<div><div class="footer-col-title">${escHtmlInner(d.col1Title||'Quick Links')}</div><div class="footer-col-links">${col1Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div><div><div class="footer-col-title">${escHtmlInner(d.col2Title||'Customer Care')}</div><div class="footer-col-links">${col2Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div>`:''}</div><div class="footer-bottom"><div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>${d.showSocial!=='no'?`<div class="footer-social">${d.instagramUrl?`<a href="${d.instagramUrl}" class="social-btn" target="_blank">📸</a>`:`<div class="social-btn">📸</div>`}${d.facebookUrl?`<a href="${d.facebookUrl}" class="social-btn" target="_blank">📘</a>`:`<div class="social-btn">📘</div>`}${d.twitterUrl?`<a href="${d.twitterUrl}" class="social-btn" target="_blank">🐦</a>`:`<div class="social-btn">🐦</div>`}</div>`:''}</div></footer>`)}
-    case 'trustbadges':{const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);';const tc=d.textColor?`color:${d.textColor};`:'';const layout=d.layout||'row';const gridCols=layout==='2x2'?2:layout==='column'?1:(isMobile?2:4);return wrap('',`<section class="trust-section" style="${bg}${tc}"><div class="trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],[d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe & encrypted'],[d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day return policy'],[d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here to help']].map(([icon,label,sub])=>`<div class="trust-item"><span class="trust-icon">${escHtmlInner(icon)}</span><div><div class="trust-label">${escHtmlInner(label)}</div><div class="trust-sub">${escHtmlInner(sub)}</div></div></div>`).join('')}</div></section>`)}
-    case 'faq':{const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q);const defaults=pairs.length?pairs:[['How long does shipping take?','Typically 3-7 business days.'],['What is your return policy?','30-day returns guaranteed.'],['Do you offer Cash on Delivery?','Yes! COD available across India.']];return wrap('',`<section class="faq-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'FAQ')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtmlInner(q)}</div><div class="faq-a">${escHtmlInner(a)}</div></div>`).join('')}</section>`)}
-    case 'video':{const bg=d.bgColor?`background:${d.bgColor};`:'';return wrap('',`<section class="video-section" style="${bg}"><div style="margin-bottom:16px"><div class="section-title">${escHtmlInner(d.heading||'Our Story')}</div>${d.subtext?`<div class="section-subtitle">${escHtmlInner(d.subtext)}</div>`:''}</div><div class="video-box">${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div style="font-size:13px;font-weight:600;opacity:.5">${escHtmlInner(d.playBtnText||'Watch Video')}</div>`}</div></section>`)}
-    case 'countdown':{const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);';const tc=d.textColor?`color:${d.textColor};`:'';const ac=d.accentColor||themeData.primaryColor||'#5b5cf6';const endDate=d.endDate||new Date(Date.now()+7*24*3600*1000).toISOString();return wrap('',`<section class="countdown-section" style="${bg}${tc}" data-countdown="${endDate}"><div class="section-title">⏳ ${escHtmlInner(d.heading||'Deal Ends In')}</div>${d.subtext?`<div class="section-subtitle" style="margin-bottom:8px">${escHtmlInner(d.subtext)}</div>`:''}<div class="countdown-row">${[['cd-days','Days'],['cd-hrs','Hours'],['cd-min','Mins'],['cd-sec','Secs']].map(([cls,l])=>`<div class="cd-unit"><div class="cd-num ${cls}" style="color:${ac}">00</div><div class="cd-label">${l}</div></div>`).join('')}</div>${d.ctaText?`<div style="margin-top:28px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</section>`)}
-    case 'gallery':{const gCols=isMobile?2:(parseInt(d.columns)||4);const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1';const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean);const displayImgs=imgs.length?imgs:SAMPLE_PRODUCTS.map(p=>p.img);return wrap('',`<section class="gallery-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Our Gallery')}</div></div><div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">${displayImgs.slice(0,gCols*2).map(imgUrl=>`<div class="gallery-item" style="aspect-ratio:${ratio}"><img src="${imgUrl}" alt="Gallery" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('')}</div></section>`)}
-    case 'about':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';const layout=d.layout||'image-right';const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="About us" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🏪</span>';const textSide=`<div><h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;margin-bottom:12px">${escHtmlInner(d.title||'Our Story')}</h2>${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px">${escHtmlInner(d.subtitle)}</p>`:''}<p style="opacity:.65;line-height:1.75;margin-bottom:12px">${escHtmlInner(d.body||'We started with a simple mission: to bring quality products to every household.')}</p>${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}</div>`;const imgSide=layout!=='no-image'?`<div class="about-img">${imgEl}</div>`:'';const hasStats=d.stat1num||d.stat2num||d.stat3num;return wrap('',`<section class="about-section" style="${bg}${tc}"><div class="about-grid" style="grid-template-columns:${layout==='no-image'||isMobile?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div>${hasStats?`<div class="about-stats">${d.stat1num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat1num)}</div><div class="about-stat-label">${escHtmlInner(d.stat1label||'')}</div></div>`:''}${d.stat2num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat2num)}</div><div class="about-stat-label">${escHtmlInner(d.stat2label||'')}</div></div>`:''}${d.stat3num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat3num)}</div><div class="about-stat-label">${escHtmlInner(d.stat3label||'')}</div></div>`:''}</div>`:''}</section>`)}
-    case 'richtext':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';const maxWidths={narrow:'480px',normal:'680px',wide:'900px',full:'100%'};return wrap('',`<section class="richtext-section" style="${bg}${tc}"><div class="richtext-inner" style="max-width:${maxWidths[d.maxWidth||'normal']};text-align:${d.align||'left'}">${d.title?`<h2 class="richtext-title" style="font-size:28px">${escHtmlInner(d.title)}</h2>`:''}${d.body?`<div class="richtext-body">${escHtmlInner(d.body).replace(/\n/g,'<br>')}</div>`:''}${d.ctaText?`<div style="margin-top:24px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</div></section>`)}
-    case 'imagetext':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';const layout=d.layout||'image-right';const bullets=[d.bullet1,d.bullet2,d.bullet3].filter(Boolean);const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🖼️</span>';const textSide=`<div><h2 style="font-size:${isMobile?'22px':'30px'};font-weight:900;margin-bottom:8px">${escHtmlInner(d.title||'Why Choose Us')}</h2>${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:14px">${escHtmlInner(d.subtitle)}</p>`:''}<p style="opacity:.65;line-height:1.75;margin-bottom:16px">${escHtmlInner(d.body||'')}</p>${bullets.length?`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">${bullets.map(b=>`<div style="font-size:14px;font-weight:600;opacity:.8">${escHtmlInner(b)}</div>`).join('')}</div>`:''} ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}</div>`;const imgSide=`<div class="imagetext-img">${imgEl}</div>`;return wrap('',`<section class="imagetext-section" style="${bg}${tc}"><div class="imagetext-grid" style="grid-template-columns:${isMobile?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div></section>`)}
-    case 'brands':{const bg=d.bgColor?`background:${d.bgColor};`:'';const brands=[d.brand1||'Nike',d.brand2||'Adidas',d.brand3||'Apple',d.brand4||'Samsung',d.brand5||'Sony',d.brand6||'Boat'].filter(Boolean);return wrap('',`<section class="brands-section" style="${bg}">${d.title?`<div style="text-align:center;margin-bottom:16px"><div class="section-title">${escHtmlInner(d.title)}</div></div>`:''}<div class="brands-grid">${brands.map(b=>`<div class="brand-item">${escHtmlInner(b)}</div>`).join('')}</div></section>`)}
-    case 'offers':{const bg=d.bgColor?`background:${d.bgColor};`:'';const oCols=isMobile?1:(parseInt(d.columns)||3);const offers=[{title:d.offer1title||'Flat 30% Off',desc:d.offer1desc||'On all Electronics',code:d.offer1code||'ELEC30',bg:d.offer1bg||'#5b5cf6'},{title:d.offer2title||'Buy 2 Get 1 Free',desc:d.offer2desc||'On selected Fashion',code:d.offer2code||'B2G1',bg:d.offer2bg||'#ec4899'},{title:d.offer3title||'Free Delivery',desc:d.offer3desc||'On orders above ₹499',code:d.offer3code||'FREEDEL',bg:d.offer3bg||'#10b981'}];return wrap('',`<section class="offers-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Hot Deals')}</div></div><div class="offers-grid" style="grid-template-columns:repeat(${oCols},1fr)">${offers.map(o=>`<div class="offer-card" style="background:${o.bg}"><div class="offer-title">${escHtmlInner(o.title)}</div><div class="offer-desc">${escHtmlInner(o.desc)}</div><div class="offer-code-box">🎫 ${escHtmlInner(o.code)}</div></div>`).join('')}</div></section>`)}
-    case 'team':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tCols=isMobile?2:(parseInt(d.columns)||3);const members=[[d.m1name||'Priya Sharma',d.m1role||'Founder & CEO',d.m1img],[d.m2name||'Rahul Verma',d.m2role||'Operations',d.m2img],[d.m3name||'Anita Patel',d.m3role||'Customer Success',d.m3img]].filter(([n])=>n);return wrap('',`<section class="team-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Meet Our Team')}</div></div><div style="display:grid;grid-template-columns:repeat(${tCols},1fr);gap:20px">${members.map(([n,r,img])=>`<div style="background:var(--card-bg);border-radius:var(--radius);padding:20px;text-align:center"><div style="width:72px;height:72px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;overflow:hidden">${img?`<img src="${img}" alt="${escHtmlInner(n)}" style="width:100%;height:100%;object-fit:cover">`:n[0]}</div><div style="font-size:15px;font-weight:800;margin-bottom:4px">${escHtmlInner(n)}</div><div style="font-size:12px;opacity:.5;font-weight:600">${escHtmlInner(r)}</div></div>`).join('')}</div></section>`)}
-    case 'contact':{const bg=d.bgColor?`background:${d.bgColor};`:'';const tc=d.textColor?`color:${d.textColor};`:'';return wrap('',`<section class="contact-section" style="${bg}${tc}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Get in Touch')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div><div class="contact-grid" style="grid-template-columns:${isMobile?'1fr':'1fr 1fr'}">${d.email||d.phone?`<div>${d.email?`<div class="contact-info-item"><div class="contact-info-icon">✉️</div><div><b>Email</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.email)}</span></div></div>`:''}${d.phone?`<div class="contact-info-item"><div class="contact-info-icon">📞</div><div><b>Phone</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.phone)}</span></div></div>`:''}</div>`:''}<div class="contact-form"><input class="contact-input" placeholder="Your Name"><input class="contact-input" placeholder="Email Address"><textarea class="contact-input contact-textarea" placeholder="Your message..."></textarea><button class="btn-cta">${escHtmlInner(d.btnText||'Send Message')}</button></div></div></section>`)}
+    case 'categories':{
+      const cCols=isMobile?2:(parseInt(d.columns)||4)
+      const style=d.style||'image'
+      const showCount=d.showCount!=='no'
+      const catCards=SAMPLE_CATEGORIES.slice(0,cCols*2).map(cat=>{
+        const imgHtml=`<div class="cat-img"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" loading="lazy" onerror="this.style.display='none'"></div>`
+        if(style==='image')return`<div class="cat-card" style="overflow:hidden;border-radius:var(--radius);position:relative">${imgHtml}<div class="cat-info overlay-info"><div class="cat-name" style="color:white">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count" style="color:rgba(255,255,255,.6)">${cat.count} items</div>`:''}</div></div>`
+        if(style==='circle')return`<div style="text-align:center;cursor:pointer"><div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid rgba(0,0,0,.1)"><img src="${cat.img}" alt="${escHtmlInner(cat.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div><div class="cat-name">${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count}</div>`:''}</div>`
+        return`<div class="cat-card" style="border-radius:var(--radius)">${imgHtml}<div class="cat-info"><div class="cat-name">${cat.emoji} ${escHtmlInner(cat.name)}</div>${showCount?`<div class="cat-count">${cat.count} items</div>`:''}</div></div>`
+      }).join('')
+      return wrap('',`<section class="section"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Browse by Category')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div></div><div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">${catCards}</div></section>`)
+    }
+    case 'banner':{
+      const bg=d.bgColor||themeData.primaryColor||'#5b5cf6'
+      const tc=d.textColor||'#ffffff'
+      const bgStyle=d.bgImage?`background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${d.bgImage}') center/cover;`:`background:${bg};`
+      return wrap('',`<section class="promo-banner" style="${bgStyle}color:${tc}"><div class="promo-content">${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px">${escHtmlInner(d.badgeText)}</div>`:''}<h2>${escHtmlInner(d.heading||'Limited Time Offer')}</h2><p>${escHtmlInner(d.subtext||'Get 20% off your first order.')}</p>${d.couponCode?`<div class="promo-coupon">🎫 ${escHtmlInner(d.couponCode)}</div>`:''}<button class="btn-white" style="color:${bg}">${escHtmlInner(d.ctaText||'Claim Offer')}</button></div></section>`)
+    }
+    case 'testimonials':{
+      const tCols=isMobile?1:(parseInt(d.columns)||3)
+      const ts=[[d.t1name||'Sarah M.',d.t1text||'Absolutely love this store!',parseInt(d.t1stars||5)],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.',parseInt(d.t2stars||5)],[d.t3name||'Anita P.',d.t3text||'Great products and customer service.',parseInt(d.t3stars||5)]]
+      return wrap('',`<section class="testimonials"><div class="section-header-row" style="margin-bottom:0"><div class="section-title">${escHtmlInner(d.title||'What Customers Say')}</div></div><div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">${ts.map(([n,t,stars])=>`<div class="testimonial"><div class="t-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="t-text">"${escHtmlInner(t)}"</div><div class="t-author"><div class="t-avatar">${n[0]}</div><div class="t-name">${escHtmlInner(n)}</div></div></div>`).join('')}</div></section>`)
+    }
+    case 'newsletter':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const btnBg=d.btnColor||themeData.primaryColor||'#5b5cf6'
+      return wrap('',`<section class="newsletter" style="${bg}${tc}"><h2>${escHtmlInner(d.heading||'Stay in the loop')}</h2><p>${escHtmlInner(d.subtext||'Get exclusive deals and offers straight to your inbox.')}</p><div class="newsletter-form"><input class="newsletter-input" type="email" placeholder="${escHtmlInner(d.inputPlaceholder||'Enter your email address')}"><button class="btn-cta" style="background:${btnBg};white-space:nowrap">${escHtmlInner(d.btnText||'Subscribe')} →</button></div>${d.privacyText?`<div class="newsletter-privacy">${escHtmlInner(d.privacyText)}</div>`:''}</section>`)
+    }
+    case 'footer':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const col1Links=(d.col1Links||'Home,Products,Categories,About').split(',').filter(Boolean)
+      const col2Links=(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').filter(Boolean)
+      return wrap('',`<footer class="footer" style="${bg}${tc}"><div class="footer-top"><div class="footer-brand"><div class="footer-logo">${escHtmlInner(d.logoText||(sections.find(s=>s.type==='navbar')?.data?.logoText)||'My Store')}</div>${d.tagline?`<div class="footer-tagline">${escHtmlInner(d.tagline)}</div>`:''}<div class="footer-contact">${d.email?`<div>✉️ ${escHtmlInner(d.email)}</div>`:''}${d.phone?`<div>📞 ${escHtmlInner(d.phone)}</div>`:''}</div></div>${!isMobile?`<div><div class="footer-col-title">${escHtmlInner(d.col1Title||'Quick Links')}</div><div class="footer-col-links">${col1Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div><div><div class="footer-col-title">${escHtmlInner(d.col2Title||'Customer Care')}</div><div class="footer-col-links">${col2Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div>`:''}</div><div class="footer-bottom"><div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>${d.showSocial!=='no'?`<div class="footer-social">${d.instagramUrl?`<a href="${d.instagramUrl}" class="social-btn" target="_blank">📸</a>`:`<div class="social-btn">📸</div>`}${d.facebookUrl?`<a href="${d.facebookUrl}" class="social-btn" target="_blank">📘</a>`:`<div class="social-btn">📘</div>`}${d.twitterUrl?`<a href="${d.twitterUrl}" class="social-btn" target="_blank">🐦</a>`:`<div class="social-btn">🐦</div>`}</div>`:''}</div></footer>`)
+    }
+    case 'trustbadges':{
+      const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const layout=d.layout||'row'
+      const gridCols=layout==='2x2'?2:layout==='column'?1:(isMobile?2:4)
+      return wrap('',`<section class="trust-section" style="${bg}${tc}"><div class="trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],[d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe & encrypted'],[d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day return policy'],[d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here to help']].map(([icon,label,sub])=>`<div class="trust-item"><span class="trust-icon">${escHtmlInner(icon)}</span><div><div class="trust-label">${escHtmlInner(label)}</div><div class="trust-sub">${escHtmlInner(sub)}</div></div></div>`).join('')}</div></section>`)
+    }
+    case 'faq':{
+      const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q)
+      const defaults=pairs.length?pairs:[['How long does shipping take?','Typically 3-7 business days.'],['What is your return policy?','30-day returns guaranteed.'],['Do you offer Cash on Delivery?','Yes! COD available across India.']]
+      return wrap('',`<section class="faq-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'FAQ')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtmlInner(q)}</div><div class="faq-a">${escHtmlInner(a)}</div></div>`).join('')}</section>`)
+    }
+    case 'video':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      return wrap('',`<section class="video-section" style="${bg}"><div style="margin-bottom:16px"><div class="section-title">${escHtmlInner(d.heading||'Our Story')}</div>${d.subtext?`<div class="section-subtitle">${escHtmlInner(d.subtext)}</div>`:''}</div><div class="video-box">${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div style="font-size:13px;font-weight:600;opacity:.5">${escHtmlInner(d.playBtnText||'Watch Video')}</div>`}</div></section>`)
+    }
+    case 'countdown':{
+      const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const ac=d.accentColor||themeData.primaryColor||'#5b5cf6'
+      const endDate=d.endDate||new Date(Date.now()+7*24*3600*1000).toISOString()
+      return wrap('',`<section class="countdown-section" style="${bg}${tc}" data-countdown="${endDate}"><div class="section-title">⏳ ${escHtmlInner(d.heading||'Deal Ends In')}</div>${d.subtext?`<div class="section-subtitle" style="margin-bottom:8px">${escHtmlInner(d.subtext)}</div>`:''}<div class="countdown-row">${[['cd-days','Days'],['cd-hrs','Hours'],['cd-min','Mins'],['cd-sec','Secs']].map(([cls,l])=>`<div class="cd-unit"><div class="cd-num ${cls}" style="color:${ac}">00</div><div class="cd-label">${l}</div></div>`).join('')}</div>${d.ctaText?`<div style="margin-top:28px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</section>`)
+    }
+    case 'gallery':{
+      const gCols=isMobile?2:(parseInt(d.columns)||4)
+      const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1'
+      const imgs=[d.img1,d.img2,d.img3,d.img4,d.img5,d.img6].filter(Boolean)
+      const displayImgs=imgs.length?imgs:SAMPLE_PRODUCTS.map(p=>p.img)
+      return wrap('',`<section class="gallery-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Our Gallery')}</div></div><div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">${displayImgs.slice(0,gCols*2).map(imgUrl=>`<div class="gallery-item" style="aspect-ratio:${ratio}"><img src="${imgUrl}" alt="Gallery" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('')}</div></section>`)
+    }
+    case 'about':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const layout=d.layout||'image-right'
+      const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="About us" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🏪</span>'
+      const textSide=`<div><h2 style="font-size:${isMobile?'24px':'32px'};font-weight:900;margin-bottom:12px">${escHtmlInner(d.title||'Our Story')}</h2>${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:16px">${escHtmlInner(d.subtitle)}</p>`:''}<p style="opacity:.65;line-height:1.75;margin-bottom:12px">${escHtmlInner(d.body||'We started with a simple mission: to bring quality products to every household.')}</p>${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}</div>`
+      const imgSide=layout!=='no-image'?`<div class="about-img">${imgEl}</div>`:''
+      const hasStats=d.stat1num||d.stat2num||d.stat3num
+      return wrap('',`<section class="about-section" style="${bg}${tc}"><div class="about-grid" style="grid-template-columns:${layout==='no-image'||isMobile?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div>${hasStats?`<div class="about-stats">${d.stat1num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat1num)}</div><div class="about-stat-label">${escHtmlInner(d.stat1label||'')}</div></div>`:''}${d.stat2num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat2num)}</div><div class="about-stat-label">${escHtmlInner(d.stat2label||'')}</div></div>`:''}${d.stat3num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat3num)}</div><div class="about-stat-label">${escHtmlInner(d.stat3label||'')}</div></div>`:''}</div>`:''}</section>`)
+    }
+    case 'richtext':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const maxWidths={narrow:'480px',normal:'680px',wide:'900px',full:'100%'}
+      return wrap('',`<section class="richtext-section" style="${bg}${tc}"><div class="richtext-inner" style="max-width:${maxWidths[d.maxWidth||'normal']};text-align:${d.align||'left'}">${d.title?`<h2 class="richtext-title" style="font-size:28px">${escHtmlInner(d.title)}</h2>`:''}${d.body?`<div class="richtext-body">${escHtmlInner(d.body).replace(/\n/g,'<br>')}</div>`:''}${d.ctaText?`<div style="margin-top:24px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</div></section>`)
+    }
+    case 'imagetext':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      const layout=d.layout||'image-right'
+      const bullets=[d.bullet1,d.bullet2,d.bullet3].filter(Boolean)
+      const imgEl=d.imageUrl?`<img src="${d.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:64px">🖼️</span>'
+      const textSide=`<div><h2 style="font-size:${isMobile?'22px':'30px'};font-weight:900;margin-bottom:8px">${escHtmlInner(d.title||'Why Choose Us')}</h2>${d.subtitle?`<p style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:14px">${escHtmlInner(d.subtitle)}</p>`:''}<p style="opacity:.65;line-height:1.75;margin-bottom:16px">${escHtmlInner(d.body||'')}</p>${bullets.length?`<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">${bullets.map(b=>`<div style="font-size:14px;font-weight:600;opacity:.8">${escHtmlInner(b)}</div>`).join('')}</div>`:''} ${d.ctaText?`<a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a>`:''}</div>`
+      const imgSide=`<div class="imagetext-img">${imgEl}</div>`
+      return wrap('',`<section class="imagetext-section" style="${bg}${tc}"><div class="imagetext-grid" style="grid-template-columns:${isMobile?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div></section>`)
+    }
+    case 'brands':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const brands=[d.brand1||'Nike',d.brand2||'Adidas',d.brand3||'Apple',d.brand4||'Samsung',d.brand5||'Sony',d.brand6||'Boat'].filter(Boolean)
+      return wrap('',`<section class="brands-section" style="${bg}">${d.title?`<div style="text-align:center;margin-bottom:16px"><div class="section-title">${escHtmlInner(d.title)}</div></div>`:''}<div class="brands-grid">${brands.map(b=>`<div class="brand-item">${escHtmlInner(b)}</div>`).join('')}</div></section>`)
+    }
+    case 'offers':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const oCols=isMobile?1:(parseInt(d.columns)||3)
+      const offers=[{title:d.offer1title||'Flat 30% Off',desc:d.offer1desc||'On all Electronics',code:d.offer1code||'ELEC30',bg:d.offer1bg||'#5b5cf6'},{title:d.offer2title||'Buy 2 Get 1 Free',desc:d.offer2desc||'On selected Fashion',code:d.offer2code||'B2G1',bg:d.offer2bg||'#ec4899'},{title:d.offer3title||'Free Delivery',desc:d.offer3desc||'On orders above ₹499',code:d.offer3code||'FREEDEL',bg:d.offer3bg||'#10b981'}]
+      return wrap('',`<section class="offers-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Hot Deals')}</div></div><div class="offers-grid" style="grid-template-columns:repeat(${oCols},1fr)">${offers.map(o=>`<div class="offer-card" style="background:${o.bg}"><div class="offer-title">${escHtmlInner(o.title)}</div><div class="offer-desc">${escHtmlInner(o.desc)}</div><div class="offer-code-box">🎫 ${escHtmlInner(o.code)}</div></div>`).join('')}</div></section>`)
+    }
+    case 'team':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tCols=isMobile?2:(parseInt(d.columns)||3)
+      const members=[[d.m1name||'Priya Sharma',d.m1role||'Founder & CEO',d.m1img],[d.m2name||'Rahul Verma',d.m2role||'Operations',d.m2img],[d.m3name||'Anita Patel',d.m3role||'Customer Success',d.m3img]].filter(([n])=>n)
+      return wrap('',`<section class="team-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Meet Our Team')}</div></div><div style="display:grid;grid-template-columns:repeat(${tCols},1fr);gap:20px">${members.map(([n,r,img])=>`<div style="background:var(--card-bg);border-radius:var(--radius);padding:20px;text-align:center"><div style="width:72px;height:72px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;overflow:hidden">${img?`<img src="${img}" alt="${escHtmlInner(n)}" style="width:100%;height:100%;object-fit:cover">`:n[0]}</div><div style="font-size:15px;font-weight:800;margin-bottom:4px">${escHtmlInner(n)}</div><div style="font-size:12px;opacity:.5;font-weight:600">${escHtmlInner(r)}</div></div>`).join('')}</div></section>`)
+    }
+    case 'contact':{
+      const bg=d.bgColor?`background:${d.bgColor};`:''
+      const tc=d.textColor?`color:${d.textColor};`:''
+      return wrap('',`<section class="contact-section" style="${bg}${tc}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Get in Touch')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div><div class="contact-grid" style="grid-template-columns:${isMobile?'1fr':'1fr 1fr'}">${d.email||d.phone?`<div>${d.email?`<div class="contact-info-item"><div class="contact-info-icon">✉️</div><div><b>Email</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.email)}</span></div></div>`:''}${d.phone?`<div class="contact-info-item"><div class="contact-info-icon">📞</div><div><b>Phone</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.phone)}</span></div></div>`:''}</div>`:''}<div class="contact-form"><input class="contact-input" placeholder="Your Name"><input class="contact-input" placeholder="Email Address"><textarea class="contact-input contact-textarea" placeholder="Your message..."></textarea><button class="btn-cta">${escHtmlInner(d.btnText||'Send Message')}</button></div></div></section>`)
+    }
     default:return''
   }
 }
 
-/* ═══════════════ PREVIEW CLICK-TO-EDIT ═══════════════ */
-function setupPreviewClicks(iframe){try{const doc=iframe.contentDocument;if(!doc)return;if(activeSectionId){const el=doc.querySelector(`[data-section-id="${activeSectionId}"]`);if(el)el.classList.add('sec-active')};doc.querySelectorAll('[data-section-id]').forEach(el=>{el.addEventListener('click',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'||e.target.tagName==='A')return;e.stopPropagation();selectSection(el.getAttribute('data-section-id'))})})}catch(e){}}
-function highlightSectionInPreview(id){try{const doc=document.getElementById('preview-iframe').contentDocument;if(!doc)return;doc.querySelectorAll('[data-section-id]').forEach(el=>{const match=el.getAttribute('data-section-id')===id;el.classList.toggle('sec-active',match);if(match)el.scrollIntoView({behavior:'smooth',block:'nearest'})})}catch(e){}}
+/* ═══════════════════════════════════════════════════════════════
+   PREVIEW CLICK-TO-EDIT
+═══════════════════════════════════════════════════════════════ */
+function setupPreviewClicks(iframe){
+  try{
+    const doc=iframe.contentDocument
+    if(!doc)return
+    if(activeSectionId){const el=doc.querySelector(`[data-section-id="${activeSectionId}"]`);if(el)el.classList.add('sec-active')}
+    doc.querySelectorAll('[data-section-id]').forEach(el=>{
+      el.addEventListener('click',e=>{
+        if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'||e.target.tagName==='A')return
+        e.stopPropagation()
+        selectSection(el.getAttribute('data-section-id'))
+      })
+    })
+  }catch(e){}
+}
+function highlightSectionInPreview(id){
+  try{
+    const doc=document.getElementById('preview-iframe').contentDocument
+    if(!doc)return
+    doc.querySelectorAll('[data-section-id]').forEach(el=>{
+      const match=el.getAttribute('data-section-id')===id
+      el.classList.toggle('sec-active',match)
+      if(match)el.scrollIntoView({behavior:'smooth',block:'nearest'})
+    })
+  }catch(e){}
+}
 function clearHighlight(){try{document.getElementById('preview-iframe').contentDocument?.querySelectorAll('[data-section-id]').forEach(el=>el.classList.remove('sec-active'))}catch(e){}}
 
-/* ═══════════════ UTILS ═══════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════════ */
 function isLightColor(hex){const c=(hex||'').replace('#','');if(c.length!==6)return true;const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return(r*299+g*587+b*114)/1000>128}
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function escHtmlInner(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
