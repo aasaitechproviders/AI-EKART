@@ -190,6 +190,77 @@
 .chat-send-btn:active { transform: scale(.95); }
 .chat-send-btn:disabled { opacity: .4; cursor: not-allowed; }
 
+/* ─── Mic Button ─────────────────────────────────────────── */
+.chat-mic-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.chat-mic-btn:hover { border-color: rgba(108,99,255,0.5); background: rgba(108,99,255,0.08); }
+.chat-mic-btn:disabled { opacity: .35; cursor: not-allowed; }
+.chat-mic-btn.recording {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.6);
+  animation: micPulse 1.2s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50%      { box-shadow: 0 0 0 7px rgba(239,68,68,0); }
+}
+/* ripple rings behind the mic icon when recording */
+.mic-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 2px solid rgba(239,68,68,0.5);
+  animation: micRing 1.4s ease-out infinite;
+  pointer-events: none;
+}
+.mic-ring:nth-child(2) { animation-delay: .45s; }
+.mic-ring:nth-child(3) { animation-delay: .9s; }
+@keyframes micRing {
+  0%   { transform: scale(1);   opacity: .7; }
+  100% { transform: scale(1.7); opacity: 0;  }
+}
+
+/* recording — textarea gets live transcription style */
+.chat-input.listening {
+  border-color: rgba(239,68,68,0.45);
+  background: rgba(239,68,68,0.04);
+  color: var(--text);
+}
+.chat-input.listening::placeholder { color: rgba(239,68,68,0.5); }
+
+/* language pill that appears during recording */
+.voice-lang-pill {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ef4444;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.voice-lang-pill.show { display: flex; }
+.voice-lang-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ef4444;
+  animation: micPulse 1s ease-in-out infinite;
+}
+
 /* ─── Action Panel ───────────────────────────────────────── */
 .action-panel {
   display: flex;
@@ -508,10 +579,15 @@
 
         <div class="quick-chips" id="quickChips"></div>
 
-        <div class="chat-input-wrap">
+        <div class="chat-input-wrap" id="chatInputWrap">
           <textarea class="chat-input" id="chatInput"
-            placeholder="Type your message… (e.g. 'Add a new T-shirt product' or 'Suggest categories for my food store')"
+            placeholder="Type or speak your message…"
             rows="1"></textarea>
+          <span class="voice-lang-pill" id="voiceLangPill">
+            <span class="voice-lang-dot"></span>
+            <span id="voiceLangLabel">EN</span>
+          </span>
+          <button class="chat-mic-btn" id="micBtn" title="Voice input" onclick="toggleVoice()">🎙</button>
           <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
         </div>
       </div>
@@ -556,6 +632,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupInput()
   addWelcomeMessage()
   showQuickChips(getInitialChips())
+  initVoice()
 })
 
 async function loadStoreData() {
@@ -629,6 +706,9 @@ function setupInput() {
    SEND MESSAGE
 ══════════════════════════════════════════════════════════ */
 async function sendMessage() {
+  // Stop voice if recording before sending
+  if (_isRecording) _stopVoice(false)
+
   const inp = document.getElementById('chatInput')
   const text = inp.value.trim()
   if (!text || isTyping) return
@@ -1261,6 +1341,224 @@ function escAttr(s) {
   if (typeof s !== 'string') s = String(s)
   return s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
+
+/* ══════════════════════════════════════════════════════════
+   VOICE INPUT  — Web Speech API (client-side, free, zero deps)
+   Auto-detects language from speech, shows live interim text,
+   auto-sends after 2s silence once final text exists.
+   Works in Chrome, Edge, Safari 15+. Falls back gracefully.
+══════════════════════════════════════════════════════════ */
+
+const VOICE_LANG_NAMES = {
+  'ta': 'Tamil', 'hi': 'Hindi', 'te': 'Telugu', 'kn': 'Kannada',
+  'ml': 'Malayalam', 'mr': 'Marathi', 'bn': 'Bengali', 'gu': 'Gujarati',
+  'pa': 'Punjabi', 'ur': 'Urdu', 'en': 'English', 'fr': 'French',
+  'de': 'German', 'es': 'Spanish', 'zh': 'Chinese', 'ja': 'Japanese',
+  'ar': 'Arabic',
+}
+
+// We start with 'en-IN' but pass the live detected lang to next restarts
+let _recognition    = null
+let _isRecording    = false
+let _finalText      = ''
+let _silenceTimer   = null
+let _voiceSupported = false
+let _detectedLang   = ''
+
+function _voiceSupport() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+}
+
+function initVoice() {
+  const btn = document.getElementById('micBtn')
+  if (!btn) return
+  _voiceSupported = _voiceSupport()
+  if (!_voiceSupported) {
+    btn.disabled = true
+    btn.title = 'Voice not supported — use Chrome or Edge'
+    btn.style.opacity = '0.3'
+  }
+}
+
+function toggleVoice() {
+  if (!_voiceSupported) {
+    addAIMessage('Sorry, voice input needs Chrome or Edge browser 🎙')
+    return
+  }
+  _isRecording ? _stopVoice(true) : _startVoice()
+}
+
+function _startVoice() {
+  if (_isRecording) return
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  _recognition = new SR()
+
+  // Settings that give best multilingual results
+  _recognition.continuous      = true   // keep listening until we stop it
+  _recognition.interimResults  = true   // show live transcription
+  _recognition.maxAlternatives = 1
+  // Start with browser language — speech API auto-detects once running
+  _recognition.lang = navigator.language || 'en-IN'
+
+  _finalText = ''
+  _detectedLang = ''
+  _isRecording = true
+  _updateVoiceUI(true)
+
+  const input = document.getElementById('chatInput')
+  input.value = ''
+  input.placeholder = '🎙 Listening…'
+  input.classList.add('listening')
+  autoResizeInput(input)
+
+  // ── onresult: live interim + final text in textarea ──────────────────
+  _recognition.onresult = (e) => {
+    _clearSilenceTimer()
+
+    let interim = ''
+    let newFinal = ''
+
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript
+      if (e.results[i].isFinal) {
+        newFinal += t
+        // Try to detect language from the result
+        if (!_detectedLang && e.results[i][0].transcript) {
+          _detectLangFromText(t)
+        }
+      } else {
+        interim += t
+      }
+    }
+
+    if (newFinal) _finalText += newFinal
+
+    // Show live in textarea: final (black) + interim (dimmer)
+    input.value = (_finalText + (interim ? ' ' + interim : '')).trim()
+    autoResizeInput(input)
+
+    // Start silence timer only when we have confirmed final text
+    if (_finalText.trim()) _startSilenceTimer()
+  }
+
+  // ── onerror ──────────────────────────────────────────────────────────
+  _recognition.onerror = (e) => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      addAIMessage('Microphone access was denied. Please allow mic permissions in your browser and try again.')
+      _stopVoice(false)
+      return
+    }
+    if (e.error === 'aborted') return // we triggered the stop — ignore
+    // network / no-speech: just restart quietly
+    console.warn('Speech error:', e.error)
+  }
+
+  // ── onend: auto-restart while still in recording state ───────────────
+  // The browser stops recognition after silence — we restart to stay live
+  _recognition.onend = () => {
+    if (_isRecording) {
+      try { _recognition.start() } catch (err) { /* already started */ }
+    }
+  }
+
+  try {
+    _recognition.start()
+  } catch (e) {
+    console.error('Could not start recognition:', e)
+    _isRecording = false
+    _updateVoiceUI(false)
+  }
+}
+
+// Detect probable language from Unicode ranges in the text
+function _detectLangFromText(text) {
+  const ranges = [
+    { re: /[\u0B80-\u0BFF]/, lang: 'ta', label: 'Tamil'     },
+    { re: /[\u0900-\u097F]/, lang: 'hi', label: 'Hindi'     },
+    { re: /[\u0C00-\u0C7F]/, lang: 'te', label: 'Telugu'    },
+    { re: /[\u0C80-\u0CFF]/, lang: 'kn', label: 'Kannada'   },
+    { re: /[\u0D00-\u0D7F]/, lang: 'ml', label: 'Malayalam' },
+    { re: /[\u0980-\u09FF]/, lang: 'bn', label: 'Bengali'   },
+    { re: /[\u0A80-\u0AFF]/, lang: 'gu', label: 'Gujarati'  },
+    { re: /[\u0A00-\u0A7F]/, lang: 'pa', label: 'Punjabi'   },
+    { re: /[\u0600-\u06FF]/, lang: 'ar', label: 'Arabic'    },
+    { re: /[\u4E00-\u9FFF]/, lang: 'zh', label: 'Chinese'   },
+    { re: /[\u3040-\u30FF]/, lang: 'ja', label: 'Japanese'  },
+  ]
+  for (const r of ranges) {
+    if (r.re.test(text)) {
+      _detectedLang = r.label
+      const pill = document.getElementById('voiceLangLabel')
+      if (pill) pill.textContent = r.label
+      return
+    }
+  }
+  // Latin script → English
+  _detectedLang = 'English'
+  const pill = document.getElementById('voiceLangLabel')
+  if (pill) pill.textContent = 'EN'
+}
+
+function _stopVoice(andSend) {
+  _isRecording = false
+  _clearSilenceTimer()
+  try { _recognition?.stop() } catch (e) {}
+  _recognition = null
+  _updateVoiceUI(false)
+
+  const input = document.getElementById('chatInput')
+  input.classList.remove('listening')
+  input.placeholder = 'Type or speak your message…'
+
+  // Keep final text in textarea, trim interim junk
+  input.value = _finalText.trim()
+  autoResizeInput(input)
+
+  if (andSend && _finalText.trim()) {
+    setTimeout(() => sendMessage(), 80) // tiny delay so UI settles
+  }
+}
+
+function _startSilenceTimer() {
+  _clearSilenceTimer()
+  _silenceTimer = setTimeout(() => {
+    if (_isRecording && _finalText.trim()) _stopVoice(true)
+  }, 2000) // 2s of silence → auto-send
+}
+
+function _clearSilenceTimer() {
+  if (_silenceTimer) { clearTimeout(_silenceTimer); _silenceTimer = null }
+}
+
+function _updateVoiceUI(recording) {
+  const btn  = document.getElementById('micBtn')
+  const pill = document.getElementById('voiceLangPill')
+  if (!btn) return
+
+  if (recording) {
+    btn.classList.add('recording')
+    btn.innerHTML = `<div class="mic-ring"></div><div class="mic-ring"></div><div class="mic-ring"></div>⏹`
+    btn.title = 'Recording — click to stop & send'
+    if (pill) {
+      pill.classList.add('show')
+      const label = document.getElementById('voiceLangLabel')
+      if (label) label.textContent = 'Auto'
+    }
+  } else {
+    btn.classList.remove('recording')
+    btn.innerHTML = '🎙'
+    btn.title = 'Voice input'
+    if (pill) pill.classList.remove('show')
+    _detectedLang = ''
+  }
+}
+
+// auto-resize helper used by voice (same as input event)
+function autoResizeInput(el) {
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+}
+
 </script>
 </body>
 </html>
