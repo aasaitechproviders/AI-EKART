@@ -648,7 +648,18 @@ async function sendMessage() {
     conversationHistory.push({ role: 'assistant', content: JSON.stringify(response) })
 
     addAIMessage(message)
-    if (action) renderActionCard(action)
+    if (action) {
+      // Ensure all data fields that cards use are strings/arrays, not objects
+      if (action.data) {
+        Object.keys(action.data).forEach(k => {
+          const v = action.data[k]
+          if (v !== null && v !== undefined && !Array.isArray(v) && typeof v === 'object') {
+            action.data[k] = JSON.stringify(v)
+          }
+        })
+      }
+      renderActionCard(action)
+    }
     if (chips && chips.length) showQuickChips(chips)
   } catch (err) {
     hideTyping()
@@ -760,7 +771,9 @@ function addUserMessage(text) {
 }
 
 function addAIMessage(text) {
-  // Convert **bold** to <strong>
+  // Guard: if AI returned non-string (object/null), safely convert
+  if (text === null || text === undefined) text = ''
+  if (typeof text !== 'string') text = JSON.stringify(text)
   const html = text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br>')
@@ -801,6 +814,8 @@ function scrollChat() {
 }
 
 function escHtml(s) {
+  if (s === null || s === undefined) return ''
+  if (typeof s !== 'string') s = String(s)
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
 }
 
@@ -835,7 +850,7 @@ function buildProductCard(id, action) {
   const d = action.data
   const catOpts = allCategories.map(c =>
     `<option value="${c._id}" ${c.name===d.category?'selected':''}>${c.name}</option>`).join('')
-  const tags = (d.tags || []).join(', ')
+  const tags = (Array.isArray(d.tags) ? d.tags : []).map(t => String(t||'')).join(', ')
   return `
     <div class="action-card-header">
       <div class="action-card-icon" style="background:rgba(108,99,255,0.12);">📦</div>
@@ -861,7 +876,7 @@ function buildProductCard(id, action) {
       <div class="ac-field"><label>Tags (comma separated)</label>
         <input id="${id}_tags" value="${escAttr(tags)}">
       </div>
-      ${d.highlights && d.highlights.length ? `
+      ${d.highlights && Array.isArray(d.highlights) && d.highlights.length ? `
         <div class="ac-field"><label>Highlights</label>
           ${d.highlights.map(h => `<div class="hi-item"><div class="hi-dot"></div>${escHtml(h)}</div>`).join('')}
         </div>` : ''}
@@ -875,7 +890,7 @@ function buildProductCard(id, action) {
 
 /* ── Category Card ─────────────────────────────────── */
 function buildCategoryCard(id, action) {
-  const cats = action.data.categories || []
+  const cats = Array.isArray(action.data.categories) ? action.data.categories : []
   const rows = cats.map((c, i) => `
     <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
       <div class="ac-field-row">
@@ -912,7 +927,7 @@ function buildCategoryCard(id, action) {
 /* ── Store Card ────────────────────────────────────── */
 function buildStoreCard(id, action) {
   const d = action.data
-  const names = (d.name_suggestions || []).slice(0, 4)
+  const names = (Array.isArray(d.name_suggestions) ? d.name_suggestions : []).slice(0, 4).map(n => String(n||''))
   return `
     <div class="action-card-header">
       <div class="action-card-icon" style="background:rgba(234,179,8,0.12);">🏪</div>
@@ -1208,7 +1223,9 @@ function copyCoupon(id) {
 }
 
 function escAttr(s) {
-  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  if (s === null || s === undefined) return ''
+  if (typeof s !== 'string') s = String(s)
+  return s.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 </script>
 </body>
