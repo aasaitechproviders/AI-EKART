@@ -707,7 +707,7 @@ function setupInput() {
 ══════════════════════════════════════════════════════════ */
 async function sendMessage() {
   // Stop voice if recording before sending
-  if (_isRecording) _stopVoice(false)
+  if (_recActive) _stopVoice(false)
 
   const inp = document.getElementById('chatInput')
   const text = inp.value.trim()
@@ -1343,218 +1343,205 @@ function escAttr(s) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   VOICE INPUT  — Web Speech API (client-side, free, zero deps)
-   Auto-detects language from speech, shows live interim text,
-   auto-sends after 2s silence once final text exists.
-   Works in Chrome, Edge, Safari 15+. Falls back gracefully.
+   VOICE ENGINE — Web Speech API
+   • Real-time interim text shown as you speak
+   • New SR instance on each restart (fixes the onend bug)
+   • 10s idle timer from mic click (no speech → auto stop)
+   • 10s silence timer after last speech → auto send
+   • Language auto-detected from Unicode ranges
 ══════════════════════════════════════════════════════════ */
 
-const VOICE_LANG_NAMES = {
-  'ta': 'Tamil', 'hi': 'Hindi', 'te': 'Telugu', 'kn': 'Kannada',
-  'ml': 'Malayalam', 'mr': 'Marathi', 'bn': 'Bengali', 'gu': 'Gujarati',
-  'pa': 'Punjabi', 'ur': 'Urdu', 'en': 'English', 'fr': 'French',
-  'de': 'German', 'es': 'Spanish', 'zh': 'Chinese', 'ja': 'Japanese',
-  'ar': 'Arabic',
-}
-
-// We start with 'en-IN' but pass the live detected lang to next restarts
-let _recognition    = null
-let _isRecording    = false
-let _finalText      = ''
-let _silenceTimer   = null
-let _voiceSupported = false
-let _detectedLang   = ''
-
-function _voiceSupport() {
-  return !!(window.SpeechRecognition || window.webkitSpeechRecognition)
-}
+let _rec         = null   // current SpeechRecognition instance
+let _recActive   = false  // are we in recording state?
+let _finalText   = ''     // accumulated confirmed text
+let _idleTimer   = null   // 10s from start with no speech at all
+let _silTimer    = null   // 10s after last speech → auto-send
 
 function initVoice() {
   const btn = document.getElementById('micBtn')
   if (!btn) return
-  _voiceSupported = _voiceSupport()
-  if (!_voiceSupported) {
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
     btn.disabled = true
-    btn.title = 'Voice not supported — use Chrome or Edge'
-    btn.style.opacity = '0.3'
+    btn.title = 'Voice needs Chrome or Edge'
+    btn.style.opacity = '0.35'
+    btn.style.cursor = 'not-allowed'
   }
 }
 
 function toggleVoice() {
-  if (!_voiceSupported) {
-    addAIMessage('Sorry, voice input needs Chrome or Edge browser 🎙')
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SR) {
+    addAIMessage('Voice input needs Chrome or Edge browser 🎙')
     return
   }
-  _isRecording ? _stopVoice(true) : _startVoice()
+  if (_recActive) {
+    _stopVoice(true)   // stop + send whatever we have
+  } else {
+    _startVoice()
+  }
+}
+
+function _makeInstance() {
+  /* Always create a FRESH instance — you cannot restart an ended instance */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  const r = new SR()
+  r.continuous     = true   // keep going until we call .stop()
+  r.interimResults = true   // fire events for partial words
+  r.maxAlternatives = 1
+  r.lang = navigator.language || 'en-IN'
+  return r
 }
 
 function _startVoice() {
-  if (_isRecording) return
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  _recognition = new SR()
+  if (_recActive) return
+  _recActive  = true
+  _finalText  = ''
 
-  // Settings that give best multilingual results
-  _recognition.continuous      = true   // keep listening until we stop it
-  _recognition.interimResults  = true   // show live transcription
-  _recognition.maxAlternatives = 1
-  // Start with browser language — speech API auto-detects once running
-  _recognition.lang = navigator.language || 'en-IN'
+  const inp = document.getElementById('chatInput')
+  inp.value       = ''
+  inp.placeholder = '🎙  Listening…  speak now'
+  inp.classList.add('listening')
+  _autoH(inp)
+  _setUI(true)
 
-  _finalText = ''
-  _detectedLang = ''
-  _isRecording = true
-  _updateVoiceUI(true)
+  // 10-second idle: if NOTHING is heard at all, stop automatically
+  _idleTimer = setTimeout(() => {
+    if (_recActive && !_finalText.trim()) {
+      _stopVoice(false)
+      inp.placeholder = 'No speech detected — try again'
+      setTimeout(() => { inp.placeholder = 'Type or speak your message…' }, 3000)
+    }
+  }, 10000)
 
-  const input = document.getElementById('chatInput')
-  input.value = ''
-  input.placeholder = '🎙 Listening…'
-  input.classList.add('listening')
-  autoResizeInput(input)
+  _attachAndStart()
+}
 
-  // ── onresult: live interim + final text in textarea ──────────────────
-  _recognition.onresult = (e) => {
-    _clearSilenceTimer()
+function _attachAndStart() {
+  /* Create a new instance, attach handlers, start it */
+  _rec = _makeInstance()
+
+  _rec.onstart = () => {
+    // mic is definitely live now — update placeholder
+    const inp = document.getElementById('chatInput')
+    if (inp && !_finalText) inp.placeholder = '🎙  Listening…'
+  }
+
+  _rec.onresult = (e) => {
+    /* Accumulate interim + final, display both live in textarea */
+    _clearSil()
+    _clearIdle() // speech detected → cancel idle stop
 
     let interim = ''
-    let newFinal = ''
-
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript
+      const txt = e.results[i][0].transcript
       if (e.results[i].isFinal) {
-        newFinal += t
-        // Try to detect language from the result
-        if (!_detectedLang && e.results[i][0].transcript) {
-          _detectLangFromText(t)
-        }
+        _finalText += txt + ' '
+        _detectLang(txt)
       } else {
-        interim += t
+        interim += txt
       }
     }
 
-    if (newFinal) _finalText += newFinal
+    const inp = document.getElementById('chatInput')
+    if (inp) {
+      inp.placeholder = ''
+      inp.value = (_finalText + interim).trimStart()
+      _autoH(inp)
+    }
 
-    // Show live in textarea: final (black) + interim (dimmer)
-    input.value = (_finalText + (interim ? ' ' + interim : '')).trim()
-    autoResizeInput(input)
-
-    // Start silence timer only when we have confirmed final text
-    if (_finalText.trim()) _startSilenceTimer()
+    // 10s silence after last speech → auto-send
+    _silTimer = setTimeout(() => {
+      if (_recActive && _finalText.trim()) _stopVoice(true)
+    }, 10000)
   }
 
-  // ── onerror ──────────────────────────────────────────────────────────
-  _recognition.onerror = (e) => {
+  _rec.onerror = (e) => {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      addAIMessage('Microphone access was denied. Please allow mic permissions in your browser and try again.')
+      addAIMessage('🔴 Microphone access denied — please allow mic in browser settings and try again.')
       _stopVoice(false)
       return
     }
-    if (e.error === 'aborted') return // we triggered the stop — ignore
-    // network / no-speech: just restart quietly
-    console.warn('Speech error:', e.error)
+    if (e.error === 'aborted') return   // we called .stop() — ignore
+    if (e.error === 'no-speech') return // just silence — onend will restart
+    console.warn('[Voice] error:', e.error)
   }
 
-  // ── onend: auto-restart while still in recording state ───────────────
-  // The browser stops recognition after silence — we restart to stay live
-  _recognition.onend = () => {
-    if (_isRecording) {
-      try { _recognition.start() } catch (err) { /* already started */ }
+  _rec.onend = () => {
+    /* ⚠ KEY FIX: cannot call .start() on an ended instance.
+       Create a brand new instance and start that instead.      */
+    if (_recActive) {
+      setTimeout(_attachAndStart, 120) // small gap avoids "already started" race
     }
   }
 
   try {
-    _recognition.start()
-  } catch (e) {
-    console.error('Could not start recognition:', e)
-    _isRecording = false
-    _updateVoiceUI(false)
+    _rec.start()
+  } catch (err) {
+    // "already started" can fire in rapid toggle — safe to ignore
+    console.warn('[Voice] start error:', err.message)
   }
-}
-
-// Detect probable language from Unicode ranges in the text
-function _detectLangFromText(text) {
-  const ranges = [
-    { re: /[\u0B80-\u0BFF]/, lang: 'ta', label: 'Tamil'     },
-    { re: /[\u0900-\u097F]/, lang: 'hi', label: 'Hindi'     },
-    { re: /[\u0C00-\u0C7F]/, lang: 'te', label: 'Telugu'    },
-    { re: /[\u0C80-\u0CFF]/, lang: 'kn', label: 'Kannada'   },
-    { re: /[\u0D00-\u0D7F]/, lang: 'ml', label: 'Malayalam' },
-    { re: /[\u0980-\u09FF]/, lang: 'bn', label: 'Bengali'   },
-    { re: /[\u0A80-\u0AFF]/, lang: 'gu', label: 'Gujarati'  },
-    { re: /[\u0A00-\u0A7F]/, lang: 'pa', label: 'Punjabi'   },
-    { re: /[\u0600-\u06FF]/, lang: 'ar', label: 'Arabic'    },
-    { re: /[\u4E00-\u9FFF]/, lang: 'zh', label: 'Chinese'   },
-    { re: /[\u3040-\u30FF]/, lang: 'ja', label: 'Japanese'  },
-  ]
-  for (const r of ranges) {
-    if (r.re.test(text)) {
-      _detectedLang = r.label
-      const pill = document.getElementById('voiceLangLabel')
-      if (pill) pill.textContent = r.label
-      return
-    }
-  }
-  // Latin script → English
-  _detectedLang = 'English'
-  const pill = document.getElementById('voiceLangLabel')
-  if (pill) pill.textContent = 'EN'
 }
 
 function _stopVoice(andSend) {
-  _isRecording = false
-  _clearSilenceTimer()
-  try { _recognition?.stop() } catch (e) {}
-  _recognition = null
-  _updateVoiceUI(false)
+  _recActive = false
+  _clearSil()
+  _clearIdle()
 
-  const input = document.getElementById('chatInput')
-  input.classList.remove('listening')
-  input.placeholder = 'Type or speak your message…'
+  try { _rec?.stop() } catch (_) {}
+  _rec = null
 
-  // Keep final text in textarea, trim interim junk
-  input.value = _finalText.trim()
-  autoResizeInput(input)
+  const inp = document.getElementById('chatInput')
+  if (inp) {
+    inp.classList.remove('listening')
+    inp.placeholder = 'Type or speak your message…'
+    inp.value = _finalText.trim()
+    _autoH(inp)
+  }
+
+  _setUI(false)
 
   if (andSend && _finalText.trim()) {
-    setTimeout(() => sendMessage(), 80) // tiny delay so UI settles
+    setTimeout(sendMessage, 100)
   }
 }
 
-function _startSilenceTimer() {
-  _clearSilenceTimer()
-  _silenceTimer = setTimeout(() => {
-    if (_isRecording && _finalText.trim()) _stopVoice(true)
-  }, 2000) // 2s of silence → auto-send
-}
+function _clearSil()  { if (_silTimer)  { clearTimeout(_silTimer);  _silTimer  = null } }
+function _clearIdle() { if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null } }
 
-function _clearSilenceTimer() {
-  if (_silenceTimer) { clearTimeout(_silenceTimer); _silenceTimer = null }
-}
-
-function _updateVoiceUI(recording) {
+function _setUI(on) {
   const btn  = document.getElementById('micBtn')
   const pill = document.getElementById('voiceLangPill')
   if (!btn) return
-
-  if (recording) {
+  if (on) {
     btn.classList.add('recording')
-    btn.innerHTML = `<div class="mic-ring"></div><div class="mic-ring"></div><div class="mic-ring"></div>⏹`
-    btn.title = 'Recording — click to stop & send'
-    if (pill) {
-      pill.classList.add('show')
-      const label = document.getElementById('voiceLangLabel')
-      if (label) label.textContent = 'Auto'
-    }
+    btn.innerHTML = '<span class="mic-ring"></span><span class="mic-ring"></span><span class="mic-ring"></span>⏹'
+    btn.title = 'Click to stop & send'
+    if (pill) { pill.classList.add('show'); document.getElementById('voiceLangLabel').textContent = '🎙' }
   } else {
     btn.classList.remove('recording')
     btn.innerHTML = '🎙'
     btn.title = 'Voice input'
     if (pill) pill.classList.remove('show')
-    _detectedLang = ''
   }
 }
 
-// auto-resize helper used by voice (same as input event)
-function autoResizeInput(el) {
+function _detectLang(text) {
+  const map = [
+    [/[஀-௿]/, 'Tamil'],   [/[ऀ-ॿ]/, 'Hindi'],
+    [/[ఀ-౿]/, 'Telugu'],  [/[ಀ-೿]/, 'Kannada'],
+    [/[ഀ-ൿ]/, 'Malay.'],  [/[ঀ-৿]/, 'Bengali'],
+    [/[઀-૿]/, 'Gujarati'],[/[؀-ۿ]/, 'Arabic'],
+    [/[一-鿿]/, 'Chinese'], [/[぀-ヿ]/, 'Japanese'],
+  ]
+  const lbl = document.getElementById('voiceLangLabel')
+  if (!lbl) return
+  for (const [re, name] of map) {
+    if (re.test(text)) { lbl.textContent = name; return }
+  }
+  lbl.textContent = 'EN'
+}
+
+function _autoH(el) {
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 120) + 'px'
 }
