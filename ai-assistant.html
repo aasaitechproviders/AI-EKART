@@ -1508,43 +1508,58 @@ function _startVoice() {
   _spawnRec()
 }
 
-/* ── spawn a fresh SR instance (called on start + on each onend restart) ── */
+/* ── spawn a fresh SR instance ──────────────────────────────
+   KEY RULES to avoid word repetition:
+   1. continuous = FALSE  → browser ends cleanly after each pause,
+      no stale result buffer to replay on next instance
+   2. _interimText is reset to '' on each new spawn so old
+      partials never bleed into the display
+   3. Only e.resultIndex..length are processed — never re-scan 0
+─────────────────────────────────────────────────────────── */
+let _interimText = ''   // live partial — reset per spawn
+
 function _spawnRec() {
-  if (!_recActive) return   // guard: may have been stopped while waiting
+  if (!_recActive) return
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   _rec = new SR()
-  _rec.continuous      = true   // don't auto-stop on pause
-  _rec.interimResults  = true   // fire for partial words
+  _rec.continuous      = false  // ← FALSE: each session ends cleanly on pause
+  _rec.interimResults  = true   // still fire partials within the session
   _rec.maxAlternatives = 1
   _rec.lang            = _voiceLang
 
+  _interimText = ''  // always clear partials at start of new instance
+
   const inp = document.getElementById('chatInput')
 
-  /* ── onresult: update textarea in real time ── */
+  /* ── onresult: only process THIS session's new results ── */
   _rec.onresult = (e) => {
     _clearSil()
-    _clearIdle()  // first speech clears idle timeout
+    _clearIdle()
 
+    // Reset interim for this event batch
     let interim = ''
+
+    // Loop only the NEW results in this event (e.resultIndex → end)
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript
       if (e.results[i].isFinal) {
-        _finalText += t + ' '
+        _finalText  += t + ' '
+        _interimText = ''       // final consumed — clear interim
       } else {
-        interim += t
+        interim += t            // accumulate partials within batch
       }
     }
+    _interimText = interim      // store latest partial for display
 
-    // Show confirmed + live interim together
+    // Display: confirmed text + current partial (no duplication)
     if (inp) {
-      inp.value = (_finalText + interim).trimStart()
+      inp.value       = (_finalText + _interimText).trimStart()
       inp.placeholder = ''
       _autoH(inp)
-      // Scroll to bottom of textarea so latest words visible
-      inp.scrollTop = inp.scrollHeight
+      inp.scrollTop   = inp.scrollHeight  // keep latest words visible
     }
 
-    // Reset 10s silence timer on every speech event
+    // 10s silence → auto-send
     _silTimer = setTimeout(() => {
       if (_recActive && _finalText.trim()) _stopVoice(true)
     }, 10000)
@@ -1556,19 +1571,27 @@ function _spawnRec() {
       _stopVoice(false)
       return
     }
-    if (e.error === 'aborted' || e.error === 'no-speech') return // harmless
+    if (e.error === 'aborted') return   // we called .stop() — ignore
+    if (e.error === 'no-speech') {
+      // Browser heard nothing in this session — just respawn quietly
+      if (_recActive) setTimeout(_spawnRec, 100)
+      return
+    }
     console.warn('[Voice]', e.error)
   }
 
-  /* ── onend: browser stops after silence — immediately restart ── */
+  /* ── onend: session ended (pause / natural end / no-speech)
+     Spawn a brand-new instance — never call .start() on ended rec ── */
   _rec.onend = () => {
-    if (_recActive) {
-      // Create brand-new instance (cannot call .start() on ended instance)
-      setTimeout(_spawnRec, 100)
-    }
+    _interimText = ''  // clear stale partial before next session
+    if (_recActive) setTimeout(_spawnRec, 100)
   }
 
-  try { _rec.start() } catch (err) { console.warn('[Voice] start:', err.message) }
+  try {
+    _rec.start()
+  } catch (err) {
+    console.warn('[Voice] start:', err.message)
+  }
 }
 
 /* ── stop recognition engine only (no UI change) ── */
@@ -1585,6 +1608,7 @@ function _stopVoice(andSend) {
   _stopRecognition()
 
   const inp = document.getElementById('chatInput')
+  _interimText = ''
   if (inp) {
     inp.classList.remove('listening')
     inp.placeholder = 'Type or speak your message…'
