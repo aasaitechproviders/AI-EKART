@@ -202,64 +202,75 @@
   flex-shrink: 0;
   transition: all .2s;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .chat-mic-btn:hover { border-color: rgba(108,99,255,0.5); background: rgba(108,99,255,0.08); }
 .chat-mic-btn:disabled { opacity: .35; cursor: not-allowed; }
 .chat-mic-btn.recording {
   background: rgba(239,68,68,0.12);
-  border-color: rgba(239,68,68,0.6);
-  animation: micPulse 1.2s ease-in-out infinite;
+  border-color: rgba(239,68,68,0.55);
+  box-shadow: 0 0 0 0 rgba(239,68,68,0.4);
+  animation: micGlow 1.2s ease-in-out infinite;
 }
-@keyframes micPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-  50%      { box-shadow: 0 0 0 7px rgba(239,68,68,0); }
+@keyframes micGlow {
+  0%,100% { box-shadow: 0 0 0 0   rgba(239,68,68,0.45); }
+  50%      { box-shadow: 0 0 0 8px rgba(239,68,68,0);    }
 }
-/* ripple rings behind the mic icon when recording */
-.mic-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  border: 2px solid rgba(239,68,68,0.5);
-  animation: micRing 1.4s ease-out infinite;
-  pointer-events: none;
-}
-.mic-ring:nth-child(2) { animation-delay: .45s; }
-.mic-ring:nth-child(3) { animation-delay: .9s; }
-@keyframes micRing {
-  0%   { transform: scale(1);   opacity: .7; }
-  100% { transform: scale(1.7); opacity: 0;  }
-}
-
-/* recording — textarea gets live transcription style */
 .chat-input.listening {
-  border-color: rgba(239,68,68,0.45);
-  background: rgba(239,68,68,0.04);
-  color: var(--text);
+  border-color: rgba(239,68,68,0.45) !important;
+  background: rgba(239,68,68,0.03) !important;
 }
-.chat-input.listening::placeholder { color: rgba(239,68,68,0.5); }
 
-/* language pill that appears during recording */
-.voice-lang-pill {
-  display: none;
-  align-items: center;
-  gap: 5px;
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.25);
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 11px;
+/* ─── Language selector popup ────────────────────────────── */
+.lang-picker-wrap { position: relative; flex-shrink: 0; }
+.lang-pick-btn {
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0 10px;
+  font-size: 12px;
   font-weight: 700;
-  color: #ef4444;
-  flex-shrink: 0;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
   white-space: nowrap;
+  transition: all .15s;
+  font-family: 'Outfit', sans-serif;
 }
-.voice-lang-pill.show { display: flex; }
-.voice-lang-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #ef4444;
-  animation: micPulse 1s ease-in-out infinite;
+.lang-pick-btn:hover { border-color: rgba(108,99,255,0.5); color: var(--accent2); }
+.lang-pick-btn.recording { border-color: rgba(239,68,68,0.5); color: #ef4444; background: rgba(239,68,68,0.08); }
+.lang-pick-btn .rec-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #ef4444;
+  animation: micGlow 1s infinite; flex-shrink: 0; display: none;
 }
+.lang-pick-btn.recording .rec-dot { display: block; }
+
+.lang-dropdown {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 175px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  z-index: 999;
+  display: none;
+}
+.lang-dropdown.open { display: block; animation: fadeUp .15s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.lang-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 8px;
+  cursor: pointer; font-size: 12.5px; font-weight: 600;
+  color: var(--text2); transition: background .12s;
+}
+.lang-dd-item:hover { background: var(--surface3); color: var(--text); }
+.lang-dd-item.active { background: rgba(108,99,255,0.1); color: var(--accent2); }
+.lang-dd-item .lang-flag { font-size: 16px; flex-shrink: 0; }
+.lang-dd-sep { height: 1px; background: var(--border); margin: 4px 2px; }
 
 /* ─── Action Panel ───────────────────────────────────────── */
 .action-panel {
@@ -583,11 +594,15 @@
           <textarea class="chat-input" id="chatInput"
             placeholder="Type or speak your message…"
             rows="1"></textarea>
-          <span class="voice-lang-pill" id="voiceLangPill">
-            <span class="voice-lang-dot"></span>
-            <span id="voiceLangLabel">EN</span>
-          </span>
-          <button class="chat-mic-btn" id="micBtn" title="Voice input" onclick="toggleVoice()">🎙</button>
+          <!-- language picker + mic combined -->
+          <div class="lang-picker-wrap" id="langPickerWrap">
+            <button class="lang-pick-btn" id="micBtn" onclick="toggleVoice()" title="Voice input">
+              <span class="rec-dot"></span>
+              <span id="micIcon">🎙</span>
+              <span id="micLangLabel">EN</span>
+            </button>
+            <div class="lang-dropdown" id="langDropdown"></div>
+          </div>
           <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
         </div>
       </div>
@@ -708,7 +723,6 @@ function setupInput() {
 async function sendMessage() {
   // Stop voice if recording before sending
   if (_recActive) _stopVoice(false)
-
   const inp = document.getElementById('chatInput')
   const text = inp.value.trim()
   if (!text || isTyping) return
@@ -1343,113 +1357,194 @@ function escAttr(s) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   VOICE ENGINE — Web Speech API
-   • Real-time interim text shown as you speak
-   • New SR instance on each restart (fixes the onend bug)
-   • 10s idle timer from mic click (no speech → auto stop)
-   • 10s silence timer after last speech → auto send
-   • Language auto-detected from Unicode ranges
+   VOICE ENGINE v3
+   • User picks language from dropdown (long-press / right-click mic)
+   • Left-click mic = start / click again = stop + send
+   • Real-time interim words appear in textarea as user speaks
+   • 10s total idle (no speech at all) → auto-stop
+   • 10s silence after last word → auto-send
+   • Long sessions (3-4 min) supported: fresh SR instance on each
+     browser-side onend so recognition never silently dies
 ══════════════════════════════════════════════════════════ */
 
-let _rec         = null   // current SpeechRecognition instance
-let _recActive   = false  // are we in recording state?
-let _finalText   = ''     // accumulated confirmed text
-let _idleTimer   = null   // 10s from start with no speech at all
-let _silTimer    = null   // 10s after last speech → auto-send
+const VOICE_LANGS = [
+  { code: 'en-IN',  flag: '🇮🇳', label: 'English (India)'   },
+  { code: 'ta-IN',  flag: '🇮🇳', label: 'Tamil'              },
+  { code: 'hi-IN',  flag: '🇮🇳', label: 'Hindi'              },
+  { code: 'te-IN',  flag: '🇮🇳', label: 'Telugu'             },
+  { code: 'kn-IN',  flag: '🇮🇳', label: 'Kannada'            },
+  { code: 'ml-IN',  flag: '🇮🇳', label: 'Malayalam'          },
+  { code: 'mr-IN',  flag: '🇮🇳', label: 'Marathi'            },
+  { code: 'bn-IN',  flag: '🇮🇳', label: 'Bengali'            },
+  { code: 'gu-IN',  flag: '🇮🇳', label: 'Gujarati'           },
+  { code: 'pa-IN',  flag: '🇮🇳', label: 'Punjabi'            },
+  { sep: true },
+  { code: 'en-US',  flag: '🇺🇸', label: 'English (US)'       },
+  { code: 'en-GB',  flag: '🇬🇧', label: 'English (UK)'       },
+  { code: 'ar-SA',  flag: '🇸🇦', label: 'Arabic'             },
+  { code: 'zh-CN',  flag: '🇨🇳', label: 'Chinese'            },
+  { code: 'fr-FR',  flag: '🇫🇷', label: 'French'             },
+  { code: 'de-DE',  flag: '🇩🇪', label: 'German'             },
+]
 
+/* ── state ── */
+let _rec         = null
+let _recActive   = false
+let _finalText   = ''      // confirmed text accumulated
+let _idleTimer   = null    // stops if nothing heard in 10s
+let _silTimer    = null    // auto-sends after 10s silence
+let _voiceLang   = localStorage.getItem('ekart_voice_lang') || 'en-IN'
+let _ddOpen      = false
+
+/* ── init ── */
 function initVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   const btn = document.getElementById('micBtn')
   if (!btn) return
-  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
+
+  if (!SR) {
     btn.disabled = true
     btn.title = 'Voice needs Chrome or Edge'
-    btn.style.opacity = '0.35'
+    btn.style.opacity = '0.3'
     btn.style.cursor = 'not-allowed'
-  }
-}
-
-function toggleVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) {
-    addAIMessage('Voice input needs Chrome or Edge browser 🎙')
     return
   }
-  if (_recActive) {
-    _stopVoice(true)   // stop + send whatever we have
-  } else {
-    _startVoice()
+
+  // Render language dropdown
+  const dd = document.getElementById('langDropdown')
+  if (dd) {
+    dd.innerHTML = `
+      <div style="padding:6px 10px 4px;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;">Voice Language</div>
+      ${VOICE_LANGS.map(l => l.sep
+        ? `<div class="lang-dd-sep"></div>`
+        : `<div class="lang-dd-item ${l.code===_voiceLang?'active':''}" onclick="selectVoiceLang('${l.code}',this)">
+             <span class="lang-flag">${l.flag}</span>${l.label}
+           </div>`
+      ).join('')}`
   }
+
+  // Update label
+  _updateLangLabel()
+
+  // Long-press OR right-click → open dropdown without starting mic
+  btn.addEventListener('contextmenu', e => { e.preventDefault(); _toggleDD() })
+  btn.addEventListener('mousedown', e => {
+    if (e.button === 0) { // left click only → handled by onclick=toggleVoice
+      // close dd if open
+      if (_ddOpen) { _closeDD(); e.stopPropagation() }
+    }
+  })
+
+  // Click outside → close dd
+  document.addEventListener('click', e => {
+    if (_ddOpen && !e.target.closest('#langPickerWrap')) _closeDD()
+  })
 }
 
-function _makeInstance() {
-  /* Always create a FRESH instance — you cannot restart an ended instance */
+function selectVoiceLang(code, el) {
+  _voiceLang = code
+  localStorage.setItem('ekart_voice_lang', code)
+  document.querySelectorAll('.lang-dd-item').forEach(x => x.classList.remove('active'))
+  if (el) el.classList.add('active')
+  _updateLangLabel()
+  _closeDD()
+  // If already recording, restart with new language
+  if (_recActive) { _stopRecognition(); setTimeout(_spawnRec, 150) }
+}
+
+function _updateLangLabel() {
+  const lbl = document.getElementById('micLangLabel')
+  if (!lbl) return
+  const found = VOICE_LANGS.find(l => l.code === _voiceLang)
+  // show just the short code e.g. "EN" "TA" "HI"
+  lbl.textContent = found ? found.code.split('-')[0].toUpperCase() : 'EN'
+}
+
+function _toggleDD() {
+  _ddOpen ? _closeDD() : _openDD()
+}
+function _openDD() {
+  const dd = document.getElementById('langDropdown')
+  if (dd) { dd.classList.add('open'); _ddOpen = true }
+}
+function _closeDD() {
+  const dd = document.getElementById('langDropdown')
+  if (dd) { dd.classList.remove('open'); _ddOpen = false }
+}
+
+/* ── main toggle ── */
+function toggleVoice() {
+  if (_ddOpen) { _closeDD(); return }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  const r = new SR()
-  r.continuous     = true   // keep going until we call .stop()
-  r.interimResults = true   // fire events for partial words
-  r.maxAlternatives = 1
-  r.lang = navigator.language || 'en-IN'
-  return r
+  if (!SR) { addAIMessage('Voice input needs Chrome or Edge browser 🎙'); return }
+  _recActive ? _stopVoice(true) : _startVoice()
 }
 
+/* ── start ── */
 function _startVoice() {
   if (_recActive) return
-  _recActive  = true
-  _finalText  = ''
+  _recActive = true
+  _finalText = ''
 
   const inp = document.getElementById('chatInput')
-  inp.value       = ''
-  inp.placeholder = '🎙  Listening…  speak now'
+  inp.value = ''
   inp.classList.add('listening')
   _autoH(inp)
+
   _setUI(true)
 
-  // 10-second idle: if NOTHING is heard at all, stop automatically
+  // 10s idle: if user clicks mic but says nothing at all
   _idleTimer = setTimeout(() => {
     if (_recActive && !_finalText.trim()) {
       _stopVoice(false)
-      inp.placeholder = 'No speech detected — try again'
-      setTimeout(() => { inp.placeholder = 'Type or speak your message…' }, 3000)
+      const i = document.getElementById('chatInput')
+      if (i) {
+        i.placeholder = '💬 No speech detected — try again'
+        setTimeout(() => { i.placeholder = 'Type or speak your message…' }, 3000)
+      }
     }
   }, 10000)
 
-  _attachAndStart()
+  _spawnRec()
 }
 
-function _attachAndStart() {
-  /* Create a new instance, attach handlers, start it */
-  _rec = _makeInstance()
+/* ── spawn a fresh SR instance (called on start + on each onend restart) ── */
+function _spawnRec() {
+  if (!_recActive) return   // guard: may have been stopped while waiting
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  _rec = new SR()
+  _rec.continuous      = true   // don't auto-stop on pause
+  _rec.interimResults  = true   // fire for partial words
+  _rec.maxAlternatives = 1
+  _rec.lang            = _voiceLang
 
-  _rec.onstart = () => {
-    // mic is definitely live now — update placeholder
-    const inp = document.getElementById('chatInput')
-    if (inp && !_finalText) inp.placeholder = '🎙  Listening…'
-  }
+  const inp = document.getElementById('chatInput')
 
+  /* ── onresult: update textarea in real time ── */
   _rec.onresult = (e) => {
-    /* Accumulate interim + final, display both live in textarea */
     _clearSil()
-    _clearIdle() // speech detected → cancel idle stop
+    _clearIdle()  // first speech clears idle timeout
 
     let interim = ''
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const txt = e.results[i][0].transcript
+      const t = e.results[i][0].transcript
       if (e.results[i].isFinal) {
-        _finalText += txt + ' '
-        _detectLang(txt)
+        _finalText += t + ' '
       } else {
-        interim += txt
+        interim += t
       }
     }
 
-    const inp = document.getElementById('chatInput')
+    // Show confirmed + live interim together
     if (inp) {
-      inp.placeholder = ''
       inp.value = (_finalText + interim).trimStart()
+      inp.placeholder = ''
       _autoH(inp)
+      // Scroll to bottom of textarea so latest words visible
+      inp.scrollTop = inp.scrollHeight
     }
 
-    // 10s silence after last speech → auto-send
+    // Reset 10s silence timer on every speech event
     _silTimer = setTimeout(() => {
       if (_recActive && _finalText.trim()) _stopVoice(true)
     }, 10000)
@@ -1457,38 +1552,37 @@ function _attachAndStart() {
 
   _rec.onerror = (e) => {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      addAIMessage('🔴 Microphone access denied — please allow mic in browser settings and try again.')
+      addAIMessage('🔴 Mic access denied. Please allow microphone in browser settings.')
       _stopVoice(false)
       return
     }
-    if (e.error === 'aborted') return   // we called .stop() — ignore
-    if (e.error === 'no-speech') return // just silence — onend will restart
-    console.warn('[Voice] error:', e.error)
+    if (e.error === 'aborted' || e.error === 'no-speech') return // harmless
+    console.warn('[Voice]', e.error)
   }
 
+  /* ── onend: browser stops after silence — immediately restart ── */
   _rec.onend = () => {
-    /* ⚠ KEY FIX: cannot call .start() on an ended instance.
-       Create a brand new instance and start that instead.      */
     if (_recActive) {
-      setTimeout(_attachAndStart, 120) // small gap avoids "already started" race
+      // Create brand-new instance (cannot call .start() on ended instance)
+      setTimeout(_spawnRec, 100)
     }
   }
 
-  try {
-    _rec.start()
-  } catch (err) {
-    // "already started" can fire in rapid toggle — safe to ignore
-    console.warn('[Voice] start error:', err.message)
-  }
+  try { _rec.start() } catch (err) { console.warn('[Voice] start:', err.message) }
 }
 
+/* ── stop recognition engine only (no UI change) ── */
+function _stopRecognition() {
+  try { _rec?.stop() } catch (_) {}
+  _rec = null
+}
+
+/* ── full stop ── */
 function _stopVoice(andSend) {
   _recActive = false
   _clearSil()
   _clearIdle()
-
-  try { _rec?.stop() } catch (_) {}
-  _rec = null
+  _stopRecognition()
 
   const inp = document.getElementById('chatInput')
   if (inp) {
@@ -1497,7 +1591,6 @@ function _stopVoice(andSend) {
     inp.value = _finalText.trim()
     _autoH(inp)
   }
-
   _setUI(false)
 
   if (andSend && _finalText.trim()) {
@@ -1505,43 +1598,27 @@ function _stopVoice(andSend) {
   }
 }
 
+/* ── helpers ── */
 function _clearSil()  { if (_silTimer)  { clearTimeout(_silTimer);  _silTimer  = null } }
 function _clearIdle() { if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null } }
 
 function _setUI(on) {
-  const btn  = document.getElementById('micBtn')
-  const pill = document.getElementById('voiceLangPill')
+  const btn = document.getElementById('micBtn')
+  const ico = document.getElementById('micIcon')
   if (!btn) return
   if (on) {
     btn.classList.add('recording')
-    btn.innerHTML = '<span class="mic-ring"></span><span class="mic-ring"></span><span class="mic-ring"></span>⏹'
-    btn.title = 'Click to stop & send'
-    if (pill) { pill.classList.add('show'); document.getElementById('voiceLangLabel').textContent = '🎙' }
+    if (ico) ico.textContent = '⏹'
+    btn.title = 'Recording — click to stop & send'
   } else {
     btn.classList.remove('recording')
-    btn.innerHTML = '🎙'
+    if (ico) ico.textContent = '🎙'
     btn.title = 'Voice input'
-    if (pill) pill.classList.remove('show')
   }
-}
-
-function _detectLang(text) {
-  const map = [
-    [/[஀-௿]/, 'Tamil'],   [/[ऀ-ॿ]/, 'Hindi'],
-    [/[ఀ-౿]/, 'Telugu'],  [/[ಀ-೿]/, 'Kannada'],
-    [/[ഀ-ൿ]/, 'Malay.'],  [/[ঀ-৿]/, 'Bengali'],
-    [/[઀-૿]/, 'Gujarati'],[/[؀-ۿ]/, 'Arabic'],
-    [/[一-鿿]/, 'Chinese'], [/[぀-ヿ]/, 'Japanese'],
-  ]
-  const lbl = document.getElementById('voiceLangLabel')
-  if (!lbl) return
-  for (const [re, name] of map) {
-    if (re.test(text)) { lbl.textContent = name; return }
-  }
-  lbl.textContent = 'EN'
 }
 
 function _autoH(el) {
+  if (!el) return
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 120) + 'px'
 }
