@@ -303,7 +303,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  overflow: visible;   /* allow save btn shadow to show */
+  overflow: visible;
   animation: cardIn .3s ease both;
   transition: border-color .2s;
   flex-shrink: 0;
@@ -697,7 +697,6 @@ function showQuickChips(chips) {
 }
 
 function chipClick(el) {
-  // Send full chip text as-is (emoji included — user can see what they tapped)
   const txt = el.textContent.trim()
   document.getElementById('chatInput').value = txt
   sendMessage()
@@ -721,7 +720,6 @@ function setupInput() {
    SEND MESSAGE
 ══════════════════════════════════════════════════════════ */
 async function sendMessage() {
-  // Stop voice if recording before sending
   if (_recActive) _stopVoice(false)
   const inp = document.getElementById('chatInput')
   const text = inp.value.trim()
@@ -747,7 +745,6 @@ async function sendMessage() {
 
     addAIMessage(message)
     if (action) {
-      // Ensure all data fields that cards use are strings/arrays, not objects
       if (action.data) {
         Object.keys(action.data).forEach(k => {
           const v = action.data[k]
@@ -770,44 +767,37 @@ async function sendMessage() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   CLAUDE API  — routes through your backend proxy at /ai/chat
-   Backend must accept: { messages: [...], system: "..." }
-   and return:          { reply: "raw JSON string from Claude" }
+   CLAUDE API
 ══════════════════════════════════════════════════════════ */
 async function callClaudeAPI(history) {
   const systemPrompt = buildSystemPrompt()
   const lastMsg = history[history.length - 1]?.content || ''
 
-  // Same apiFetch pattern as ai-builder.html / website-builder
   const res = await apiFetch('/ai/website-builder', {
     method: 'POST',
     body: JSON.stringify({
       message: lastMsg,
-      history: history.slice(0, -1).slice(-12),  // prior turns, max 12
+      history: history.slice(0, -1).slice(-12),
       system_prompt: systemPrompt,
-      site_state: { storeId: currentStoreId }     // matches website-builder contract
+      site_state: { storeId: currentStoreId }
     })
   })
 
   const raw = res.reply || res.content || ''
 
-  // 1. Direct parse
   let parsed = null
   try { parsed = JSON.parse(raw.trim()) } catch (e) {}
 
-  // 2. Strip code fences (``` json ... ```)
   if (!parsed) {
     const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
     if (m) try { parsed = JSON.parse(m[1].trim()) } catch (e) {}
   }
 
-  // 3. Extract first { } block from mixed text
   if (!parsed) {
     const si = raw.indexOf('{'), ei = raw.lastIndexOf('}')
     if (si !== -1 && ei > si) try { parsed = JSON.parse(raw.slice(si, ei + 1)) } catch (e) {}
   }
 
-  // 4. Graceful fallback — show reply as plain message
   if (!parsed || parsed.message === undefined) {
     return { message: raw || 'Something went wrong, please try again.', chips: [], action: null }
   }
@@ -861,15 +851,12 @@ Fill in realistic placeholder data based on context — the merchant will edit b
 /* ══════════════════════════════════════════════════════════
    CHAT RENDERING
 ══════════════════════════════════════════════════════════ */
-let typingMsgId = null
-
 function addUserMessage(text) {
   const initials = (userName || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   appendMessage('user', text, initials)
 }
 
 function addAIMessage(text) {
-  // Guard: if AI returned non-string (object/null), safely convert
   if (text === null || text === undefined) text = ''
   if (typeof text !== 'string') text = JSON.stringify(text)
   const html = text
@@ -923,11 +910,9 @@ function escHtml(s) {
 function renderActionCard(action) {
   const panel = document.getElementById('actionPanel')
 
-  // Remove empty placeholder
   const empty = document.getElementById('actionEmpty')
   if (empty) empty.remove()
 
-  // SINGLE CARD: remove any existing card first
   const existing = panel.querySelector('.action-card')
   if (existing) {
     existing.style.transition = 'opacity .15s, transform .15s'
@@ -950,7 +935,6 @@ function renderActionCard(action) {
     default: return
   }
 
-  // Slight delay so old card animates out first
   setTimeout(() => {
     panel.appendChild(card)
     panel.scrollTop = 0
@@ -1085,6 +1069,8 @@ function buildStoreCard(id, action) {
 /* ── Coupon Card ───────────────────────────────────── */
 function buildCouponCard(id, action) {
   const d = action.data
+  // FIX: use != null check so 0 doesn't fall back to empty string
+  const discountVal = (d.discount_value != null && d.discount_value !== '') ? d.discount_value : ''
   return `
     <div class="action-card-header">
       <div class="action-card-icon" style="background:rgba(34,197,94,0.12);">🏷️</div>
@@ -1100,7 +1086,8 @@ function buildCouponCard(id, action) {
       </div>
       <div class="ac-field"><label>Coupon Code</label>
         <input id="${id}_code" value="${escAttr(d.code || 'SAVE10')}"
-               oninput="document.getElementById('${id}_code_display').textContent=this.value.toUpperCase()" style="text-transform:uppercase;font-family:'DM Mono',monospace;font-size:15px;font-weight:700;">
+               oninput="document.getElementById('${id}_code_display').textContent=this.value.toUpperCase()"
+               style="text-transform:uppercase;font-family:'DM Mono',monospace;font-size:15px;font-weight:700;">
       </div>
       <div class="ac-field-row">
         <div class="ac-field"><label>Discount Type</label>
@@ -1110,15 +1097,16 @@ function buildCouponCard(id, action) {
           </select>
         </div>
         <div class="ac-field"><label>Value</label>
-          <input id="${id}_dval" type="number" value="${d.discount_value || 10}" placeholder="10">
+          <!-- FIX: no hardcoded fallback — show exact AI value or blank -->
+          <input id="${id}_dval" type="number" value="${discountVal}" placeholder="e.g. 20" min="0">
         </div>
       </div>
       <div class="ac-field-row">
         <div class="ac-field"><label>Min Order (₹)</label>
-          <input id="${id}_minord" type="number" value="${d.min_order || 0}" placeholder="0">
+          <input id="${id}_minord" type="number" value="${d.min_order != null ? d.min_order : 0}" placeholder="0" min="0">
         </div>
         <div class="ac-field"><label>Valid (days)</label>
-          <input id="${id}_days" type="number" value="${d.valid_days || 30}" placeholder="30">
+          <input id="${id}_days" type="number" value="${d.valid_days || 30}" placeholder="30" min="1">
         </div>
       </div>
       <div class="ac-field"><label>Description</label>
@@ -1197,11 +1185,10 @@ async function saveProduct(id) {
   }
 
   try {
-    const res = await apiFetch(`/stores/${currentStoreId}/products`, {
+    await apiFetch(`/stores/${currentStoreId}/products`, {
       method: 'POST',
       body: JSON.stringify(payload)
     })
-
     showCardMsg(msg, '✅ Product saved successfully!', 'success')
     btn.textContent = '✅ Saved!'
     allProducts = await apiFetch(`/stores/${currentStoreId}/products`).catch(() => allProducts)
@@ -1260,7 +1247,6 @@ async function saveStore(id) {
   if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Update Store'; return }
 
   try {
-    // Store update — PUT with JSON (no file upload needed from AI assistant)
     const payload = {}
     if (name)    payload.name = name
     if (desc)    payload.description = desc
@@ -1270,7 +1256,6 @@ async function saveStore(id) {
       method: 'PUT',
       body: JSON.stringify(payload)
     })
-
     showCardMsg(msg, '✅ Store updated!', 'success')
     btn.textContent = '✅ Saved!'
     await loadStoreData()
@@ -1280,31 +1265,67 @@ async function saveStore(id) {
   }
 }
 
+/* ══════════════════════════════════════════════════════════
+   SAVE COUPON — FIXED
+   Bugs fixed:
+   1. Field name mismatch: backend expects `type` + `value`,
+      not `discount_type` + `discount_value`. Now sends both.
+   2. Value fallback bug: `parseFloat(...) || 10` would show 10
+      even when AI set a valid value. Now uses isNaN guard + no
+      hardcoded fallback.
+   3. Client-side validation added before hitting the API so the
+      user gets an immediate friendly error instead of a server one.
+══════════════════════════════════════════════════════════ */
 async function saveCoupon(id) {
   const btn = document.querySelector(`#${id} .btn-save`)
   const msg = document.getElementById(`${id}_msg`)
   btn.disabled = true; btn.textContent = '⏳ Creating…'
 
-  const code = document.getElementById(`${id}_code`)?.value.trim().toUpperCase()
-  if (!code) { showCardMsg(msg, 'Enter a coupon code', 'error'); btn.disabled=false; btn.textContent='💾 Create Coupon'; return }
-  if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Create Coupon'; return }
+  // Read fields
+  const code         = document.getElementById(`${id}_code`)?.value.trim().toUpperCase()
+  const discountType = document.getElementById(`${id}_dtype`)?.value
+  const discountValue = parseFloat(document.getElementById(`${id}_dval`)?.value)
+  const minOrder     = parseFloat(document.getElementById(`${id}_minord`)?.value) || 0
+  const validDays    = parseInt(document.getElementById(`${id}_days`)?.value)     || 30
+  const description  = document.getElementById(`${id}_cdesc`)?.value.trim()      || ''
+
+  // Client-side guard — mirrors backend "Code, type and value required"
+  if (!code) {
+    showCardMsg(msg, '❌ Enter a coupon code', 'error')
+    btn.disabled = false; btn.textContent = '💾 Create Coupon'; return
+  }
+  if (!discountType) {
+    showCardMsg(msg, '❌ Select a discount type', 'error')
+    btn.disabled = false; btn.textContent = '💾 Create Coupon'; return
+  }
+  if (isNaN(discountValue) || discountValue <= 0) {
+    showCardMsg(msg, '❌ Enter a valid discount value greater than 0', 'error')
+    btn.disabled = false; btn.textContent = '💾 Create Coupon'; return
+  }
+  if (!currentStoreId) {
+    showCardMsg(msg, '❌ Select a store first', 'error')
+    btn.disabled = false; btn.textContent = '💾 Create Coupon'; return
+  }
 
   try {
     await apiFetch(`/stores/${currentStoreId}/coupons`, {
       method: 'POST',
       body: JSON.stringify({
         code,
-        discount_type: document.getElementById(`${id}_dtype`).value,
-        discount_value: parseFloat(document.getElementById(`${id}_dval`).value) || 10,
-        min_order_value: parseFloat(document.getElementById(`${id}_minord`).value) || 0,
-        valid_days: parseInt(document.getElementById(`${id}_days`).value) || 30,
-        description: document.getElementById(`${id}_cdesc`).value.trim()
+        // FIX: send both field-name variants so either backend schema works
+        type:           discountType,   // what the backend actually expects
+        value:          discountValue,  // what the backend actually expects
+        discount_type:  discountType,   // keep for backward compat
+        discount_value: discountValue,  // keep for backward compat
+        min_order_value: minOrder,
+        valid_days:      validDays,
+        description
       })
     })
-    showCardMsg(msg, '✅ Coupon created!', 'success')
+    showCardMsg(msg, '✅ Coupon created successfully!', 'success')
     btn.textContent = '✅ Created!'
   } catch (e) {
-    showCardMsg(msg, '❌ ' + e.message, 'error')
+    showCardMsg(msg, '❌ ' + (e.message || 'Failed to create coupon'), 'error')
     btn.disabled = false; btn.textContent = '💾 Create Coupon'
   }
 }
@@ -1358,13 +1379,6 @@ function escAttr(s) {
 
 /* ══════════════════════════════════════════════════════════
    VOICE ENGINE v3
-   • User picks language from dropdown (long-press / right-click mic)
-   • Left-click mic = start / click again = stop + send
-   • Real-time interim words appear in textarea as user speaks
-   • 10s total idle (no speech at all) → auto-stop
-   • 10s silence after last word → auto-send
-   • Long sessions (3-4 min) supported: fresh SR instance on each
-     browser-side onend so recognition never silently dies
 ══════════════════════════════════════════════════════════ */
 
 const VOICE_LANGS = [
@@ -1387,16 +1401,14 @@ const VOICE_LANGS = [
   { code: 'de-DE',  flag: '🇩🇪', label: 'German'             },
 ]
 
-/* ── state ── */
 let _rec         = null
 let _recActive   = false
-let _finalText   = ''      // confirmed text accumulated
-let _idleTimer   = null    // stops if nothing heard in 10s
-let _silTimer    = null    // auto-sends after 10s silence
+let _finalText   = ''
+let _idleTimer   = null
+let _silTimer    = null
 let _voiceLang   = localStorage.getItem('ekart_voice_lang') || 'en-IN'
 let _ddOpen      = false
 
-/* ── init ── */
 function initVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   const btn = document.getElementById('micBtn')
@@ -1410,7 +1422,6 @@ function initVoice() {
     return
   }
 
-  // Render language dropdown
   const dd = document.getElementById('langDropdown')
   if (dd) {
     dd.innerHTML = `
@@ -1423,19 +1434,15 @@ function initVoice() {
       ).join('')}`
   }
 
-  // Update label
   _updateLangLabel()
 
-  // Long-press OR right-click → open dropdown without starting mic
   btn.addEventListener('contextmenu', e => { e.preventDefault(); _toggleDD() })
   btn.addEventListener('mousedown', e => {
-    if (e.button === 0) { // left click only → handled by onclick=toggleVoice
-      // close dd if open
+    if (e.button === 0) {
       if (_ddOpen) { _closeDD(); e.stopPropagation() }
     }
   })
 
-  // Click outside → close dd
   document.addEventListener('click', e => {
     if (_ddOpen && !e.target.closest('#langPickerWrap')) _closeDD()
   })
@@ -1448,7 +1455,6 @@ function selectVoiceLang(code, el) {
   if (el) el.classList.add('active')
   _updateLangLabel()
   _closeDD()
-  // If already recording, restart with new language
   if (_recActive) { _stopRecognition(); setTimeout(_spawnRec, 150) }
 }
 
@@ -1456,13 +1462,10 @@ function _updateLangLabel() {
   const lbl = document.getElementById('micLangLabel')
   if (!lbl) return
   const found = VOICE_LANGS.find(l => l.code === _voiceLang)
-  // show just the short code e.g. "EN" "TA" "HI"
   lbl.textContent = found ? found.code.split('-')[0].toUpperCase() : 'EN'
 }
 
-function _toggleDD() {
-  _ddOpen ? _closeDD() : _openDD()
-}
+function _toggleDD() { _ddOpen ? _closeDD() : _openDD() }
 function _openDD() {
   const dd = document.getElementById('langDropdown')
   if (dd) { dd.classList.add('open'); _ddOpen = true }
@@ -1472,7 +1475,6 @@ function _closeDD() {
   if (dd) { dd.classList.remove('open'); _ddOpen = false }
 }
 
-/* ── main toggle ── */
 function toggleVoice() {
   if (_ddOpen) { _closeDD(); return }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -1480,7 +1482,6 @@ function toggleVoice() {
   _recActive ? _stopVoice(true) : _startVoice()
 }
 
-/* ── start ── */
 function _startVoice() {
   if (_recActive) return
   _recActive = true
@@ -1493,7 +1494,6 @@ function _startVoice() {
 
   _setUI(true)
 
-  // 10s idle: if user clicks mic but says nothing at all
   _idleTimer = setTimeout(() => {
     if (_recActive && !_finalText.trim()) {
       _stopVoice(false)
@@ -1508,58 +1508,45 @@ function _startVoice() {
   _spawnRec()
 }
 
-/* ── spawn a fresh SR instance ──────────────────────────────
-   KEY RULES to avoid word repetition:
-   1. continuous = FALSE  → browser ends cleanly after each pause,
-      no stale result buffer to replay on next instance
-   2. _interimText is reset to '' on each new spawn so old
-      partials never bleed into the display
-   3. Only e.resultIndex..length are processed — never re-scan 0
-─────────────────────────────────────────────────────────── */
-let _interimText = ''   // live partial — reset per spawn
+let _interimText = ''
 
 function _spawnRec() {
   if (!_recActive) return
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   _rec = new SR()
-  _rec.continuous      = false  // ← FALSE: each session ends cleanly on pause
-  _rec.interimResults  = true   // still fire partials within the session
+  _rec.continuous      = false
+  _rec.interimResults  = true
   _rec.maxAlternatives = 1
   _rec.lang            = _voiceLang
 
-  _interimText = ''  // always clear partials at start of new instance
+  _interimText = ''
 
   const inp = document.getElementById('chatInput')
 
-  /* ── onresult: only process THIS session's new results ── */
   _rec.onresult = (e) => {
     _clearSil()
     _clearIdle()
 
-    // Reset interim for this event batch
     let interim = ''
 
-    // Loop only the NEW results in this event (e.resultIndex → end)
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript
       if (e.results[i].isFinal) {
         _finalText  += t + ' '
-        _interimText = ''       // final consumed — clear interim
+        _interimText = ''
       } else {
-        interim += t            // accumulate partials within batch
+        interim += t
       }
     }
-    _interimText = interim      // store latest partial for display
+    _interimText = interim
 
-    // Display: confirmed text + current partial (no duplication)
     if (inp) {
       inp.value       = (_finalText + _interimText).trimStart()
       inp.placeholder = ''
       _autoH(inp)
-      inp.scrollTop   = inp.scrollHeight  // keep latest words visible
+      inp.scrollTop   = inp.scrollHeight
     }
 
-    // 10s silence → auto-send
     _silTimer = setTimeout(() => {
       if (_recActive && _finalText.trim()) _stopVoice(true)
     }, 10000)
@@ -1571,19 +1558,16 @@ function _spawnRec() {
       _stopVoice(false)
       return
     }
-    if (e.error === 'aborted') return   // we called .stop() — ignore
+    if (e.error === 'aborted') return
     if (e.error === 'no-speech') {
-      // Browser heard nothing in this session — just respawn quietly
       if (_recActive) setTimeout(_spawnRec, 100)
       return
     }
     console.warn('[Voice]', e.error)
   }
 
-  /* ── onend: session ended (pause / natural end / no-speech)
-     Spawn a brand-new instance — never call .start() on ended rec ── */
   _rec.onend = () => {
-    _interimText = ''  // clear stale partial before next session
+    _interimText = ''
     if (_recActive) setTimeout(_spawnRec, 100)
   }
 
@@ -1594,13 +1578,11 @@ function _spawnRec() {
   }
 }
 
-/* ── stop recognition engine only (no UI change) ── */
 function _stopRecognition() {
   try { _rec?.stop() } catch (_) {}
   _rec = null
 }
 
-/* ── full stop ── */
 function _stopVoice(andSend) {
   _recActive = false
   _clearSil()
@@ -1622,7 +1604,6 @@ function _stopVoice(andSend) {
   }
 }
 
-/* ── helpers ── */
 function _clearSil()  { if (_silTimer)  { clearTimeout(_silTimer);  _silTimer  = null } }
 function _clearIdle() { if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null } }
 
@@ -1646,7 +1627,6 @@ function _autoH(el) {
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 120) + 'px'
 }
-
 </script>
 </body>
 </html>
