@@ -11,13 +11,85 @@
   </script>
   <script src="api.js"></script>
   <style>
-    :root{--bg:#09090f;--surface:#0e0e17;--surface2:#13131e;--surface3:#181826;--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);--accent:#5b5cf6;--accent2:#818cf8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--text3:#475569;--panel-w:420px;--topbar-h:52px;}
+    /* ══════════════════════════════════════════════════════════
+       DAY / NIGHT THEME — copied from ai-assistant.html
+    ══════════════════════════════════════════════════════════ */
+    :root{
+      --bg:#09090f;--surface:#0e0e17;--surface2:#13131e;--surface3:#181826;
+      --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.10);--border3:rgba(255,255,255,.16);
+      --accent:#5b5cf6;--accent2:#818cf8;
+      --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+      --panel-w:420px;--topbar-h:52px;
+    }
+    [data-theme="light"]{
+      --bg:#f0f0f5;--surface:#ffffff;--surface2:#f3f4f6;--surface3:#e9eaf0;
+      --border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.14);--border3:rgba(0,0,0,.20);
+      --accent:#6c63ff;--accent2:#5b52e0;
+      --green:#16a34a;--red:#dc2626;--amber:#ca8a04;
+      --text:#111827;--text2:#374151;--text3:#9ca3af;
+    }
+    [data-theme="light"] body          { background:#f0f0f5; }
+    [data-theme="light"] #topbar       { background:#fff; border-bottom-color:rgba(0,0,0,.09); }
+    [data-theme="light"] #left-panel   { background:#fff; border-right-color:rgba(0,0,0,.09); }
+    [data-theme="light"] #preview-panel{ background:#e8e9f0; }
+    [data-theme="light"] .preview-bar  { background:#fff; border-bottom-color:rgba(0,0,0,.09); }
+    [data-theme="light"] .panel-tabs   { background:#fff; border-bottom-color:rgba(0,0,0,.09); }
+    [data-theme="light"] .ptab         { color:#9ca3af; }
+    [data-theme="light"] .ptab.active  { color:#5b52e0; border-bottom-color:#5b52e0; background:rgba(108,99,255,.04); }
+    [data-theme="light"] #chat-messages{ background:#fff; }
+    [data-theme="light"] .msg.ai .msg-bubble{ background:#f3f4f6; border-color:rgba(0,0,0,.09); color:#111827; }
+    [data-theme="light"] .chat-header  { background:#fff; }
+    [data-theme="light"] .chat-header-title{ color:#111827; }
+    [data-theme="light"] .chat-header-sub  { color:#9ca3af; }
+    [data-theme="light"] .chat-input-area  { background:#fff; }
+    [data-theme="light"] .chat-input-wrap  { background:#f3f4f6; border-color:rgba(0,0,0,.12); }
+    [data-theme="light"] #chat-input   { color:#111827; }
+    [data-theme="light"] #chat-input::placeholder { color:#9ca3af; }
+    [data-theme="light"] .quick-chips-wrap { background:#fff; border-bottom-color:rgba(0,0,0,.08); }
+    [data-theme="light"] .chip         { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .changes-bar  { background:rgba(22,163,74,.04); }
+    [data-theme="light"] .changes-undo { background:#f3f4f6; color:#374151; }
+    [data-theme="light"] .style-panel  { background:#fff; }
+    [data-theme="light"] .sec-list     { background:#fff; }
+    [data-theme="light"] .sec-card     { background:#f3f4f6; border-color:rgba(0,0,0,.1); }
+    [data-theme="light"] .sec-card.enabled { background:rgba(108,99,255,.05); border-color:rgba(108,99,255,.2); }
+    [data-theme="light"] .sec-search   { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#111827; }
+    [data-theme="light"] .sec-select-all{ background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .sec-name     { color:#111827; }
+    [data-theme="light"] .sec-group-header:hover{ background:rgba(0,0,0,.02); }
+    [data-theme="light"] .store-dropdown{ background:#fff; border-color:rgba(0,0,0,.12); box-shadow:0 12px 40px rgba(0,0,0,.12); }
+    [data-theme="light"] .store-dd-item{ color:#374151; }
+    [data-theme="light"] .store-dd-item:hover{ background:#f3f4f6; }
+    [data-theme="light"] .tb-store-pill{ background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#111827; }
+    [data-theme="light"] .tb-badge     { background:rgba(108,99,255,.1); border-color:rgba(108,99,255,.2); }
+    [data-theme="light"] .preview-url-wrap{ background:#f3f4f6; border-color:rgba(0,0,0,.12); }
+    [data-theme="light"] .device-btns  { background:#f3f4f6; border-color:rgba(0,0,0,.12); }
+    [data-theme="light"] .zoom-wrap    { background:#f3f4f6; border-color:rgba(0,0,0,.12); }
+    [data-theme="light"] .zoom-btn     { color:#374151; }
+    [data-theme="light"] .sef-input    { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#111827; }
+    [data-theme="light"] .sef-select   { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#111827; }
+    [data-theme="light"] .color-row    { background:#f3f4f6; border-color:rgba(0,0,0,.12); }
+    [data-theme="light"] .font-select  { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#111827; }
+    [data-theme="light"] .sopt         { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .cols-btn     { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .cso          { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .preset-btn   { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+
+    /* ── Language Dropdown — copied from ai-assistant.html ── */
+    [data-theme="light"] .lang-btn     { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .chat-mic-btn { background:#f3f4f6; border-color:rgba(0,0,0,.12); color:#374151; }
+    [data-theme="light"] .lang-dropdown{ background:#fff; border-color:rgba(0,0,0,.12); box-shadow:0 8px 30px rgba(0,0,0,.12); }
+    [data-theme="light"] .lang-dd-item { color:#374151; }
+    [data-theme="light"] .lang-dd-item:hover{ background:#f3f4f6; }
+    [data-theme="light"] .lang-dd-sep  { background:rgba(0,0,0,.08); }
+
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;transition:background .25s,color .25s}
 
     /* TOPBAR */
-    #topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:200;position:relative}
+    #topbar{height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:200;position:relative;transition:background .25s,border-color .25s}
     .tb-logo{font-family:'Outfit',sans-serif;font-size:18px;font-weight:900;color:var(--text);letter-spacing:-.04em;text-decoration:none;display:flex;align-items:center;padding-right:12px;border-right:1px solid var(--border2);flex-shrink:0}
     .tb-logo em{color:var(--accent2);font-style:normal}
     .tb-badge{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(91,92,246,.15),rgba(129,140,248,.1));border:1px solid rgba(91,92,246,.3);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:800;color:var(--accent2);flex-shrink:0}
@@ -29,7 +101,7 @@
     .tb-store-pill.no-store{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.06)}
     .tb-store-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .tb-chevron{color:var(--text3);font-size:10px;flex-shrink:0}
-    .store-dropdown{position:absolute;top:calc(var(--topbar-h) + 4px);left:150px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:600;min-width:220px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+    .store-dropdown{position:absolute;top:calc(var(--topbar-h) + 4px);left:150px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:600;min-width:220px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:none;transition:background .25s}
     .store-dropdown.open{display:block}
     .store-dd-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:background .12s;font-size:13px;font-weight:600;color:var(--text2)}
     .store-dd-item:hover{background:var(--surface3);color:var(--text)}
@@ -46,12 +118,22 @@
     .tb-btn-primary:hover{background:#4f4de0;box-shadow:0 4px 16px rgba(91,92,246,.4)}
     .tb-btn-primary:disabled{opacity:.5;cursor:not-allowed}
 
+    /* ── THEME TOGGLE BUTTON — copied from ai-assistant.html ── */
+    .theme-toggle-btn{
+      width:34px;height:34px;border-radius:9px;
+      background:var(--surface2);border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:16px;flex-shrink:0;
+      transition:all .2s;
+    }
+    .theme-toggle-btn:hover{border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.08);}
+
     /* MAIN LAYOUT */
     #main{display:flex;flex:1;overflow:hidden}
-    #left-panel{width:var(--panel-w);min-width:var(--panel-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    
+    #left-panel{width:var(--panel-w);min-width:var(--panel-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:background .25s,border-color .25s}
+
     /* PANEL TABS */
-    .panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+    .panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);transition:background .25s,border-color .25s}
     .ptab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 6px 10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;transition:all .15s;position:relative;font-family:'Plus Jakarta Sans',sans-serif}
     .ptab.active{color:var(--accent2);border-bottom-color:var(--accent);background:rgba(91,92,246,.04)}
     .ptab:hover:not(.active){color:var(--text2);background:rgba(255,255,255,.02)}
@@ -61,12 +143,12 @@
     .tab-pane.active{display:flex}
 
     /* CHAT PANE */
-    .chat-header{padding:10px 14px 9px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .chat-header{padding:10px 14px 9px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);transition:background .25s,border-color .25s}
     .chat-header-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
     .chat-header-sub{font-size:10.5px;color:var(--text3);font-weight:500;line-height:1.5}
 
     /* QUICK CHIPS */
-    .quick-chips-wrap{border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+    .quick-chips-wrap{border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);transition:background .25s,border-color .25s}
     .quick-chips-toggle{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;cursor:pointer;user-select:none}
     .quick-chips-toggle-label{font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
     .quick-chips-toggle-arrow{font-size:9px;color:var(--text3);transition:transform .2s}
@@ -77,7 +159,7 @@
     .chip:hover{border-color:var(--accent);color:var(--accent2);background:rgba(91,92,246,.08)}
 
     /* CHAT MESSAGES */
-    #chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+    #chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface);transition:background .25s}
     #chat-messages::-webkit-scrollbar{width:3px}
     #chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
     .msg{display:flex;gap:8px;align-items:flex-start;animation:msgIn .25s ease}
@@ -94,7 +176,7 @@
     .msg-time{font-size:9px;color:var(--text3);opacity:.5;padding:0 2px}
     .msg-action{display:inline-flex;align-items:center;gap:4px;background:rgba(91,92,246,.12);border:1px solid rgba(91,92,246,.25);border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:700;color:var(--accent2);margin-top:4px;margin-right:4px}
 
-    /* NEXT MOVE SUGGESTION BUTTONS */
+    /* NEXT MOVES */
     .next-moves{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
     .next-move-btn{padding:5px 10px;border-radius:16px;border:1px solid rgba(91,92,246,.3);background:rgba(91,92,246,.07);font-size:11px;font-weight:600;color:var(--accent2);cursor:pointer;transition:all .15s;white-space:nowrap;text-align:left}
     .next-move-btn:hover{border-color:var(--accent);background:rgba(91,92,246,.15);color:var(--text)}
@@ -114,33 +196,101 @@
     .changes-undo{font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;padding:3px 8px;border-radius:5px;background:var(--surface3);border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .12s}
     .changes-undo:hover{color:var(--text);background:var(--surface2)}
 
-    /* VOICE STATUS */
-    #voice-status{display:none;align-items:center;gap:8px;padding:5px 14px;background:rgba(239,68,68,.06);border-top:1px solid rgba(239,68,68,.15);font-size:11px;font-weight:700;color:#ef4444;flex-shrink:0}
+    /* ══════════════════════════════════════════════════════════
+       VOICE STATUS BAR — styled like ai-assistant recording bar
+    ══════════════════════════════════════════════════════════ */
+    #voice-status{display:none;align-items:center;gap:8px;padding:7px 14px;background:rgba(239,68,68,.06);border-top:1px solid rgba(239,68,68,.15);font-size:11px;font-weight:700;color:#ef4444;flex-shrink:0}
     #voice-status.show{display:flex}
     .voice-status-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;flex-shrink:0}
     .voice-status-lang{margin-left:auto;font-size:10px;font-weight:700;color:var(--text3);background:var(--surface3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace}
     .voice-stop-btn{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:5px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .12s}
     .voice-stop-btn:hover{background:rgba(239,68,68,.3)}
 
-    /* CHAT INPUT */
-    .chat-input-area{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0}
-    .chat-input-wrap{display:flex;align-items:flex-end;gap:7px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:7px 9px;transition:border-color .15s}
-    .chat-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.1)}
-    .chat-input-wrap.recording{border-color:#ef4444 !important;box-shadow:0 0 0 3px rgba(239,68,68,.15) !important;animation:recordingPulse 1.5s ease-in-out infinite}
-    @keyframes recordingPulse{0%,100%{box-shadow:0 0 0 3px rgba(239,68,68,.15)}50%{box-shadow:0 0 0 6px rgba(239,68,68,.08)}}
-    #chat-input{flex:1;background:none;border:none;outline:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);resize:none;max-height:100px;min-height:20px;line-height:1.5}
+    /* ══════════════════════════════════════════════════════════
+       CHAT INPUT — with language selector widget (ai-assistant style)
+    ══════════════════════════════════════════════════════════ */
+    .chat-input-area{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface);transition:background .25s,border-color .25s}
+    .chat-input-wrap{display:flex;align-items:flex-end;gap:7px}
+    #chat-input{
+      flex:1;padding:10px 13px;background:var(--surface2);border:1.5px solid var(--border2);
+      border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+      color:var(--text);resize:none;max-height:100px;min-height:42px;line-height:1.5;
+      outline:none;transition:border-color .15s,background .25s;
+    }
+    #chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,92,246,.1)}
     #chat-input::placeholder{color:var(--text3)}
-    #chat-input.interim{color:var(--accent2);font-style:italic}
-    .chat-send-btn{width:30px;height:30px;border-radius:7px;background:var(--accent);border:none;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .15s}
+    #chat-input.listening{border-color:rgba(239,68,68,.45)!important;background:rgba(239,68,68,.03)!important}
+
+    .chat-send-btn{width:42px;height:42px;border-radius:11px;background:var(--accent);border:none;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .15s;box-shadow:0 2px 10px rgba(91,92,246,.35)}
     .chat-send-btn:hover{background:#4f4de0}
-    .chat-send-btn:disabled{opacity:.4;cursor:not-allowed}
-    .chat-mic-btn{width:30px;height:30px;border-radius:7px;background:var(--surface3);border:1px solid var(--border2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all .15s;position:relative;overflow:hidden}
-    .chat-mic-btn:hover{border-color:var(--border3);color:var(--text)}
-    .chat-mic-btn.recording{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.5);color:#ef4444;animation:micPulse 1s ease-in-out infinite}
-    @keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-    .mic-ripple{position:absolute;inset:-2px;border-radius:9px;border:2px solid #ef4444;opacity:0;animation:micRipple 1.5s ease-out infinite;pointer-events:none}
-    @keyframes micRipple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.6);opacity:0}}
-    #voice-hint{font-size:10px;color:var(--text3);margin-top:4px;text-align:center;display:none}
+    .chat-send-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+    /* ══ INPUT TOOLS WRAP (mic + lang selector) ══ */
+    .input-tools{display:flex;gap:6px;align-items:flex-end;flex-shrink:0}
+
+    /* ── Mic button — ai-assistant style ── */
+    .chat-mic-btn{
+      width:42px;height:42px;border-radius:11px;
+      background:var(--surface2);border:1px solid var(--border2);
+      color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:17px;flex-shrink:0;transition:all .2s;position:relative;overflow:visible;
+    }
+    .chat-mic-btn:hover{border-color:rgba(108,99,255,.4);background:rgba(108,99,255,.07);color:var(--text)}
+    .chat-mic-btn:disabled{opacity:.35;cursor:not-allowed}
+    .chat-mic-btn.recording{
+      background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.55);color:#ef4444;
+      animation:micGlow 1.2s ease-in-out infinite;
+    }
+    @keyframes micGlow{
+      0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.45)}
+      50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}
+    }
+    .mic-ripple{position:absolute;inset:-2px;border-radius:13px;border:2px solid #ef4444;opacity:0;animation:micRipple 1.5s ease-out infinite;pointer-events:none}
+    @keyframes micRipple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.55);opacity:0}}
+
+    /* ══ LANGUAGE SELECTOR — full copy from ai-assistant.html ══ */
+    .lang-wrap{position:relative;flex-shrink:0}
+    .lang-btn{
+      height:42px;min-width:62px;padding:0 10px;border-radius:11px;
+      background:var(--surface2);border:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:center;gap:5px;
+      cursor:pointer;font-size:12px;font-weight:700;color:var(--text2);
+      font-family:'Outfit',sans-serif;transition:all .15s;white-space:nowrap;user-select:none;
+    }
+    .lang-btn:hover{border-color:rgba(108,99,255,.45);color:var(--accent2);background:rgba(108,99,255,.07)}
+    .lang-btn.open{border-color:rgba(108,99,255,.55);color:var(--accent2);background:rgba(108,99,255,.09)}
+    .lang-btn .lb-flag{font-size:15px;line-height:1}
+    .lang-btn .lb-code{font-size:12px;font-weight:800;letter-spacing:.03em}
+    .lang-btn .lb-arrow{font-size:9px;opacity:.55;margin-left:1px;transition:transform .15s}
+    .lang-btn.open .lb-arrow{transform:rotate(180deg)}
+    .lang-btn.recording{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.07);color:#ef4444}
+    .rec-pulse{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:recPulse 1s ease-in-out infinite;flex-shrink:0;display:none}
+    .lang-btn.recording .rec-pulse{display:block}
+    @keyframes recPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+    .lang-dropdown{
+      position:absolute;bottom:calc(100% + 8px);right:0;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:14px;padding:8px 6px;min-width:200px;max-height:320px;overflow-y:auto;
+      box-shadow:0 14px 44px rgba(0,0,0,.45);z-index:9999;display:none;
+      transition:background .25s;
+    }
+    .lang-dropdown::-webkit-scrollbar{width:3px}
+    .lang-dropdown::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    .lang-dropdown.open{display:block;animation:fadeUpDD .15s ease}
+    @keyframes fadeUpDD{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .lang-dd-head{padding:4px 10px 8px;font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+    .lang-dd-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);transition:background .12s}
+    .lang-dd-item:hover{background:var(--surface3);color:var(--text)}
+    .lang-dd-item.active{background:rgba(108,99,255,.12);color:var(--accent2)}
+    .lang-dd-item .dd-flag{font-size:17px;flex-shrink:0}
+    .lang-dd-item .dd-name{flex:1}
+    .lang-dd-item .dd-check{font-size:13px;color:var(--accent);opacity:0}
+    .lang-dd-item.active .dd-check{opacity:1}
+    .lang-dd-sep{height:1px;background:var(--border);margin:5px 4px}
+
+    /* VOICE HINT */
+    #voice-hint{font-size:10px;color:var(--text3);margin-top:5px;text-align:center;display:none}
 
     /* WELCOME */
     .welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;text-align:center;gap:6px}
@@ -157,7 +307,7 @@
     .sec-toolbar{padding:9px 12px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:8px}
     .sec-search-wrap{flex:1;position:relative}
     .sec-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;opacity:.4;pointer-events:none}
-    .sec-search{width:100%;padding:6px 10px 6px 27px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s}
+    .sec-search{width:100%;padding:6px 10px 6px 27px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s,background .25s}
     .sec-search:focus{border-color:var(--accent)}
     .sec-search::placeholder{color:var(--text3)}
     .sec-select-all{padding:5px 9px;border-radius:7px;background:var(--surface2);border:1px solid var(--border2);font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif}
@@ -167,7 +317,7 @@
     .sec-list::-webkit-scrollbar{width:3px}
     .sec-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-    /* COLLAPSIBLE SECTION GROUPS */
+    /* COLLAPSIBLE GROUPS */
     .sec-group-header{display:flex;align-items:center;justify-content:space-between;padding:6px 4px;cursor:pointer;user-select:none;border-radius:6px;transition:background .12s}
     .sec-group-header:hover{background:rgba(255,255,255,.02)}
     .sec-group-label{font-size:9px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:6px}
@@ -222,10 +372,10 @@
     .sef-group:first-child{border-top:none;margin-top:0;padding-top:0}
     .sef-field{display:flex;flex-direction:column;gap:3px}
     .sef-label{font-size:10px;font-weight:700;color:var(--text3)}
-    .sef-input{width:100%;padding:6px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s}
+    .sef-input{width:100%;padding:6px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s,background .25s}
     .sef-input:focus{border-color:var(--accent)}
     .sef-textarea{min-height:60px;resize:vertical;line-height:1.5}
-    .sef-select{width:100%;padding:6px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;appearance:auto}
+    .sef-select{width:100%;padding:6px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;appearance:auto;transition:background .25s}
     .sef-color-row{display:flex;align-items:center;gap:7px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;cursor:pointer}
     .sef-color-row:focus-within{border-color:var(--accent)}
     .sef-swatch{width:20px;height:20px;border-radius:4px;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0}
@@ -243,7 +393,7 @@
     .sef-apply:hover{background:#4f4de0;box-shadow:0 4px 14px rgba(91,92,246,.3)}
 
     /* STYLE TAB */
-    .style-panel{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:14px}
+    .style-panel{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:14px;background:var(--surface);transition:background .25s}
     .style-panel::-webkit-scrollbar{width:3px}
     .style-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
     .style-grp{display:flex;flex-direction:column;gap:7px}
@@ -255,11 +405,11 @@
     .color-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
     .cf{display:flex;flex-direction:column;gap:3px}
     .cf-label{font-size:10px;font-weight:700;color:var(--text3)}
-    .color-row{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;cursor:pointer}
+    .color-row{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;cursor:pointer;transition:background .25s}
     .color-row:focus-within{border-color:var(--accent)}
     .color-swatch{width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(255,255,255,.15);flex-shrink:0}
     .color-hex{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);flex:1;background:none;border:none;outline:none;min-width:0}
-    .font-select{width:100%;padding:7px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer}
+    .font-select{width:100%;padding:7px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;font-size:12px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;transition:background .25s}
     .font-select:focus{border-color:var(--accent)}
     .style-opts{display:flex;flex-wrap:wrap;gap:4px}
     .sopt{padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif}
@@ -270,21 +420,21 @@
     .radius-wrap{display:flex;align-items:center;gap:10px}
     .radius-slider{flex:1;accent-color:var(--accent);cursor:pointer;height:4px}
     .card-style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-    .cso{padding:5px 3px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:9.5px;font-weight:700;color:var(--text3);cursor:pointer;text-align:center;transition:all .12s;font-family:'Plus Jakarta Sans',sans-serif}
+    .cso{padding:5px 3px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:9.5px;font-weight:700;color:var(--text3);cursor:pointer;text-align:center;transition:all .12px;font-family:'Plus Jakarta Sans',sans-serif}
     .cso.active,.cso:hover{border-color:var(--accent);background:rgba(91,92,246,.12);color:var(--accent2)}
     .style-apply-btn{width:100%;padding:8px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
     .style-apply-btn:hover{background:#4f4de0;box-shadow:0 4px 14px rgba(91,92,246,.3)}
 
     /* PREVIEW */
-    #preview-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0c0c14}
-    .preview-bar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:9px;flex-shrink:0}
-    .preview-url-wrap{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:4px 11px;max-width:440px;margin:0 auto}
+    #preview-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0c0c14;transition:background .25s}
+    .preview-bar{height:40px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:9px;flex-shrink:0;transition:background .25s,border-color .25s}
+    .preview-url-wrap{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:4px 11px;max-width:440px;margin:0 auto;transition:background .25s}
     .preview-lock{font-size:11px;color:var(--green)}
     .preview-url-text{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .device-btns{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+    .device-btns{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:7px;overflow:hidden;transition:background .25s}
     .device-btn{padding:4px 8px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:13px;transition:all .15s}
     .device-btn.active{background:var(--surface3);color:var(--accent2)}
-    .zoom-wrap{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 3px}
+    .zoom-wrap{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 3px;transition:background .25s}
     .zoom-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:3px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;transition:all .12s}
     .zoom-btn:hover{color:var(--text);background:var(--surface3)}
     .zoom-label{font-size:10px;font-weight:700;color:var(--text3);font-family:'DM Mono',monospace;min-width:30px;text-align:center}
@@ -325,6 +475,8 @@
   <div class="store-dropdown" id="store-dropdown"></div>
   <div class="tb-spacer"></div>
   <div class="tb-unsaved" id="unsaved-indicator"><span>●</span> Unsaved changes</div>
+  <!-- Day / Night toggle — ai-assistant style -->
+  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode">🌙</button>
   <button class="tb-btn tb-btn-ghost" onclick="window.location='website-builder.html'">✏️ Manual Editor</button>
   <button class="tb-btn tb-btn-ghost" onclick="previewLive()">↗ Preview</button>
   <button class="tb-btn tb-btn-primary" id="save-btn" onclick="saveAndPublish()">💾 Save &amp; Publish</button>
@@ -387,19 +539,37 @@
       <div id="voice-status">
         <div class="voice-status-dot"></div>
         <span id="voice-status-text">Listening…</span>
-        <span class="voice-status-lang" id="voice-lang-badge">Auto</span>
+        <span class="voice-status-lang" id="voice-lang-badge">EN</span>
         <button class="voice-stop-btn" onclick="stopVoiceAndSend()">■ Stop & Send</button>
       </div>
 
+      <!-- CHAT INPUT with Language Selector (ai-assistant style) -->
       <div class="chat-input-area">
-        <div class="chat-input-wrap" id="chat-input-wrap">
+        <div class="chat-input-wrap">
           <textarea id="chat-input" placeholder="Type or 🎙 speak your request…" rows="1" onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
-          <button class="chat-mic-btn" id="mic-btn" onclick="toggleVoice()" title="Voice input">🎙</button>
+
+          <!-- Input tools: lang selector + mic (copied from ai-assistant) -->
+          <div class="input-tools">
+            <!-- Language selector -->
+            <div class="lang-wrap" id="langWrap">
+              <button class="lang-btn" id="langBtn" onclick="toggleLangDD()" title="Choose voice language">
+                <span class="rec-pulse"></span>
+                <span class="lb-flag" id="lbFlag">🇮🇳</span>
+                <span class="lb-code" id="lbCode">EN</span>
+                <span class="lb-arrow">▼</span>
+              </button>
+              <div class="lang-dropdown" id="langDropdown"></div>
+            </div>
+
+            <!-- Mic button -->
+            <button class="chat-mic-btn" id="micBtn" onclick="toggleVoice()" title="Voice input">
+              <span id="micIcon">🎙</span>
+            </button>
+          </div>
+
           <button class="chat-send-btn" id="send-btn" onclick="sendMessage()">➤</button>
         </div>
-        <div id="voice-hint" style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center;display:none">
-          🌐 Tamil, Hindi, English &amp; more — auto-detected
-        </div>
+        <div id="voice-hint">🌐 Tamil, Hindi, English &amp; more — pick your language above</div>
       </div>
     </div>
 
@@ -514,6 +684,29 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
+   THEME — DAY / NIGHT (copied & adapted from ai-assistant.html)
+══════════════════════════════════════════════════════════════════════════ */
+let _isDark = localStorage.getItem('ekart_builder_theme') !== 'light'
+
+function applyTheme(dark) {
+  _isDark = dark
+  const root = document.documentElement
+  if (dark) {
+    root.removeAttribute('data-theme')
+    root.style.background = '#09090f'
+  } else {
+    root.setAttribute('data-theme', 'light')
+    root.style.background = '#f0f0f5'
+  }
+  const btn = document.getElementById('themeToggleBtn')
+  if (btn) btn.textContent = dark ? '🌙' : '☀️'
+  localStorage.setItem('ekart_builder_theme', dark ? 'dark' : 'light')
+}
+
+function toggleTheme() { applyTheme(!_isDark) }
+applyTheme(_isDark)  // apply on load
+
+/* ══════════════════════════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════════════════════════ */
 let currentUser=null,allStores=[],currentStoreId=null
@@ -525,42 +718,9 @@ let chipsOpen=false
 
 /* ══ CARD SIZE CSS ══ */
 const CARD_SIZE_CSS={
-  small:{
-    '--pv-card-aspect':'1/1',
-    '--pv-card-img-h':'110px',
-    '--pv-card-name-fs':'11px',
-    '--pv-card-price-fs':'12.5px',
-    '--pv-card-info-pad':'7px 9px 3px',
-    '--pv-card-btn-pad':'4px 9px 9px',
-    '--pv-card-btn-h':'32px',
-    '--pv-card-btn-fs':'10.5px',
-    '--pv-card-cat-fs':'8.5px',
-    '--pv-grid-gap':'8px'
-  },
-  medium:{
-    '--pv-card-aspect':'3/4',
-    '--pv-card-img-h':'150px',
-    '--pv-card-name-fs':'12.5px',
-    '--pv-card-price-fs':'14px',
-    '--pv-card-info-pad':'10px 12px 5px',
-    '--pv-card-btn-pad':'6px 12px 12px',
-    '--pv-card-btn-h':'38px',
-    '--pv-card-btn-fs':'11.5px',
-    '--pv-card-cat-fs':'9.5px',
-    '--pv-grid-gap':'14px'
-  },
-  large:{
-    '--pv-card-aspect':'4/5',
-    '--pv-card-img-h':'210px',
-    '--pv-card-name-fs':'14px',
-    '--pv-card-price-fs':'16px',
-    '--pv-card-info-pad':'14px 16px 7px',
-    '--pv-card-btn-pad':'8px 14px 14px',
-    '--pv-card-btn-h':'44px',
-    '--pv-card-btn-fs':'12.5px',
-    '--pv-card-cat-fs':'10px',
-    '--pv-grid-gap':'18px'
-  }
+  small:{'--pv-card-aspect':'1/1','--pv-card-img-h':'110px','--pv-card-name-fs':'11px','--pv-card-price-fs':'12.5px','--pv-card-info-pad':'7px 9px 3px','--pv-card-btn-pad':'4px 9px 9px','--pv-card-btn-h':'32px','--pv-card-btn-fs':'10.5px','--pv-card-cat-fs':'8.5px','--pv-grid-gap':'8px'},
+  medium:{'--pv-card-aspect':'3/4','--pv-card-img-h':'150px','--pv-card-name-fs':'12.5px','--pv-card-price-fs':'14px','--pv-card-info-pad':'10px 12px 5px','--pv-card-btn-pad':'6px 12px 12px','--pv-card-btn-h':'38px','--pv-card-btn-fs':'11.5px','--pv-card-cat-fs':'9.5px','--pv-grid-gap':'14px'},
+  large:{'--pv-card-aspect':'4/5','--pv-card-img-h':'210px','--pv-card-name-fs':'14px','--pv-card-price-fs':'16px','--pv-card-info-pad':'14px 16px 7px','--pv-card-btn-pad':'8px 14px 14px','--pv-card-btn-h':'44px','--pv-card-btn-fs':'12.5px','--pv-card-cat-fs':'10px','--pv-grid-gap':'18px'}
 }
 
 /* ══ SAMPLE DATA ══ */
@@ -688,7 +848,9 @@ const SECTION_FIELDS={
   team:[{g:'Title'},{key:'title',label:'Section Title',type:'text'},{key:'columns',label:'Columns',type:'select',options:['2','3','4']},{g:'Member 1'},{key:'m1name',label:'Name',type:'text'},{key:'m1role',label:'Role',type:'text'},{key:'m1img',label:'Image URL',type:'text'},{g:'Member 2'},{key:'m2name',label:'Name',type:'text'},{key:'m2role',label:'Role',type:'text'},{key:'m2img',label:'Image URL',type:'text'},{g:'Member 3'},{key:'m3name',label:'Name',type:'text'},{key:'m3role',label:'Role',type:'text'},{key:'m3img',label:'Image URL',type:'text'},{g:'Colors'},{key:'bgColor',label:'Background',type:'color'}],
 }
 
-/* ══ INIT ══ */
+/* ══════════════════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded',async()=>{
   const token=localStorage.getItem('ekart_token')
   if(!token){window.location.href='index.html';return}
@@ -785,11 +947,12 @@ function handleInputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();s
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
 
 async function sendMessage(){
+  if(_recActive)_stopVoice(false)
   const input=document.getElementById('chat-input')
   const msg=input.value.trim();if(!msg||isGenerating)return
   document.getElementById('welcome-screen')?.remove()
   appendMessage('user',msg);chatHistory.push({role:'user',content:msg})
-  input.value='';input.style.height='auto';input.classList.remove('interim')
+  input.value='';input.style.height='auto'
   const tid=showTyping()
   isGenerating=true;document.getElementById('send-btn').disabled=true
   try{
@@ -804,7 +967,6 @@ async function sendMessage(){
       lastSnapshot={themeData:JSON.parse(JSON.stringify(themeData)),sections:JSON.parse(JSON.stringify(sections))}
       const applied=[]
       if(Array.isArray(parsed.actions)){for(const a of parsed.actions){const l=applyAction(a);if(l)applied.push(l)}}
-      // Build next moves
       const nextMoves=Array.isArray(parsed.nextMoves)&&parsed.nextMoves.length?parsed.nextMoves:getDefaultNextMoves(parsed.actions)
       const actionsHTML=applied.length?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">'+applied.map(a=>`<span class="msg-action">✓ ${escHtml(a)}</span>`).join('')+'</div>':''
       const nextMovesHTML=nextMoves.length?`<div class="next-moves">${nextMoves.map(s=>`<button class="next-move-btn" onclick="sendQuick(${JSON.stringify(s)})">${escHtml(s)}</button>`).join('')}</div>`:''
@@ -918,198 +1080,252 @@ function undoLastChange(){
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   VOICE INPUT — FIXED IMPLEMENTATION
-   Uses Web Speech API with real-time interim text display
+   VOICE ENGINE — full port from ai-assistant.html
+   Features:
+     • Language selector dropdown (17 languages)
+     • Idle timer: 10 seconds with no speech → auto-stop
+     • Silence timer: 10 seconds after final text → auto-send
+     • Interim text shown live in textarea (italic tint)
+     • Recording glow animation on mic + lang button
+     • Status bar shows live transcript preview
 ══════════════════════════════════════════════════════════════════════════ */
-let recognition=null
-let isRecording=false
-let voiceSupported=false
-let interimTranscript=''
-let finalTranscript=''
-let silenceTimer=null
-let voiceLang='en-IN'
+const VOICE_LANGS = [
+  { code:'en-IN', flag:'🇮🇳', label:'English (India)' },
+  { code:'ta-IN', flag:'🇮🇳', label:'Tamil'           },
+  { code:'hi-IN', flag:'🇮🇳', label:'Hindi'           },
+  { code:'te-IN', flag:'🇮🇳', label:'Telugu'          },
+  { code:'kn-IN', flag:'🇮🇳', label:'Kannada'         },
+  { code:'ml-IN', flag:'🇮🇳', label:'Malayalam'       },
+  { code:'mr-IN', flag:'🇮🇳', label:'Marathi'         },
+  { code:'bn-IN', flag:'🇮🇳', label:'Bengali'         },
+  { code:'gu-IN', flag:'🇮🇳', label:'Gujarati'        },
+  { code:'pa-IN', flag:'🇮🇳', label:'Punjabi'         },
+  { sep: true },
+  { code:'en-US', flag:'🇺🇸', label:'English (US)'    },
+  { code:'en-GB', flag:'🇬🇧', label:'English (UK)'    },
+  { code:'ar-SA', flag:'🇸🇦', label:'Arabic'          },
+  { code:'zh-CN', flag:'🇨🇳', label:'Chinese'         },
+  { code:'fr-FR', flag:'🇫🇷', label:'French'          },
+  { code:'de-DE', flag:'🇩🇪', label:'German'          },
+]
 
-const LANG_NAMES={'ta-IN':'Tamil','hi-IN':'Hindi','en-IN':'English','en-US':'English','te-IN':'Telugu','kn-IN':'Kannada','ml-IN':'Malayalam','mr-IN':'Marathi','bn-IN':'Bengali','gu-IN':'Gujarati','pa-IN':'Punjabi'}
-const LANG_PRIORITY=['ta-IN','hi-IN','te-IN','kn-IN','ml-IN','mr-IN','bn-IN','gu-IN','pa-IN','en-IN','en-US']
+let _rec        = null
+let _recActive  = false
+let _finalText  = ''
+let _interimText= ''
+let _idleTimer  = null
+let _silTimer   = null
+let _voiceLang  = localStorage.getItem('ekart_builder_voice_lang') || 'en-IN'
+let _ddOpen     = false
 
-function initVoice(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition
-  const micBtn=document.getElementById('mic-btn')
-  const hintEl=document.getElementById('voice-hint')
-  if(!SR){
-    voiceSupported=false
-    micBtn.style.opacity='0.3'
-    micBtn.style.cursor='not-allowed'
-    micBtn.title='Voice not supported. Use Chrome/Edge.'
+function initVoice() {
+  const SR  = window.SpeechRecognition || window.webkitSpeechRecognition
+  const mic = document.getElementById('micBtn')
+  const hint= document.getElementById('voice-hint')
+  if (!mic) return
+
+  if (!SR) {
+    mic.disabled = true
+    mic.title = 'Voice needs Chrome or Edge'
+    mic.style.opacity = '0.3'
     return
   }
-  voiceSupported=true
-  hintEl.style.display='block'
-  // Detect browser language
-  const bl=(navigator.language||'en-IN').toLowerCase()
-  if(bl.startsWith('ta'))voiceLang='ta-IN'
-  else if(bl.startsWith('hi'))voiceLang='hi-IN'
-  else if(bl.startsWith('te'))voiceLang='te-IN'
-  else if(bl.startsWith('kn'))voiceLang='kn-IN'
-  else if(bl.startsWith('ml'))voiceLang='ml-IN'
-  else voiceLang='en-IN'
-}
 
-function createRecognition(lang){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition
-  if(!SR)return null
-  const r=new SR()
-  r.continuous=true
-  r.interimResults=true
-  r.maxAlternatives=1
-  r.lang=lang
-  return r
-}
+  if (hint) hint.style.display = 'block'
 
-function toggleVoice(){
-  if(!voiceSupported){toast('Voice requires Chrome or Edge','error');return}
-  if(isRecording){stopVoiceAndSend()}
-  else{startVoice()}
-}
-
-function startVoice(){
-  if(!voiceSupported||isRecording)return
-  const input=document.getElementById('chat-input')
-  input.value=''
-  input.classList.remove('interim')
-  interimTranscript=''
-  finalTranscript=''
-  recognition=createRecognition(voiceLang)
-  if(!recognition)return
-
-  recognition.onstart=function(){
-    isRecording=true
-    updateVoiceUI(true)
-    toast('🎙 Listening…','success')
+  // Build dropdown
+  const dd = document.getElementById('langDropdown')
+  if (dd) {
+    dd.innerHTML = `
+      <div class="lang-dd-head">Voice Language</div>
+      ${VOICE_LANGS.map(l => l.sep
+        ? `<div class="lang-dd-sep"></div>`
+        : `<div class="lang-dd-item ${l.code === _voiceLang ? 'active' : ''}"
+               onclick="selectVoiceLang('${l.code}', this)">
+             <span class="dd-flag">${l.flag}</span>
+             <span class="dd-name">${l.label}</span>
+             <span class="dd-check">✓</span>
+           </div>`
+      ).join('')}`
   }
 
-  recognition.onresult=function(e){
-    // Reset silence timer on any speech activity
-    resetSilenceTimer()
-    let interim=''
-    let final=''
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal){
-        final+=e.results[i][0].transcript
-      }else{
-        interim+=e.results[i][0].transcript
+  _syncLangBtn()
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (_ddOpen && !e.target.closest('#langWrap')) _closeLangDD()
+  })
+}
+
+function toggleLangDD() { _ddOpen ? _closeLangDD() : _openLangDD() }
+function _openLangDD()  { document.getElementById('langDropdown')?.classList.add('open'); document.getElementById('langBtn')?.classList.add('open'); _ddOpen = true }
+function _closeLangDD() { document.getElementById('langDropdown')?.classList.remove('open'); document.getElementById('langBtn')?.classList.remove('open'); _ddOpen = false }
+
+function selectVoiceLang(code, el) {
+  _voiceLang = code
+  localStorage.setItem('ekart_builder_voice_lang', code)
+  document.querySelectorAll('.lang-dd-item').forEach(x => x.classList.remove('active'))
+  if (el) el.classList.add('active')
+  _syncLangBtn()
+  _closeLangDD()
+  // If already recording, restart with new language
+  if (_recActive) { _stopRecognition(); setTimeout(_spawnRec, 150) }
+}
+
+function _syncLangBtn() {
+  const found = VOICE_LANGS.find(l => l.code === _voiceLang)
+  const flag  = document.getElementById('lbFlag')
+  const code  = document.getElementById('lbCode')
+  const badge = document.getElementById('voice-lang-badge')
+  if (flag && found) flag.textContent = found.flag
+  if (code && found) code.textContent = found.code.split('-')[0].toUpperCase()
+  if (badge && found) badge.textContent = found.code.split('-')[0].toUpperCase()
+}
+
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (!SR) { appendMessage('ai', '🔴 Voice input needs Chrome or Edge browser 🎙'); return }
+  _recActive ? _stopVoice(true) : _startVoice()
+}
+
+function _startVoice() {
+  if (_recActive) return
+  _recActive = true; _finalText = ''; _interimText = ''
+  const inp = document.getElementById('chat-input')
+  if (inp) { inp.value = ''; inp.classList.add('listening'); _autoH(inp) }
+  _setMicUI(true)
+
+  // 10-second idle timer — fires if no speech is detected at all
+  _idleTimer = setTimeout(() => {
+    if (_recActive && !_finalText.trim()) {
+      _stopVoice(false)
+      const i = document.getElementById('chat-input')
+      if (i) {
+        i.placeholder = '💬 No speech detected — try again'
+        setTimeout(() => { i.placeholder = 'Type or 🎙 speak your request…' }, 3000)
       }
     }
-    if(final){
-      finalTranscript+=final
-      interimTranscript=''
-    }else{
-      interimTranscript=interim
+  }, 10000)
+
+  _spawnRec()
+}
+
+function _spawnRec() {
+  if (!_recActive) return
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+  _rec = new SR()
+  _rec.continuous      = false
+  _rec.interimResults  = true
+  _rec.maxAlternatives = 1
+  _rec.lang            = _voiceLang
+  _interimText = ''
+
+  const inp = document.getElementById('chat-input')
+  const statusText = document.getElementById('voice-status-text')
+
+  _rec.onresult = (e) => {
+    _clearSil(); _clearIdle()
+    let interim = ''
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript
+      if (e.results[i].isFinal) { _finalText += t + ' '; _interimText = '' }
+      else interim += t
     }
-    // Update textarea in real time
-    const display=finalTranscript+(interimTranscript?' '+interimTranscript:'')
-    input.value=display.trim()
-    input.classList.toggle('interim',!!interimTranscript&&!finalTranscript)
-    autoResize(input)
-    // Update voice status text
-    document.getElementById('voice-status-text').textContent=
-      interimTranscript?'Hearing: '+interimTranscript.slice(0,40)+'…':'Listening…'
-  }
-
-  recognition.onerror=function(e){
-    console.warn('Speech error:',e.error)
-    if(e.error==='not-allowed'){
-      toast('Mic access denied — allow in browser settings','error')
-      stopVoice()
-      return
+    _interimText = interim
+    if (inp) {
+      inp.value = (_finalText + _interimText).trimStart()
+      inp.placeholder = ''
+      _autoH(inp)
+      inp.scrollTop = inp.scrollHeight
     }
-    if(e.error==='aborted')return
-    // For no-speech or other errors, just keep going
-  }
-
-  recognition.onend=function(){
-    // Auto-restart while recording (browser sometimes stops after silence)
-    if(isRecording){
-      setTimeout(()=>{
-        if(isRecording&&recognition){
-          try{recognition.start()}catch(err){}
-        }
-      },100)
+    // Update status bar live preview
+    if (statusText) {
+      statusText.textContent = _interimText
+        ? 'Hearing: ' + _interimText.slice(0, 42) + ((_interimText.length > 42) ? '…' : '')
+        : 'Listening…'
     }
+    // 10-second silence-after-speech auto-send timer
+    _silTimer = setTimeout(() => {
+      if (_recActive && _finalText.trim()) _stopVoice(true)
+    }, 10000)
   }
 
-  try{
-    recognition.start()
-  }catch(e){
-    toast('Could not start mic: '+e.message,'error')
-  }
-}
-
-function stopVoice(){
-  isRecording=false
-  clearSilenceTimer()
-  if(recognition){
-    try{recognition.stop()}catch(e){}
-    recognition=null
-  }
-  updateVoiceUI(false)
-  const input=document.getElementById('chat-input')
-  input.classList.remove('interim')
-  // Clean up: keep only final transcript
-  if(finalTranscript){
-    input.value=finalTranscript.trim()
-  }
-}
-
-function stopVoiceAndSend(){
-  stopVoice()
-  const input=document.getElementById('chat-input')
-  if(input.value.trim()){
-    setTimeout(()=>sendMessage(),100)
-  }
-}
-
-function resetSilenceTimer(){
-  clearSilenceTimer()
-  // Auto-send after 2.5s of silence once we have some final text
-  if(finalTranscript.trim()){
-    silenceTimer=setTimeout(()=>{
-      if(isRecording&&finalTranscript.trim()){
-        stopVoiceAndSend()
-      }
-    },2500)
-  }
-}
-
-function clearSilenceTimer(){
-  if(silenceTimer){clearTimeout(silenceTimer);silenceTimer=null}
-}
-
-function updateVoiceUI(recording){
-  const micBtn=document.getElementById('mic-btn')
-  const wrap=document.getElementById('chat-input-wrap')
-  const statusBar=document.getElementById('voice-status')
-  const langBadge=document.getElementById('voice-lang-badge')
-  if(recording){
-    micBtn.classList.add('recording')
-    micBtn.innerHTML='⏹'
-    micBtn.title='Click to stop & send'
-    wrap.classList.add('recording')
-    statusBar.classList.add('show')
-    langBadge.textContent=LANG_NAMES[voiceLang]||voiceLang
-    // Add ripple
-    if(!micBtn.querySelector('.mic-ripple')){
-      const r=document.createElement('div');r.className='mic-ripple';micBtn.appendChild(r)
+  _rec.onerror = (e) => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      appendMessage('ai', '🔴 Mic access denied. Please allow microphone in browser settings.')
+      _stopVoice(false); return
     }
-  }else{
-    micBtn.classList.remove('recording')
-    micBtn.innerHTML='🎙'
-    micBtn.title='Voice input'
-    wrap.classList.remove('recording')
-    statusBar.classList.remove('show')
-    micBtn.querySelector('.mic-ripple')?.remove()
-    document.getElementById('voice-status-text').textContent='Listening…'
+    if (e.error === 'aborted') return
+    if (e.error === 'no-speech') { if (_recActive) setTimeout(_spawnRec, 100); return }
+    console.warn('[Voice]', e.error)
   }
+
+  _rec.onend = () => {
+    _interimText = ''
+    if (_recActive) setTimeout(_spawnRec, 100)
+  }
+
+  try { _rec.start() } catch (err) { console.warn('[Voice] start:', err.message) }
+}
+
+function _stopRecognition() { try { _rec?.stop() } catch(_) {}; _rec = null }
+
+function _stopVoice(andSend) {
+  _recActive = false; _clearSil(); _clearIdle(); _stopRecognition()
+  _interimText = ''
+  const inp = document.getElementById('chat-input')
+  if (inp) {
+    inp.classList.remove('listening')
+    inp.placeholder = 'Type or 🎙 speak your request…'
+    inp.value = _finalText.trim()
+    _autoH(inp)
+  }
+  _setMicUI(false)
+  if (andSend && _finalText.trim()) setTimeout(sendMessage, 100)
+}
+
+// Called by "Stop & Send" button in voice status bar
+function stopVoiceAndSend() { _stopVoice(true) }
+
+function _clearSil()  { if (_silTimer)  { clearTimeout(_silTimer);  _silTimer  = null } }
+function _clearIdle() { if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null } }
+
+function _setMicUI(on) {
+  const btn      = document.getElementById('micBtn')
+  const ico      = document.getElementById('micIcon')
+  const langBtn  = document.getElementById('langBtn')
+  const statusBar= document.getElementById('voice-status')
+  const badge    = document.getElementById('voice-lang-badge')
+
+  if (!btn) return
+
+  if (on) {
+    btn.classList.add('recording')
+    if (ico) ico.textContent = '⏹'
+    btn.title = 'Recording — click to stop & send'
+    if (langBtn) langBtn.classList.add('recording')
+    if (statusBar) statusBar.classList.add('show')
+    if (badge) { const found = VOICE_LANGS.find(l => l.code === _voiceLang); if (found) badge.textContent = found.label.split(' ')[0] }
+    // Add ripple to mic button
+    if (!btn.querySelector('.mic-ripple')) {
+      const r = document.createElement('div'); r.className = 'mic-ripple'; btn.appendChild(r)
+    }
+  } else {
+    btn.classList.remove('recording')
+    if (ico) ico.textContent = '🎙'
+    btn.title = 'Voice input'
+    if (langBtn) langBtn.classList.remove('recording')
+    if (statusBar) statusBar.classList.remove('show')
+    btn.querySelector('.mic-ripple')?.remove()
+    const statusText = document.getElementById('voice-status-text')
+    if (statusText) statusText.textContent = 'Listening…'
+  }
+}
+
+function _autoH(el) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px'
 }
 
 /* ══ SAVE & PUBLISH ══ */
@@ -1181,7 +1397,6 @@ function updateBadge(){
   if(b){b.textContent=n;b.style.display=n?'':'none'}
 }
 
-// Track which groups are open
 const openGroups={Header:true,Content:true,Social:false,Engagement:false,Footer:true}
 
 function renderSecList(q=''){
@@ -1196,10 +1411,7 @@ function renderSecList(q=''){
     const enabledCount=secs.filter(s=>s.enabled).length
     html+=`<div>
       <div class="sec-group-header" onclick="toggleSecGroup('${grp}')">
-        <div class="sec-group-label">
-          ${grp}
-          <span class="sec-group-count">${enabledCount}/${secs.length}</span>
-        </div>
+        <div class="sec-group-label">${grp}<span class="sec-group-count">${enabledCount}/${secs.length}</span></div>
         <span class="sec-group-arrow ${isOpen?'open':''}" id="sg-arrow-${grp}">▾</span>
       </div>
       <div class="sec-group-items ${isOpen?'open':''}" id="sg-items-${grp}">`
@@ -1330,7 +1542,7 @@ function applyPreset(preset){
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   PREVIEW RENDER — FIXED CARD SIZES & STYLES
+   PREVIEW RENDER (unchanged from original)
 ══════════════════════════════════════════════════════════════════════════ */
 function renderPreview(){
   const isMobile=currentDevice==='mobile'
@@ -1339,11 +1551,8 @@ function renderPreview(){
   const btnRadius=themeData.btnStyle==='pill'?'999px':themeData.btnStyle==='square'?'3px':(themeData.radius||'12px')
   const isLight=isLightColor(themeData.bgColor||'#ffffff')
   const borderRgb=isLight?'0,0,0':'255,255,255'
-
-  // Get card size CSS vars - applied to :root in preview so they cascade everywhere
   const sizeVars=CARD_SIZE_CSS[themeData.cardSize]||CARD_SIZE_CSS.medium
   const sizeVarsCSS=Object.entries(sizeVars).map(([k,v])=>`${k}:${v};`).join('')
-
   const sectionsHTML=sections.filter(s=>s.enabled).map(s=>buildSectionHTML(s,isMobile)).join('\n')
 
   const html=`<!DOCTYPE html><html><head>
@@ -1351,35 +1560,23 @@ function renderPreview(){
 <link href="https://fonts.googleapis.com/css2?family=${fontEnc}:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --primary:${themeData.primaryColor};
-  --bg:${themeData.bgColor};
-  --text:${themeData.textColor};
-  --card-bg:${themeData.cardBg};
-  --nav-bg:${themeData.navBg};
-  --radius:${themeData.radius};
-  --btn-r:${btnRadius};
-  --font:'${fontName}',sans-serif;
-  --cols:${isMobile?2:parseInt(themeData.cols||3)};
-  --border-rgb:${borderRgb};
+  --primary:${themeData.primaryColor};--bg:${themeData.bgColor};--text:${themeData.textColor};
+  --card-bg:${themeData.cardBg};--nav-bg:${themeData.navBg};--radius:${themeData.radius};
+  --btn-r:${btnRadius};--font:'${fontName}',sans-serif;
+  --cols:${isMobile?2:parseInt(themeData.cols||3)};--border-rgb:${borderRgb};
   ${sizeVarsCSS}
 }
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text)}
 a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
-
-/* ANNOUNCEMENT */
 .announcement-bar{background:var(--primary);color:white;text-align:center;padding:9px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}
 .ann-link{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:4px;font-size:12px;font-weight:700}
-
-/* NAVBAR */
 .navbar{background:var(--nav-bg);height:${isMobile?'52px':'62px'};display:flex;align-items:center;padding:0 5%;border-bottom:1px solid rgba(${borderRgb},.06);position:sticky;top:0;z-index:100}
 .nav-logo{font-size:${isMobile?'18px':'22px'};font-weight:900;letter-spacing:-.03em;flex-shrink:0}
 .nav-links-center{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:${isMobile?'12px':'28px'};font-size:${isMobile?'12px':'13.5px'};font-weight:600;opacity:.65;pointer-events:none}
 .nav-links-center a{pointer-events:all}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;position:relative;z-index:1}
 .nav-cart{display:flex;align-items:center;gap:6px;padding:7px 15px;background:var(--primary);color:white;border-radius:var(--btn-r);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
-
-/* HERO */
 .hero{padding:${isMobile?'48px 5% 40px':'80px 5% 72px'};text-align:center;background:var(--bg);position:relative;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
 .hero-overlay{position:absolute;inset:0;z-index:1}
@@ -1391,24 +1588,12 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;padding:${isMobile?'11px 24px':'13px 30px'};border-radius:var(--btn-r);font-size:${isMobile?'14px':'15px'};font-weight:700;cursor:pointer;border:none;font-family:var(--font)}
 .btn-cta-ghost{background:transparent;color:var(--text);border:1.5px solid rgba(${borderRgb},.2)}
-
-/* SECTION */
 .section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .section-title{font-size:${isMobile?'20px':'28px'};font-weight:800;letter-spacing:-.02em}
 .section-subtitle{font-size:${isMobile?'12px':'14px'};opacity:.55;margin-top:6px}
 .section-header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:${isMobile?'18px':'28px'}}
 .view-all-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;border:1.5px solid rgba(${borderRgb},.15);border-radius:var(--btn-r);font-size:13px;font-weight:700;opacity:.7;cursor:pointer;color:var(--text)}
-
-/* ═══════════════════════════════════════════
-   PRODUCT GRID & CARDS — FIXED
-═══════════════════════════════════════════ */
-.products-grid{
-  display:grid;
-  grid-template-columns:repeat(var(--cols,3),1fr);
-  gap:var(--pv-grid-gap,14px);
-}
-
-/* BASE CARD */
+.products-grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:var(--pv-grid-gap,14px)}
 .tc{background:var(--card-bg);border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer;transition:transform .22s,box-shadow .22s;display:block;color:inherit;text-decoration:none;border:1px solid rgba(${borderRgb},.08)}
 .tc:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.15)}
 .tc-img{width:100%;aspect-ratio:var(--pv-card-aspect,3/4);background:rgba(${borderRgb},.06);overflow:hidden;position:relative}
@@ -1426,56 +1611,34 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .tc-disc{font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#ef4444;padding:2px 6px;border-radius:4px}
 .tc-btn-wrap{padding:var(--pv-card-btn-pad,6px 12px 12px)}
 .tc-btn{width:100%;height:var(--pv-card-btn-h,38px);background:var(--primary);color:white;border:none;border-radius:var(--btn-r);font-size:var(--pv-card-btn-fs,11.5px);font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:5px}
-
-/* CARD STYLE VARIANTS */
-/* Minimal */
 .minimal-grid .tc{background:transparent;border:1.5px solid rgba(${borderRgb},.12);box-shadow:none}
 .minimal-grid .tc:hover{border-color:var(--primary);transform:none}
-/* Bold */
 .bold-grid .tc{border-top:3px solid var(--primary)}
-/* Elevated */
 .elevated-grid .tc{border:none;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .elevated-grid .tc:hover{transform:translateY(-6px);box-shadow:0 24px 52px rgba(0,0,0,.18)}
-/* Compact */
-.compact-grid{gap:8px !important}
-.compact-grid .tc-img{aspect-ratio:1/1 !important}
-.compact-grid .tc-info{padding:6px 8px 4px !important}
-.compact-grid .tc-name{font-size:11px !important;-webkit-line-clamp:1}
-.compact-grid .tc-btn-wrap{display:none !important}
-/* List */
-.list-grid{grid-template-columns:1fr !important}
+.compact-grid{gap:8px!important}
+.compact-grid .tc-img{aspect-ratio:1/1!important}
+.compact-grid .tc-info{padding:6px 8px 4px!important}
+.compact-grid .tc-name{font-size:11px!important;-webkit-line-clamp:1}
+.compact-grid .tc-btn-wrap{display:none!important}
+.list-grid{grid-template-columns:1fr!important}
 .list-grid .tc{display:flex;flex-direction:row;height:auto;min-height:100px}
-.list-grid .tc-img{width:120px;min-width:120px;aspect-ratio:auto !important;height:auto;min-height:100px;border-radius:0}
-.list-grid .tc-info{flex:1;padding:12px 16px !important;border-top:none;border-left:1px solid rgba(${borderRgb},.06)}
+.list-grid .tc-img{width:120px;min-width:120px;aspect-ratio:auto!important;height:auto;min-height:100px;border-radius:0}
+.list-grid .tc-info{flex:1;padding:12px 16px!important;border-top:none;border-left:1px solid rgba(${borderRgb},.06)}
 .list-grid .tc:hover{transform:none}
-.list-grid .tc-btn-wrap{padding:0 12px !important;display:flex;align-items:center;align-self:stretch}
-.list-grid .tc-btn{height:36px;width:auto;padding:0 16px !important;white-space:nowrap}
-/* Magazine */
+.list-grid .tc-btn-wrap{padding:0 12px!important;display:flex;align-items:center;align-self:stretch}
+.list-grid .tc-btn{height:36px;width:auto;padding:0 16px!important;white-space:nowrap}
 .magazine-grid .tc:first-child{grid-column:span 2}
-.magazine-grid .tc:first-child .tc-img{aspect-ratio:16/9 !important}
-/* Overlay */
-.overlay-grid .tc-info{display:none !important}
-.overlay-grid .tc-btn-wrap{display:none !important}
-.overlay-grid .tc-img{aspect-ratio:3/4 !important}
-.overlay-grid .tc .tc-overlay{
-  position:absolute;bottom:0;left:0;right:0;
-  background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.4) 50%,transparent 100%);
-  padding:${isMobile?'16px 12px 12px':'22px 16px 14px'};
-  color:white;z-index:3;
-}
+.magazine-grid .tc:first-child .tc-img{aspect-ratio:16/9!important}
+.overlay-grid .tc-info{display:none!important}
+.overlay-grid .tc-btn-wrap{display:none!important}
+.overlay-grid .tc-img{aspect-ratio:3/4!important}
+.overlay-grid .tc .tc-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.4) 50%,transparent 100%);padding:${isMobile?'16px 12px 12px':'22px 16px 14px'};color:white;z-index:3}
 .overlay-grid .tc .ov-name{font-size:${isMobile?'12px':'14px'};font-weight:700;margin-bottom:4px}
 .overlay-grid .tc .ov-price-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .overlay-grid .tc .ov-price{font-size:${isMobile?'13px':'15px'};font-weight:800}
 .overlay-grid .tc .ov-compare{font-size:11px;text-decoration:line-through;opacity:.55}
-.overlay-grid .tc .ov-btn{
-  width:100%;height:36px;display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.2);backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.35);color:white;
-  border-radius:var(--btn-r);font-size:12px;font-weight:700;cursor:pointer;
-  font-family:var(--font);
-}
-
-/* CATEGORIES */
+.overlay-grid .tc .ov-btn{width:100%;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);color:white;border-radius:var(--btn-r);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
 .cats-grid{display:grid;gap:${isMobile?'10px':'16px'}}
 .cat-card{border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
 .cat-card:hover{transform:translateY(-3px)}
@@ -1486,15 +1649,11 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .cat-info.overlay-info{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.8),transparent 100%);padding:${isMobile?'16px 12px':'22px 16px'};color:white}
 .cat-name{font-size:${isMobile?'12px':'14px'};font-weight:700}
 .cat-count{font-size:11px;opacity:.45;margin-top:2px}
-
-/* BANNER */
 .promo-banner{color:white;padding:${isMobile?'40px 5%':'68px 5%'};text-align:center;position:relative;overflow:hidden}
 .promo-content h2{font-size:${isMobile?'22px':'36px'};font-weight:900;margin-bottom:10px}
 .promo-content p{opacity:.8;margin-bottom:20px}
 .promo-coupon{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px dashed rgba(255,255,255,.5);padding:6px 14px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;margin-bottom:20px}
 .btn-white{background:white;color:var(--primary);padding:12px 28px;border-radius:var(--btn-r);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
-
-/* TESTIMONIALS */
 .testimonials{padding:${isMobile?'32px 5%':'56px 5%'};background:var(--card-bg)}
 .testimonials-grid{display:grid;gap:16px;margin-top:24px}
 .testimonial{background:var(--bg);border-radius:var(--radius);padding:20px}
@@ -1503,16 +1662,12 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .t-author{display:flex;align-items:center;gap:10px}
 .t-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px}
 .t-name{font-size:13px;font-weight:700}
-
-/* NEWSLETTER */
 .newsletter{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .newsletter h2{font-size:${isMobile?'22px':'30px'};font-weight:800;margin-bottom:10px}
 .newsletter p{opacity:.6;margin-bottom:24px}
 .newsletter-form{display:flex;gap:10px;max-width:440px;margin:0 auto;flex-wrap:wrap}
 .newsletter-input{flex:1;min-width:180px;padding:11px 16px;border:1.5px solid rgba(${borderRgb},.1);border-radius:var(--btn-r);font-size:14px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
 .newsletter-privacy{font-size:11px;opacity:.4;margin-top:10px}
-
-/* FOOTER */
 .footer{padding:${isMobile?'24px 5% 16px':'48px 5% 24px'};background:var(--nav-bg);border-top:1px solid rgba(${borderRgb},.06)}
 .footer-top{display:grid;grid-template-columns:${isMobile?'1fr':'2fr 1fr 1fr'};gap:32px;margin-bottom:32px}
 .footer-logo{font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
@@ -1525,40 +1680,28 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .footer-copy{font-size:12px;opacity:.35}
 .footer-social{display:flex;gap:10px}
 .social-btn{width:32px;height:32px;border-radius:8px;background:rgba(${borderRgb},.06);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
-
-/* TRUST */
 .trust-section{padding:${isMobile?'20px 5%':'32px 5%'}}
 .trust-grid{display:grid;gap:12px}
 .trust-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card-bg);border-radius:var(--radius)}
 .trust-icon{font-size:24px;flex-shrink:0}
 .trust-label{font-size:13.5px;font-weight:700}
 .trust-sub{font-size:11.5px;opacity:.5;margin-top:2px}
-
-/* FAQ */
 .faq-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .faq-item{border-bottom:1px solid rgba(${borderRgb},.08);padding:18px 0}
 .faq-q{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
 .faq-q::after{content:'▾';opacity:.4;font-size:12px}
 .faq-a{font-size:13.5px;opacity:.6;line-height:1.65}
-
-/* VIDEO */
 .video-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .video-box{border-radius:var(--radius);height:${isMobile?'200px':'340px'};overflow:hidden;background:var(--card-bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;margin-top:20px}
 .play-circle{width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
-
-/* COUNTDOWN */
 .countdown-section{padding:${isMobile?'32px 5%':'56px 5%'};text-align:center}
 .countdown-row{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap}
 .cd-unit{border-radius:var(--radius);padding:${isMobile?'12px 16px':'18px 24px'};min-width:72px;background:var(--card-bg)}
 .cd-num{font-size:${isMobile?'28px':'38px'};font-weight:900;line-height:1}
 .cd-label{font-size:11px;font-weight:700;opacity:.45;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
-
-/* GALLERY */
 .gallery-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .gallery-grid{display:grid;gap:${isMobile?'8px':'12px'}}
 .gallery-item{background:var(--card-bg);border-radius:var(--radius);overflow:hidden}
-
-/* ABOUT / RICHTEXT / IMAGETEXT / CONTACT */
 .about-section,.richtext-section,.imagetext-section,.contact-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .about-grid,.imagetext-grid{display:grid;gap:48px;align-items:center}
 .about-img,.imagetext-img{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;background:var(--card-bg);display:flex;align-items:center;justify-content:center;font-size:60px}
@@ -1571,13 +1714,9 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .contact-form{display:flex;flex-direction:column;gap:12px}
 .contact-input{width:100%;padding:11px 14px;border:1.5px solid rgba(${borderRgb},.1);border-radius:var(--radius);font-size:13.5px;background:var(--card-bg);color:var(--text);font-family:var(--font);outline:none}
 .contact-textarea{min-height:100px;resize:vertical}
-
-/* BRANDS */
 .brands-section{padding:${isMobile?'24px 5%':'40px 5%'}}
 .brands-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
 .brand-item{padding:10px 20px;background:var(--card-bg);border-radius:999px;font-size:13px;font-weight:700;opacity:.6}
-
-/* OFFERS */
 .offers-section{padding:${isMobile?'32px 5%':'56px 5%'}}
 .offers-grid{display:grid;gap:16px;margin-top:24px}
 .offer-card{border-radius:var(--radius);padding:${isMobile?'20px':'28px'};color:white;position:relative;overflow:hidden}
@@ -1585,11 +1724,7 @@ a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .offer-title{font-size:${isMobile?'18px':'22px'};font-weight:900;margin-bottom:6px}
 .offer-desc{font-size:13px;opacity:.8;margin-bottom:14px}
 .offer-code-box{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);border:1.5px dashed rgba(255,255,255,.5);padding:6px 14px;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700}
-
-/* TEAM */
 .team-section{padding:${isMobile?'32px 5%':'56px 5%'}}
-
-/* EDIT HOVER */
 [data-ekart-sec]{position:relative;cursor:pointer}
 [data-ekart-sec]::after{content:'';position:absolute;inset:0;border:2px solid transparent;border-radius:4px;pointer-events:none;transition:border-color .15s,box-shadow .15s;z-index:9999}
 [data-ekart-sec]:hover::after{border-color:rgba(91,92,246,.6);box-shadow:inset 0 0 0 1px rgba(91,92,246,.2)}
@@ -1609,7 +1744,6 @@ ${sectionsHTML}
     })
   })
 })();
-// Countdown timers
 document.querySelectorAll('[data-countdown]').forEach(function(el){
   var end=new Date(el.getAttribute('data-countdown')).getTime()
   function tick(){
@@ -1636,11 +1770,10 @@ document.querySelectorAll('[data-countdown]').forEach(function(el){
   }catch(e){console.error('Preview render failed:',e)}
 }
 
-/* ══ SECTION HTML BUILDER ══ */
+/* ══ SECTION HTML BUILDER (unchanged from original) ══ */
 function buildSectionHTML(sec,isMobile){
   const d=sec.data||{}
   const isMob=isMobile
-
   const wrapSec=(html)=>`<div data-ekart-sec="${sec.type}" style="position:relative">${html}<div class="ek-edit-pill">✏️ Edit ${(SECTION_META[sec.type]||{label:sec.type}).label}</div></div>`
 
   switch(sec.type){
@@ -1652,7 +1785,6 @@ function buildSectionHTML(sec,isMobile){
         ${d.linkText?`<span class="ann-link">${escHtmlInner(d.linkText)}</span>`:''}
       </div>`)
     }
-
     case 'navbar':{
       const logoStyle=d.logoColor?`color:${d.logoColor};`:''
       const navStyle=d.bgColor?`background:${d.bgColor};`:''
@@ -1666,7 +1798,6 @@ function buildSectionHTML(sec,isMobile){
         </div>
       </nav>`)
     }
-
     case 'hero':{
       const rawH=d.heading||'Welcome to our Store'
       const heading=rawH.replace(/(store|shop)/gi,m=>`<em>${m}</em>`)
@@ -1689,84 +1820,25 @@ function buildSectionHTML(sec,isMobile){
         </div>
       </section>`)
     }
-
     case 'featured':{
-      // Determine card style: section-level overrides global theme
       const rawCardStyle=d.cardStyle||themeData.cardStyle||'classic'
       const cardStyle=ALL_CARD_STYLES.has(rawCardStyle)?rawCardStyle:'classic'
-
-      // Determine card size: section-level overrides global theme
       const rawCardSize=d.cardSize||themeData.cardSize||'medium'
       const szVars=CARD_SIZE_CSS[rawCardSize]||CARD_SIZE_CSS.medium
-      // Build inline CSS vars for this section
       const szStyle=Object.entries(szVars).map(([k,v])=>`${k}:${v}`).join(';')
-
       const count=Math.min(parseInt(d.count)||8,SAMPLE_PRODUCTS.length)
       const fCols=cardStyle==='list'?1:(isMob?2:(parseInt(d.columns)||parseInt(themeData.cols)||3))
       const showOld=d.showOldPrice!=='no'
       const showBadge=d.showBadge==='yes'||d.showBadge===true
       const btnTxt=escHtmlInner(d.btnText||'Add to Cart')
-
       const cards=SAMPLE_PRODUCTS.slice(0,count).map(p=>{
-        const imgArea=`<div class="tc-img">
-          ${showBadge&&p.badge?`<div class="tc-badge">${escHtmlInner(p.badge)}</div>`:''}
-          <button class="tc-wish">♡</button>
-          <img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy">
-        </div>`
-
-        if(cardStyle==='overlay'){
-          return `<a class="tc">
-            ${imgArea}
-            <div class="tc-overlay">
-              <div class="ov-name">${escHtmlInner(p.name)}</div>
-              <div class="ov-price-row">
-                <span class="ov-price">₹${p.price.toLocaleString('en-IN')}</span>
-                ${showOld&&p.compare?`<span class="ov-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}
-              </div>
-              <button class="ov-btn">🛒 ${btnTxt}</button>
-            </div>
-          </a>`
-        }
-        if(cardStyle==='list'){
-          return `<a class="tc">
-            ${imgArea}
-            <div class="tc-info">
-              <div class="tc-cat">${escHtmlInner(p.cat)}</div>
-              <div class="tc-name">${escHtmlInner(p.name)}</div>
-              <div class="tc-price-row">
-                <span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span>
-                ${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}
-              </div>
-            </div>
-            <div class="tc-btn-wrap"><button class="tc-btn">🛒 ${btnTxt}</button></div>
-          </a>`
-        }
-        return `<a class="tc">
-          ${imgArea}
-          <div class="tc-info">
-            <div class="tc-cat">${escHtmlInner(p.cat)}</div>
-            <div class="tc-name">${escHtmlInner(p.name)}</div>
-            <div class="tc-price-row">
-              <span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span>
-              ${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}
-            </div>
-          </div>
-          ${cardStyle!=='compact'?`<div class="tc-btn-wrap"><button class="tc-btn">🛒 ${btnTxt}</button></div>`:''}
-        </a>`
+        const imgArea=`<div class="tc-img">${showBadge&&p.badge?`<div class="tc-badge">${escHtmlInner(p.badge)}</div>`:''}<button class="tc-wish">♡</button><img src="${p.img}" alt="${escHtmlInner(p.name)}" loading="lazy"></div>`
+        if(cardStyle==='overlay')return`<a class="tc">${imgArea}<div class="tc-overlay"><div class="ov-name">${escHtmlInner(p.name)}</div><div class="ov-price-row"><span class="ov-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="ov-compare">₹${p.compare.toLocaleString('en-IN')}</span>`:''}</div><button class="ov-btn">🛒 ${btnTxt}</button></div></a>`
+        if(cardStyle==='list')return`<a class="tc">${imgArea}<div class="tc-info"><div class="tc-cat">${escHtmlInner(p.cat)}</div><div class="tc-name">${escHtmlInner(p.name)}</div><div class="tc-price-row"><span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}</div></div><div class="tc-btn-wrap"><button class="tc-btn">🛒 ${btnTxt}</button></div></a>`
+        return`<a class="tc">${imgArea}<div class="tc-info"><div class="tc-cat">${escHtmlInner(p.cat)}</div><div class="tc-name">${escHtmlInner(p.name)}</div><div class="tc-price-row"><span class="tc-price">₹${p.price.toLocaleString('en-IN')}</span>${showOld&&p.compare?`<span class="tc-compare">₹${p.compare.toLocaleString('en-IN')}</span><span class="tc-disc">-${p.disc}%</span>`:''}</div></div>${cardStyle!=='compact'?`<div class="tc-btn-wrap"><button class="tc-btn">🛒 ${btnTxt}</button></div>`:''}</a>`
       }).join('')
-
-      return wrapSec(`<section class="section" id="products" style="${szStyle}">
-        <div class="section-header-row">
-          <div>
-            <div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>
-            ${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}
-          </div>
-          ${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}
-        </div>
-        <div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div>
-      </section>`)
+      return wrapSec(`<section class="section" id="products" style="${szStyle}"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Featured Products')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${d.viewAllText?`<a href="${d.viewAllLink||'#'}" class="view-all-btn">${escHtmlInner(d.viewAllText)} →</a>`:''}</div><div class="products-grid ${cardStyle}-grid" style="--cols:${fCols}">${cards}</div></section>`)
     }
-
     case 'categories':{
       const cCols=isMob?2:(parseInt(d.columns)||4)
       const style=d.style||'image'
@@ -1779,27 +1851,23 @@ function buildSectionHTML(sec,isMobile){
       }).join('')
       return wrapSec(`<section class="section"><div class="section-header-row"><div><div class="section-title">${escHtmlInner(d.title||'Browse by Category')}</div></div></div><div class="cats-grid" style="grid-template-columns:repeat(${cCols},1fr)">${catCards}</div></section>`)
     }
-
     case 'banner':{
       const bg=d.bgColor||themeData.primaryColor||'#5b5cf6'
       const tc=d.textColor||'#ffffff'
       const bgStyle=d.bgImage?`background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),url('${d.bgImage}') center/cover;`:`background:${bg};`
       return wrapSec(`<section class="promo-banner" style="${bgStyle}color:${tc}"><div class="promo-content">${d.badgeText?`<div style="display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px">${escHtmlInner(d.badgeText)}</div>`:''}<h2>${escHtmlInner(d.heading||'Limited Time Offer')}</h2><p>${escHtmlInner(d.subtext||'Get 20% off your first order.')}</p>${d.couponCode?`<div class="promo-coupon">🎫 ${escHtmlInner(d.couponCode)}</div>`:''}<button class="btn-white" style="color:${bg}">${escHtmlInner(d.ctaText||'Claim Offer')}</button></div></section>`)
     }
-
     case 'testimonials':{
       const tCols=isMob?1:(parseInt(d.columns)||3)
       const ts=[[d.t1name||'Sarah M.',d.t1text||'Absolutely love this store!',parseInt(d.t1stars||5)],[d.t2name||'Rahul K.',d.t2text||'Best shopping experience.',parseInt(d.t2stars||5)],[d.t3name||'Anita P.',d.t3text||'Great products and service.',parseInt(d.t3stars||5)]]
       return wrapSec(`<section class="testimonials"><div class="section-header-row" style="margin-bottom:0"><div class="section-title">${escHtmlInner(d.title||'What Customers Say')}</div></div><div class="testimonials-grid" style="grid-template-columns:repeat(${tCols},1fr)">${ts.map(([n,t,stars])=>`<div class="testimonial"><div class="t-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="t-text">"${escHtmlInner(t)}"</div><div class="t-author"><div class="t-avatar">${n[0]}</div><div class="t-name">${escHtmlInner(n)}</div></div></div>`).join('')}</div></section>`)
     }
-
     case 'newsletter':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
       const btnBg=d.btnColor||themeData.primaryColor||'#5b5cf6'
       return wrapSec(`<section class="newsletter" style="${bg}${tc}"><h2>${escHtmlInner(d.heading||'Stay in the loop')}</h2><p>${escHtmlInner(d.subtext||'Get exclusive deals straight to your inbox.')}</p><div class="newsletter-form"><input class="newsletter-input" type="email" placeholder="${escHtmlInner(d.inputPlaceholder||'Enter your email address')}"><button class="btn-cta" style="background:${btnBg};white-space:nowrap">${escHtmlInner(d.btnText||'Subscribe')} →</button></div>${d.privacyText?`<div class="newsletter-privacy">${escHtmlInner(d.privacyText)}</div>`:''}</section>`)
     }
-
     case 'footer':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
@@ -1807,7 +1875,6 @@ function buildSectionHTML(sec,isMobile){
       const col2Links=(d.col2Links||'Shipping,Returns,FAQ,Track Order').split(',').filter(Boolean)
       return wrapSec(`<footer class="footer" style="${bg}${tc}"><div class="footer-top"><div><div class="footer-logo">${escHtmlInner(d.logoText||(sections.find(s=>s.type==='navbar')?.data?.logoText)||'My Store')}</div>${d.tagline?`<div class="footer-tagline">${escHtmlInner(d.tagline)}</div>`:''}<div class="footer-contact">${d.email?`<div>✉️ ${escHtmlInner(d.email)}</div>`:''}${d.phone?`<div>📞 ${escHtmlInner(d.phone)}</div>`:''}</div></div>${!isMob?`<div><div class="footer-col-title">${escHtmlInner(d.col1Title||'Quick Links')}</div><div class="footer-col-links">${col1Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div><div><div class="footer-col-title">${escHtmlInner(d.col2Title||'Customer Care')}</div><div class="footer-col-links">${col2Links.map(l=>`<a>${escHtmlInner(l.trim())}</a>`).join('')}</div></div>`:''}</div><div class="footer-bottom"><div class="footer-copy">${escHtmlInner(d.footerText||themeData.footerText)}</div>${d.showSocial!=='no'?`<div class="footer-social"><div class="social-btn">📸</div><div class="social-btn">📘</div><div class="social-btn">🐦</div></div>`:''}</div></footer>`)
     }
-
     case 'trustbadges':{
       const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
       const tc=d.textColor?`color:${d.textColor};`:''
@@ -1815,18 +1882,15 @@ function buildSectionHTML(sec,isMobile){
       const gridCols=layout==='2x2'?2:layout==='column'?1:(isMob?2:4)
       return wrapSec(`<section class="trust-section" style="${bg}${tc}"><div class="trust-grid" style="grid-template-columns:repeat(${gridCols},1fr)">${[[d.badge1Icon||'🚚',d.badge1||'Free Shipping',d.badge1sub||'On orders above ₹499'],[d.badge2Icon||'🔒',d.badge2||'Secure Payment',d.badge2sub||'100% safe & encrypted'],[d.badge3Icon||'↩️',d.badge3||'Easy Returns',d.badge3sub||'30-day return policy'],[d.badge4Icon||'💬',d.badge4||'24/7 Support',d.badge4sub||'Always here to help']].map(([icon,label,sub])=>`<div class="trust-item"><span class="trust-icon">${escHtmlInner(icon)}</span><div><div class="trust-label">${escHtmlInner(label)}</div><div class="trust-sub">${escHtmlInner(sub)}</div></div></div>`).join('')}</div></section>`)
     }
-
     case 'faq':{
       const pairs=[[d.q1,d.a1],[d.q2,d.a2],[d.q3,d.a3],[d.q4,d.a4]].filter(([q])=>q)
       const defaults=pairs.length?pairs:[['How long does shipping take?','Typically 3-7 business days.'],['What is your return policy?','30-day returns guaranteed.'],['Do you offer Cash on Delivery?','Yes! COD available across India.']]
       return wrapSec(`<section class="faq-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'FAQ')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div>${defaults.map(([q,a])=>`<div class="faq-item"><div class="faq-q">${escHtmlInner(q)}</div><div class="faq-a">${escHtmlInner(a)}</div></div>`).join('')}</section>`)
     }
-
     case 'video':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       return wrapSec(`<section class="video-section" style="${bg}"><div style="margin-bottom:16px"><div class="section-title">${escHtmlInner(d.heading||'Our Story')}</div></div><div class="video-box">${d.videoUrl?`<iframe src="${d.videoUrl}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`:`<div class="play-circle">▶</div><div style="font-size:13px;font-weight:600;opacity:.5">${escHtmlInner(d.playBtnText||'Watch Video')}</div>`}</div></section>`)
     }
-
     case 'countdown':{
       const bg=d.bgColor?`background:${d.bgColor};`:'background:var(--card-bg);'
       const tc=d.textColor?`color:${d.textColor};`:''
@@ -1834,7 +1898,6 @@ function buildSectionHTML(sec,isMobile){
       const endDate=d.endDate||new Date(Date.now()+7*24*3600*1000).toISOString()
       return wrapSec(`<section class="countdown-section" style="${bg}${tc}" data-countdown="${endDate}"><div class="section-title">⏳ ${escHtmlInner(d.heading||'Deal Ends In')}</div>${d.subtext?`<div class="section-subtitle" style="margin-bottom:8px">${escHtmlInner(d.subtext)}</div>`:''}<div class="countdown-row">${[['cd-days','Days'],['cd-hrs','Hours'],['cd-min','Mins'],['cd-sec','Secs']].map(([cls,l])=>`<div class="cd-unit"><div class="cd-num ${cls}" style="color:${ac}">00</div><div class="cd-label">${l}</div></div>`).join('')}</div>${d.ctaText?`<div style="margin-top:28px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</section>`)
     }
-
     case 'gallery':{
       const gCols=isMob?2:(parseInt(d.columns)||4)
       const ratio=d.imgAspect==='landscape'?'16/9':d.imgAspect==='portrait'?'3/4':'1/1'
@@ -1842,7 +1905,6 @@ function buildSectionHTML(sec,isMobile){
       const displayImgs=imgs.length?imgs:SAMPLE_PRODUCTS.map(p=>p.img)
       return wrapSec(`<section class="gallery-section"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Our Gallery')}</div></div><div class="gallery-grid" style="grid-template-columns:repeat(${gCols},1fr)">${displayImgs.slice(0,gCols*2).map(imgUrl=>`<div class="gallery-item" style="aspect-ratio:${ratio}"><img src="${imgUrl}" alt="Gallery" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`).join('')}</div></section>`)
     }
-
     case 'about':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
@@ -1853,14 +1915,12 @@ function buildSectionHTML(sec,isMobile){
       const hasStats=d.stat1num||d.stat2num||d.stat3num
       return wrapSec(`<section class="about-section" style="${bg}${tc}"><div class="about-grid" style="grid-template-columns:${layout==='no-image'||isMob?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div>${hasStats?`<div class="about-stats">${d.stat1num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat1num)}</div><div class="about-stat-label">${escHtmlInner(d.stat1label||'')}</div></div>`:''}${d.stat2num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat2num)}</div><div class="about-stat-label">${escHtmlInner(d.stat2label||'')}</div></div>`:''}${d.stat3num?`<div class="about-stat"><div class="about-stat-num">${escHtmlInner(d.stat3num)}</div><div class="about-stat-label">${escHtmlInner(d.stat3label||'')}</div></div>`:''}</div>`:''}</section>`)
     }
-
     case 'richtext':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
       const maxWidths={narrow:'480px',normal:'680px',wide:'900px',full:'100%'}
       return wrapSec(`<section class="richtext-section" style="${bg}${tc}"><div class="richtext-inner" style="max-width:${maxWidths[d.maxWidth||'normal']};text-align:${d.align||'left'}">${d.title?`<h2 style="font-size:28px;font-weight:800;margin-bottom:16px">${escHtmlInner(d.title)}</h2>`:''}<div style="opacity:.7;font-size:16px;line-height:1.75">${escHtmlInner(d.body||'').replace(/\n/g,'<br>')}</div>${d.ctaText?`<div style="margin-top:24px"><a href="${d.ctaLink||'#'}" class="btn-cta">${escHtmlInner(d.ctaText)}</a></div>`:''}</div></section>`)
     }
-
     case 'imagetext':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
@@ -1871,33 +1931,28 @@ function buildSectionHTML(sec,isMobile){
       const imgSide=`<div class="imagetext-img">${imgEl}</div>`
       return wrapSec(`<section class="imagetext-section" style="${bg}${tc}"><div class="imagetext-grid" style="grid-template-columns:${isMob?'1fr':'1fr 1fr'}">${layout==='image-right'?textSide+imgSide:imgSide+textSide}</div></section>`)
     }
-
     case 'brands':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const brands=[d.brand1||'Nike',d.brand2||'Adidas',d.brand3||'Apple',d.brand4||'Samsung',d.brand5||'Sony',d.brand6||'Boat'].filter(Boolean)
       return wrapSec(`<section class="brands-section" style="${bg}">${d.title?`<div style="text-align:center;margin-bottom:16px"><div class="section-title">${escHtmlInner(d.title)}</div></div>`:''}<div class="brands-grid">${brands.map(b=>`<div class="brand-item">${escHtmlInner(b)}</div>`).join('')}</div></section>`)
     }
-
     case 'offers':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const oCols=isMob?1:(parseInt(d.columns)||3)
       const offers=[{title:d.offer1title||'Flat 30% Off',desc:d.offer1desc||'On all Electronics',code:d.offer1code||'ELEC30',bg:d.offer1bg||'#5b5cf6'},{title:d.offer2title||'Buy 2 Get 1 Free',desc:d.offer2desc||'On selected Fashion',code:d.offer2code||'B2G1',bg:d.offer2bg||'#ec4899'},{title:d.offer3title||'Free Delivery',desc:d.offer3desc||'On orders above ₹499',code:d.offer3code||'FREEDEL',bg:d.offer3bg||'#10b981'}]
       return wrapSec(`<section class="offers-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Hot Deals')}</div></div><div class="offers-grid" style="grid-template-columns:repeat(${oCols},1fr)">${offers.map(o=>`<div class="offer-card" style="background:${o.bg}"><div class="offer-title">${escHtmlInner(o.title)}</div><div class="offer-desc">${escHtmlInner(o.desc)}</div><div class="offer-code-box">🎫 ${escHtmlInner(o.code)}</div></div>`).join('')}</div></section>`)
     }
-
     case 'team':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tCols=isMob?2:(parseInt(d.columns)||3)
       const members=[[d.m1name||'Priya Sharma',d.m1role||'Founder & CEO',d.m1img],[d.m2name||'Rahul Verma',d.m2role||'Operations',d.m2img],[d.m3name||'Anita Patel',d.m3role||'Customer Success',d.m3img]].filter(([n])=>n)
       return wrapSec(`<section class="team-section" style="${bg}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Meet Our Team')}</div></div><div style="display:grid;grid-template-columns:repeat(${tCols},1fr);gap:20px">${members.map(([n,r,img])=>`<div style="background:var(--card-bg);border-radius:var(--radius);padding:20px;text-align:center"><div style="width:72px;height:72px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;overflow:hidden">${img?`<img src="${img}" alt="${escHtmlInner(n)}" style="width:100%;height:100%;object-fit:cover">`:n[0]}</div><div style="font-size:15px;font-weight:800;margin-bottom:4px">${escHtmlInner(n)}</div><div style="font-size:12px;opacity:.5;font-weight:600">${escHtmlInner(r)}</div></div>`).join('')}</div></section>`)
     }
-
     case 'contact':{
       const bg=d.bgColor?`background:${d.bgColor};`:''
       const tc=d.textColor?`color:${d.textColor};`:''
       return wrapSec(`<section class="contact-section" style="${bg}${tc}"><div style="margin-bottom:24px"><div class="section-title">${escHtmlInner(d.title||'Get in Touch')}</div>${d.subtitle?`<div class="section-subtitle">${escHtmlInner(d.subtitle)}</div>`:''}</div><div style="display:grid;grid-template-columns:${isMob?'1fr':'1fr 1fr'};gap:40px">${d.email||d.phone?`<div>${d.email?`<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px"><div style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✉️</div><div><b>Email</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.email)}</span></div></div>`:''}${d.phone?`<div style="display:flex;align-items:flex-start;gap:12px"><div style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📞</div><div><b>Phone</b><br><span style="opacity:.55;font-size:13px">${escHtmlInner(d.phone)}</span></div></div>`:''}</div>`:''}<div class="contact-form"><input class="contact-input" placeholder="Your Name"><input class="contact-input" placeholder="Email Address"><textarea class="contact-input contact-textarea" placeholder="Your message..."></textarea><button class="btn-cta">${escHtmlInner(d.btnText||'Send Message')}</button></div></div></section>`)
     }
-
     default:return''
   }
 }
