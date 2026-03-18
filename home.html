@@ -1029,11 +1029,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!nav) return
   currentUser = nav.user
   document.getElementById('storeEmail').value = currentUser.email || ''
-  setTopbarActions(`
-    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode">🌙</button>
-    <button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>
-  `)
-  // Re-sync icon now that button is in DOM
+  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>`)
+
+  // Inject theme toggle directly into .topbar-right — independent of setTopbarActions
+  const topbarRight = document.querySelector('.topbar-right')
+  if (topbarRight && !document.getElementById('themeToggleBtn')) {
+    const btn = document.createElement('button')
+    btn.className   = 'theme-toggle'
+    btn.id          = 'themeToggleBtn'
+    btn.title       = 'Toggle day / night mode'
+    btn.onclick     = toggleTheme
+    btn.textContent = _isDark ? '🌙' : '☀️'
+    topbarRight.insertBefore(btn, topbarRight.firstChild)
+  }
   applyTheme(_isDark)
   await loadAll()
 })
