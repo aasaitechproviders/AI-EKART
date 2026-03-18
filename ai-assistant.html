@@ -9,405 +9,1206 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
-  .ai-layout { display: grid; grid-template-columns: 260px 1fr; gap: 18px; align-items: start; }
-  .ai-tool-list { display: flex; flex-direction: column; gap: 10px; }
-  .ai-tool-card {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all .2s;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .ai-tool-card:hover { border-color: rgba(108,99,255,0.35); }
-  .ai-tool-card.active { border-color: var(--accent); background: rgba(108,99,255,0.09); }
-  .ai-tool-card-icon { font-size: 22px; margin-bottom: 6px; }
-  .ai-tool-card-name { font-size: 14px; font-weight: 800; }
-  .ai-tool-card-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
-  .ai-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    min-height: 400px;
-  }
-  .ai-panel-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px;
-    background: linear-gradient(135deg, rgba(108,99,255,0.06), rgba(108,99,255,0.02));
-  }
-  .ai-panel-header h2 { font-size: 16px; font-weight: 800; }
-  .ai-panel-header p { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
-  .ai-panel-body { padding: 22px; }
-  .ai-result {
-    background: linear-gradient(135deg, rgba(108,99,255,0.06), rgba(167,139,250,0.03));
-    border: 1px solid rgba(108,99,255,0.18);
-    border-radius: 14px;
-    padding: 20px;
-    margin-top: 18px;
-  }
-  .ai-result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .ai-result-title { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); }
-  .ai-result-copy {
-    background: rgba(108,99,255,0.15);
-    border: 1px solid rgba(108,99,255,0.25);
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent2);
-    cursor: pointer;
-    font-family: 'Outfit', sans-serif;
-    transition: all .15s;
-  }
-  .ai-result-copy:hover { background: var(--accent); color: white; border-color: var(--accent); }
-  .ai-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .ai-kv { padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .ai-kv:last-child { border-bottom: none; }
-  .ai-kv label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); display: block; margin-bottom: 4px; }
-  .ai-kv p { font-size: 13.5px; color: var(--text); line-height: 1.6; }
-  .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-  .tag-pill { background: rgba(108,99,255,0.1); color: var(--accent2); border: 1px solid rgba(108,99,255,0.2); border-radius: 5px; padding: 2px 9px; font-size: 12px; font-weight: 600; }
-  .highlight-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text2); line-height: 1.5; }
-  .highlight-item:last-child { border-bottom: none; }
-  .highlight-bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
-  .price-tag { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 700; color: var(--green); }
-  .setup-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .setup-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .setup-section h3 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent2); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .setup-cat { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border-radius: 7px; padding: 5px 10px; margin: 4px; font-size: 12.5px; font-weight: 600; }
-  .insights-summary { font-size: 14px; color: var(--text2); line-height: 1.8; margin-bottom: 16px; padding: 14px; background: var(--surface2); border-radius: 10px; }
-  .insight-action { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .insight-action:last-child { border-bottom: none; }
-  .priority-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-  @media(max-width:768px) { .ai-layout { grid-template-columns: 1fr; } }
+/* ─── Layout ─────────────────────────────────────────────── */
+.ai-root {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+  height: calc(100vh - 72px);
+  overflow: hidden;
+}
+
+/* ─── Chat Panel ─────────────────────────────────────────── */
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(108,99,255,0.07) 0%, transparent 60%);
+}
+.chat-header-avatar {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(108,99,255,0.35);
+}
+.chat-header-info h2 { font-size: 14px; font-weight: 800; }
+.chat-header-info p  { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
+.chat-status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* bubbles */
+.msg {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  animation: msgIn .25s ease both;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg.user { flex-direction: row-reverse; }
+.msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.msg.ai   .msg-avatar { background: linear-gradient(135deg,#6c63ff,#a78bfa); }
+.msg.user .msg-avatar { background: var(--surface2); font-size: 11px; font-weight: 800; color: var(--text2); }
+
+.msg-bubble {
+  max-width: 76%;
+  padding: 11px 15px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text);
+  word-break: break-word;
+}
+.msg.ai   .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.msg.user .msg-bubble {
+  background: linear-gradient(135deg,#6c63ff,#7c73ff);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.msg-bubble strong { color: var(--accent2); font-weight: 700; }
+
+/* typing indicator */
+.typing-dots {
+  display: flex; gap: 4px; align-items: center; padding: 4px 2px;
+}
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text3);
+  animation: blink 1.2s ease infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .2s; }
+.typing-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+
+/* quick replies */
+.quick-chips {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  padding: 10px 20px 0;
+}
+.chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Outfit', sans-serif;
+}
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: rgba(108,99,255,0.08);
+}
+
+/* input bar */
+.chat-input-wrap {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 15px;
+  font-size: 13.5px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  resize: none;
+  max-height: 120px;
+  min-height: 44px;
+  line-height: 1.5;
+  transition: border-color .15s;
+  outline: none;
+}
+.chat-input:focus { border-color: rgba(108,99,255,0.5); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg,#6c63ff,#7c73ff);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: opacity .15s, transform .1s;
+  box-shadow: 0 2px 10px rgba(108,99,255,0.35);
+}
+.chat-send-btn:hover { opacity: .88; }
+.chat-send-btn:active { transform: scale(.95); }
+.chat-send-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ─── Action Panel ───────────────────────────────────────── */
+.action-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.action-panel::-webkit-scrollbar { width: 4px; }
+.action-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.action-empty {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  padding: 40px 28px;
+  text-align: center;
+  color: var(--text3);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.action-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .5; }
+.action-empty h3 { font-size: 13.5px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+
+/* action card */
+.action-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: cardIn .3s ease both;
+  transition: border-color .2s;
+}
+.action-card:hover { border-color: rgba(108,99,255,0.3); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.action-card-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg,rgba(108,99,255,0.06),transparent);
+}
+.action-card-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.action-card-title { font-size: 13px; font-weight: 800; }
+.action-card-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.action-card-body  { padding: 14px 16px; }
+
+/* fields inside action cards */
+.ac-field { margin-bottom: 10px; }
+.ac-field label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3);
+  margin-bottom: 5px;
+}
+.ac-field input,
+.ac-field textarea,
+.ac-field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  transition: border-color .15s;
+  outline: none;
+  box-sizing: border-box;
+}
+.ac-field input:focus,
+.ac-field textarea:focus,
+.ac-field select:focus { border-color: rgba(108,99,255,0.5); }
+.ac-field textarea { resize: none; height: 72px; line-height: 1.5; }
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.tag-pill {
+  background: rgba(108,99,255,0.1);
+  color: var(--accent2);
+  border: 1px solid rgba(108,99,255,0.2);
+  border-radius: 5px;
+  padding: 2px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* row for two fields */
+.ac-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.ac-field-row .ac-field { margin-bottom: 0; }
+
+/* save / action buttons */
+.ac-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.btn-save {
+  flex: 1;
+  background: linear-gradient(135deg,#6c63ff,#7c73ff);
+  border: none;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: opacity .15s, transform .1s;
+  white-space: nowrap;
+}
+.btn-save:hover { opacity: .88; }
+.btn-save:active { transform: scale(.97); }
+.btn-save:disabled { opacity: .4; cursor: not-allowed; }
+.btn-save-outline {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-save-outline:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* category pills selectable */
+.cat-pill-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat-pill {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.cat-pill.selected {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.1);
+  color: var(--accent2);
+}
+
+/* success flash */
+.ac-success {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--green);
+  display: flex; align-items: center; gap: 8px;
+  animation: msgIn .2s ease;
+}
+
+/* highlights list */
+.hi-item { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+.hi-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
+
+/* store name suggestions */
+.name-suggestion {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.name-suggestion:hover { border-color: var(--accent); color: var(--accent2); }
+.name-suggestions { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+
+/* coupon code display */
+.coupon-code-display {
+  background: var(--surface2);
+  border: 1.5px dashed rgba(108,99,255,0.4);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent2);
+  letter-spacing: .08em;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.coupon-code-display:hover { background: rgba(108,99,255,0.08); }
+
+/* insight sections */
+.insight-section { margin-bottom: 12px; }
+.insight-section h4 {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3);
+  margin-bottom: 7px;
+}
+
+/* mobile */
+@media (max-width: 900px) {
+  .ai-root { grid-template-columns: 1fr; height: auto; }
+  .chat-panel { height: 65vh; }
+  .action-panel { overflow-y: visible; }
+}
 </style>
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
-<div id="page-skeleton">
-    <div class="skel-sidebar">
-      <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-      <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-        <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-          <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-          <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
-        </div>
-      </div>
-      <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div><div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    </div>
-    <div class="skel-main">
-      <div class="skel-topbar">
-        <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
-        <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
-      </div>
-      <div class="skel-body">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
-          <div class="skel" style="height:78px;border-radius:13px;"></div><div class="skel" style="height:78px;border-radius:13px;"></div><div class="skel" style="height:78px;border-radius:13px;"></div><div class="skel" style="height:78px;border-radius:13px;"></div>
-        </div>
-        <div class="skel" style="height:40px;border-radius:9px;margin-bottom:10px;"></div>
-        <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:1.0;"></div><div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.82;"></div><div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.64;"></div><div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.46;"></div><div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.28;"></div>
-      </div>
-    </div>
-  </div>
-<div class="sidebar" id="sidebar">
-    <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" id="nav-avatar">…</div>
-      <div style="min-width:0;">
-        <div class="sidebar-user-name" id="nav-user-name">…</div>
-        <div class="sidebar-user-email" id="nav-user-email">…</div>
-      </div>
-    </div>
-        <div class="nav-section"><div class="nav-section-label">Merchant</div>
-      <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-      <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-      <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
-      <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-      <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
-      <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-    </div>
-    <div class="nav-section"><div class="nav-section-label">Storefront</div>
-      <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-    </div>
-    <div class="nav-section"><div class="nav-section-label">AI Tools</div>
-      <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
-    </div>
-    <div class="sidebar-bottom">
-      <button class="btn-logout" onclick="logout()">↩ Logout</button>
-    </div>
-  </div>
-  <div class="main-wrap">
-    <div class="topbar">
-      <div class="topbar-left"><span class="topbar-title">AI Assistant</span></div>
-      <div class="topbar-right">
-          <div class="store-select-wrap" id="store-select-wrap"><span class="store-select-label">Store</span><select class="store-selector" id="store-selector"></select></div>
-        <div id="topbar-actions"></div>
-      </div>
-    </div>
-    <div id="page-content" class="content page-enter" style="display:none;"></div>
-  </div>
-<script>
-let currentTool = 'setup', currentStoreId = '', allProducts = [], allCategories = []
 
+<!-- ── skeleton ──────────────────────────────────────── -->
+<div id="page-skeleton">
+  <div class="skel-sidebar">
+    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      </div>
+    </div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+  </div>
+  <div class="skel-main">
+    <div class="skel-topbar">
+      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
+      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
+    </div>
+    <div class="skel-body">
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;height:80vh;">
+        <div class="skel" style="border-radius:18px;"></div>
+        <div class="skel" style="border-radius:18px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── sidebar ────────────────────────────────────────── -->
+<div class="sidebar" id="sidebar">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
+    <div style="min-width:0;">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
+    </div>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Merchant</div>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">Storefront</div>
+    <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+    <a class="nav-item active" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+  </div>
+</div>
+
+<!-- ── main ───────────────────────────────────────────── -->
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left"><span class="topbar-title">AI Assistant</span></div>
+    <div class="topbar-right">
+      <div class="store-select-wrap" id="store-select-wrap">
+        <span class="store-select-label">Store</span>
+        <select class="store-selector" id="store-selector"></select>
+      </div>
+      <div id="topbar-actions"></div>
+    </div>
+  </div>
+
+  <div id="page-content" class="content page-enter" style="display:none;">
+    <div class="ai-root">
+
+      <!-- LEFT: Chat -->
+      <div class="chat-panel">
+        <div class="chat-header">
+          <div class="chat-header-avatar">🤖</div>
+          <div class="chat-header-info">
+            <h2>eKart AI Assistant</h2>
+            <p>Ask me anything about your store in any language</p>
+          </div>
+          <div class="chat-status-dot"></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="quick-chips" id="quickChips"></div>
+
+        <div class="chat-input-wrap">
+          <textarea class="chat-input" id="chatInput"
+            placeholder="Type your message… (e.g. 'Add a new T-shirt product' or 'Suggest categories for my food store')"
+            rows="1"></textarea>
+          <button class="chat-send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Actions -->
+      <div class="action-panel" id="actionPanel">
+        <div class="action-empty" id="actionEmpty">
+          <div class="action-empty-icon">💬</div>
+          <h3>Start a conversation</h3>
+          <p>As you chat with the AI, smart action cards will appear here — ready for you to review and save with one click.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════ */
+let currentStoreId = ''
+let allProducts = []
+let allCategories = []
+let conversationHistory = []
+let isTyping = false
+let userName = ''
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('ai-assistant', (id) => { currentStoreId = id; loadStoreData() })
+  const nav = await renderNav('ai-assistant', (id) => {
+    currentStoreId = id
+    loadStoreData()
+  })
   if (!nav) return
   currentStoreId = nav.currentStoreId
+  userName = nav.userName || 'there'
   if (currentStoreId) await loadStoreData()
-  renderPage()
+
+  setupInput()
+  addWelcomeMessage()
+  showQuickChips(getInitialChips())
 })
 
 async function loadStoreData() {
   if (!currentStoreId) return
   try {
     ;[allProducts, allCategories] = await Promise.all([
-      apiFetch(`/stores/${currentStoreId}/products`),
-      apiFetch(`/stores/${currentStoreId}/categories`)
+      apiFetch(`/stores/${currentStoreId}/products`).catch(() => []),
+      apiFetch(`/stores/${currentStoreId}/categories`).catch(() => [])
     ])
   } catch {}
 }
 
-const TOOLS = {
-  setup: {
-    icon: '🏗️',
-    name: 'Store Setup',
-    desc: 'Get AI suggestions for store name, categories & description',
-    renderForm: () => `
-      <div class="field"><label>What type of store are you creating? *</label>
-        <input type="text" id="aiStoreType" placeholder="e.g. Clothing boutique, Electronics store, Homemade food..."></div>
-      <div class="field"><label>What products will you sell?</label>
-        <input type="text" id="aiStoreProducts" placeholder="e.g. Women's ethnic wear, Laptops and accessories..."></div>
-      <div class="field"><label>Who is your target audience?</label>
-        <input type="text" id="aiStoreAudience" placeholder="e.g. Young women 18-35, Working professionals..."></div>
-      <button class="btn-ai" onclick="runSetup()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">✨ Generate Store Ideas</button>`
-  },
-  product: {
-    icon: '📦',
-    name: 'Product Content',
-    desc: 'Generate titles, descriptions, tags for any product',
-    renderForm: () => {
-      const opts = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
-      return `
-        <div class="field"><label>Product Name *</label>
-          <input type="text" id="aiProdName" placeholder="e.g. Wireless Noise Cancelling Headphones">
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Category</label>
-            <select id="aiProdCat">
-              <option value="">Select category</option>
-              ${allCategories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field"><label>Price (₹)</label>
-            <input type="number" id="aiProdPrice" placeholder="999">
-          </div>
-        </div>
-        <div class="field"><label>Key Features (Optional)</label>
-          <textarea id="aiProdFeatures" style="height:70px;" placeholder="e.g. 30hr battery, Bluetooth 5.0, Foldable design..."></textarea>
-        </div>
-        <button class="btn-ai" onclick="runProductContent()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">✨ Generate Content</button>`
-    }
-  },
-  insights: {
-    icon: '📊',
-    name: 'Sales Insights',
-    desc: 'Analyze your store performance with AI',
-    renderForm: () => `
-      <div class="field"><label>Analysis Period</label>
-        <select id="aiInsightsDays">
-          <option value="7">Last 7 days</option>
-          <option value="14">Last 14 days</option>
-          <option value="30" selected>Last 30 days</option>
-        </select>
+/* ══════════════════════════════════════════════════════════
+   WELCOME
+══════════════════════════════════════════════════════════ */
+function addWelcomeMessage() {
+  const first = userName.split(' ')[0]
+  addAIMessage(
+    `Hi ${first}! 👋 I'm your eKart AI assistant. I can help you with:\n\n` +
+    `• **Add products** — describe a product and I'll fill in the details\n` +
+    `• **Create categories** — organise your catalogue effortlessly\n` +
+    `• **Store setup** — name, description, and category ideas\n` +
+    `• **Coupons & discounts** — create offers for your customers\n` +
+    `• **Sales insights** — understand your store performance\n\n` +
+    `You can talk to me in any language — just type naturally!`
+  )
+}
+
+/* ══════════════════════════════════════════════════════════
+   QUICK CHIPS
+══════════════════════════════════════════════════════════ */
+function getInitialChips() {
+  return [
+    '➕ Add a product',
+    '🗂️ Create a category',
+    '🏷️ Make a coupon',
+    '🏪 Setup my store',
+    '📊 Analyse my sales'
+  ]
+}
+
+function showQuickChips(chips) {
+  const el = document.getElementById('quickChips')
+  el.innerHTML = chips.map(c =>
+    `<span class="chip" onclick="chipClick(this)">${c}</span>`
+  ).join('')
+}
+
+function chipClick(el) {
+  // Send full chip text as-is (emoji included — user can see what they tapped)
+  const txt = el.textContent.trim()
+  document.getElementById('chatInput').value = txt
+  sendMessage()
+}
+
+/* ══════════════════════════════════════════════════════════
+   INPUT HANDLING
+══════════════════════════════════════════════════════════ */
+function setupInput() {
+  const inp = document.getElementById('chatInput')
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+  })
+  inp.addEventListener('input', () => {
+    inp.style.height = 'auto'
+    inp.style.height = Math.min(inp.scrollHeight, 120) + 'px'
+  })
+}
+
+/* ══════════════════════════════════════════════════════════
+   SEND MESSAGE
+══════════════════════════════════════════════════════════ */
+async function sendMessage() {
+  const inp = document.getElementById('chatInput')
+  const text = inp.value.trim()
+  if (!text || isTyping) return
+
+  inp.value = ''
+  inp.style.height = 'auto'
+  document.getElementById('quickChips').innerHTML = ''
+  document.getElementById('sendBtn').disabled = true
+
+  addUserMessage(text)
+  conversationHistory.push({ role: 'user', content: text })
+
+  showTyping()
+  isTyping = true
+
+  try {
+    const response = await callClaudeAPI(conversationHistory)
+    hideTyping()
+
+    const { message, action, chips } = response
+    conversationHistory.push({ role: 'assistant', content: JSON.stringify(response) })
+
+    addAIMessage(message)
+    if (action) renderActionCard(action)
+    if (chips && chips.length) showQuickChips(chips)
+  } catch (err) {
+    hideTyping()
+    addAIMessage('Sorry, something went wrong. Please try again! 😅')
+    console.error(err)
+  }
+
+  isTyping = false
+  document.getElementById('sendBtn').disabled = false
+}
+
+/* ══════════════════════════════════════════════════════════
+   CLAUDE API  — routes through your backend proxy at /ai/chat
+   Backend must accept: { messages: [...], system: "..." }
+   and return:          { reply: "raw JSON string from Claude" }
+══════════════════════════════════════════════════════════ */
+async function callClaudeAPI(history) {
+  const systemPrompt = buildSystemPrompt()
+  const lastMsg = history[history.length - 1]?.content || ''
+
+  // Same apiFetch pattern as ai-builder.html / website-builder
+  const res = await apiFetch('/ai/chat', {
+    method: 'POST',
+    body: JSON.stringify({
+      message: lastMsg,
+      history: history.slice(0, -1).slice(-12),  // prior turns, max 12
+      system_prompt: systemPrompt
+    })
+  })
+
+  const raw = res.reply || res.content || ''
+
+  // 1. Direct parse
+  let parsed = null
+  try { parsed = JSON.parse(raw.trim()) } catch (e) {}
+
+  // 2. Strip code fences (``` json ... ```)
+  if (!parsed) {
+    const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (m) try { parsed = JSON.parse(m[1].trim()) } catch (e) {}
+  }
+
+  // 3. Extract first { } block from mixed text
+  if (!parsed) {
+    const si = raw.indexOf('{'), ei = raw.lastIndexOf('}')
+    if (si !== -1 && ei > si) try { parsed = JSON.parse(raw.slice(si, ei + 1)) } catch (e) {}
+  }
+
+  // 4. Graceful fallback — show reply as plain message
+  if (!parsed || parsed.message === undefined) {
+    return { message: raw || 'Something went wrong, please try again.', chips: [], action: null }
+  }
+
+  return parsed
+}
+
+function buildSystemPrompt() {
+  const cats = allCategories.map(c => c.name).join(', ') || 'None yet'
+  const prods = allProducts.slice(0, 10).map(p => p.name).join(', ') || 'None yet'
+
+  return `You are an eKart AI assistant embedded in an e-commerce merchant dashboard.
+The merchant is talking to you to manage their store. You MUST respond in the SAME LANGUAGE the user writes in.
+
+Store context:
+- Store ID: ${currentStoreId || 'not selected'}
+- Existing categories: ${cats}
+- Recent products: ${prods}
+
+Your job is to understand what the merchant wants and respond with a JSON object (NO markdown, NO code fences, pure JSON):
+
+{
+  "message": "Your friendly conversational reply in the user's language",
+  "chips": ["Follow-up suggestion 1", "Follow-up suggestion 2", "Follow-up suggestion 3"],
+  "action": null OR one of the action objects below
+}
+
+ACTION TYPES — include the relevant one when the user asks to:
+
+1. ADD/CREATE PRODUCT:
+{ "type": "product", "title": "Card title", "data": { "name": "...", "category": "...", "price": 0, "description": "...", "tags": ["..."], "highlights": ["..."], "sku": "" } }
+
+2. ADD/CREATE CATEGORY:
+{ "type": "category", "title": "Card title", "data": { "categories": [{ "name": "...", "description": "...", "icon": "emoji" }] } }
+
+3. STORE SETUP:
+{ "type": "store", "title": "Card title", "data": { "name_suggestions": ["..."], "description": "...", "tagline": "...", "categories": ["..."], "tips": ["..."] } }
+
+4. COUPON / DISCOUNT:
+{ "type": "coupon", "title": "Card title", "data": { "code": "SAVE20", "discount_type": "percentage", "discount_value": 20, "min_order": 0, "description": "...", "valid_days": 30 } }
+
+5. SALES INSIGHTS (use this when user asks about performance, analytics):
+{ "type": "insights", "title": "Card title", "data": { "summary": "...", "wins": ["..."], "improvements": ["..."], "actions": [{ "label": "...", "priority": "high|medium|low" }] } }
+
+If the user is just chatting (greetings, questions, unclear intent), set action to null.
+Always generate 2-4 relevant follow-up chips in the user's language.
+Be warm, concise, helpful. Use emojis sparingly.
+Fill in realistic placeholder data based on context — the merchant will edit before saving.`
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHAT RENDERING
+══════════════════════════════════════════════════════════ */
+let typingMsgId = null
+
+function addUserMessage(text) {
+  const initials = (userName || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  appendMessage('user', text, initials)
+}
+
+function addAIMessage(text) {
+  // Convert **bold** to <strong>
+  const html = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>')
+  appendMessage('ai', html, '🤖', true)
+}
+
+function appendMessage(role, content, avatarContent, isHTML = false) {
+  const wrap = document.getElementById('chatMessages')
+  const div = document.createElement('div')
+  div.className = `msg ${role}`
+  div.innerHTML = `
+    <div class="msg-avatar">${avatarContent}</div>
+    <div class="msg-bubble">${isHTML ? content : escHtml(content)}</div>`
+  wrap.appendChild(div)
+  scrollChat()
+}
+
+function showTyping() {
+  const wrap = document.getElementById('chatMessages')
+  const div = document.createElement('div')
+  div.className = 'msg ai'
+  div.id = 'typingMsg'
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`
+  wrap.appendChild(div)
+  scrollChat()
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingMsg')
+  if (el) el.remove()
+}
+
+function scrollChat() {
+  const wrap = document.getElementById('chatMessages')
+  setTimeout(() => { wrap.scrollTop = wrap.scrollHeight }, 50)
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+}
+
+/* ══════════════════════════════════════════════════════════
+   ACTION CARDS
+══════════════════════════════════════════════════════════ */
+function renderActionCard(action) {
+  const panel = document.getElementById('actionPanel')
+  const empty = document.getElementById('actionEmpty')
+  if (empty) empty.remove()
+
+  const card = document.createElement('div')
+  card.className = 'action-card'
+  const id = 'ac_' + Date.now()
+  card.id = id
+
+  switch (action.type) {
+    case 'product':  card.innerHTML = buildProductCard(id, action); break
+    case 'category': card.innerHTML = buildCategoryCard(id, action); break
+    case 'store':    card.innerHTML = buildStoreCard(id, action); break
+    case 'coupon':   card.innerHTML = buildCouponCard(id, action); break
+    case 'insights': card.innerHTML = buildInsightsCard(id, action); break
+    default: return
+  }
+
+  panel.prepend(card)
+  panel.scrollTop = 0
+}
+
+/* ── Product Card ──────────────────────────────────── */
+function buildProductCard(id, action) {
+  const d = action.data
+  const catOpts = allCategories.map(c =>
+    `<option value="${c._id}" ${c.name===d.category?'selected':''}>${c.name}</option>`).join('')
+  const tags = (d.tags || []).join(', ')
+  return `
+    <div class="action-card-header">
+      <div class="action-card-icon" style="background:rgba(108,99,255,0.12);">📦</div>
+      <div>
+        <div class="action-card-title">${action.title || 'New Product'}</div>
+        <div class="action-card-sub">Review & save to your store</div>
       </div>
-      <div class="field"><label>Focus Area</label>
-        <select id="aiInsightsFocus">
-          <option value="general">General Performance</option>
-          <option value="products">Product Performance</option>
-          <option value="customers">Customer Behavior</option>
-          <option value="growth">Growth Opportunities</option>
-        </select>
+    </div>
+    <div class="action-card-body">
+      <div class="ac-field"><label>Product Name</label>
+        <input id="${id}_name" value="${escAttr(d.name || '')}"></div>
+      <div class="ac-field-row">
+        <div class="ac-field"><label>Category</label>
+          <select id="${id}_cat">${catOpts || '<option>Uncategorised</option>'}</select>
+        </div>
+        <div class="ac-field"><label>Price (₹)</label>
+          <input id="${id}_price" type="number" value="${d.price || ''}" placeholder="0">
+        </div>
       </div>
-      <button class="btn-ai" onclick="runInsights()" id="aiRunBtn" style="width:100%;justify-content:center;padding:11px;">🧠 Analyze My Store</button>
-      ${!currentStoreId ? '<p style="color:var(--red);font-size:12.5px;margin-top:10px;">⚠️ Select a store first</p>' : ''}`
+      <div class="ac-field"><label>Description</label>
+        <textarea id="${id}_desc">${escAttr(d.description || '')}</textarea>
+      </div>
+      <div class="ac-field"><label>Tags (comma separated)</label>
+        <input id="${id}_tags" value="${escAttr(tags)}">
+      </div>
+      ${d.highlights && d.highlights.length ? `
+        <div class="ac-field"><label>Highlights</label>
+          ${d.highlights.map(h => `<div class="hi-item"><div class="hi-dot"></div>${escHtml(h)}</div>`).join('')}
+        </div>` : ''}
+      <div class="ac-actions">
+        <button class="btn-save" onclick="saveProduct('${id}')">💾 Save Product</button>
+        <button class="btn-save-outline" onclick="dismissCard('${id}')">✕</button>
+      </div>
+      <div id="${id}_msg"></div>
+    </div>`
+}
+
+/* ── Category Card ─────────────────────────────────── */
+function buildCategoryCard(id, action) {
+  const cats = action.data.categories || []
+  const rows = cats.map((c, i) => `
+    <div style="margin-bottom:10px;padding:10px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+      <div class="ac-field-row">
+        <div class="ac-field"><label>Name</label>
+          <input id="${id}_cat${i}_name" value="${escAttr(c.name || '')}">
+        </div>
+        <div class="ac-field"><label>Icon</label>
+          <input id="${id}_cat${i}_icon" value="${escAttr(c.icon || '📦')}" style="text-align:center;font-size:18px;">
+        </div>
+      </div>
+      <div class="ac-field"><label>Description</label>
+        <input id="${id}_cat${i}_desc" value="${escAttr(c.description || '')}">
+      </div>
+    </div>`).join('')
+
+  return `
+    <div class="action-card-header">
+      <div class="action-card-icon" style="background:rgba(59,130,246,0.12);">🗂️</div>
+      <div>
+        <div class="action-card-title">${action.title || 'New Categories'}</div>
+        <div class="action-card-sub">${cats.length} categor${cats.length===1?'y':'ies'} to add</div>
+      </div>
+    </div>
+    <div class="action-card-body">
+      <div id="${id}_catrows">${rows}</div>
+      <div class="ac-actions">
+        <button class="btn-save" onclick="saveCategories('${id}', ${cats.length})">💾 Save All</button>
+        <button class="btn-save-outline" onclick="dismissCard('${id}')">✕</button>
+      </div>
+      <div id="${id}_msg"></div>
+    </div>`
+}
+
+/* ── Store Card ────────────────────────────────────── */
+function buildStoreCard(id, action) {
+  const d = action.data
+  const names = (d.name_suggestions || []).slice(0, 4)
+  return `
+    <div class="action-card-header">
+      <div class="action-card-icon" style="background:rgba(234,179,8,0.12);">🏪</div>
+      <div>
+        <div class="action-card-title">${action.title || 'Store Setup'}</div>
+        <div class="action-card-sub">Pick a name & description</div>
+      </div>
+    </div>
+    <div class="action-card-body">
+      ${names.length ? `
+        <div class="ac-field"><label>Suggested Names — tap to use</label>
+          <div class="name-suggestions">
+            ${names.map(n => `<div class="name-suggestion" onclick="pickStoreName('${id}', this)">${escHtml(n)}<span style="color:var(--text3);font-size:11px;">tap</span></div>`).join('')}
+          </div>
+        </div>` : ''}
+      <div class="ac-field" style="margin-top:10px;"><label>Store Name</label>
+        <input id="${id}_sname" placeholder="Enter or pick above">
+      </div>
+      <div class="ac-field"><label>Description</label>
+        <textarea id="${id}_sdesc">${escAttr(d.description || '')}</textarea>
+      </div>
+      ${d.tagline ? `<div class="ac-field"><label>Tagline</label>
+        <input id="${id}_tagline" value="${escAttr(d.tagline)}">
+      </div>` : ''}
+      ${d.categories && d.categories.length ? `
+        <div class="ac-field"><label>Suggested Categories</label>
+          <div class="cat-pill-grid">
+            ${d.categories.map(c => `<span class="cat-pill" onclick="toggleCat(this)">${escHtml(c)}</span>`).join('')}
+          </div>
+        </div>` : ''}
+      ${d.tips && d.tips.length ? `
+        <div class="ac-field"><label>Tips</label>
+          ${d.tips.map(t => `<div class="hi-item"><div class="hi-dot"></div>${escHtml(t)}</div>`).join('')}
+        </div>` : ''}
+      <div class="ac-actions">
+        <button class="btn-save" onclick="saveStore('${id}')">💾 Update Store</button>
+        <button class="btn-save-outline" onclick="dismissCard('${id}')">✕</button>
+      </div>
+      <div id="${id}_msg"></div>
+    </div>`
+}
+
+/* ── Coupon Card ───────────────────────────────────── */
+function buildCouponCard(id, action) {
+  const d = action.data
+  return `
+    <div class="action-card-header">
+      <div class="action-card-icon" style="background:rgba(34,197,94,0.12);">🏷️</div>
+      <div>
+        <div class="action-card-title">${action.title || 'New Coupon'}</div>
+        <div class="action-card-sub">Create a discount for customers</div>
+      </div>
+    </div>
+    <div class="action-card-body">
+      <div class="coupon-code-display" id="${id}_code_display"
+           onclick="copyCoupon('${id}')" title="Click to copy">
+        ${escHtml(d.code || 'SAVE10')}
+      </div>
+      <div class="ac-field"><label>Coupon Code</label>
+        <input id="${id}_code" value="${escAttr(d.code || 'SAVE10')}"
+               oninput="document.getElementById('${id}_code_display').textContent=this.value.toUpperCase()" style="text-transform:uppercase;font-family:'DM Mono',monospace;font-size:15px;font-weight:700;">
+      </div>
+      <div class="ac-field-row">
+        <div class="ac-field"><label>Discount Type</label>
+          <select id="${id}_dtype">
+            <option value="percentage" ${d.discount_type==='percentage'?'selected':''}>Percentage (%)</option>
+            <option value="fixed" ${d.discount_type==='fixed'?'selected':''}>Fixed (₹)</option>
+          </select>
+        </div>
+        <div class="ac-field"><label>Value</label>
+          <input id="${id}_dval" type="number" value="${d.discount_value || 10}" placeholder="10">
+        </div>
+      </div>
+      <div class="ac-field-row">
+        <div class="ac-field"><label>Min Order (₹)</label>
+          <input id="${id}_minord" type="number" value="${d.min_order || 0}" placeholder="0">
+        </div>
+        <div class="ac-field"><label>Valid (days)</label>
+          <input id="${id}_days" type="number" value="${d.valid_days || 30}" placeholder="30">
+        </div>
+      </div>
+      <div class="ac-field"><label>Description</label>
+        <input id="${id}_cdesc" value="${escAttr(d.description || '')}">
+      </div>
+      <div class="ac-actions">
+        <button class="btn-save" onclick="saveCoupon('${id}')">💾 Create Coupon</button>
+        <button class="btn-save-outline" onclick="dismissCard('${id}')">✕</button>
+      </div>
+      <div id="${id}_msg"></div>
+    </div>`
+}
+
+/* ── Insights Card ─────────────────────────────────── */
+function buildInsightsCard(id, action) {
+  const d = action.data
+  const prioColor = p => p==='high'?'var(--red)':p==='medium'?'var(--yellow)':'var(--green)'
+  return `
+    <div class="action-card-header">
+      <div class="action-card-icon" style="background:rgba(251,146,60,0.12);">📊</div>
+      <div>
+        <div class="action-card-title">${action.title || 'Sales Insights'}</div>
+        <div class="action-card-sub">AI-powered analysis</div>
+      </div>
+    </div>
+    <div class="action-card-body">
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;padding:12px;background:var(--surface2);border-radius:9px;">
+        ${escHtml(d.summary || '')}
+      </div>
+      ${d.wins && d.wins.length ? `
+        <div class="insight-section">
+          <h4>✅ What's Working</h4>
+          ${d.wins.map(w=>`<div class="hi-item"><div class="hi-dot" style="background:var(--green);"></div>${escHtml(w)}</div>`).join('')}
+        </div>` : ''}
+      ${d.improvements && d.improvements.length ? `
+        <div class="insight-section">
+          <h4>🔧 Areas to Improve</h4>
+          ${d.improvements.map(i=>`<div class="hi-item"><div class="hi-dot" style="background:var(--yellow);"></div>${escHtml(i)}</div>`).join('')}
+        </div>` : ''}
+      ${d.actions && d.actions.length ? `
+        <div class="insight-section">
+          <h4>🎯 Recommended Actions</h4>
+          ${d.actions.map(a=>`
+            <div class="hi-item">
+              <div class="hi-dot" style="background:${prioColor(a.priority)};"></div>
+              ${escHtml(a.label)}
+            </div>`).join('')}
+        </div>` : ''}
+      <div class="ac-actions">
+        <button class="btn-save" onclick="exportInsights('${id}')">📋 Copy Summary</button>
+        <button class="btn-save-outline" onclick="dismissCard('${id}')">✕</button>
+      </div>
+    </div>`
+}
+
+/* ══════════════════════════════════════════════════════════
+   SAVE HANDLERS
+══════════════════════════════════════════════════════════ */
+async function saveProduct(id) {
+  const btn = document.querySelector(`#${id} .btn-save`)
+  const msg = document.getElementById(`${id}_msg`)
+  btn.disabled = true
+  btn.textContent = '⏳ Saving…'
+
+  const name = document.getElementById(`${id}_name`).value.trim()
+  if (!name) { showCardMsg(msg, 'Enter a product name', 'error'); btn.disabled=false; btn.textContent='💾 Save Product'; return }
+  if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Save Product'; return }
+
+  const catEl = document.getElementById(`${id}_cat`)
+  const payload = {
+    name,
+    category_id: catEl ? catEl.value : '',
+    price: parseFloat(document.getElementById(`${id}_price`).value) || 0,
+    description: document.getElementById(`${id}_desc`).value.trim(),
+    tags: document.getElementById(`${id}_tags`).value.split(',').map(t=>t.trim()).filter(Boolean)
+  }
+
+  try {
+    await apiFetch(`/stores/${currentStoreId}/products`, { method: 'POST', body: JSON.stringify(payload) })
+    showCardMsg(msg, '✅ Product saved successfully!', 'success')
+    btn.textContent = '✅ Saved!'
+    allProducts = await apiFetch(`/stores/${currentStoreId}/products`).catch(() => allProducts)
+  } catch (e) {
+    showCardMsg(msg, '❌ ' + e.message, 'error')
+    btn.disabled = false; btn.textContent = '💾 Save Product'
   }
 }
 
-function renderPage() {
-  const content = document.getElementById('page-content')
-  content.innerHTML = `
-    <div class="ai-layout">
-      <div class="ai-tool-list">
-        ${Object.entries(TOOLS).map(([key, t]) => `
-          <div class="ai-tool-card ${currentTool===key?'active':''}" onclick="switchTool('${key}')">
-            <div class="ai-tool-card-icon">${t.icon}</div>
-            <div class="ai-tool-card-name">${t.name}</div>
-            <div class="ai-tool-card-desc">${t.desc}</div>
-          </div>`).join('')}
-      </div>
-      <div class="ai-panel" id="aiPanel">
-        ${renderPanel()}
-      </div>
-    </div>`
+async function saveCategories(id, count) {
+  const btn = document.querySelector(`#${id} .btn-save`)
+  const msg = document.getElementById(`${id}_msg`)
+  btn.disabled = true; btn.textContent = '⏳ Saving…'
+
+  if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Save All'; return }
+
+  let saved = 0
+  for (let i = 0; i < count; i++) {
+    const nameEl = document.getElementById(`${id}_cat${i}_name`)
+    if (!nameEl) continue
+    const name = nameEl.value.trim()
+    if (!name) continue
+    try {
+      await apiFetch(`/stores/${currentStoreId}/categories`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name,
+          icon: document.getElementById(`${id}_cat${i}_icon`)?.value || '📦',
+          description: document.getElementById(`${id}_cat${i}_desc`)?.value.trim() || ''
+        })
+      })
+      saved++
+    } catch {}
+  }
+
+  if (saved > 0) {
+    showCardMsg(msg, `✅ ${saved} categor${saved===1?'y':'ies'} saved!`, 'success')
+    btn.textContent = '✅ Saved!'
+    allCategories = await apiFetch(`/stores/${currentStoreId}/categories`).catch(() => allCategories)
+  } else {
+    showCardMsg(msg, '❌ Could not save categories', 'error')
+    btn.disabled = false; btn.textContent = '💾 Save All'
+  }
 }
 
-function renderPanel() {
-  const t = TOOLS[currentTool]
-  return `
-    <div class="ai-panel-header">
-      <span style="font-size:26px;">${t.icon}</span>
-      <div><h2>${t.name}</h2><p>${t.desc}</p></div>
-    </div>
-    <div class="ai-panel-body">
-      ${t.renderForm()}
-      <div id="aiResult" style="margin-top:4px;"></div>
-    </div>`
-}
+async function saveStore(id) {
+  const btn = document.querySelector(`#${id} .btn-save`)
+  const msg = document.getElementById(`${id}_msg`)
+  btn.disabled = true; btn.textContent = '⏳ Saving…'
 
-function switchTool(tool) {
-  currentTool = tool
-  document.querySelectorAll('.ai-tool-card').forEach(c => c.classList.remove('active'))
-  event.currentTarget.classList.add('active')
-  document.getElementById('aiPanel').innerHTML = renderPanel()
-}
+  const name = document.getElementById(`${id}_sname`)?.value.trim()
+  const desc = document.getElementById(`${id}_sdesc`)?.value.trim()
+  if (!name && !desc) { showCardMsg(msg, 'Fill in at least one field', 'error'); btn.disabled=false; btn.textContent='💾 Update Store'; return }
+  if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Update Store'; return }
 
-async function runSetup() {
-  const storeType = document.getElementById('aiStoreType').value.trim()
-  if (!storeType) return toast('Enter your store type', 'error')
-  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Thinking...'
-  document.getElementById('aiResult').innerHTML = ''
   try {
-    const r = await apiFetch('/ai/store-setup', {
+    const payload = {}
+    if (name) payload.name = name
+    if (desc) payload.description = desc
+    const taglineEl = document.getElementById(`${id}_tagline`)
+    if (taglineEl && taglineEl.value.trim()) payload.tagline = taglineEl.value.trim()
+
+    await apiFetch(`/stores/${currentStoreId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+    showCardMsg(msg, '✅ Store updated!', 'success')
+    btn.textContent = '✅ Saved!'
+  } catch (e) {
+    showCardMsg(msg, '❌ ' + e.message, 'error')
+    btn.disabled = false; btn.textContent = '💾 Update Store'
+  }
+}
+
+async function saveCoupon(id) {
+  const btn = document.querySelector(`#${id} .btn-save`)
+  const msg = document.getElementById(`${id}_msg`)
+  btn.disabled = true; btn.textContent = '⏳ Creating…'
+
+  const code = document.getElementById(`${id}_code`)?.value.trim().toUpperCase()
+  if (!code) { showCardMsg(msg, 'Enter a coupon code', 'error'); btn.disabled=false; btn.textContent='💾 Create Coupon'; return }
+  if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Create Coupon'; return }
+
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons`, {
       method: 'POST',
       body: JSON.stringify({
-        store_type: storeType,
-        products_description: document.getElementById('aiStoreProducts').value.trim(),
-        target_audience: document.getElementById('aiStoreAudience').value.trim()
+        code,
+        discount_type: document.getElementById(`${id}_dtype`).value,
+        discount_value: parseFloat(document.getElementById(`${id}_dval`).value) || 10,
+        min_order_value: parseFloat(document.getElementById(`${id}_minord`).value) || 0,
+        valid_days: parseInt(document.getElementById(`${id}_days`).value) || 30,
+        description: document.getElementById(`${id}_cdesc`).value.trim()
       })
     })
-    const d = r.setup
-    document.getElementById('aiResult').innerHTML = `
-      <div class="ai-result">
-        <div class="ai-result-header"><span class="ai-result-title">✨ Store Suggestions</span></div>
-        <div class="setup-section">
-          <h3>🏪 Store Names</h3>
-          <div class="tag-cloud">${(d.store_name_suggestions||d.store_names||[]).map(n=>`<span class="tag-pill">${n}</span>`).join('')}</div>
-        </div>
-        <div class="setup-section">
-          <h3>📝 Description</h3>
-          <p style="font-size:13.5px;color:var(--text2);line-height:1.7;">${d.description||''}</p>
-        </div>
-        <div class="setup-section">
-          <h3>🗂️ Suggested Categories</h3>
-          <div style="margin-top:6px;">${(d.categories||[]).map(c=>`<span class="setup-cat">📦 ${c}</span>`).join('')}</div>
-        </div>
-        ${d.tagline ? `<div class="setup-section"><h3>💬 Tagline</h3><p style="font-size:14px;font-style:italic;color:var(--text2);">"${d.tagline}"</p></div>` : ''}
-        ${d.tips ? `<div class="setup-section"><h3>💡 Tips</h3>${d.tips.map(t=>`<div class="highlight-item"><div class="highlight-bullet"></div>${t}</div>`).join('')}</div>` : ''}
-      </div>`
-  } catch (e) { toast('AI error: ' + e.message, 'error') }
-  btn.disabled = false; btn.textContent = '✨ Generate Store Ideas'
+    showCardMsg(msg, '✅ Coupon created!', 'success')
+    btn.textContent = '✅ Created!'
+  } catch (e) {
+    showCardMsg(msg, '❌ ' + e.message, 'error')
+    btn.disabled = false; btn.textContent = '💾 Create Coupon'
+  }
 }
 
-async function runProductContent() {
-  const name = document.getElementById('aiProdName').value.trim()
-  if (!name) return toast('Enter a product name', 'error')
-  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Writing...'
-  document.getElementById('aiResult').innerHTML = ''
-  try {
-    const r = await apiFetch('/ai/generate-product-content', {
-      method: 'POST',
-      body: JSON.stringify({
-        product_name: name,
-        category: document.getElementById('aiProdCat').value,
-        price: document.getElementById('aiProdPrice').value,
-        features: document.getElementById('aiProdFeatures').value.trim(),
-        currency: 'INR'
-      })
-    })
-    const d = r.content
-    document.getElementById('aiResult').innerHTML = `
-      <div class="ai-result">
-        <div class="ai-result-header">
-          <span class="ai-result-title">✨ Generated Content</span>
-          <button class="ai-result-copy" onclick="copyAllProductContent()">📋 Copy All</button>
-        </div>
-        <div class="ai-kv"><label>Title</label><p id="aiProdTitle" style="font-weight:700;font-size:15px;">${d.title||name}</p></div>
-        <div class="ai-kv"><label>Description</label><p id="aiProdDesc">${d.description||''}</p></div>
-        ${d.highlights ? `<div class="ai-kv"><label>Highlights</label>${(d.highlights||[]).map(h=>`<div class="highlight-item"><div class="highlight-bullet"></div>${h}</div>`).join('')}</div>` : ''}
-        ${d.suggested_price ? `<div class="ai-kv"><label>Suggested Price</label><div class="price-tag">₹${d.suggested_price}</div></div>` : ''}
-        <div class="ai-kv"><label>Tags</label><div class="tag-cloud">${(d.tags||[]).map(t=>`<span class="tag-pill">${t}</span>`).join('')}</div>
-          <div id="aiTagsHidden" style="display:none;">${(d.tags||[]).join(', ')}</div>
-        </div>
-        ${d.seo_title ? `<div class="ai-kv"><label>SEO Title</label><p id="aiSeoTitle" style="color:var(--blue);">${d.seo_title}</p></div>` : ''}
-        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" onclick="applyToNewProduct()">📦 Create Product</button>
-        </div>
-      </div>`
-  } catch (e) { toast('AI error: ' + e.message, 'error') }
-  btn.disabled = false; btn.textContent = '✨ Generate Content'
+function exportInsights(id) {
+  const card = document.getElementById(id)
+  if (!card) return
+  const text = card.querySelector('.action-card-body').innerText
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!', 'success'))
 }
 
-async function runInsights() {
-  if (!currentStoreId) return toast('Select a store first', 'error')
-  const btn = document.getElementById('aiRunBtn'); btn.disabled = true; btn.textContent = '⏳ Analyzing...'
-  document.getElementById('aiResult').innerHTML = ''
-  try {
-    const days = document.getElementById('aiInsightsDays').value
-    const focus = document.getElementById('aiInsightsFocus').value
-    const analytics = await apiFetch(`/stores/${currentStoreId}/analytics?days=${days}`)
-    const r = await apiFetch('/ai/sales-insights', {
-      method: 'POST',
-      body: JSON.stringify({ analytics, focus, store_name: 'Store', currency: 'INR' })
-    })
-    const d = r.insights
-    const prioColor = p => p==='high'?'var(--red)':p==='medium'?'var(--yellow)':'var(--green)'
-    document.getElementById('aiResult').innerHTML = `
-      <div class="ai-result">
-        <div class="ai-result-header"><span class="ai-result-title">🧠 AI Insights</span></div>
-        <div class="insights-summary">${d.summary||''}</div>
-        ${d.wins?.length ? `<div class="setup-section"><h3>✅ What's Working</h3>
-          ${d.wins.map(w=>`<div class="highlight-item"><div class="highlight-bullet" style="background:var(--green);"></div>${w}</div>`).join('')}
-        </div>` : ''}
-        ${d.improvements?.length ? `<div class="setup-section"><h3>🔧 Areas to Improve</h3>
-          ${d.improvements.map(i=>`<div class="highlight-item"><div class="highlight-bullet" style="background:var(--yellow);"></div>${i}</div>`).join('')}
-        </div>` : ''}
-        ${d.actions?.length ? `<div class="setup-section"><h3>🎯 Recommended Actions</h3>
-          ${d.actions.map(a=>`<div class="insight-action">
-            <div class="priority-dot" style="background:${prioColor(a.priority)};"></div>
-            <div>
-              <div style="font-weight:700;font-size:13.5px;margin-bottom:3px;">${a.action}</div>
-              <div style="font-size:12px;color:var(--text3);">${a.reason}</div>
-            </div>
-          </div>`).join('')}
-        </div>` : ''}
-      </div>`
-  } catch (e) { toast('Insights error: ' + e.message, 'error') }
-  btn.disabled = false; btn.textContent = '🧠 Analyze My Store'
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function showCardMsg(el, text, type) {
+  el.innerHTML = `<div class="${type==='success'?'ac-success':'ac-success'}" style="${type!=='success'?'background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:var(--red);':''}">${escHtml(text)}</div>`
 }
 
-function copyAllProductContent() {
-  const title = document.getElementById('aiProdTitle')?.textContent || ''
-  const desc = document.getElementById('aiProdDesc')?.textContent || ''
-  const tags = document.getElementById('aiTagsHidden')?.textContent || ''
-  navigator.clipboard.writeText(`Title: ${title}\n\nDescription: ${desc}\n\nTags: ${tags}`)
-    .then(() => toast('Copied!', 'success'))
+function dismissCard(id) {
+  const el = document.getElementById(id)
+  if (el) { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all .25s'; setTimeout(() => el.remove(), 250) }
 }
 
-function applyToNewProduct() {
-  const title = document.getElementById('aiProdTitle')?.textContent || ''
-  const desc = document.getElementById('aiProdDesc')?.textContent || ''
-  const tags = document.getElementById('aiTagsHidden')?.textContent || ''
-  sessionStorage.setItem('ai_product_prefill', JSON.stringify({ title, desc, tags }))
-  location.href = 'products.html'
+function pickStoreName(id, el) {
+  const name = el.firstChild.textContent.trim()
+  document.getElementById(`${id}_sname`).value = name
+  document.querySelectorAll(`#${id} .name-suggestion`).forEach(n => n.style.fontWeight = '600')
+  el.style.borderColor = 'var(--accent)'
+  el.style.color = 'var(--accent2)'
+}
+
+function toggleCat(el) {
+  el.classList.toggle('selected')
+}
+
+function copyCoupon(id) {
+  const code = document.getElementById(`${id}_code`)?.value || document.getElementById(`${id}_code_display`)?.textContent.trim()
+  if (code) navigator.clipboard.writeText(code).then(() => toast('Coupon code copied!', 'success'))
+}
+
+function escAttr(s) {
+  return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 </script>
 </body>
-</html>
 </html>
