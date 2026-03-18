@@ -8,122 +8,492 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
+
+<script>
+(function(){
+  if (localStorage.getItem('ekart_theme') === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light')
+    document.documentElement.style.background = '#f0f0f5'
+  }
+})()
+</script>
+
 <style>
-/* ── TABS ── */
-.tabs { display:flex; gap:4px; padding:0 28px; border-bottom:1px solid var(--border); background:var(--surface); position:sticky; top:58px; z-index:40; }
-.tab { padding:13px 18px; font-size:13.5px; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
-.tab:hover { color:var(--text); }
-.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-.tab-panel { display:none; }
-.tab-panel.active { display:block; }
+/* ══════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+══════════════════════════════════════════════ */
+[data-theme="light"] {
+  --surface:  #ffffff;
+  --surface2: #f3f4f6;
+  --surface3: #e9eaf0;
+  --border:   rgba(0,0,0,0.10);
+  --border2:  rgba(0,0,0,0.14);
+  --text:     #111827;
+  --text2:    #374151;
+  --text3:    #9ca3af;
+  --accent:   #6c63ff;
+  --accent2:  #5b52e0;
+  --green:    #16a34a;
+  --red:      #dc2626;
+  --yellow:   #ca8a04;
+  background: #f0f0f5 !important;
+}
+[data-theme="light"] body { background: #f0f0f5 !important; }
+[data-theme="light"] .sidebar { background: #fff !important; border-right-color: rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .main-wrap { background: #f0f0f5 !important; }
+[data-theme="light"] .topbar { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .topbar-title { color: #111827 !important; }
+[data-theme="light"] .content { background: #f0f0f5 !important; }
+[data-theme="light"] .nav-item { color: #374151 !important; }
+[data-theme="light"] .nav-item:hover,
+[data-theme="light"] .nav-item.active { background: rgba(108,99,255,0.08) !important; color: #5b52e0 !important; }
+[data-theme="light"] .sidebar-logo { color: #111827 !important; }
+[data-theme="light"] .sidebar-user-name { color: #111827 !important; }
+[data-theme="light"] .sidebar-user-email { color: #9ca3af !important; }
+[data-theme="light"] .nav-section-label { color: #9ca3af !important; }
+[data-theme="light"] .btn-logout { color: #374151 !important; }
+[data-theme="light"] .store-select-wrap { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .store-selector { color: #111827 !important; background: transparent !important; }
+[data-theme="light"] .store-select-label { color: #9ca3af !important; }
+[data-theme="light"] .tabs-bar { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .tab-item { color: #6b7280 !important; }
+[data-theme="light"] .tab-item.active { color: #6c63ff !important; }
+[data-theme="light"] .setup-card { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .setup-card-title { color: #111827 !important; }
+[data-theme="light"] .setup-card-sub { color: #374151 !important; }
+[data-theme="light"] .form-label { color: #374151 !important; }
+[data-theme="light"] .form-input { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; color: #111827 !important; }
+[data-theme="light"] .form-hint { color: #9ca3af !important; }
+[data-theme="light"] .toggle-row { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .toggle-label { color: #111827 !important; }
+[data-theme="light"] .toggle-sub { color: #6b7280 !important; }
+[data-theme="light"] .step-body h4 { color: #111827 !important; }
+[data-theme="light"] .step-body p { color: #374151 !important; }
+[data-theme="light"] .step-body code { background: #e9eaf0 !important; color: #5b52e0 !important; }
+[data-theme="light"] .pay-stat { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .pay-stat-label { color: #9ca3af !important; }
+[data-theme="light"] .pay-stat-sub { color: #6b7280 !important; }
+[data-theme="light"] .table-wrap { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .table-title { color: #111827 !important; }
+[data-theme="light"] .table-header { border-bottom-color: rgba(0,0,0,0.07) !important; }
+[data-theme="light"] .search-input { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; color: #111827 !important; }
+[data-theme="light"] table thead th { background: #f9fafb !important; color: #6b7280 !important; border-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] table tbody td { border-color: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] table tbody tr:hover td { background: rgba(108,99,255,0.03) !important; }
+[data-theme="light"] .badge-gray { background: #e9eaf0 !important; color: #374151 !important; }
+[data-theme="light"] .link-card { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .link-amount { color: #111827 !important; }
+[data-theme="light"] .link-desc { color: #374151 !important; }
+[data-theme="light"] .link-url { background: #f3f4f6 !important; color: #5b52e0 !important; }
+[data-theme="light"] .not-configured { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .not-configured h3 { color: #111827 !important; }
+[data-theme="light"] .not-configured p { color: #374151 !important; }
+[data-theme="light"] .modal { background: #fff !important; border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .modal-title { color: #111827 !important; }
+[data-theme="light"] .modal-sub { color: #374151 !important; }
+[data-theme="light"] .empty-state h3 { color: #111827 !important; }
+[data-theme="light"] .empty-state p { color: #374151 !important; }
 
-/* ── SETUP ── */
-.setup-grid { display:grid; grid-template-columns:360px 1fr; gap:22px; align-items:start; }
-.setup-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; }
-.setup-card-title { font-size:15px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:9px; }
-.setup-card-sub { font-size:13px; color:var(--text2); margin-bottom:22px; line-height:1.6; }
-.form-group { margin-bottom:16px; }
-.form-label { display:block; font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; }
-.form-input { width:100%; padding:11px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Outfit',sans-serif; font-size:14px; outline:none; transition:border-color .2s; }
-.form-input:focus { border-color:var(--accent); }
-.form-input.secret { font-family:'DM Mono',monospace; letter-spacing:.08em; }
-.form-hint { font-size:11.5px; color:var(--text3); margin-top:5px; }
-.form-hint a { color:var(--accent); text-decoration:none; }
-.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:11px; margin-bottom:16px; }
-.toggle-label { font-size:14px; font-weight:600; }
-.toggle-sub { font-size:12px; color:var(--text2); margin-top:2px; }
-.toggle { position:relative; width:42px; height:24px; }
-.toggle input { opacity:0; width:0; height:0; }
-.toggle-slider { position:absolute; inset:0; background:var(--surface3); border-radius:24px; cursor:pointer; transition:.25s; }
-.toggle-slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.25s; }
-.toggle input:checked + .toggle-slider { background:var(--accent); }
-.toggle input:checked + .toggle-slider:before { transform:translateX(18px); }
-.verify-btn { width:100%; padding:12px; background:rgba(108,99,255,.12); border:1px solid rgba(108,99,255,.3); color:var(--accent); border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; margin-bottom:12px; font-family:'Outfit',sans-serif; }
-.verify-btn:hover:not(:disabled) { background:rgba(108,99,255,.22); }
-.verify-status { padding:11px 14px; border-radius:9px; font-size:13px; font-weight:600; display:none; align-items:center; gap:8px; }
-.verify-status.ok  { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; display:flex; }
-.verify-status.err { background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; display:flex; }
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; flex-shrink: 0;
+  transition: all .2s;
+}
+.theme-toggle:hover {
+  border-color: rgba(108,99,255,0.4);
+  background: rgba(108,99,255,0.08);
+  transform: rotate(12deg) scale(1.05);
+}
+[data-theme="light"] .theme-toggle {
+  background: #f3f4f6; border-color: rgba(0,0,0,0.12); color: #374151;
+}
 
-/* steps guide */
-.setup-steps { list-style:none; display:flex; flex-direction:column; gap:14px; }
-.step { display:flex; gap:14px; align-items:flex-start; }
-.step-num { width:26px; height:26px; border-radius:50%; background:rgba(108,99,255,.15); color:var(--accent); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.step-body h4 { font-size:13.5px; font-weight:700; margin-bottom:3px; }
-.step-body p { font-size:12.5px; color:var(--text2); line-height:1.6; }
-.step-body a { color:var(--accent); text-decoration:none; }
-.step-body code { background:var(--surface3); padding:1px 6px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11.5px; color:var(--accent2); }
+/* ══════════════════════════════════════════════
+   PAYMENTS PAGE — PRODUCTION GRADE
+══════════════════════════════════════════════ */
 
-/* ── STATS ROW ── */
-.pay-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
-.pay-stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
-.pay-stat-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); margin-bottom:7px; }
-.pay-stat-value { font-size:26px; font-weight:900; font-family:'DM Mono',monospace; letter-spacing:-.04em; }
-.pay-stat-sub { font-size:11.5px; color:var(--text2); margin-top:4px; }
+/* ── TABS BAR ── */
+.tabs-bar {
+  display: flex; gap: 2px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky; top: 58px; z-index: 40;
+}
+.tab-item {
+  padding: 14px 20px;
+  font-size: 13.5px; font-weight: 600;
+  color: var(--text2); cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all .15s; white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+}
+.tab-item:hover { color: var(--text); }
+.tab-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-/* ── TABLE ── */
-.table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
-.table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); gap:12px; flex-wrap:wrap; }
-.table-title { font-size:14px; font-weight:700; }
-.search-input { padding:8px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:'Outfit',sans-serif; font-size:13px; outline:none; width:200px; transition:border-color .2s; }
-.search-input:focus { border-color:var(--accent); }
-table { width:100%; border-collapse:collapse; }
-th { padding:11px 16px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap; }
-td { padding:13px 16px; font-size:13.5px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
-tr:last-child td { border-bottom:none; }
-tr:hover td { background:rgba(255,255,255,.02); }
-.mono { font-family:'DM Mono',monospace; font-size:12.5px; }
-.badge { display:inline-flex; align-items:center; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
-.badge-green  { background:rgba(52,211,153,.12); color:#34d399; }
-.badge-red    { background:rgba(248,113,113,.12); color:#f87171; }
-.badge-yellow { background:rgba(251,191,36,.12); color:#fbbf24; }
-.badge-gray   { background:rgba(255,255,255,.07); color:var(--text2); }
-.btn-refund { padding:5px 11px; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.25); color:#f87171; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; }
-.btn-refund:hover { background:rgba(248,113,113,.2); }
-.btn-refund:disabled { opacity:.4; cursor:not-allowed; }
-.empty-state { padding:60px 20px; text-align:center; color:var(--text2); }
-.empty-state .empty-icon { font-size:40px; margin-bottom:12px; }
-.empty-state h3 { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
-.empty-state p { font-size:13px; }
+/* ── SETUP GRID ── */
+.setup-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 22px; align-items: start;
+}
+
+/* ── CARDS ── */
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 26px;
+}
+.setup-card-title {
+  font-size: 15px; font-weight: 800; color: var(--text);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.setup-card-sub {
+  font-size: 13px; color: var(--text2);
+  margin-bottom: 24px; line-height: 1.6;
+}
+
+/* ── FORM ── */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 11px; font-weight: 800;
+  color: var(--text2); text-transform: uppercase;
+  letter-spacing: 0.07em; margin-bottom: 8px;
+}
+.form-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: 11px; color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 14px;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.form-input:focus {
+  border-color: rgba(108,99,255,0.55);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+}
+.form-input.secret { font-family: 'DM Mono', monospace; letter-spacing: 0.08em; }
+.form-hint { font-size: 11.5px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+.form-hint a { color: var(--accent); text-decoration: none; }
+.form-hint code {
+  background: var(--surface3); padding: 1px 6px;
+  border-radius: 4px; font-family: 'DM Mono', monospace;
+  font-size: 11.5px; color: var(--accent2);
+}
+
+/* ── TOGGLE ROW ── */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 20px;
+}
+.toggle-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.toggle-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: var(--surface3); border-radius: 24px;
+  cursor: pointer; transition: .25s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  width: 18px; height: 18px;
+  left: 3px; bottom: 3px;
+  background: #fff; border-radius: 50%;
+  transition: .25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* ── VERIFY BUTTON ── */
+.verify-btn {
+  width: 100%; padding: 12px;
+  background: rgba(108,99,255,0.1);
+  border: 1.5px solid rgba(108,99,255,0.3);
+  color: var(--accent); border-radius: 11px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  margin-bottom: 12px;
+  font-family: 'Outfit', sans-serif;
+}
+.verify-btn:hover:not(:disabled) { background: rgba(108,99,255,0.18); }
+.verify-status {
+  padding: 11px 14px; border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  display: none; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.verify-status.ok  { background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3); color: #34d399; display: flex; }
+.verify-status.err { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3); color: #f87171; display: flex; }
+
+/* ── SETUP STEPS ── */
+.setup-steps { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.step { display: flex; gap: 14px; align-items: flex-start; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(108,99,255,0.15); color: var(--accent);
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-body h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.step-body p  { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+.step-body a  { color: var(--accent); text-decoration: none; }
+.step-body code {
+  background: var(--surface3); padding: 1px 6px;
+  border-radius: 4px; font-family: 'DM Mono', monospace;
+  font-size: 11.5px; color: var(--accent2);
+}
+
+/* ── STAT CARDS ── */
+.pay-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 22px;
+}
+.pay-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px;
+  transition: transform .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.pay-stat::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--stat-accent, var(--accent));
+  opacity: 0; transition: opacity .2s;
+}
+.pay-stat:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.14); }
+.pay-stat:hover::before { opacity: 1; }
+.pay-stat-label {
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3); margin-bottom: 8px;
+}
+.pay-stat-value {
+  font-size: 26px; font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -0.04em; line-height: 1;
+}
+.pay-stat-sub { font-size: 11.5px; color: var(--text2); margin-top: 6px; }
+
+/* ── TABLE WRAP ── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px; flex-wrap: wrap;
+}
+.table-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.search-input {
+  padding: 8px 12px 8px 34px;
+  background: var(--surface2); border: 1.5px solid var(--border2);
+  border-radius: 9px; color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 13px;
+  outline: none; width: 200px; transition: border-color .15s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px center;
+}
+.search-input:focus { border-color: rgba(108,99,255,0.55); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 11px 16px; text-align: left;
+  font-size: 10.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 13px 16px; font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle; transition: background .12s;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(108,99,255,0.03); }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.badge::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+}
+.badge-green  { background: rgba(52,211,153,.12); color: #34d399; }
+.badge-red    { background: rgba(248,113,113,.12); color: #f87171; }
+.badge-yellow { background: rgba(251,191,36,.12);  color: #fbbf24; }
+.badge-gray   { background: rgba(255,255,255,.07); color: var(--text2); }
+
+/* ── REFUND BUTTON ── */
+.btn-refund {
+  padding: 5px 12px;
+  background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25);
+  color: #f87171; border-radius: 7px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all .15s; font-family: 'Outfit', sans-serif;
+}
+.btn-refund:hover { background: rgba(248,113,113,.2); transform: translateY(-1px); }
+.btn-refund:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ── PAYMENT LINKS ── */
-.links-grid { display:grid; grid-template-columns:400px 1fr; gap:22px; align-items:start; }
-.link-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:8px; }
-.link-amount { font-size:22px; font-weight:900; font-family:'DM Mono',monospace; }
-.link-desc { font-size:13px; color:var(--text2); }
-.link-url { font-family:'DM Mono',monospace; font-size:11.5px; color:var(--accent); background:var(--surface2); padding:7px 10px; border-radius:7px; word-break:break-all; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.btn-copy { background:none; border:none; cursor:pointer; color:var(--accent); font-size:16px; flex-shrink:0; }
-.link-status-row { display:flex; align-items:center; justify-content:space-between; }
+.links-grid {
+  display: grid; grid-template-columns: 400px 1fr;
+  gap: 22px; align-items: start;
+}
+.link-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .2s, transform .2s;
+}
+.link-card:hover { border-color: rgba(108,99,255,0.3); transform: translateY(-2px); }
+.link-amount { font-size: 22px; font-weight: 900; font-family: 'DM Mono', monospace; color: var(--text); }
+.link-desc { font-size: 13px; color: var(--text2); }
+.link-url {
+  font-family: 'DM Mono', monospace; font-size: 11.5px;
+  color: var(--accent); background: var(--surface2);
+  padding: 8px 12px; border-radius: 8px;
+  word-break: break-all;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.btn-copy {
+  background: none; border: none; cursor: pointer;
+  color: var(--accent); font-size: 16px; flex-shrink: 0;
+  padding: 2px; border-radius: 5px;
+  transition: background .15s;
+}
+.btn-copy:hover { background: rgba(108,99,255,0.1); }
+.link-status-row { display: flex; align-items: center; justify-content: space-between; }
 
 /* ── MODAL ── */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
-.modal-overlay.open { display:flex; }
-.modal { background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; width:100%; max-width:440px; }
-.modal-title { font-size:17px; font-weight:800; margin-bottom:6px; }
-.modal-sub { font-size:13px; color:var(--text2); margin-bottom:22px; }
-.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
-.btn-primary { padding:10px 20px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; transition:all .15s; font-family:'Outfit',sans-serif; display:flex; align-items:center; gap:7px; }
-.btn-primary:hover:not(:disabled) { opacity:.88; }
-.btn-primary:disabled { opacity:.5; cursor:not-allowed; }
-.btn-ghost { padding:10px 18px; background:transparent; border:1px solid var(--border); border-radius:10px; color:var(--text2); font-size:14px; font-weight:600; cursor:pointer; font-family:'Outfit',sans-serif; }
-.btn-ghost:hover { border-color:var(--text); color:var(--text); }
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+  z-index: 1000; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px;
+  width: 100%; max-width: 440px;
+  animation: modalIn .25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.modal-sub   { font-size: 13px; color: var(--text2); margin-bottom: 22px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.mono { font-family: 'DM Mono', monospace; font-size: 12.5px; }
 
-/* not configured overlay */
-.not-configured { background:var(--surface); border:1px solid var(--border2); border-radius:16px; padding:50px 30px; text-align:center; }
-.not-configured .icon { font-size:44px; margin-bottom:16px; }
-.not-configured h3 { font-size:18px; font-weight:800; margin-bottom:8px; }
-.not-configured p { font-size:13.5px; color:var(--text2); margin-bottom:22px; }
+/* ── BUTTONS ── */
+.btn-primary {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #6c63ff, #a259ff);
+  color: #fff; border: none; border-radius: 11px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: all .2s; font-family: 'Outfit', sans-serif;
+  display: inline-flex; align-items: center; gap: 7px;
+  box-shadow: 0 4px 16px rgba(108,99,255,0.3);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(108,99,255,0.4); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-ghost {
+  padding: 10px 18px; background: transparent;
+  border: 1.5px solid var(--border2); border-radius: 11px;
+  color: var(--text2); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--accent2); color: var(--accent); }
 
-@keyframes spin { to{transform:rotate(360deg)} }
-.spinning { animation:spin .7s linear infinite; display:inline-block; }
-@media(max-width:900px) { .setup-grid,.links-grid{grid-template-columns:1fr} .pay-stats{grid-template-columns:repeat(2,1fr)} }
-@media(max-width:600px) { .pay-stats{grid-template-columns:1fr} .tabs{padding:0 16px;overflow-x:auto} }
+/* ── NOT CONFIGURED ── */
+.not-configured {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 18px; padding: 60px 30px; text-align: center;
+}
+.not-configured .icon { font-size: 48px; margin-bottom: 16px; display: block; }
+.not-configured h3 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.not-configured p  { font-size: 13.5px; color: var(--text2); margin-bottom: 22px; }
+
+/* ── EMPTY STATE ── */
+.empty-state { padding: 60px 20px; text-align: center; }
+.empty-icon  { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.empty-state p  { font-size: 13px; color: var(--text2); }
+
+/* ── PAYOUT CARDS ── */
+.payout-summary-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 24px;
+}
+.payout-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 24px; text-align: center;
+  transition: transform .2s, box-shadow .2s;
+}
+.payout-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.14); }
+.payout-card-emoji { font-size: 40px; margin-bottom: 10px; display: block; }
+.payout-card-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 8px; }
+.payout-card-value { font-size: 34px; font-weight: 900; font-family: 'DM Mono', monospace; letter-spacing: -0.04em; }
+.payout-card-sub   { font-size: 11.5px; color: var(--text2); margin-top: 6px; }
+
+/* ── SPINNER ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { animation: spin .7s linear infinite; display: inline-block; }
+.spinner-block { text-align: center; padding: 60px; }
+.spinner-block::after {
+  content: ''; display: block; width: 32px; height: 32px;
+  border-radius: 50%; border: 3px solid var(--border2);
+  border-top-color: var(--accent);
+  animation: spin .7s linear infinite; margin: 0 auto;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .setup-grid, .links-grid { grid-template-columns: 1fr; }
+  .pay-stats { grid-template-columns: repeat(2, 1fr); }
+  .payout-summary-grid { grid-template-columns: 1fr; }
+  .tabs-bar { padding: 0 16px; overflow-x: auto; }
+}
+@media (max-width: 600px) {
+  .pay-stats { grid-template-columns: 1fr 1fr; }
+}
 </style>
+
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
-<!-- ── SKELETON ───────────────────────────────────────────────────────────── -->
+<!-- ── SKELETON ── -->
 <div id="page-skeleton">
   <div class="skel-sidebar">
     <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
@@ -140,30 +510,26 @@ tr:hover td { background:rgba(255,255,255,.02); }
     <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
     <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
     <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
   </div>
   <div class="skel-main">
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
+      <div class="skel" style="height:16px;width:90px;border-radius:5px;"></div>
       <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
     </div>
     <div class="skel-body">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
+      <div style="height:48px;background:var(--surface);border-bottom:1px solid var(--border);margin:-24px -28px 24px;"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
+        <div class="skel" style="height:88px;border-radius:16px;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.8;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.6;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.4;"></div>
       </div>
-      <div class="skel" style="height:40px;border-radius:9px;margin-bottom:10px;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.8;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.6;"></div>
+      <div class="skel" style="height:360px;border-radius:16px;"></div>
     </div>
   </div>
 </div>
 
-<!-- ── SIDEBAR ────────────────────────────────────────────────────────────── -->
+<!-- ── SIDEBAR ── -->
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
   <div class="sidebar-user">
@@ -182,9 +548,9 @@ tr:hover td { background:rgba(255,255,255,.02); }
     <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
   </div>
   <div class="nav-section"><div class="nav-section-label">Storefront</div>
-      <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-    </div>
-    <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+    <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
     <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
   </div>
   <div class="sidebar-bottom">
@@ -192,6 +558,7 @@ tr:hover td { background:rgba(255,255,255,.02); }
   </div>
 </div>
 
+<!-- ── MAIN ── -->
 <div class="main-wrap">
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">Payments</span></div>
@@ -204,33 +571,28 @@ tr:hover td { background:rgba(255,255,255,.02); }
     </div>
   </div>
 
-  <!-- ── TAB BAR ── -->
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('setup')">⚙️ Setup</div>
-    <div class="tab" onclick="switchTab('transactions')">📄 Transactions</div>
-    <div class="tab" onclick="switchTab('payouts')">💰 Payout Summary</div>
-    <div class="tab" onclick="switchTab('links')">🔗 Payment Links</div>
+  <!-- TAB BAR -->
+  <div class="tabs-bar">
+    <div class="tab-item active" onclick="switchTab('setup')">⚙️ Setup</div>
+    <div class="tab-item" onclick="switchTab('transactions')">📄 Transactions</div>
+    <div class="tab-item" onclick="switchTab('payouts')">💰 Payouts</div>
+    <div class="tab-item" onclick="switchTab('links')">🔗 Payment Links</div>
   </div>
 
-  <!-- REAL CONTENT -->
   <div id="page-content" class="content page-enter" style="display:none;">
 
-    <!-- ── TAB: SETUP ────────────────────────────────────────────────────── -->
+    <!-- ── SETUP TAB ── -->
     <div class="tab-panel active" id="tab-setup">
       <div class="setup-grid">
-
-        <!-- Left: Form -->
         <div>
           <div class="setup-card">
-            <div class="setup-card-title">
-              <span style="font-size:22px;">💳</span> Razorpay Credentials
-            </div>
-            <div class="setup-card-sub">Enter your Razorpay API keys. Each store can have its own Razorpay account.</div>
+            <div class="setup-card-title">💳 Razorpay Credentials</div>
+            <div class="setup-card-sub">Connect your Razorpay account to enable payments on your storefront.</div>
 
             <div class="toggle-row">
               <div>
                 <div class="toggle-label">Enable Payments</div>
-                <div class="toggle-sub">Allow customers to pay on your storefront</div>
+                <div class="toggle-sub">Allow customers to pay online</div>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="pay-enabled" onchange="saveEnabled()">
@@ -241,13 +603,13 @@ tr:hover td { background:rgba(255,255,255,.02); }
             <div class="form-group">
               <label class="form-label">Key ID</label>
               <input class="form-input mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off">
-              <div class="form-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (test mode)</div>
+              <div class="form-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (testing)</div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Key Secret</label>
               <input class="form-input secret" id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password">
-              <div class="form-hint">Never shared with customers. Stored securely on the server.</div>
+              <div class="form-hint">Never shown to customers. Stored encrypted on the server.</div>
             </div>
 
             <div class="form-group">
@@ -265,15 +627,12 @@ tr:hover td { background:rgba(255,255,255,.02); }
             <button class="verify-btn" id="btn-verify" onclick="verifyKeys()">🔍 Test Connection</button>
             <div class="verify-status" id="verify-status"></div>
 
-            <div style="display:flex;gap:10px;margin-top:16px;">
-              <button class="btn-primary" onclick="saveSettings()" id="btn-save" style="flex:1;">
-                💾 Save Settings
-              </button>
-            </div>
+            <button class="btn-primary" onclick="saveSettings()" id="btn-save" style="width:100%;justify-content:center;">
+              💾 Save Settings
+            </button>
           </div>
         </div>
 
-        <!-- Right: Setup guide -->
         <div>
           <div class="setup-card">
             <div class="setup-card-title">📋 How to get your Razorpay keys</div>
@@ -283,7 +642,7 @@ tr:hover td { background:rgba(255,255,255,.02); }
                 <div class="step-num">1</div>
                 <div class="step-body">
                   <h4>Create a Razorpay account</h4>
-                  <p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank">dashboard.razorpay.com</a> and complete KYC verification for live payments.</p>
+                  <p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank">dashboard.razorpay.com</a> and complete KYC for live payments.</p>
                 </div>
               </li>
               <li class="step">
@@ -297,46 +656,61 @@ tr:hover td { background:rgba(255,255,255,.02); }
                 <div class="step-num">3</div>
                 <div class="step-body">
                   <h4>Paste keys above</h4>
-                  <p>Use <code>rzp_test_</code> keys while testing. Switch to <code>rzp_live_</code> when going live.</p>
+                  <p>Use <code>rzp_test_</code> keys while testing, switch to <code>rzp_live_</code> when going live.</p>
                 </div>
               </li>
               <li class="step">
                 <div class="step-num">4</div>
                 <div class="step-body">
-                  <h4>Set up Webhook (optional but recommended)</h4>
+                  <h4>Set up Webhook (recommended)</h4>
                   <p>In Razorpay Dashboard → <strong>Settings → Webhooks</strong>, add:<br>
                   <code>https://apiv2.aasaitech.in/webhooks/razorpay</code><br>
-                  Select events: <em>payment.captured, payment.failed, refund.processed</em></p>
+                  Events: <em>payment.captured, payment.failed, refund.processed</em></p>
                 </div>
               </li>
               <li class="step">
                 <div class="step-num">5</div>
                 <div class="step-body">
-                  <h4>Enable payments & save</h4>
-                  <p>Toggle <strong>Enable Payments</strong> on, click <strong>Test Connection</strong>, then <strong>Save Settings</strong>. Your storefront checkout is live!</p>
+                  <h4>Test & save</h4>
+                  <p>Toggle Enable Payments on, click <strong>Test Connection</strong>, then <strong>Save Settings</strong>. You're live!</p>
                 </div>
               </li>
             </ol>
           </div>
         </div>
-
       </div>
     </div>
 
-    <!-- ── TAB: TRANSACTIONS ─────────────────────────────────────────────── -->
+    <!-- ── TRANSACTIONS TAB ── -->
     <div class="tab-panel" id="tab-transactions">
       <div id="transactions-not-configured" class="not-configured" style="display:none;">
-        <div class="icon">💳</div>
+        <span class="icon">💳</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to view transactions.</p>
         <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
       </div>
       <div id="transactions-content">
         <div class="pay-stats" id="txn-stats">
-          <div class="pay-stat"><div class="pay-stat-label">Total Collected</div><div class="pay-stat-value" id="stat-collected">—</div><div class="pay-stat-sub">Last 30 days</div></div>
-          <div class="pay-stat"><div class="pay-stat-label">Transactions</div><div class="pay-stat-value" id="stat-count">—</div><div class="pay-stat-sub">Total payments</div></div>
-          <div class="pay-stat"><div class="pay-stat-label">Refunded</div><div class="pay-stat-value" id="stat-refunded" style="color:var(--red)">—</div><div class="pay-stat-sub">Amount refunded</div></div>
-          <div class="pay-stat"><div class="pay-stat-label">Failed</div><div class="pay-stat-value" id="stat-failed" style="color:var(--yellow)">—</div><div class="pay-stat-sub">Failed payments</div></div>
+          <div class="pay-stat" style="--stat-accent:#34d399;">
+            <div class="pay-stat-label">Total Collected</div>
+            <div class="pay-stat-value" id="stat-collected">—</div>
+            <div class="pay-stat-sub">Last 30 days</div>
+          </div>
+          <div class="pay-stat">
+            <div class="pay-stat-label">Transactions</div>
+            <div class="pay-stat-value" id="stat-count">—</div>
+            <div class="pay-stat-sub">Total payments</div>
+          </div>
+          <div class="pay-stat" style="--stat-accent:#f87171;">
+            <div class="pay-stat-label">Refunded</div>
+            <div class="pay-stat-value" id="stat-refunded" style="color:#f87171;">—</div>
+            <div class="pay-stat-sub">Amount refunded</div>
+          </div>
+          <div class="pay-stat" style="--stat-accent:#fbbf24;">
+            <div class="pay-stat-label">Failed</div>
+            <div class="pay-stat-value" id="stat-failed" style="color:#fbbf24;">—</div>
+            <div class="pay-stat-sub">Failed payments</div>
+          </div>
         </div>
         <div class="table-wrap">
           <div class="table-header">
@@ -357,7 +731,7 @@ tr:hover td { background:rgba(255,255,255,.02); }
                 </tr>
               </thead>
               <tbody id="txn-table-body">
-                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">Loading…</td></tr>
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">Loading transactions…</td></tr>
               </tbody>
             </table>
           </div>
@@ -365,76 +739,75 @@ tr:hover td { background:rgba(255,255,255,.02); }
       </div>
     </div>
 
-    <!-- ── TAB: PAYOUT SUMMARY ───────────────────────────────────────────── -->
+    <!-- ── PAYOUTS TAB ── -->
     <div class="tab-panel" id="tab-payouts">
       <div id="payouts-not-configured" class="not-configured" style="display:none;">
-        <div class="icon">💰</div>
+        <span class="icon">💰</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to view payout summary.</p>
         <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
       </div>
       <div id="payouts-content">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
-          <div class="setup-card" style="text-align:center;">
-            <div style="font-size:36px;margin-bottom:8px;">💰</div>
-            <div class="pay-stat-label" style="margin-bottom:6px;">Net Collected</div>
-            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;" id="payout-net">—</div>
-            <div class="pay-stat-sub" id="payout-currency">INR • Last 30 days</div>
+        <div class="payout-summary-grid">
+          <div class="payout-card">
+            <span class="payout-card-emoji">💰</span>
+            <div class="payout-card-label">Net Collected</div>
+            <div class="payout-card-value" id="payout-net">—</div>
+            <div class="payout-card-sub" id="payout-currency">INR • Last 30 days</div>
           </div>
-          <div class="setup-card" style="text-align:center;">
-            <div style="font-size:36px;margin-bottom:8px;">🔄</div>
-            <div class="pay-stat-label" style="margin-bottom:6px;">Total Refunded</div>
-            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;color:var(--red);" id="payout-refunded">—</div>
-            <div class="pay-stat-sub">Refunds issued</div>
+          <div class="payout-card">
+            <span class="payout-card-emoji">🔄</span>
+            <div class="payout-card-label">Total Refunded</div>
+            <div class="payout-card-value" id="payout-refunded" style="color:#f87171;">—</div>
+            <div class="payout-card-sub">Refunds issued</div>
           </div>
-          <div class="setup-card" style="text-align:center;">
-            <div style="font-size:36px;margin-bottom:8px;">❌</div>
-            <div class="pay-stat-label" style="margin-bottom:6px;">Failed Payments</div>
-            <div style="font-size:32px;font-weight:900;font-family:'DM Mono',monospace;color:var(--yellow);" id="payout-failed">—</div>
-            <div class="pay-stat-sub">Not collected</div>
+          <div class="payout-card">
+            <span class="payout-card-emoji">❌</span>
+            <div class="payout-card-label">Failed Payments</div>
+            <div class="payout-card-value" id="payout-failed" style="color:#fbbf24;">—</div>
+            <div class="payout-card-sub">Not collected</div>
           </div>
         </div>
         <div class="setup-card">
           <div class="setup-card-title" style="margin-bottom:16px;">📊 Payment Method Breakdown</div>
-          <div id="method-breakdown" style="display:flex;flex-direction:column;gap:10px;">
+          <div id="method-breakdown" style="display:flex;flex-direction:column;gap:12px;">
             <div style="color:var(--text2);font-size:13px;">Loading breakdown…</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── TAB: PAYMENT LINKS ────────────────────────────────────────────── -->
+    <!-- ── PAYMENT LINKS TAB ── -->
     <div class="tab-panel" id="tab-links">
       <div id="links-not-configured" class="not-configured" style="display:none;">
-        <div class="icon">🔗</div>
+        <span class="icon">🔗</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to generate payment links.</p>
         <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
       </div>
       <div id="links-content">
         <div class="links-grid">
-          <!-- Create form -->
           <div>
             <div class="setup-card">
-              <div class="setup-card-title" style="margin-bottom:16px;">🔗 Create Payment Link</div>
+              <div class="setup-card-title" style="margin-bottom:20px;">🔗 Create Payment Link</div>
               <div class="form-group">
                 <label class="form-label">Amount (₹)</label>
                 <input class="form-input mono" id="link-amount" type="number" min="1" placeholder="999">
               </div>
               <div class="form-group">
                 <label class="form-label">Description</label>
-                <input class="form-input" id="link-desc" type="text" placeholder="e.g. Custom order for John">
+                <input class="form-input" id="link-desc" type="text" placeholder="e.g. Custom order for customer">
               </div>
               <div class="form-group">
-                <label class="form-label">Customer Name (optional)</label>
+                <label class="form-label">Customer Name <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
                 <input class="form-input" id="link-name" type="text" placeholder="John Doe">
               </div>
               <div class="form-group">
-                <label class="form-label">Customer Email (optional)</label>
+                <label class="form-label">Customer Email <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
                 <input class="form-input" id="link-email" type="email" placeholder="john@example.com">
               </div>
               <div class="form-group">
-                <label class="form-label">Customer Phone (optional)</label>
+                <label class="form-label">Customer Phone <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
                 <input class="form-input mono" id="link-phone" type="tel" placeholder="+91 98765 43210">
               </div>
               <div class="form-group">
@@ -448,19 +821,18 @@ tr:hover td { background:rgba(255,255,255,.02); }
                   <option value="720">30 days</option>
                 </select>
               </div>
-              <button class="btn-primary" onclick="createPaymentLink()" id="btn-create-link" style="width:100%;">
+              <button class="btn-primary" onclick="createPaymentLink()" id="btn-create-link" style="width:100%;justify-content:center;">
                 ✨ Generate Payment Link
               </button>
             </div>
           </div>
-          <!-- Links list -->
           <div>
             <div class="table-wrap">
               <div class="table-header">
                 <span class="table-title">Recent Links</span>
                 <button class="btn-ghost" style="font-size:13px;padding:7px 14px;" onclick="loadLinks()">↻ Refresh</button>
               </div>
-              <div id="links-list" style="padding:12px;">
+              <div id="links-list" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
                 <div style="color:var(--text2);font-size:13px;padding:20px;text-align:center;">Loading links…</div>
               </div>
             </div>
@@ -469,61 +841,97 @@ tr:hover td { background:rgba(255,255,255,.02); }
       </div>
     </div>
 
-  </div><!-- end page-content -->
-</div><!-- end main-wrap -->
+  </div>
+</div>
 
-<!-- ── REFUND MODAL ──────────────────────────────────────────────────────── -->
+<!-- ── REFUND MODAL ── -->
 <div class="modal-overlay" id="modal-refund">
   <div class="modal">
     <div class="modal-title">💸 Issue Refund</div>
-    <div class="modal-sub" id="refund-modal-sub">Refunding payment <span id="refund-payment-id" class="mono"></span></div>
+    <div class="modal-sub">Processing refund for payment <span id="refund-payment-id" class="mono" style="color:var(--accent2);"></span></div>
     <div class="form-group">
       <label class="form-label">Refund Amount (₹) — leave blank for full refund</label>
       <input class="form-input mono" id="refund-amount" type="number" min="1" placeholder="Full refund">
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal('modal-refund')">Cancel</button>
-      <button class="btn-primary" id="btn-confirm-refund" onclick="confirmRefund()" style="background:#f87171;">💸 Confirm Refund</button>
+      <button class="btn-primary" id="btn-confirm-refund" onclick="confirmRefund()" style="background:linear-gradient(135deg,#f87171,#ef4444);box-shadow:0 4px 16px rgba(239,68,68,0.3);">
+        💸 Confirm Refund
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-let currentStoreId = ''
-let paymentSettings = null
-let allTxns = []
-let refundTarget = null
+/* ══════════════════════════════════════════════
+   THEME SYSTEM
+══════════════════════════════════════════════ */
+let _isDark = localStorage.getItem('ekart_theme') !== 'light'
 
+function applyTheme(dark) {
+  _isDark = dark
+  const root = document.documentElement
+  if (dark) {
+    root.removeAttribute('data-theme')
+    root.style.background = '#080910'
+  } else {
+    root.setAttribute('data-theme', 'light')
+    root.style.background = '#f0f0f5'
+  }
+  const btn = document.getElementById('themeToggleBtn')
+  if (btn) btn.textContent = dark ? '🌙' : '☀️'
+  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
+}
+function toggleTheme() { applyTheme(!_isDark) }
+applyTheme(_isDark)
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let currentStoreId = '', paymentSettings = null, allTxns = [], refundTarget = null
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('payments', (id) => { currentStoreId = id; loadAll() })
   if (!nav) return
   currentStoreId = nav.currentStoreId
+
+  // Theme toggle
+  const topbarRight = document.querySelector('.topbar-right')
+  if (topbarRight && !document.getElementById('themeToggleBtn')) {
+    const btn = document.createElement('button')
+    btn.className   = 'theme-toggle'
+    btn.id          = 'themeToggleBtn'
+    btn.title       = 'Toggle day / night mode'
+    btn.onclick     = toggleTheme
+    btn.textContent = _isDark ? '🌙' : '☀️'
+    topbarRight.insertBefore(btn, topbarRight.firstChild)
+  }
+  applyTheme(_isDark)
   await loadAll()
 })
 
 async function loadAll() {
   await loadSettings()
-  // Load current active tab's data
-  const activeTab = document.querySelector('.tab.active')?.onclick?.toString().match(/'(\w+)'/)?.[1] || 'setup'
 }
 
 async function loadSettings() {
   try {
     const data = await apiFetch(`/stores/${currentStoreId}/payment-settings`)
     paymentSettings = data
-    document.getElementById('pay-enabled').checked = data.enabled
-    document.getElementById('key-id').value = data.razorpay_key_id || ''
-    document.getElementById('key-secret').value = data.has_secret ? '••••••••••••••••••••' : ''
-    document.getElementById('pay-currency').value = data.currency || 'INR'
-  } catch(e) {
-    paymentSettings = null
-  }
+    document.getElementById('pay-enabled').checked  = data.enabled
+    document.getElementById('key-id').value         = data.razorpay_key_id || ''
+    document.getElementById('key-secret').value     = data.has_secret ? '••••••••••••••••••••' : ''
+    document.getElementById('pay-currency').value   = data.currency || 'INR'
+  } catch(e) { paymentSettings = null }
 }
 
 async function saveEnabled() {
   const enabled = document.getElementById('pay-enabled').checked
   await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
-    method:'PUT', body: JSON.stringify({ enabled })
+    method: 'PUT', body: JSON.stringify({ enabled })
   })
   toast(enabled ? 'Payments enabled' : 'Payments disabled', enabled ? 'success' : 'info')
 }
@@ -534,15 +942,15 @@ async function saveSettings() {
   try {
     const keySecret = document.getElementById('key-secret').value
     const body = {
-      razorpay_key_id:     document.getElementById('key-id').value.trim(),
-      currency:            document.getElementById('pay-currency').value,
-      enabled:             document.getElementById('pay-enabled').checked,
+      razorpay_key_id: document.getElementById('key-id').value.trim(),
+      currency:        document.getElementById('pay-currency').value,
+      enabled:         document.getElementById('pay-enabled').checked,
     }
     if (keySecret && !keySecret.startsWith('•')) body.razorpay_key_secret = keySecret.trim()
     await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
-      method:'PUT', body: JSON.stringify(body)
+      method: 'PUT', body: JSON.stringify(body)
     })
-    toast('Settings saved', 'success')
+    toast('Settings saved!', 'success')
     await loadSettings()
   } catch(e) {
     toast(e.message || 'Failed to save', 'error')
@@ -552,41 +960,41 @@ async function saveSettings() {
 }
 
 async function verifyKeys() {
-  const btn = document.getElementById('btn-verify')
+  const btn    = document.getElementById('btn-verify')
   const status = document.getElementById('verify-status')
-  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Testing…'
+  btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Testing connection…'
   status.className = 'verify-status'; status.style.display = 'none'
 
-  // Save first if keys have been changed
-  const keyId = document.getElementById('key-id').value.trim()
+  const keyId     = document.getElementById('key-id').value.trim()
   const keySecret = document.getElementById('key-secret').value
   if (keyId && keySecret && !keySecret.startsWith('•')) {
     await apiFetch(`/stores/${currentStoreId}/payment-settings`, {
-      method:'PUT', body: JSON.stringify({ razorpay_key_id: keyId, razorpay_key_secret: keySecret })
+      method: 'PUT', body: JSON.stringify({ razorpay_key_id: keyId, razorpay_key_secret: keySecret })
     })
   }
 
   try {
-    const d = await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`, { method:'POST' })
-    status.className = 'verify-status ok'; status.style.display = 'block'; status.innerHTML = '✅ ' + d.message
+    const d = await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`, { method: 'POST' })
+    status.className = 'verify-status ok'; status.style.display = 'flex'; status.innerHTML = '✅ ' + d.message
   } catch(e) {
-    status.className = 'verify-status err'; status.style.display = 'block'; status.innerHTML = '❌ ' + (e.message || 'Verification failed')
+    status.className = 'verify-status err'; status.style.display = 'flex'; status.innerHTML = '❌ ' + (e.message || 'Verification failed')
   } finally {
     btn.disabled = false; btn.textContent = '🔍 Test Connection'
   }
 }
 
-// ── TABS ─────────────────────────────────────────────────────────────────────
+/* ── TABS ── */
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['setup','transactions','payouts','links'][i] === name))
+  const tabs = ['setup', 'transactions', 'payouts', 'links']
+  document.querySelectorAll('.tab-item').forEach((t, i) => t.classList.toggle('active', tabs[i] === name))
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
-  document.getElementById('tab-' + (name==='payouts'?'payouts':name)).classList.add('active')
+  document.getElementById('tab-' + name).classList.add('active')
   if (name === 'transactions') loadTransactions()
   if (name === 'payouts')      loadPayouts()
   if (name === 'links')        loadLinks()
 }
 
-// ── TRANSACTIONS ──────────────────────────────────────────────────────────────
+/* ── TRANSACTIONS ── */
 async function loadTransactions() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('transactions-not-configured').style.display = 'block'
@@ -609,29 +1017,28 @@ async function loadTransactions() {
     document.getElementById('stat-failed').textContent    = summary.failed_count || 0
     renderTxns(allTxns)
   } catch(e) {
-    document.getElementById('txn-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--red);">Error: ${e.message}</td></tr>`
+    document.getElementById('txn-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171;">⚠️ Error: ${e.message}</td></tr>`
   }
 }
 
 function renderTxns(items) {
   const tbody = document.getElementById('txn-table-body')
   if (!items.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">No transactions yet</td></tr>'
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📄</div><h3>No transactions yet</h3></div></td></tr>`
     return
   }
+  const statusMap = { captured: 'badge-green', refunded: 'badge-yellow', failed: 'badge-red' }
   tbody.innerHTML = items.map(p => {
     const amt = (p.amount / 100).toFixed(2)
-    const statusMap = { captured:'badge-green', refunded:'badge-yellow', failed:'badge-red' }
-    const badge = `<span class="badge ${statusMap[p.status] || 'badge-gray'}">${p.status}</span>`
     const canRefund = p.status === 'captured'
     return `<tr>
-      <td class="mono" style="font-size:12px;">${p.id}</td>
-      <td style="font-weight:700;font-family:'DM Mono',monospace;">₹${amt}</td>
-      <td><span style="text-transform:capitalize;">${p.method || '—'}</span></td>
+      <td class="mono" style="font-size:12px;color:var(--accent2);">${p.id}</td>
+      <td style="font-weight:800;font-family:'DM Mono',monospace;font-size:14px;">₹${amt}</td>
+      <td><span style="text-transform:capitalize;font-weight:600;">${p.method || '—'}</span></td>
       <td style="color:var(--text2);font-size:13px;">${p.email || p.contact || '—'}</td>
-      <td>${badge}</td>
-      <td style="color:var(--text2);font-size:12.5px;">${new Date(p.created_at * 1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
-      <td>${canRefund ? `<button class="btn-refund" onclick="openRefund('${p.id}', ${p.amount})">Refund</button>` : '—'}</td>
+      <td><span class="badge ${statusMap[p.status] || 'badge-gray'}">${p.status}</span></td>
+      <td style="color:var(--text2);font-size:12.5px;">${new Date(p.created_at * 1000).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</td>
+      <td>${canRefund ? `<button class="btn-refund" onclick="openRefund('${p.id}', ${p.amount})">💸 Refund</button>` : '—'}</td>
     </tr>`
   }).join('')
 }
@@ -641,7 +1048,7 @@ function filterTxns() {
   renderTxns(q ? allTxns.filter(p => p.id.toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q)) : allTxns)
 }
 
-// ── PAYOUTS ───────────────────────────────────────────────────────────────────
+/* ── PAYOUTS ── */
 async function loadPayouts() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('payouts-not-configured').style.display = 'block'
@@ -662,33 +1069,32 @@ async function loadPayouts() {
     document.getElementById('payout-failed').textContent   = summary.failed_count || 0
     document.getElementById('payout-currency').textContent = `${cur} • Last 30 days`
 
-    // Method breakdown
     const items = txns.items || []
     const methods = {}
     items.filter(p => p.status === 'captured').forEach(p => {
       const m = p.method || 'other'
       methods[m] = (methods[m] || 0) + p.amount / 100
     })
-    const total = Object.values(methods).reduce((a,b) => a+b, 0) || 1
+    const total = Object.values(methods).reduce((a, b) => a + b, 0) || 1
     const icons = { upi:'📱', card:'💳', netbanking:'🏦', wallet:'👛', emi:'📅', other:'💰' }
-    document.getElementById('method-breakdown').innerHTML = Object.entries(methods).sort((a,b)=>b[1]-a[1]).map(([m, amt]) => {
-      const pct = Math.round((amt / total) * 100)
-      return `<div style="display:flex;flex-direction:column;gap:5px;">
-        <div style="display:flex;justify-content:space-between;font-size:13.5px;">
-          <span>${icons[m]||'💰'} <span style="text-transform:capitalize;">${m}</span></span>
-          <span style="font-family:'DM Mono',monospace;font-weight:700;">₹${amt.toFixed(2)} <span style="color:var(--text2);">(${pct}%)</span></span>
-        </div>
-        <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;">
-          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;"></div>
-        </div>
-      </div>`
-    }).join('') || '<div style="color:var(--text2);font-size:13px;">No captured payments yet</div>'
-  } catch(e) {
-    toast('Failed to load payout data: ' + e.message, 'error')
-  }
+    document.getElementById('method-breakdown').innerHTML = Object.entries(methods)
+      .sort((a, b) => b[1] - a[1])
+      .map(([m, amt]) => {
+        const pct = Math.round((amt / total) * 100)
+        return `<div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:13.5px;">
+            <span style="font-weight:600;">${icons[m]||'💰'} <span style="text-transform:capitalize;">${m}</span></span>
+            <span style="font-family:'DM Mono',monospace;font-weight:700;">₹${amt.toFixed(2)} <span style="color:var(--text3);">(${pct}%)</span></span>
+          </div>
+          <div style="height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),#a259ff);border-radius:4px;transition:width .6s;"></div>
+          </div>
+        </div>`
+      }).join('') || '<div style="color:var(--text2);font-size:13px;">No captured payments yet</div>'
+  } catch(e) { toast('Failed to load payout data: ' + e.message, 'error') }
 }
 
-// ── PAYMENT LINKS ─────────────────────────────────────────────────────────────
+/* ── PAYMENT LINKS ── */
 async function loadLinks() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('links-not-configured').style.display = 'block'
@@ -703,37 +1109,35 @@ async function loadLinks() {
     const items = data.items || []
     const container = document.getElementById('links-list')
     if (!items.length) {
-      container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);"><div style="font-size:32px;margin-bottom:10px;">🔗</div><div>No payment links yet</div></div>'
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔗</div><h3>No payment links yet</h3><p>Create your first link using the form</p></div>`
       return
     }
+    const statusMap = { created:'badge-yellow', paid:'badge-green', cancelled:'badge-red', expired:'badge-gray' }
     container.innerHTML = items.map(l => {
       const amt = (l.amount / 100).toFixed(2)
-      const statusMap = { created:'badge-yellow', paid:'badge-green', cancelled:'badge-red', expired:'badge-gray' }
       return `<div class="link-card">
         <div style="display:flex;justify-content:space-between;align-items:start;">
           <div>
             <div class="link-amount">₹${amt}</div>
             <div class="link-desc">${l.description || 'No description'}</div>
           </div>
-          <span class="badge ${statusMap[l.status]||'badge-gray'}">${l.status}</span>
+          <span class="badge ${statusMap[l.status] || 'badge-gray'}">${l.status}</span>
         </div>
         <div class="link-url">
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.short_url || l.id}</span>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${l.short_url || l.id}</span>
           <button class="btn-copy" onclick="navigator.clipboard.writeText('${l.short_url}');toast('Link copied!','success')" title="Copy link">📋</button>
         </div>
         <div class="link-status-row">
-          <span style="font-size:12px;color:var(--text2);">${new Date(l.created_at * 1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+          <span style="font-size:12px;color:var(--text2);">${new Date(l.created_at * 1000).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</span>
           ${l.customer?.name ? `<span style="font-size:12px;color:var(--text2);">👤 ${l.customer.name}</span>` : ''}
         </div>
       </div>`
     }).join('')
-  } catch(e) {
-    toast('Failed to load links: ' + e.message, 'error')
-  }
+  } catch(e) { toast('Failed to load links: ' + e.message, 'error') }
 }
 
 async function createPaymentLink() {
-  const btn = document.getElementById('btn-create-link')
+  const btn    = document.getElementById('btn-create-link')
   const amount = parseFloat(document.getElementById('link-amount').value)
   const desc   = document.getElementById('link-desc').value.trim()
   if (!amount || amount < 1) { toast('Enter a valid amount', 'error'); return }
@@ -748,15 +1152,13 @@ async function createPaymentLink() {
       customer_phone: document.getElementById('link-phone').value.trim(),
       expire_hours:   parseInt(document.getElementById('link-expiry').value) || undefined,
     }
-    const d = await apiFetch(`/stores/${currentStoreId}/payment-links`, { method:'POST', body: JSON.stringify(body) })
+    const d = await apiFetch(`/stores/${currentStoreId}/payment-links`, { method: 'POST', body: JSON.stringify(body) })
     toast('Payment link created!', 'success')
-    // Copy link immediately
     if (d.link?.short_url) {
-      navigator.clipboard.writeText(d.link.short_url).catch(()=>{})
+      navigator.clipboard.writeText(d.link.short_url).catch(() => {})
       toast('Link copied to clipboard!', 'success')
     }
-    // Clear form
-    ;['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id => document.getElementById(id).value = '')
+    ;['link-amount', 'link-desc', 'link-name', 'link-email', 'link-phone'].forEach(id => document.getElementById(id).value = '')
     await loadLinks()
   } catch(e) {
     toast(e.message || 'Failed to create link', 'error')
@@ -765,25 +1167,25 @@ async function createPaymentLink() {
   }
 }
 
-// ── REFUNDS ───────────────────────────────────────────────────────────────────
+/* ── REFUNDS ── */
 function openRefund(paymentId, amountPaise) {
   refundTarget = { paymentId, maxAmount: amountPaise / 100 }
   document.getElementById('refund-payment-id').textContent = paymentId
-  document.getElementById('refund-amount').placeholder = `Full refund (₹${(amountPaise/100).toFixed(2)})`
-  document.getElementById('refund-amount').value = ''
+  document.getElementById('refund-amount').placeholder    = `Full refund (₹${(amountPaise / 100).toFixed(2)})`
+  document.getElementById('refund-amount').value          = ''
   openModal('modal-refund')
 }
 
 async function confirmRefund() {
   if (!refundTarget) return
-  const btn = document.getElementById('btn-confirm-refund')
+  const btn    = document.getElementById('btn-confirm-refund')
   const amount = parseFloat(document.getElementById('refund-amount').value) || undefined
   btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Processing…'
   try {
     await apiFetch(`/stores/${currentStoreId}/payments/${refundTarget.paymentId}/refund`, {
-      method:'POST', body: JSON.stringify({ amount })
+      method: 'POST', body: JSON.stringify({ amount })
     })
-    toast('Refund issued successfully', 'success')
+    toast('Refund issued successfully!', 'success')
     closeModal('modal-refund')
     await loadTransactions()
   } catch(e) {
@@ -793,7 +1195,7 @@ async function confirmRefund() {
   }
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────────────────
+/* ── UTILS ── */
 function formatAmount(amount, currency) {
   const symbols = { INR:'₹', USD:'$', EUR:'€', GBP:'£', SGD:'S$', AED:'AED ' }
   return (symbols[currency] || '') + (amount || 0).toFixed(2)
