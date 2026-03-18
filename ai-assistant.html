@@ -670,12 +670,13 @@ async function callClaudeAPI(history) {
   const lastMsg = history[history.length - 1]?.content || ''
 
   // Same apiFetch pattern as ai-builder.html / website-builder
-  const res = await apiFetch('/ai/chat', {
+  const res = await apiFetch('/ai/website-builder', {
     method: 'POST',
     body: JSON.stringify({
       message: lastMsg,
       history: history.slice(0, -1).slice(-12),  // prior turns, max 12
-      system_prompt: systemPrompt
+      system_prompt: systemPrompt,
+      site_state: { storeId: currentStoreId }     // matches website-builder contract
     })
   })
 
