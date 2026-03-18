@@ -29,14 +29,33 @@
   --yellow:   #ca8a04;
   background: #f0f0f5 !important;
 }
-[data-theme="light"] body            { background: #f0f0f5; }
-[data-theme="light"] .sidebar        { background: #fff; border-right-color: rgba(0,0,0,0.09); }
-[data-theme="light"] .main-wrap      { background: #f0f0f5; }
-[data-theme="light"] .topbar         { background: #fff; border-bottom-color: rgba(0,0,0,0.09); }
-[data-theme="light"] .store-card     { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-[data-theme="light"] .stat-card      { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-[data-theme="light"] .modal          { background: #fff; }
-[data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.35); }
+[data-theme="light"] body            { background: #f0f0f5 !important; }
+[data-theme="light"] .sidebar        { background: #fff !important; border-right-color: rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .main-wrap      { background: #f0f0f5 !important; }
+[data-theme="light"] .topbar         { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .store-card     { background: #fff !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .stat-card      { background: #fff !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .modal          { background: #fff !important; }
+[data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.35) !important; }
+/* extra elements nav.css might hardcode */
+[data-theme="light"] .content        { background: #f0f0f5 !important; }
+[data-theme="light"] .sidebar-logo   { color: #111827 !important; }
+[data-theme="light"] .sidebar-user-name  { color: #111827 !important; }
+[data-theme="light"] .sidebar-user-email { color: #9ca3af !important; }
+[data-theme="light"] .nav-section-label  { color: #9ca3af !important; }
+[data-theme="light"] .badge-gray     { background: #e9eaf0 !important; color: #374151 !important; border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .badge-green    { background: rgba(22,163,74,0.1) !important; color: #15803d !important; }
+[data-theme="light"] .store-name     { color: #111827 !important; }
+[data-theme="light"] .store-kpi-val  { color: #111827 !important; }
+[data-theme="light"] .store-kpi-val.rev   { color: #16a34a !important; }
+[data-theme="light"] .store-kpi-val.today { color: #5b52e0 !important; }
+[data-theme="light"] .store-kpi-label     { color: #9ca3af !important; }
+[data-theme="light"] .domain-section-label { color: #9ca3af !important; }
+[data-theme="light"] .dns-guide-title { color: #5b52e0 !important; }
+[data-theme="light"] .dns-step-text  { color: #374151 !important; }
+[data-theme="light"] .dns-rec-val    { color: #111827 !important; }
+[data-theme="light"] .empty-state    { background: #f0f0f5 !important; color: #374151 !important; }
+[data-theme="light"] .btn-logout     { color: #374151 !important; }
 [data-theme="light"] .field input,
 [data-theme="light"] .field textarea,
 [data-theme="light"] .field select   { background: #f3f4f6; color: #111827; border-color: rgba(0,0,0,0.12); }
@@ -627,7 +646,6 @@
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">My Stores</span></div>
     <div class="topbar-right">
-      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode">🌙</button>
       <div id="topbar-actions"></div>
     </div>
   </div>
@@ -1011,7 +1029,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (!nav) return
   currentUser = nav.user
   document.getElementById('storeEmail').value = currentUser.email || ''
-  setTopbarActions(`<button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>`)
+  setTopbarActions(`
+    <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode">🌙</button>
+    <button class="btn btn-primary" onclick="openCreateStore()">+ New Store</button>
+  `)
+  // Re-sync icon now that button is in DOM
+  applyTheme(_isDark)
   await loadAll()
 })
 
