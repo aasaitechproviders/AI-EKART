@@ -225,6 +225,10 @@
   letter-spacing: -0.04em;
   font-family: 'DM Mono', monospace;
 }
+.stat-value.stat-loading {
+  color: var(--border2);
+  animation: shimmer 1.2s infinite;
+}
 
 /* Card style picker */
 .card-style-picker {
@@ -1049,46 +1053,92 @@ window.addEventListener('DOMContentLoaded', async () => {
 async function loadAll() {
   const pc = document.getElementById('page-content')
   pc.querySelector('.stats-row')?.remove()
-  await Promise.all([loadStores(), loadDashStats()])
+  // Load stores first, then derive all stats from user-scoped store data only
+  await loadStores()
 }
 
 async function loadStores() {
   allStores = await apiFetch('/stores')
   renderStores()
-  allStores.forEach(s => loadStoreKPIs(s))
+  // Render stats shell immediately with correct store count
+  renderStatsShell(allStores.length)
+  // Load per-store analytics in parallel, accumulate into user-scoped totals
+  const analyticsResults = await Promise.allSettled(
+    allStores.map(s => loadStoreKPIs(s))
+  )
+  // Sum up all per-store results to build the top stats row
+  updateDashStats()
 }
 
-async function loadDashStats() {
-  try {
-    const d = await apiFetch('/dashboard')
-    document.getElementById('page-content')?.querySelector('.stats-row')?.remove()
-    const statsHtml = `
-      <div class="stats-row">
-        <div class="stat-card">
-          <span class="stat-icon">🏪</span>
-          <div><div class="stat-label">Total Stores</div><div class="stat-value">${d.stores_count}</div></div>
+// Holds per-store analytics keyed by store _id
+const _storeAnalytics = {}
+
+// Render the stats shell with shimmer placeholders
+function renderStatsShell(storeCount) {
+  const pc = document.getElementById('page-content')
+  pc.querySelector('.stats-row')?.remove()
+  const html = `
+    <div class="stats-row" id="dashStatsRow">
+      <div class="stat-card">
+        <span class="stat-icon">🏪</span>
+        <div>
+          <div class="stat-label">My Stores</div>
+          <div class="stat-value" id="ds-stores">${storeCount}</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-icon">📦</span>
-          <div><div class="stat-label">Total Orders</div><div class="stat-value">${d.total_orders}</div></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📦</span>
+        <div>
+          <div class="stat-label">My Orders</div>
+          <div class="stat-value stat-loading" id="ds-orders">—</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-icon">🕐</span>
-          <div><div class="stat-label">Today\'s Orders</div><div class="stat-value">${d.today_orders}</div></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🕐</span>
+        <div>
+          <div class="stat-label">Today's Orders</div>
+          <div class="stat-value stat-loading" id="ds-today">—</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-icon">💰</span>
-          <div><div class="stat-label">Total Revenue</div>
-          <div class="stat-value">₹${(d.total_revenue||0).toLocaleString('en-IN',{maximumFractionDigits:0})}</div></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">💰</span>
+        <div>
+          <div class="stat-label">My Revenue</div>
+          <div class="stat-value stat-loading" id="ds-revenue">—</div>
         </div>
-      </div>`
-    document.getElementById('page-content').insertAdjacentHTML('afterbegin', statsHtml)
-  } catch {}
+      </div>
+    </div>`
+  pc.insertAdjacentHTML('afterbegin', html)
+}
+
+// Recompute top stats entirely from user's own store analytics
+function updateDashStats() {
+  let totalOrders = 0, todayOrders = 0, totalRevenue = 0
+  Object.values(_storeAnalytics).forEach(d => {
+    totalOrders  += d.total_orders  || 0
+    todayOrders  += d.today_orders  || 0
+    totalRevenue += d.total_revenue || 0
+  })
+  const revStr = totalRevenue >= 100000
+    ? '₹' + (totalRevenue/100000).toFixed(1) + 'L'
+    : totalRevenue >= 1000
+    ? '₹' + (totalRevenue/1000).toFixed(1) + 'k'
+    : '₹' + Math.round(totalRevenue).toLocaleString('en-IN')
+
+  const ordEl = document.getElementById('ds-orders')
+  const todEl = document.getElementById('ds-today')
+  const revEl = document.getElementById('ds-revenue')
+  if (ordEl) { ordEl.textContent = totalOrders;  ordEl.classList.remove('stat-loading') }
+  if (todEl) { todEl.textContent = todayOrders;  todEl.classList.remove('stat-loading') }
+  if (revEl) { revEl.textContent = revStr;        revEl.classList.remove('stat-loading') }
 }
 
 async function loadStoreKPIs(s) {
   try {
     const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
+    // Cache analytics for this store so updateDashStats can sum them
+    _storeAnalytics[s._id] = data
+
     const cur  = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
     const rev  = data.total_revenue || 0
     const revStr = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L'
@@ -1097,9 +1147,12 @@ async function loadStoreKPIs(s) {
     const revEl = document.getElementById(`kpi-rev-${s._id}`)
     const ordEl = document.getElementById(`kpi-ord-${s._id}`)
     const todEl = document.getElementById(`kpi-today-${s._id}`)
-    if (revEl) { revEl.textContent = revStr;             revEl.classList.remove('loading'); revEl.classList.add('rev') }
+    if (revEl) { revEl.textContent = revStr;              revEl.classList.remove('loading'); revEl.classList.add('rev') }
     if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
     if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
+
+    // Update the top dash stats live as each store resolves
+    updateDashStats()
   } catch {}
 }
 
