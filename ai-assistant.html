@@ -1103,7 +1103,21 @@ async function saveProduct(id) {
   }
 
   try {
-    await apiFetch(`/stores/${currentStoreId}/products`, { method: 'POST', body: JSON.stringify(payload) })
+    // FormData POST matching existing product endpoints
+    const fd = new FormData()
+    fd.append('name', payload.name)
+    fd.append('price', payload.price)
+    fd.append('description', payload.description)
+    if (payload.category_id) fd.append('category_id', payload.category_id)
+    if (payload.tags && payload.tags.length) fd.append('tags', payload.tags.join(','))
+
+    const res = await fetch(API + `/stores/${currentStoreId}/products`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Save failed') }
+
     showCardMsg(msg, '✅ Product saved successfully!', 'success')
     btn.textContent = '✅ Saved!'
     allProducts = await apiFetch(`/stores/${currentStoreId}/products`).catch(() => allProducts)
@@ -1127,14 +1141,16 @@ async function saveCategories(id, count) {
     const name = nameEl.value.trim()
     if (!name) continue
     try {
-      await apiFetch(`/stores/${currentStoreId}/categories`, {
+      const cfd = new FormData()
+      cfd.append('name', name)
+      cfd.append('icon', document.getElementById(`${id}_cat${i}_icon`)?.value || '📦')
+      cfd.append('description', document.getElementById(`${id}_cat${i}_desc`)?.value.trim() || '')
+      const cres = await fetch(API + `/stores/${currentStoreId}/categories`, {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          icon: document.getElementById(`${id}_cat${i}_icon`)?.value || '📦',
-          description: document.getElementById(`${id}_cat${i}_desc`)?.value.trim() || ''
-        })
+        headers: { 'Authorization': 'Bearer ' + getToken() },
+        body: cfd
       })
+      if (!cres.ok) throw new Error('Failed')
       saved++
     } catch {}
   }
@@ -1156,19 +1172,29 @@ async function saveStore(id) {
 
   const name = document.getElementById(`${id}_sname`)?.value.trim()
   const desc = document.getElementById(`${id}_sdesc`)?.value.trim()
+  const tagline = document.getElementById(`${id}_tagline`)?.value.trim()
+
   if (!name && !desc) { showCardMsg(msg, 'Fill in at least one field', 'error'); btn.disabled=false; btn.textContent='💾 Update Store'; return }
   if (!currentStoreId) { showCardMsg(msg, 'Select a store first', 'error'); btn.disabled=false; btn.textContent='💾 Update Store'; return }
 
   try {
-    const payload = {}
-    if (name) payload.name = name
-    if (desc) payload.description = desc
-    const taglineEl = document.getElementById(`${id}_tagline`)
-    if (taglineEl && taglineEl.value.trim()) payload.tagline = taglineEl.value.trim()
+    // Use FormData + PUT same as home.html saveStore pattern
+    const fd = new FormData()
+    if (name)    fd.append('name', name)
+    if (desc)    fd.append('description', desc)
+    if (tagline) fd.append('tagline', tagline)
 
-    await apiFetch(`/stores/${currentStoreId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+    const res = await fetch(API + `/stores/${currentStoreId}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body: fd
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Update failed') }
+
     showCardMsg(msg, '✅ Store updated!', 'success')
     btn.textContent = '✅ Saved!'
+    // Refresh store data in nav dropdown
+    await loadStoreData()
   } catch (e) {
     showCardMsg(msg, '❌ ' + e.message, 'error')
     btn.disabled = false; btn.textContent = '💾 Update Store'
@@ -1215,7 +1241,12 @@ function exportInsights(id) {
    HELPERS
 ══════════════════════════════════════════════════════════ */
 function showCardMsg(el, text, type) {
-  el.innerHTML = `<div class="${type==='success'?'ac-success':'ac-success'}" style="${type!=='success'?'background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:var(--red);':''}">${escHtml(text)}</div>`
+  if (!el) return
+  const isSuccess = type === 'success'
+  const style = isSuccess
+    ? 'background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:var(--green);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;margin-top:10px;'
+    : 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:var(--red);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;margin-top:10px;'
+  el.innerHTML = `<div style="${style}">${escHtml(text)}</div>`
 }
 
 function dismissCard(id) {
