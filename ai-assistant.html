@@ -16,6 +16,7 @@
   gap: 16px;
   height: calc(100vh - 72px);
   overflow: hidden;
+  align-items: stretch;
 }
 
 /* ─── Chat Panel ─────────────────────────────────────────── */
@@ -193,9 +194,11 @@
 .action-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
   overflow-y: auto;
-  padding-right: 2px;
+  overflow-x: hidden;
+  height: 100%;
+  padding-bottom: 20px;
 }
 .action-panel::-webkit-scrollbar { width: 4px; }
 .action-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -218,9 +221,10 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;   /* allow save btn shadow to show */
   animation: cardIn .3s ease both;
   transition: border-color .2s;
+  flex-shrink: 0;
 }
 .action-card:hover { border-color: rgba(108,99,255,0.3); }
 @keyframes cardIn {
@@ -240,7 +244,7 @@
 }
 .action-card-title { font-size: 13px; font-weight: 800; }
 .action-card-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.action-card-body  { padding: 14px 16px; }
+.action-card-body  { padding: 14px 16px 18px; }
 
 /* fields inside action cards */
 .ac-field { margin-bottom: 10px; }
@@ -289,7 +293,7 @@
 .ac-field-row .ac-field { margin-bottom: 0; }
 
 /* save / action buttons */
-.ac-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.ac-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); padding-bottom: 4px; }
 .btn-save {
   flex: 1;
   background: linear-gradient(135deg,#6c63ff,#7c73ff);
@@ -513,7 +517,7 @@
       </div>
 
       <!-- RIGHT: Actions -->
-      <div class="action-panel" id="actionPanel">
+      <div class="action-panel" id="actionPanel" style="max-height:calc(100vh - 72px);overflow-y:auto;">
         <div class="action-empty" id="actionEmpty">
           <div class="action-empty-icon">💬</div>
           <h3>Start a conversation</h3>
@@ -824,8 +828,19 @@ function escHtml(s) {
 ══════════════════════════════════════════════════════════ */
 function renderActionCard(action) {
   const panel = document.getElementById('actionPanel')
+
+  // Remove empty placeholder
   const empty = document.getElementById('actionEmpty')
   if (empty) empty.remove()
+
+  // SINGLE CARD: remove any existing card first
+  const existing = panel.querySelector('.action-card')
+  if (existing) {
+    existing.style.transition = 'opacity .15s, transform .15s'
+    existing.style.opacity = '0'
+    existing.style.transform = 'translateX(20px)'
+    setTimeout(() => existing.remove(), 160)
+  }
 
   const card = document.createElement('div')
   card.className = 'action-card'
@@ -841,8 +856,11 @@ function renderActionCard(action) {
     default: return
   }
 
-  panel.prepend(card)
-  panel.scrollTop = 0
+  // Slight delay so old card animates out first
+  setTimeout(() => {
+    panel.appendChild(card)
+    panel.scrollTop = 0
+  }, existing ? 170 : 0)
 }
 
 /* ── Product Card ──────────────────────────────────── */
