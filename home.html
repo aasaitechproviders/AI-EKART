@@ -509,6 +509,26 @@
   50%      { opacity: 0.45; transform: scale(1.55); }
 }
 
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; flex-shrink: 0;
+  transition: all .2s;
+}
+.theme-toggle:hover {
+  border-color: rgba(108,99,255,0.4);
+  background: rgba(108,99,255,0.08);
+  transform: rotate(12deg) scale(1.05);
+}
+[data-theme="light"] .theme-toggle {
+  background: #f3f4f6;
+  border-color: rgba(0,0,0,0.12);
+  color: #374151;
+}
+
 /* mobile */
 @media (max-width:900px) {
   .stats-row { grid-template-columns: repeat(2,1fr); }
@@ -517,6 +537,15 @@
 </style>
 <script>
 ;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/home.html')}})()
+</script>
+<script>
+/* ── BLOCKING: apply theme before first paint to prevent flash ── */
+(function(){
+  if (localStorage.getItem('ekart_theme') === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light')
+    document.documentElement.style.background = '#f0f0f5'
+  }
+})()
 </script>
 <script src="api.js"></script>
 <script src="nav.js"></script>
@@ -598,6 +627,7 @@
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">My Stores</span></div>
     <div class="topbar-right">
+      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle day / night mode">🌙</button>
       <div id="topbar-actions"></div>
     </div>
   </div>
@@ -677,6 +707,31 @@
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   THEME SYSTEM
+══════════════════════════════════════════════════════════ */
+let _isDark = localStorage.getItem('ekart_theme') !== 'light'
+
+function applyTheme(dark) {
+  _isDark = dark
+  const root = document.documentElement
+  if (dark) {
+    root.removeAttribute('data-theme')
+    root.style.background = '#080910'
+  } else {
+    root.setAttribute('data-theme', 'light')
+    root.style.background = '#f0f0f5'
+  }
+  const btn = document.getElementById('themeToggleBtn')
+  if (btn) btn.textContent = dark ? '🌙' : '☀️'
+  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
+}
+
+function toggleTheme() { applyTheme(!_isDark) }
+
+// Apply immediately (also done by blocking head script, but keep in sync)
+applyTheme(_isDark)
+
 let currentUser = null, allStores = []
 
 const CNAME_TARGET = 'storefront.aasaitech.in'
