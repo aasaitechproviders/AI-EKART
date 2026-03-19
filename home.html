@@ -1,895 +1,625 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#080910">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — My Stores</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="nav.css">
 <style>
-
-/* ══════════════════════════════════════════════════════════
-   SKELETON SYSTEM
-   ─ Only covers the MAIN area (right of fixed sidebar).
-   ─ Sidebar is real DOM: renders immediately, no skeleton.
-   ─ On mobile (≤640px) sidebar is hidden, skeleton goes full-width.
-══════════════════════════════════════════════════════════ */
-
-@keyframes skelShimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Obsidian Precision
+═══════════════════════════════════════════════ */
+:root {
+  --bg:           #07080D;
+  --surface:      #0C0E16;
+  --surface-2:    #111420;
+  --surface-3:    #171B28;
+  --surface-4:    #1D2133;
+  --border:       rgba(255,255,255,0.055);
+  --border-md:    rgba(255,255,255,0.09);
+  --border-lg:    rgba(255,255,255,0.14);
+  --text:         #ECEDF4;
+  --text-2:       #878BAA;
+  --text-3:       #474B65;
+  --accent:       #7C6FFF;
+  --accent-2:     #6A5DEE;
+  --accent-3:     #5A4DDD;
+  --accent-dim:   rgba(124,111,255,0.10);
+  --accent-glow:  rgba(124,111,255,0.22);
+  --accent-soft:  rgba(124,111,255,0.06);
+  --green:        #2DD4A0;
+  --green-dim:    rgba(45,212,160,0.10);
+  --green-border: rgba(45,212,160,0.22);
+  --amber:        #F5A523;
+  --amber-dim:    rgba(245,165,35,0.10);
+  --amber-border: rgba(245,165,35,0.25);
+  --red:          #F26B6B;
+  --red-dim:      rgba(242,107,107,0.10);
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r:     14px;
+  --r-lg:  18px;
+  --r-xl:  24px;
+  --sh-sm: 0 1px 4px rgba(0,0,0,0.4);
+  --sh:    0 4px 20px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
+  --sh-lg: 0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+  --sh-accent: 0 8px 32px rgba(124,111,255,0.25);
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.4,0,0.2,1);
+  --t: all 0.18s cubic-bezier(0.4,0,0.2,1);
 }
-
-.skel {
-  border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 0%,
-    rgba(255,255,255,0.10) 40%,
-    rgba(255,255,255,0.04) 80%
-  );
-  background-size: 400px 100%;
-  animation: skelShimmer 1.4s ease-in-out infinite;
-}
-[data-theme="light"] .skel {
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.05) 0%,
-    rgba(0,0,0,0.10) 40%,
-    rgba(0,0,0,0.05) 80%
-  );
-  background-size: 400px 100%;
-  animation: skelShimmer 1.4s ease-in-out infinite;
-}
-
-/*
-  Skeleton root — covers only the MAIN content area.
-  Left edge starts at 220px (sidebar width) so the real
-  sidebar is always visible underneath / beside it.
-*/
-#page-skeleton {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 220px;          /* ← key: sidebar is NOT covered */
-  display: flex;
-  flex-direction: column;
-  z-index: 9999;
-  background: #080910;
-  opacity: 1;
-  transition: opacity 0.28s ease;
-  pointer-events: none;
-}
-#page-skeleton.skel-hiding {
-  opacity: 0;
-}
-[data-theme="light"] #page-skeleton {
-  background: #f0f0f5;
-}
-
-/* On mobile the sidebar collapses → skeleton goes full-width */
-@media (max-width: 640px) {
-  #page-skeleton { left: 0; }
-}
-
-/* ── Skeleton Topbar ── */
-.skel-topbar {
-  height: 56px;
-  flex-shrink: 0;
-  background: #13141f;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-}
-[data-theme="light"] .skel-topbar {
-  background: #ffffff;
-  border-bottom-color: rgba(0,0,0,0.09);
-}
-.skel-topbar-title { height: 16px; width: 100px; border-radius: 5px; }
-.skel-topbar-btn   { height: 34px; width: 108px; border-radius: 9px; }
-
-/* ── Skeleton Body ── */
-.skel-body {
-  flex: 1;
-  padding: 24px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 4-column stats row */
-.skel-stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  flex-shrink: 0;
-}
-.skel-stat-card { height: 78px; border-radius: 13px; }
-
-/* Store cards grid */
-.skel-stores-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  flex: 1;
-}
-
-.skel-store-card {
-  border-radius: 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.skel-store-banner { height: 80px; flex-shrink: 0; }
-.skel-store-body {
-  flex: 1;
-  padding: 16px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #13141f;
-}
-[data-theme="light"] .skel-store-body { background: #ffffff; }
-.skel-store-name   { height: 14px; width: 55%; border-radius: 5px; }
-.skel-store-slug   { height: 10px; width: 38%; border-radius: 4px; }
-.skel-store-domain { height: 33px; border-radius: 9px; }
-.skel-store-badges { display: flex; gap: 7px; }
-.skel-badge        { height: 22px; width: 58px; border-radius: 20px; }
-.skel-store-kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 10px;
-}
-[data-theme="light"] .skel-store-kpis { border-top-color: rgba(0,0,0,0.06); }
-.skel-kpi { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0 6px; }
-.skel-kpi-val   { height: 14px; width: 44px; border-radius: 4px; }
-.skel-kpi-label { height: 8px;  width: 32px; border-radius: 3px; }
-.skel-store-actions { display: flex; gap: 7px; }
-.skel-action-btn { height: 30px; width: 60px; border-radius: 8px; }
-
-/* Responsive */
-@media (max-width: 900px) {
-  .skel-stats-row   { grid-template-columns: repeat(2, 1fr); }
-  .skel-stores-grid { grid-template-columns: 1fr; }
-}
-
-/* ══════════════════════════════════════════════════════════
-   SIDEBAR USER INFO SHIMMER
-   ─ Shown while nav.js is resolving the user object.
-   ─ Replaced by real content once renderNav() resolves.
-══════════════════════════════════════════════════════════ */
-.sidebar-user-skel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-bottom: 14px;
-}
-[data-theme="light"] .sidebar-user-skel { border-bottom-color: rgba(0,0,0,0.07); }
-
-.sidebar-user-skel .skel-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%; flex-shrink: 0;
-}
-.sidebar-user-skel .skel-lines {
-  flex: 1; display: flex; flex-direction: column; gap: 5px;
-}
-.sidebar-user-skel .skel-name  { height: 10px; width: 80px;  border-radius: 4px; }
-.sidebar-user-skel .skel-email { height: 9px;  width: 110px; border-radius: 4px; }
-
-/* Hide the real .sidebar-user until nav resolves */
-.sidebar-user.loading { display: none !important; }
-/* Show shimmer only while loading */
-#sidebar-user-skel    { display: flex; }
-#sidebar-user-skel.loaded { display: none !important; }
-
-/* ══════════════════════════════════════════════════════════
-   DAY / NIGHT THEME OVERRIDES
-══════════════════════════════════════════════════════════ */
 [data-theme="light"] {
-  --surface:  #ffffff;
-  --surface2: #f3f4f6;
-  --surface3: #e9eaf0;
-  --border:   rgba(0,0,0,0.10);
-  --border2:  rgba(0,0,0,0.14);
-  --text:     #111827;
-  --text2:    #374151;
-  --text3:    #9ca3af;
-  --accent:   #6c63ff;
-  --accent2:  #5b52e0;
-  --green:    #16a34a;
-  --red:      #dc2626;
-  --yellow:   #ca8a04;
-  background: #f0f0f5 !important;
-}
-[data-theme="light"] body            { background: #f0f0f5 !important; }
-[data-theme="light"] .sidebar        { background: #fff !important; border-right-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .main-wrap      { background: #f0f0f5 !important; }
-[data-theme="light"] .topbar         { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .store-card     { background: #fff !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
-[data-theme="light"] .stat-card      { background: #fff !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
-[data-theme="light"] .modal          { background: #fff !important; }
-[data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.35) !important; }
-[data-theme="light"] .content        { background: #f0f0f5 !important; }
-[data-theme="light"] .sidebar-logo   { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-name  { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-email { color: #9ca3af !important; }
-[data-theme="light"] .nav-section-label  { color: #9ca3af !important; }
-[data-theme="light"] .badge-gray     { background: #e9eaf0 !important; color: #374151 !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .badge-green    { background: rgba(22,163,74,0.1) !important; color: #15803d !important; }
-[data-theme="light"] .store-name     { color: #111827 !important; }
-[data-theme="light"] .store-kpi-val  { color: #111827 !important; }
-[data-theme="light"] .store-kpi-val.rev   { color: #16a34a !important; }
-[data-theme="light"] .store-kpi-val.today { color: #5b52e0 !important; }
-[data-theme="light"] .store-kpi-label     { color: #9ca3af !important; }
-[data-theme="light"] .domain-section-label { color: #9ca3af !important; }
-[data-theme="light"] .dns-guide-title { color: #5b52e0 !important; }
-[data-theme="light"] .dns-step-text  { color: #374151 !important; }
-[data-theme="light"] .dns-rec-val    { color: #111827 !important; }
-[data-theme="light"] .empty-state    { background: #f0f0f5 !important; color: #374151 !important; }
-[data-theme="light"] .btn-logout     { color: #374151 !important; }
-[data-theme="light"] .field input,
-[data-theme="light"] .field textarea,
-[data-theme="light"] .field select   { background: #f3f4f6; color: #111827; border-color: rgba(0,0,0,0.12); }
-[data-theme="light"] .domain-input-row input { background: #f3f4f6; color: #111827; border-color: rgba(0,0,0,0.12); }
-[data-theme="light"] .domain-save-btn { background: #f3f4f6; border-color: rgba(0,0,0,0.12); color: #374151; }
-[data-theme="light"] .dns-guide      { border-color: rgba(108,99,255,0.18); background: rgba(108,99,255,0.04); }
-[data-theme="light"] .dns-record-box { border-color: rgba(0,0,0,0.1); }
-[data-theme="light"] .dns-record-box-header { background: #f3f4f6; }
-[data-theme="light"] .dns-record-row { border-color: rgba(0,0,0,0.07); }
-[data-theme="light"] .reg-tab        { background: #f3f4f6; border-color: rgba(0,0,0,0.1); color: #6b7280; }
-[data-theme="light"] .nav-item       { color: #374151; }
-[data-theme="light"] .nav-item:hover,
-[data-theme="light"] .nav-item.active { background: rgba(108,99,255,0.08); color: #5b52e0; }
-[data-theme="light"] .topbar-title   { color: #111827; }
-[data-theme="light"] .card-style-opt { border-color: rgba(0,0,0,0.1); }
-[data-theme="light"] .store-kpis     { border-top-color: rgba(0,0,0,0.07); }
-[data-theme="light"] .store-kpi      { border-right-color: rgba(0,0,0,0.07); }
-[data-theme="light"] .store-slug     { color: #9ca3af; }
-[data-theme="light"] .domain-section { border-top-color: rgba(0,0,0,0.07); }
-[data-theme="light"] .live-badge-wrap { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.25); color: #15803d; }
-[data-theme="light"] .domain-status-row.pending { background: rgba(245,158,11,0.07); }
-[data-theme="light"] .domain-status-row.connected { background: rgba(22,163,74,0.07); }
-[data-theme="light"] .dns-pending-hint { color: #92400e; }
-[data-theme="light"] .sidebar-user-skel { border-bottom-color: rgba(0,0,0,0.07); }
-
-/* ── STORE CARDS ── */
-.stores-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px,1fr));
-  gap: 20px;
+  --bg:           #F2F3F9;
+  --surface:      #FFFFFF;
+  --surface-2:    #F7F8FD;
+  --surface-3:    #EFF1F8;
+  --surface-4:    #E8EAF4;
+  --border:       rgba(0,0,0,0.07);
+  --border-md:    rgba(0,0,0,0.10);
+  --border-lg:    rgba(0,0,0,0.16);
+  --text:         #0F1117;
+  --text-2:       #5A5E78;
+  --text-3:       #9EA3BB;
+  --accent-dim:   rgba(124,111,255,0.08);
+  --accent-glow:  rgba(124,111,255,0.16);
+  --accent-soft:  rgba(124,111,255,0.05);
+  --green-dim:    rgba(45,212,160,0.08);
+  --green-border: rgba(45,212,160,0.20);
+  --amber-dim:    rgba(245,165,35,0.08);
+  --amber-border: rgba(245,165,35,0.22);
+  --red-dim:      rgba(242,107,107,0.08);
+  --sh-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --sh:    0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  --sh-lg: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  --sh-accent: 0 6px 24px rgba(124,111,255,0.18);
 }
 
-.store-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  transition: border-color .22s, transform .22s, box-shadow .22s;
-  position: relative;
-}
-.store-card:hover {
-  border-color: rgba(108,99,255,0.38);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.22);
-}
-.store-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .22s;
-  box-shadow: inset 0 0 0 1.5px rgba(108,99,255,0.35);
-}
-.store-card:hover::after { opacity: 1; }
+/* ═══════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+[data-theme="light"] body,[data-theme="light"] html{background:#F2F3F9 !important}
 
-.store-banner {
-  height: 80px;
-  display: flex; align-items: center;
-  padding: 0 20px;
-  gap: 13px;
-  position: relative;
-  overflow: hidden;
+/* ═══════════════════════════════════════════════
+   SKELETON — main area only (sidebar always visible)
+═══════════════════════════════════════════════ */
+@keyframes skelShimmer{
+  0%{background-position:-600px 0}
+  100%{background-position:600px 0}
 }
-.store-banner::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.15) 100%);
-  pointer-events: none;
+.skel{
+  border-radius:var(--r-xs);
+  background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.08) 40%,rgba(255,255,255,0.03) 80%);
+  background-size:600px 100%;
+  animation:skelShimmer 1.6s ease-in-out infinite;
 }
-.store-banner-logo {
-  height: 48px; width: 48px;
-  border-radius: 12px;
-  object-fit: contain;
-  background: rgba(255,255,255,0.18);
-  padding: 5px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  position: relative; z-index: 1;
+[data-theme="light"] .skel{
+  background:linear-gradient(90deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.09) 40%,rgba(0,0,0,0.04) 80%);
+  background-size:600px 100%;
+  animation:skelShimmer 1.6s ease-in-out infinite;
 }
-.store-banner-initials {
-  font-size: 28px; font-weight: 900;
-  color: white;
-  letter-spacing: -0.04em;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  position: relative; z-index: 1;
+#page-skeleton{
+  position:fixed;top:0;right:0;bottom:0;left:248px;
+  display:flex;flex-direction:column;z-index:9999;
+  background:var(--bg);opacity:1;
+  transition:opacity 0.3s var(--ease);pointer-events:none;
 }
+#page-skeleton.skel-hiding{opacity:0}
+.skel-topbar{
+  height:60px;flex-shrink:0;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+}
+.skel-topbar-title{height:14px;width:88px;border-radius:5px}
+.skel-topbar-btn{height:36px;width:120px;border-radius:var(--r-sm)}
+.skel-body{flex:1;padding:28px;overflow:hidden;display:flex;flex-direction:column;gap:20px}
+.skel-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;flex-shrink:0}
+.skel-stat-card{height:88px;border-radius:var(--r)}
+.skel-stores-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;flex:1}
+.skel-store-card{border-radius:var(--r-xl);overflow:visible;display:flex;flex-direction:column;position:relative}
+.skel-store-banner{height:100px;flex-shrink:0;border-radius:var(--r-xl) var(--r-xl) 0 0}
+.skel-store-body{flex:1;padding:38px 20px 20px;display:flex;flex-direction:column;gap:12px;background:var(--surface);border-radius:0 0 var(--r-xl) var(--r-xl)}
+.skel-store-logo{position:absolute;top:68px;left:20px;width:52px;height:52px;border-radius:13px}
+.skel-store-name{height:16px;width:52%;border-radius:5px}
+.skel-store-slug{height:11px;width:36%;border-radius:4px}
+.skel-store-domain{height:36px;border-radius:var(--r-sm)}
+.skel-store-badges{display:flex;gap:8px}
+.skel-badge{height:24px;width:64px;border-radius:20px}
+.skel-store-kpis{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);padding-top:12px}
+.skel-kpi{display:flex;flex-direction:column;align-items:center;gap:6px}
+.skel-kpi-val{height:16px;width:48px;border-radius:4px}
+.skel-kpi-label{height:9px;width:34px;border-radius:3px}
+.skel-store-actions{display:flex;gap:8px}
+.skel-action-btn{height:30px;width:64px;border-radius:var(--r-sm)}
+@media(max-width:900px){.skel-stats-row{grid-template-columns:repeat(2,1fr)}.skel-stores-grid{grid-template-columns:1fr}}
+@media(max-width:648px){#page-skeleton{left:0}}
 
-.store-card-body { padding: 16px 18px 18px; }
+/* ═══════════════════════════════════════════════
+   SIDEBAR — Premium
+═══════════════════════════════════════════════ */
+.sidebar{
+  width:248px !important;background:var(--surface) !important;
+  border-right:1px solid var(--border) !important;
+  padding:0 !important;display:flex !important;flex-direction:column !important;
+  position:fixed !important;top:0;left:0;bottom:0;z-index:100;overflow:hidden;
+}
+.sidebar-logo{
+  display:flex !important;align-items:center;gap:9px;
+  padding:18px 18px 16px !important;
+  font-family:var(--font) !important;font-size:19px !important;
+  font-weight:800 !important;letter-spacing:-0.05em !important;
+  color:var(--text) !important;text-decoration:none;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-logo::before{
+  content:'';display:inline-block;width:26px;height:26px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
+  border-radius:7px;box-shadow:0 4px 12px var(--accent-glow);flex-shrink:0;
+}
+.logo-k{color:var(--accent) !important}
+.logo-dot{display:none !important}
 
-.store-name {
-  font-size: 15.5px; font-weight: 800;
-  margin-bottom: 3px;
-  letter-spacing: -0.01em;
+/* Sidebar user shimmer */
+.sidebar-user-skel{
+  display:flex;align-items:center;gap:10px;
+  margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);
 }
-.store-slug {
-  font-size: 11px; color: var(--text3);
-  font-family: 'DM Mono', monospace;
-  margin-bottom: 11px;
-  display: flex; align-items: center; gap: 3px;
-}
-.store-slug-copy-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--text3); font-size: 13px;
-  padding: 0 3px; vertical-align: middle;
-  transition: color .15s;
-  line-height: 1;
-}
-.store-slug-copy-btn:hover { color: var(--accent); }
+.sidebar-user-skel .skel-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0}
+.sidebar-user-skel .skel-lines{flex:1;display:flex;flex-direction:column;gap:5px}
+.sidebar-user-skel .skel-name{height:10px;width:90px;border-radius:4px}
+.sidebar-user-skel .skel-email{height:8px;width:120px;border-radius:3px}
+#sidebar-user-skel.loaded{display:none !important}
+.sidebar-user.loading{display:none !important}
 
-.store-badges {
-  display: flex; gap: 7px;
-  margin-bottom: 13px; flex-wrap: wrap;
+/* Real user */
+.sidebar-user{
+  display:flex !important;align-items:center;gap:10px;
+  margin:10px 10px 4px !important;padding:10px 11px !important;
+  border-radius:var(--r-sm) !important;
+  background:var(--surface-2) !important;
+  border:1px solid var(--border) !important;
+  transition:var(--t) !important;cursor:default;
 }
-
-.store-kpis {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  border-top: 1px solid var(--border);
-  margin: 0 -18px 16px;
+.sidebar-user:hover{border-color:var(--border-md) !important;background:var(--surface-3) !important}
+.sidebar-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-3)) !important;
+  font-size:13px !important;font-weight:700 !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  color:white !important;flex-shrink:0 !important;
+  font-family:var(--font) !important;letter-spacing:-0.01em !important;
 }
-.store-kpi { padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); }
-.store-kpi:last-child { border-right: none; }
-.store-kpi-val {
-  font-size: 14px; font-weight: 800;
-  font-family: 'DM Mono', monospace;
-  color: var(--text); line-height: 1;
-  margin-bottom: 3px;
+.sidebar-user-name{
+  font-size:12.5px !important;font-weight:600 !important;
+  color:var(--text) !important;letter-spacing:-0.01em !important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:var(--font) !important;
 }
-.store-kpi-val.loading { color: var(--border2); animation: shimmer 1.2s infinite; }
-@keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.3} }
-.store-kpi-val.rev   { color: var(--green); }
-.store-kpi-val.today { color: var(--accent2); }
-.store-kpi-label {
-  font-size: 9.5px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--text3);
-}
-.store-actions { display: flex; gap: 7px; flex-wrap: wrap; }
-
-/* ── DASH STATS ── */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 14px;
-  margin-bottom: 24px;
-}
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px 20px;
-  display: flex; align-items: center; gap: 14px;
-  transition: border-color .2s, transform .2s;
-}
-.stat-card:hover {
-  border-color: rgba(108,99,255,0.3);
-  transform: translateY(-2px);
-}
-.stat-icon { font-size: 26px; }
-.stat-label {
-  font-size: 11px; color: var(--text3);
-  font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; margin-bottom: 4px;
-}
-.stat-value {
-  font-size: 24px; font-weight: 900;
-  letter-spacing: -0.04em;
-  font-family: 'DM Mono', monospace;
-}
-.stat-value.stat-loading {
-  color: var(--border2);
-  animation: shimmer 1.2s infinite;
+.sidebar-user-email{
+  font-size:11px !important;color:var(--text-3) !important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:var(--font) !important;
 }
 
-/* Card style picker */
-.card-style-picker {
-  display: grid; grid-template-columns: repeat(4,1fr);
-  gap: 10px; margin-top: 4px;
+/* Nav */
+.nav-section{padding:6px 10px !important;flex-shrink:0}
+.nav-section-label{
+  font-size:9px !important;font-weight:700 !important;
+  letter-spacing:0.12em !important;text-transform:uppercase !important;
+  color:var(--text-3) !important;padding:8px 8px 5px !important;
+  font-family:var(--font) !important;
 }
-.card-style-opt {
-  border: 2px solid var(--border); border-radius: 10px;
-  padding: 10px 6px 8px; cursor: pointer; text-align: center;
-  transition: all .15s;
+.nav-item{
+  display:flex !important;align-items:center !important;gap:9px !important;
+  padding:8px 10px !important;border-radius:var(--r-sm) !important;
+  font-size:13px !important;font-weight:500 !important;
+  color:var(--text-2) !important;text-decoration:none !important;
+  transition:var(--t) !important;position:relative !important;
+  font-family:var(--font) !important;margin-bottom:1px;
 }
-.card-style-opt:hover,
-.card-style-opt.active { border-color: var(--accent); background: rgba(108,99,255,0.08); }
-.card-style-opt span { font-size: 11px; font-weight: 700; color: var(--text3); display: block; margin-top: 6px; }
-.card-style-opt.active span { color: var(--accent2); }
-.card-style-preview { height: 44px; display: flex; align-items: center; justify-content: center; }
-.cspr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 40px; }
-.cspr-grid div { background: var(--border2); border-radius: 2px; height: 16px; }
-.card-style-opt.active .cspr-grid div { background: var(--accent); opacity: 0.5; }
-.cspr-list { display: flex; gap: 4px; align-items: center; width: 50px; margin-bottom: 3px; }
-.cspr-list-img { width: 16px; height: 16px; background: var(--border2); border-radius: 2px; flex-shrink: 0; }
-.cspr-list-lines { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.cspr-list-lines span { display: block; height: 3px; background: var(--border2); border-radius: 2px; }
-.card-style-opt.active .cspr-list-img,
-.card-style-opt.active .cspr-list-lines span { background: var(--accent); opacity: 0.5; }
-.cspr-minimal { position: relative; width: 40px; height: 40px; border-radius: 5px; overflow: hidden; }
-.cspr-min-img { position: absolute; inset: 0; background: var(--border2); }
-.cspr-min-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 40%; background: rgba(0,0,0,0.3); }
-.card-style-opt.active .cspr-min-img { background: var(--accent); opacity: 0.4; }
-.cspr-magazine { display: flex; gap: 3px; width: 48px; height: 40px; }
-.cspr-mag-big { flex: 2; background: var(--border2); border-radius: 2px; }
-.cspr-mag-small { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.cspr-mag-small div { flex: 1; background: var(--border2); border-radius: 2px; }
-.card-style-opt.active .cspr-mag-big,
-.card-style-opt.active .cspr-mag-small div { background: var(--accent); opacity: 0.5; }
+.nav-item:hover{background:var(--surface-3) !important;color:var(--text) !important}
+.nav-item.active{
+  background:var(--accent-dim) !important;color:var(--accent) !important;
+  font-weight:600 !important;
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:-10px;top:22%;bottom:22%;
+  width:3px;border-radius:0 3px 3px 0;background:var(--accent);
+}
+.nav-icon{font-size:15px !important;width:20px !important;display:flex !important;justify-content:center !important;flex-shrink:0 !important;opacity:.8}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-bottom{margin-top:auto !important;padding:10px !important;border-top:1px solid var(--border) !important;flex-shrink:0}
+.btn-logout{
+  width:100% !important;padding:9px 11px !important;border-radius:var(--r-sm) !important;
+  border:1px solid var(--border-md) !important;background:transparent !important;
+  color:var(--text-2) !important;font-size:12.5px !important;font-weight:500 !important;
+  cursor:pointer !important;text-align:left !important;transition:var(--t) !important;
+  display:flex !important;align-items:center !important;gap:7px !important;
+  font-family:var(--font) !important;
+}
+.btn-logout:hover{background:var(--red-dim) !important;border-color:rgba(242,107,107,0.3) !important;color:var(--red) !important}
 
-/* ══════════════════════════════════════════════════════════
-   DOMAIN WIDGET — ENHANCED
-══════════════════════════════════════════════════════════ */
-.domain-section {
-  border-top: 1px solid var(--border);
-  margin: 0 -18px 14px;
-  padding: 11px 18px 0;
+/* ═══════════════════════════════════════════════
+   MAIN WRAP + TOPBAR
+═══════════════════════════════════════════════ */
+.main-wrap{margin-left:248px !important;min-height:100vh !important;background:var(--bg) !important;display:flex !important;flex-direction:column !important}
+.topbar{
+  height:60px !important;background:var(--surface) !important;
+  border-bottom:1px solid var(--border) !important;
+  display:flex !important;align-items:center !important;justify-content:space-between !important;
+  padding:0 28px !important;position:sticky !important;top:0 !important;z-index:50 !important;flex-shrink:0 !important;
 }
-.domain-section-label {
-  font-size: 9.5px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 8px;
-}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:15px !important;font-weight:700 !important;color:var(--text) !important;letter-spacing:-0.02em !important;font-family:var(--font) !important}
+.topbar-right{display:flex !important;align-items:center !important;gap:8px !important}
+.content{flex:1 !important;padding:28px !important;background:var(--bg) !important;min-width:0 !important}
 
-.domain-status-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 11px; border-radius: 11px; margin-bottom: 6px;
+/* ═══════════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════════ */
+.theme-toggle{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border-md);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
 }
-.domain-status-row.connected {
-  border: 1px solid rgba(34,197,94,0.28);
-  background: rgba(34,197,94,0.07);
-  transition: background .15s, border-color .15s;
-}
-.domain-status-row.connected:hover {
-  background: rgba(34,197,94,0.11);
-  border-color: rgba(34,197,94,0.4);
-}
-.domain-status-row.pending {
-  border: 1px solid rgba(245,158,11,0.3);
-  background: rgba(245,158,11,0.07);
-}
+.theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
 
-.domain-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.domain-dot.pending {
-  background: #f59e0b;
-  animation: domain-pulse 1.3s ease-in-out infinite;
+/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+.btn{
+  display:inline-flex !important;align-items:center !important;gap:6px !important;
+  font-family:var(--font) !important;font-size:13px !important;font-weight:600 !important;
+  border-radius:var(--r-sm) !important;border:none !important;cursor:pointer !important;
+  transition:var(--t) !important;white-space:nowrap !important;
+  letter-spacing:-0.01em !important;text-decoration:none !important;
 }
-@keyframes domain-pulse {
-  0%,100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.45; transform: scale(1.55); }
-}
+.btn:active{transform:scale(0.96) !important}
+.btn-primary{background:var(--accent) !important;color:white !important;padding:0 18px !important;height:36px !important;box-shadow:0 4px 16px var(--accent-glow) !important}
+.btn-primary:hover{background:var(--accent-2) !important;box-shadow:0 6px 24px var(--accent-glow) !important;transform:translateY(-1px) !important}
+.btn-secondary{background:var(--surface-3) !important;color:var(--text-2) !important;border:1px solid var(--border-md) !important;padding:0 14px !important;height:36px !important}
+.btn-secondary:hover{background:var(--surface-4) !important;color:var(--text) !important;border-color:var(--border-lg) !important}
+.btn-sm{height:30px !important;padding:0 11px !important;font-size:12px !important;border-radius:var(--r-xs) !important}
+.btn-danger{background:var(--red-dim) !important;color:var(--red) !important;border:1px solid rgba(242,107,107,0.18) !important}
+.btn-danger:hover{background:rgba(242,107,107,0.18) !important;border-color:var(--red) !important}
 
-.domain-link {
-  font-size: 11.5px;
-  font-family: 'DM Mono', monospace;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #16a34a;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color .15s, text-decoration .15s;
-  display: flex; align-items: center; gap: 4px;
-}
-.domain-link:hover { color: #15803d; text-decoration: underline; }
-.domain-link-arrow {
-  font-size: 10px;
-  opacity: 0;
-  transform: translateX(-3px);
-  transition: opacity .2s, transform .2s;
-  flex-shrink: 0;
-}
-.domain-status-row.connected:hover .domain-link-arrow {
-  opacity: 0.7;
-  transform: translateX(0);
-}
-.domain-value {
-  font-size: 11px; font-family: 'DM Mono', monospace;
-  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.domain-value.pending { color: #d97706; }
+/* ═══════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════ */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:20px;padding:3px 9px;font-family:var(--font);letter-spacing:0.01em}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.badge-gray{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
 
-.live-badge-wrap {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(34,197,94,0.12);
-  border: 1px solid rgba(34,197,94,0.28);
-  border-radius: 20px;
-  padding: 3px 9px 3px 6px;
-  font-size: 9.5px; font-weight: 800;
-  color: #15803d; letter-spacing: 0.05em;
-  flex-shrink: 0;
-  transition: background .15s;
+/* ═══════════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{
+  background:var(--surface) !important;border:1px solid var(--border) !important;
+  border-radius:var(--r) !important;padding:20px 22px !important;
+  display:flex !important;align-items:flex-start !important;gap:14px !important;
+  transition:var(--t) !important;position:relative;overflow:hidden;
+  box-shadow:var(--sh-sm) !important;
 }
-[data-theme="light"] .live-badge-wrap {
-  background: rgba(22,163,74,0.1);
-  border-color: rgba(22,163,74,0.25);
-  color: #15803d;
+.stat-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 55%,rgba(124,111,255,0.04) 100%);
+  pointer-events:none;
 }
+.stat-card:hover{border-color:var(--border-md) !important;transform:translateY(-2px) !important;box-shadow:var(--sh) !important}
+.stat-icon-wrap{
+  width:40px;height:40px;border-radius:var(--r-sm);
+  background:var(--surface-3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;transition:var(--t);
+}
+.stat-card:hover .stat-icon-wrap{background:var(--accent-dim);border-color:rgba(124,111,255,0.2)}
+.stat-info{flex:1;min-width:0}
+.stat-label{font-size:10.5px !important;color:var(--text-2) !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:0.09em !important;margin-bottom:7px !important;font-family:var(--font) !important}
+.stat-value{font-size:26px !important;font-weight:700 !important;letter-spacing:-0.04em !important;font-family:var(--mono) !important;color:var(--text) !important;line-height:1 !important}
+.stat-value.stat-loading{color:var(--surface-4) !important;animation:kpiPulse 1.4s ease-in-out infinite !important}
+@keyframes kpiPulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-.live-pulse-dot {
-  position: relative;
-  width: 7px; height: 7px;
-  display: flex; align-items: center; justify-content: center;
+/* ═══════════════════════════════════════════════
+   STORE CARDS
+═══════════════════════════════════════════════ */
+.stores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.store-card{
+  background:var(--surface) !important;border:1px solid var(--border) !important;
+  border-radius:var(--r-xl) !important;overflow:visible !important;
+  transition:var(--t) !important;position:relative !important;
+  box-shadow:var(--sh-sm) !important;
+  animation:cardIn 0.38s var(--ease) both;
 }
-.live-pulse-dot::before {
-  content: '';
-  position: absolute;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  z-index: 1;
-}
-.live-pulse-dot::after {
-  content: '';
-  position: absolute;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  animation: livePulseRing 1.8s ease-out infinite;
-}
-@keyframes livePulseRing {
-  0%   { transform: scale(1);   opacity: 0.8; }
-  70%  { transform: scale(2.6); opacity: 0;   }
-  100% { transform: scale(2.6); opacity: 0;   }
-}
-.live-badge-wrap:hover .live-pulse-dot::after { animation-duration: 0.9s; }
+.store-card:hover{border-color:var(--border-md) !important;transform:translateY(-5px) !important;box-shadow:var(--sh-lg) !important}
+.store-card:nth-child(1){animation-delay:.05s}
+.store-card:nth-child(2){animation-delay:.10s}
+.store-card:nth-child(3){animation-delay:.15s}
+.store-card:nth-child(4){animation-delay:.20s}
 
-.domain-badge {
-  font-size: 9.5px; font-weight: 700;
-  letter-spacing: 0.04em; flex-shrink: 0;
+/* Banner */
+.store-banner{
+  height:100px !important;border-radius:var(--r-xl) var(--r-xl) 0 0 !important;
+  display:block !important;position:relative !important;overflow:hidden !important;
 }
-.domain-badge.pending   { color: #b45309; }
-.domain-badge.connected { color: #15803d; }
-
-.domain-action-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--text3); font-size: 13px;
-  padding: 2px 3px; line-height: 1; flex-shrink: 0;
-  border-radius: 5px;
-  transition: color .15s, background .15s;
+.store-banner::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0) 20%,rgba(0,0,0,0.4) 100%);
+  z-index:1;pointer-events:none;
 }
-.domain-action-btn:hover        { color: var(--accent2); background: rgba(108,99,255,0.1); }
-.domain-action-btn.remove:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-
-.domain-input-row { display: flex; gap: 6px; margin-bottom: 7px; }
-.domain-input-row input {
-  flex: 1; font-size: 11.5px;
-  font-family: 'DM Mono', monospace;
-  height: 33px; padding: 0 10px;
-  border-radius: 9px;
-  border: 1px solid var(--border2);
-  background: var(--surface2); color: var(--text);
-  outline: none; transition: border-color .15s, box-shadow .15s;
-}
-.domain-input-row input:focus {
-  border-color: rgba(108,99,255,0.5);
-  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
-}
-.domain-save-btn {
-  font-size: 11px; font-weight: 700;
-  padding: 0 13px; height: 33px;
-  border-radius: 9px;
-  border: 1px solid var(--border2);
-  background: var(--surface2); color: var(--text);
-  cursor: pointer; white-space: nowrap;
-  transition: border-color .15s, color .15s, background .15s;
-}
-.domain-save-btn:hover {
-  border-color: rgba(108,99,255,0.4);
-  color: var(--accent2);
-  background: rgba(108,99,255,0.07);
+/* Subtle noise texture */
+.store-banner::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+  z-index:2;pointer-events:none;opacity:.5;
 }
 
-.dns-guide {
-  border: 1px solid rgba(108,99,255,0.2);
-  border-radius: 11px;
-  background: rgba(108,99,255,0.05);
-  overflow: hidden;
-  margin-bottom: 7px;
-  transition: border-color .15s;
+/* Logo overlaps banner edge */
+.store-banner-logo{
+  position:absolute !important;bottom:-26px !important;left:20px !important;
+  width:52px !important;height:52px !important;border-radius:13px !important;
+  object-fit:contain !important;background:var(--surface) !important;
+  padding:6px !important;border:2px solid var(--border-md) !important;
+  box-shadow:var(--sh) !important;z-index:10 !important;
 }
-.dns-guide:hover { border-color: rgba(108,99,255,0.3); }
+.store-banner-initials{
+  position:absolute !important;bottom:-26px !important;left:20px !important;
+  width:52px !important;height:52px !important;border-radius:13px !important;
+  background:var(--surface) !important;border:2px solid var(--border-md) !important;
+  box-shadow:var(--sh) !important;z-index:10 !important;
+  font-size:19px !important;font-weight:900 !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  letter-spacing:-0.04em !important;font-family:var(--font) !important;
+}
+.store-card-body{padding:38px 20px 20px !important}
+.store-name{font-size:16px !important;font-weight:800 !important;color:var(--text) !important;margin-bottom:4px !important;letter-spacing:-0.03em !important;font-family:var(--font) !important}
+.store-slug{font-size:11.5px !important;color:var(--text-3) !important;font-family:var(--mono) !important;margin-bottom:14px !important;display:flex !important;align-items:center !important;gap:4px !important}
+.store-slug-copy-btn{background:none !important;border:none !important;cursor:pointer !important;color:var(--text-3) !important;font-size:12px !important;padding:2px 4px !important;transition:var(--t) !important;border-radius:4px !important;line-height:1 !important}
+.store-slug-copy-btn:hover{color:var(--accent) !important;background:var(--accent-dim) !important}
+.store-badges{display:flex !important;gap:6px !important;margin-bottom:16px !important;flex-wrap:wrap !important}
+.store-kpis{display:grid !important;grid-template-columns:repeat(3,1fr) !important;border-top:1px solid var(--border) !important;border-bottom:1px solid var(--border) !important;margin:0 -20px 16px !important}
+.store-kpi{padding:12px 8px !important;text-align:center !important;border-right:1px solid var(--border) !important;transition:background .15s !important}
+.store-kpi:last-child{border-right:none !important}
+.store-kpi:hover{background:var(--surface-2) !important}
+.store-kpi-val{font-size:15px !important;font-weight:700 !important;font-family:var(--mono) !important;color:var(--text) !important;line-height:1 !important;margin-bottom:4px !important}
+.store-kpi-val.loading{color:var(--surface-4) !important;animation:kpiPulse 1.4s ease-in-out infinite !important}
+.store-kpi-val.rev{color:var(--green) !important}
+.store-kpi-val.today{color:var(--accent) !important}
+.store-kpi-label{font-size:9px !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:0.09em !important;color:var(--text-3) !important;font-family:var(--font) !important}
+.store-actions{display:flex !important;gap:6px !important;flex-wrap:wrap !important}
 
-.dns-guide-header {
-  display: flex; align-items: center; gap: 7px;
-  padding: 9px 12px;
-  cursor: pointer; user-select: none;
-  transition: background .15s;
-}
-.dns-guide-header:hover { background: rgba(108,99,255,0.07); }
-.dns-guide-title { font-size: 11px; font-weight: 700; color: var(--accent2); flex: 1; }
-.dns-guide-chevron { font-size: 10px; color: var(--text3); transition: transform .2s; }
-.dns-guide-chevron.open { transform: rotate(180deg); }
-.dns-guide-body {
-  display: none; padding: 0 12px 11px;
-  border-top: 1px solid rgba(108,99,255,0.15);
-}
-.dns-guide-body.open { display: block; }
+/* ═══════════════════════════════════════════════
+   DOMAIN WIDGET
+═══════════════════════════════════════════════ */
+.domain-section{border-top:1px solid var(--border) !important;margin:0 -20px 16px !important;padding:14px 20px 0 !important}
+.domain-section-label{font-size:9.5px !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:0.09em !important;color:var(--text-3) !important;margin-bottom:10px !important;font-family:var(--font) !important}
+.domain-status-row{display:flex !important;align-items:center !important;gap:8px !important;padding:8px 11px !important;border-radius:var(--r-sm) !important;margin-bottom:8px !important}
+.domain-status-row.connected{background:var(--green-dim) !important;border:1px solid var(--green-border) !important;transition:var(--t) !important}
+.domain-status-row.connected:hover{background:rgba(45,212,160,0.14) !important;border-color:rgba(45,212,160,0.32) !important}
+.domain-status-row.pending{background:var(--amber-dim) !important;border:1px solid var(--amber-border) !important}
+.domain-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.domain-dot.pending{background:var(--amber);animation:domainPulse 1.4s ease-in-out infinite}
+@keyframes domainPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
+.domain-link{font-size:11.5px !important;font-family:var(--mono) !important;flex:1 !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;color:var(--green) !important;text-decoration:none !important;font-weight:500 !important;transition:var(--t) !important;display:flex !important;align-items:center !important;gap:4px !important}
+.domain-link:hover{text-decoration:underline !important}
+.domain-link-arrow{font-size:10px;opacity:0;transform:translateX(-4px);transition:var(--t);flex-shrink:0}
+.domain-status-row.connected:hover .domain-link-arrow{opacity:.7;transform:translateX(0)}
+.domain-value{font-size:11px !important;font-family:var(--mono) !important;flex:1 !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important}
+.domain-value.pending{color:var(--amber) !important}
+.live-badge-wrap{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:20px;padding:3px 9px 3px 6px;font-size:9.5px;font-weight:800;color:var(--green);letter-spacing:.06em;flex-shrink:0;font-family:var(--font);transition:var(--t)}
+.live-pulse-dot{position:relative;width:7px;height:7px;display:flex;align-items:center;justify-content:center}
+.live-pulse-dot::before{content:'';position:absolute;width:7px;height:7px;border-radius:50%;background:var(--green);z-index:1}
+.live-pulse-dot::after{content:'';position:absolute;width:7px;height:7px;border-radius:50%;background:var(--green);animation:livePulse 1.9s ease-out infinite}
+@keyframes livePulse{0%{transform:scale(1);opacity:.9}70%{transform:scale(2.8);opacity:0}100%{transform:scale(2.8);opacity:0}}
+.domain-badge{font-size:9.5px;font-weight:700;letter-spacing:.04em;flex-shrink:0;font-family:var(--font)}
+.domain-badge.pending{color:var(--amber)}
+.domain-badge.connected{color:var(--green)}
+.domain-action-btn{background:none;border:none;cursor:pointer;color:var(--text-3);font-size:13px;padding:3px 4px;line-height:1;flex-shrink:0;border-radius:var(--r-xs);transition:var(--t)}
+.domain-action-btn:hover{color:var(--accent);background:var(--accent-dim)}
+.domain-action-btn.remove:hover{color:var(--red);background:var(--red-dim)}
+.domain-input-row{display:flex;gap:6px;margin-bottom:8px}
+.domain-input-row input{flex:1;font-size:12px;font-family:var(--mono);height:36px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface-2);color:var(--text);outline:none;transition:var(--t)}
+.domain-input-row input::placeholder{color:var(--text-3)}
+.domain-input-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);background:var(--surface-3)}
+.domain-save-btn{font-size:12px;font-weight:600;padding:0 14px;height:36px;border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface-3);color:var(--text-2);cursor:pointer;white-space:nowrap;font-family:var(--font);transition:var(--t)}
+.domain-save-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 
-.reg-tabs { display: flex; gap: 4px; margin: 9px 0 10px; flex-wrap: wrap; }
-.reg-tab {
-  font-size: 10px; font-weight: 700; padding: 3px 9px;
-  border-radius: 6px; border: 1px solid var(--border2);
-  background: none; color: var(--text3);
-  cursor: pointer; transition: all .15s; letter-spacing: 0.03em;
-}
-.reg-tab:hover { border-color: rgba(108,99,255,0.4); color: var(--text); }
-.reg-tab.active { border-color: var(--accent); background: rgba(108,99,255,0.12); color: var(--accent2); }
+/* ═══════════════════════════════════════════════
+   DNS GUIDE
+═══════════════════════════════════════════════ */
+.dns-guide{border:1px solid rgba(124,111,255,.18);border-radius:var(--r-sm);background:rgba(124,111,255,.04);overflow:hidden;margin-bottom:8px;transition:border-color .15s}
+.dns-guide:hover{border-color:rgba(124,111,255,.28)}
+.dns-guide-header{display:flex;align-items:center;gap:7px;padding:9px 12px;cursor:pointer;user-select:none;transition:background .15s}
+.dns-guide-header:hover{background:rgba(124,111,255,.06)}
+.dns-guide-title{font-size:11px;font-weight:700;color:var(--accent-2);flex:1;font-family:var(--font)}
+.dns-guide-chevron{font-size:10px;color:var(--text-3);transition:transform .2s}
+.dns-guide-chevron.open{transform:rotate(180deg)}
+.dns-guide-body{display:none;padding:0 12px 12px;border-top:1px solid rgba(124,111,255,.14)}
+.dns-guide-body.open{display:block}
+.reg-tabs{display:flex;gap:4px;margin:9px 0 10px;flex-wrap:wrap}
+.reg-tab{font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r-xs);border:1px solid var(--border-md);background:none;color:var(--text-3);cursor:pointer;transition:var(--t);letter-spacing:.03em;font-family:var(--font)}
+.reg-tab:hover{border-color:var(--accent);color:var(--text)}
+.reg-tab.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent-2)}
+.dns-steps{display:flex;flex-direction:column;gap:8px}
+.dns-step{display:flex;gap:8px;align-items:flex-start}
+.dns-step-num{width:18px;height:18px;border-radius:50%;background:var(--accent-dim);color:var(--accent-2);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:var(--font)}
+.dns-step-text{font-size:11px;color:var(--text-2);line-height:1.55;flex:1;font-family:var(--font)}
+.dns-step-text strong{color:var(--text);font-weight:700}
+.dns-record-box{border:1px solid var(--border-md);border-radius:var(--r-sm);overflow:hidden;margin:10px 0 6px;font-family:var(--mono)}
+.dns-record-box-header{padding:5px 11px;background:var(--surface-2);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);font-family:var(--font)}
+.dns-record-row{display:flex;align-items:center;padding:6px 11px;gap:7px;border-top:1px solid var(--border)}
+.dns-rec-key{font-size:9.5px;font-weight:700;color:var(--text-3);width:44px;flex-shrink:0}
+.dns-rec-val{font-size:11px;color:var(--text);flex:1}
+.dns-rec-val.accent{color:var(--accent-2)}
+.dns-copy-btn{background:none;border:1px solid var(--border-md);border-radius:var(--r-xs);cursor:pointer;color:var(--text-3);font-size:10px;padding:2px 8px;line-height:1.5;transition:var(--t);white-space:nowrap;font-family:var(--font)}
+.dns-copy-btn:hover{border-color:var(--accent);color:var(--accent-2)}
+.dns-pending-hint{font-size:10px;color:#b45309;line-height:1.55;background:var(--amber-dim);border:1px solid var(--amber-border);border-radius:var(--r-sm);padding:9px 12px;margin-top:8px;font-family:var(--font)}
+.dns-pending-hint code{font-family:var(--mono);font-size:10px;background:rgba(0,0,0,.15);padding:1px 5px;border-radius:4px}
 
-.dns-steps { display: flex; flex-direction: column; gap: 7px; }
-.dns-step { display: flex; gap: 8px; align-items: flex-start; }
-.dns-step-num {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: rgba(108,99,255,0.18); color: var(--accent2);
-  font-size: 9px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
+/* ═══════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════ */
+.stores-empty-state{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 240px);padding:40px 20px;animation:fadeUp .4s var(--ease) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.stores-empty-inner{text-align:center;max-width:420px}
+.stores-empty-icon-wrap{
+  width:96px;height:96px;border-radius:24px;
+  background:linear-gradient(135deg,var(--surface-3),var(--surface-4));
+  border:1px solid var(--border-md);
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;margin:0 auto 24px;box-shadow:var(--sh);
+  animation:floatIcon 3.5s ease-in-out infinite;
 }
-.dns-step-text { font-size: 11px; color: var(--text2); line-height: 1.5; flex: 1; }
-.dns-step-text strong { color: var(--text); font-weight: 700; }
+@keyframes floatIcon{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.stores-empty-inner h3{font-size:24px;font-weight:800;color:var(--text);margin-bottom:10px;letter-spacing:-0.04em;font-family:var(--font)}
+.stores-empty-inner p{font-size:14px;color:var(--text-2);line-height:1.7;margin-bottom:28px;font-family:var(--font)}
+.stores-empty-btn{font-size:14px !important;padding:0 28px !important;height:44px !important;border-radius:var(--r) !important;box-shadow:0 6px 24px var(--accent-glow) !important;letter-spacing:-0.01em !important}
+.stores-empty-btn:hover{transform:translateY(-2px) !important;box-shadow:0 10px 32px var(--accent-glow) !important}
 
-.dns-record-box {
-  border: 1px solid var(--border2); border-radius: 9px;
-  overflow: hidden; margin: 9px 0 5px;
-  font-family: 'DM Mono', monospace;
-}
-.dns-record-box-header {
-  padding: 5px 11px; background: var(--surface2);
-  font-size: 9px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3);
-}
-.dns-record-row {
-  display: flex; align-items: center;
-  padding: 6px 11px; gap: 7px;
-  border-top: 1px solid var(--border);
-}
-.dns-rec-key { font-size: 9.5px; font-weight: 700; color: var(--text3); width: 44px; flex-shrink: 0; }
-.dns-rec-val { font-size: 11px; color: var(--text); flex: 1; }
-.dns-rec-val.accent { color: var(--accent2); }
-.dns-copy-btn {
-  background: none; border: 1px solid var(--border2);
-  border-radius: 5px; cursor: pointer; color: var(--text3);
-  font-size: 10px; padding: 2px 7px; line-height: 1.4;
-  transition: all .15s; white-space: nowrap;
-  font-family: 'Outfit', sans-serif;
-}
-.dns-copy-btn:hover { border-color: var(--accent); color: var(--accent2); }
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
+.modal-overlay{background:rgba(0,0,0,0.6) !important;backdrop-filter:blur(8px) !important;-webkit-backdrop-filter:blur(8px) !important}
+.modal{background:var(--surface) !important;border:1px solid var(--border-md) !important;border-radius:var(--r-xl) !important;box-shadow:var(--sh-lg) !important;color:var(--text) !important;font-family:var(--font) !important;padding:28px !important}
+.modal h2{font-size:18px !important;font-weight:800 !important;letter-spacing:-0.04em !important;margin-bottom:22px !important;font-family:var(--font) !important;color:var(--text) !important}
+.field{margin-bottom:14px !important}
+.field label{font-size:12px !important;font-weight:600 !important;color:var(--text-2) !important;display:block !important;margin-bottom:6px !important;font-family:var(--font) !important;letter-spacing:.01em !important}
+.field input,.field textarea,.field select{width:100% !important;font-family:var(--font) !important;font-size:13px !important;height:40px !important;padding:0 12px !important;border-radius:var(--r-sm) !important;border:1px solid var(--border-md) !important;background:var(--surface-2) !important;color:var(--text) !important;outline:none !important;transition:var(--t) !important}
+.field textarea{height:80px !important;padding:10px 12px !important;resize:vertical !important}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent) !important;box-shadow:0 0 0 3px var(--accent-dim) !important;background:var(--surface-3) !important}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-3) !important}
+.field-hint{font-size:11px;color:var(--text-3);margin-top:5px;font-family:var(--font)}
+.field-row{display:grid !important;grid-template-columns:1fr 1fr !important;gap:12px !important}
+.modal-footer{display:flex !important;justify-content:flex-end !important;gap:8px !important;margin-top:22px !important;padding-top:18px !important;border-top:1px solid var(--border) !important}
+.card-style-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+.card-style-opt{border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px 8px;cursor:pointer;text-align:center;transition:var(--t);background:var(--surface-2)}
+.card-style-opt:hover,.card-style-opt.active{border-color:var(--accent);background:var(--accent-dim)}
+.card-style-opt span{font-size:10.5px;font-weight:700;color:var(--text-3);display:block;margin-top:5px;font-family:var(--font)}
+.card-style-opt.active span{color:var(--accent-2)}
+.card-style-preview{height:40px;display:flex;align-items:center;justify-content:center}
+.cspr-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;width:38px}
+.cspr-grid div{background:var(--surface-4);border-radius:2px;height:15px}
+.card-style-opt.active .cspr-grid div{background:var(--accent);opacity:.5}
+.cspr-list{display:flex;gap:4px;align-items:center;width:48px;margin-bottom:3px}
+.cspr-list-img{width:14px;height:14px;background:var(--surface-4);border-radius:2px;flex-shrink:0}
+.cspr-list-lines{flex:1;display:flex;flex-direction:column;gap:3px}
+.cspr-list-lines span{display:block;height:3px;background:var(--surface-4);border-radius:2px}
+.card-style-opt.active .cspr-list-img,.card-style-opt.active .cspr-list-lines span{background:var(--accent);opacity:.5}
+.cspr-minimal{position:relative;width:38px;height:38px;border-radius:5px;overflow:hidden}
+.cspr-min-img{position:absolute;inset:0;background:var(--surface-4)}
+.cspr-min-overlay{position:absolute;bottom:0;left:0;right:0;height:40%;background:rgba(0,0,0,.3)}
+.card-style-opt.active .cspr-min-img{background:var(--accent);opacity:.4}
+.cspr-magazine{display:flex;gap:3px;width:46px;height:38px}
+.cspr-mag-big{flex:2;background:var(--surface-4);border-radius:2px}
+.cspr-mag-small{flex:1;display:flex;flex-direction:column;gap:3px}
+.cspr-mag-small div{flex:1;background:var(--surface-4);border-radius:2px}
+.card-style-opt.active .cspr-mag-big,.card-style-opt.active .cspr-mag-small div{background:var(--accent);opacity:.5}
 
-.dns-pending-hint {
-  font-size: 10px; color: #92400e; line-height: 1.5;
-  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
-  border-radius: 9px; padding: 8px 11px; margin-top: 7px;
-}
-.dns-pending-hint code {
-  font-family: 'DM Mono', monospace; font-size: 10px;
-  background: rgba(0,0,0,0.12); padding: 1px 5px; border-radius: 4px;
-}
+/* ═══════════════════════════════════════════════
+   LIGHT THEME
+═══════════════════════════════════════════════ */
+[data-theme="light"] body,[data-theme="light"] html,[data-theme="light"] .content,[data-theme="light"] .main-wrap{background:#F2F3F9 !important}
+[data-theme="light"] .sidebar,[data-theme="light"] .topbar,[data-theme="light"] .modal{background:#fff !important}
+[data-theme="light"] .store-card,[data-theme="light"] .stat-card{background:#fff !important}
+[data-theme="light"] .sidebar-user{background:#F7F8FD !important}
+[data-theme="light"] .store-banner-logo,[data-theme="light"] .store-banner-initials{background:#fff !important}
+[data-theme="light"] .domain-input-row input{background:#F7F8FD !important;color:#0F1117 !important}
+[data-theme="light"] .domain-save-btn{background:#F7F8FD !important;color:#5A5E78 !important}
+[data-theme="light"] .field input,[data-theme="light"] .field textarea,[data-theme="light"] .field select{background:#F7F8FD !important;color:#0F1117 !important}
+[data-theme="light"] .skel-store-body{background:#fff !important}
+[data-theme="light"] #page-skeleton,[data-theme="light"] .skel-topbar{background:#fff !important}
+[data-theme="light"] #page-skeleton{background:#F2F3F9 !important}
+[data-theme="light"] .dns-pending-hint{color:#92400e !important}
+[data-theme="light"] .card-style-opt{background:#F7F8FD !important}
 
-/* ── THEME TOGGLE BUTTON ── */
-.theme-toggle {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; flex-shrink: 0;
-  transition: all .2s;
-}
-.theme-toggle:hover {
-  border-color: rgba(108,99,255,0.4);
-  background: rgba(108,99,255,0.08);
-  transform: rotate(12deg) scale(1.05);
-}
-[data-theme="light"] .theme-toggle {
-  background: #f3f4f6;
-  border-color: rgba(0,0,0,0.12);
-  color: #374151;
-}
-
-/* ── EMPTY STATE ── */
-.stores-empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 220px);
-  padding: 40px 20px;
-  animation: fadeInUp .35s ease both;
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.stores-empty-inner { text-align: center; max-width: 400px; }
-.stores-empty-icon {
-  font-size: 72px;
-  line-height: 1;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 4px 16px rgba(108,99,255,0.3));
-  animation: floatIcon 3s ease-in-out infinite;
-}
-@keyframes floatIcon {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
-}
-.stores-empty-inner h3 {
-  font-size: 22px; font-weight: 800;
-  color: var(--text); margin-bottom: 10px;
-  letter-spacing: -0.02em;
-}
-.stores-empty-inner p {
-  font-size: 14px; color: var(--text3);
-  line-height: 1.65; margin-bottom: 28px;
-}
-.stores-empty-btn {
-  font-size: 14px !important; padding: 12px 28px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 18px rgba(108,99,255,0.35) !important;
-  transition: transform .15s, box-shadow .15s, opacity .15s !important;
-}
-.stores-empty-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 28px rgba(108,99,255,0.45) !important;
-}
-[data-theme="light"] .stores-empty-inner h3 { color: #111827 !important; }
-[data-theme="light"] .stores-empty-inner p   { color: #9ca3af !important; }
-
-/* mobile */
-@media (max-width: 900px) {
-  .stats-row   { grid-template-columns: repeat(2,1fr); }
-  .stores-grid { grid-template-columns: 1fr; }
-}
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:1200px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.stores-grid{grid-template-columns:1fr}}
+@media(max-width:648px){.sidebar{display:none !important}.main-wrap{margin-left:0 !important}.stats-row{grid-template-columns:1fr 1fr}}
 </style>
 
 <script>
-/* Token from URL param */
-;(function(){
-  var p = new URLSearchParams(location.search), t = p.get('token')
-  if (t) { localStorage.setItem('ekart_token', t); history.replaceState({}, '', '/home.html') }
-})()
+;(function(){var p=new URLSearchParams(location.search),t=p.get('token');if(t){localStorage.setItem('ekart_token',t);history.replaceState({},'','/home.html')}})()
 </script>
-
 <script>
-/* ── BLOCKING: apply theme before first paint to prevent flash ── */
 (function(){
-  if (localStorage.getItem('ekart_theme') === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light')
-    document.documentElement.style.background = '#f0f0f5'
+  if(localStorage.getItem('ekart_theme')==='light'){
+    document.documentElement.setAttribute('data-theme','light');
+    document.documentElement.style.background='#F2F3F9';
+  } else {
+    document.documentElement.style.background='#07080D';
   }
 })()
 </script>
-
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
-<!--
-  ══════════════════════════════════════════════════════════
-  PAGE SKELETON
-  ─ Covers only the MAIN content area (left: 220px).
-  ─ The real sidebar renders immediately — no sidebar clone.
-  ─ On mobile the sidebar is hidden so skeleton is full-width
-    (handled via @media in CSS above).
-  ══════════════════════════════════════════════════════════
--->
+<!-- SKELETON — main area only -->
 <div id="page-skeleton">
-
-  <!-- Topbar clone -->
   <div class="skel-topbar">
     <div class="skel skel-topbar-title"></div>
     <div class="skel skel-topbar-btn"></div>
   </div>
-
-  <!-- Content body clone -->
   <div class="skel-body">
-
-    <!-- 4 stat cards -->
     <div class="skel-stats-row">
       <div class="skel skel-stat-card"></div>
-      <div class="skel skel-stat-card" style="opacity:.85;"></div>
-      <div class="skel skel-stat-card" style="opacity:.70;"></div>
-      <div class="skel skel-stat-card" style="opacity:.55;"></div>
+      <div class="skel skel-stat-card" style="opacity:.82;"></div>
+      <div class="skel skel-stat-card" style="opacity:.64;"></div>
+      <div class="skel skel-stat-card" style="opacity:.46;"></div>
     </div>
-
-    <!-- 2 store card skeletons -->
     <div class="skel-stores-grid">
-
-      <!-- Card 1 -->
       <div class="skel-store-card">
-        <div class="skel skel-store-banner" style="border-radius:20px 20px 0 0;"></div>
+        <div class="skel skel-store-banner"></div>
+        <div class="skel skel-store-logo"></div>
         <div class="skel-store-body">
           <div class="skel skel-store-name"></div>
           <div class="skel skel-store-slug"></div>
           <div class="skel skel-store-domain"></div>
-          <div class="skel-store-badges">
-            <div class="skel skel-badge"></div>
-            <div class="skel skel-badge" style="width:44px;"></div>
-            <div class="skel skel-badge" style="width:44px;"></div>
-          </div>
+          <div class="skel-store-badges"><div class="skel skel-badge"></div><div class="skel skel-badge" style="width:52px;"></div></div>
           <div class="skel-store-kpis">
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
           </div>
-          <div class="skel-store-actions">
-            <div class="skel skel-action-btn"></div>
-            <div class="skel skel-action-btn"></div>
-            <div class="skel skel-action-btn"></div>
-          </div>
+          <div class="skel-store-actions"><div class="skel skel-action-btn"></div><div class="skel skel-action-btn"></div><div class="skel skel-action-btn"></div></div>
         </div>
       </div>
-
-      <!-- Card 2 -->
-      <div class="skel-store-card" style="opacity:.72;">
-        <div class="skel skel-store-banner" style="border-radius:20px 20px 0 0;"></div>
+      <div class="skel-store-card" style="opacity:.65;">
+        <div class="skel skel-store-banner"></div>
+        <div class="skel skel-store-logo"></div>
         <div class="skel-store-body">
-          <div class="skel skel-store-name" style="width:48%;"></div>
-          <div class="skel skel-store-slug" style="width:32%;"></div>
+          <div class="skel skel-store-name" style="width:44%;"></div>
+          <div class="skel skel-store-slug" style="width:29%;"></div>
           <div class="skel skel-store-domain"></div>
-          <div class="skel-store-badges">
-            <div class="skel skel-badge"></div>
-            <div class="skel skel-badge" style="width:44px;"></div>
-            <div class="skel skel-badge" style="width:44px;"></div>
-          </div>
+          <div class="skel-store-badges"><div class="skel skel-badge"></div><div class="skel skel-badge" style="width:52px;"></div></div>
           <div class="skel-store-kpis">
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
             <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
           </div>
-          <div class="skel-store-actions">
-            <div class="skel skel-action-btn"></div>
-            <div class="skel skel-action-btn"></div>
-            <div class="skel skel-action-btn"></div>
-          </div>
+          <div class="skel-store-actions"><div class="skel skel-action-btn"></div><div class="skel skel-action-btn"></div><div class="skel skel-action-btn"></div></div>
         </div>
       </div>
-
     </div>
-  </div><!-- /skel-body -->
-</div><!-- /#page-skeleton -->
+  </div>
+</div>
 
-
-<!-- ══════════════════════════════════════════════════════════
-     SIDEBAR — renders immediately, no JS dependency for layout
-     User info shimmer is shown until renderNav() resolves.
-══════════════════════════════════════════════════════════ -->
+<!-- SIDEBAR — renders immediately -->
 <div class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
 
-  <!--
-    Sidebar user info shimmer.
-    Visible immediately. Hidden once renderNav() populates real user data.
-  -->
   <div class="sidebar-user-skel" id="sidebar-user-skel">
     <div class="skel skel-avatar"></div>
     <div class="skel-lines">
@@ -897,12 +627,10 @@
       <div class="skel skel-email"></div>
     </div>
   </div>
-
-  <!-- Real user info — hidden until nav resolves -->
   <div class="sidebar-user loading" id="sidebar-user-real">
     <div class="sidebar-avatar" id="nav-avatar">…</div>
     <div style="min-width:0;">
-      <div class="sidebar-user-name"  id="nav-user-name">…</div>
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
       <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
   </div>
@@ -910,7 +638,7 @@
   <div class="nav-section">
     <div class="nav-section-label">Merchant</div>
     <a class="nav-item active" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
     <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
@@ -926,24 +654,20 @@
     <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
   </div>
   <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+    <button class="btn-logout" onclick="logout()">↩&nbsp; Log out</button>
   </div>
 </div>
 
-
-<!-- ── Main ── -->
+<!-- MAIN -->
 <div class="main-wrap">
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">My Stores</span></div>
-    <div class="topbar-right">
-      <div id="topbar-actions"></div>
-    </div>
+    <div class="topbar-right"><div id="topbar-actions"></div></div>
   </div>
   <div id="page-content" class="content page-enter" style="display:none;"></div>
 </div>
 
-
-<!-- ── Create / Edit Store Modal ── -->
+<!-- MODAL -->
 <div class="modal-overlay" id="storeModal">
   <div class="modal" style="max-width:560px;">
     <h2 id="storeModalTitle">Create New Store</h2>
@@ -964,32 +688,23 @@
         </select>
       </div>
       <div class="field"><label>Brand Color</label>
-        <input type="color" id="storeBrandColor" value="#6c63ff" style="height:42px;padding:4px;">
+        <input type="color" id="storeBrandColor" value="#7C6FFF" style="height:40px;padding:4px;">
       </div>
     </div>
     <div class="field">
       <label>Product Card Style</label>
       <div class="card-style-picker" id="cardStylePicker">
         <div class="card-style-opt active" data-style="grid" onclick="selectCardStyle('grid',this)">
-          <div class="card-style-preview"><div class="cspr-grid"><div></div><div></div><div></div><div></div></div></div>
-          <span>Grid</span>
+          <div class="card-style-preview"><div class="cspr-grid"><div></div><div></div><div></div><div></div></div></div><span>Grid</span>
         </div>
         <div class="card-style-opt" data-style="list" onclick="selectCardStyle('list',this)">
-          <div class="card-style-preview">
-            <div>
-              <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div>
-              <div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div>
-            </div>
-          </div>
-          <span>List</span>
+          <div class="card-style-preview"><div><div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div><div class="cspr-list"><div class="cspr-list-img"></div><div class="cspr-list-lines"><span></span><span></span></div></div></div></div><span>List</span>
         </div>
         <div class="card-style-opt" data-style="minimal" onclick="selectCardStyle('minimal',this)">
-          <div class="card-style-preview"><div class="cspr-minimal"><div class="cspr-min-img"></div><div class="cspr-min-overlay"></div></div></div>
-          <span>Minimal</span>
+          <div class="card-style-preview"><div class="cspr-minimal"><div class="cspr-min-img"></div><div class="cspr-min-overlay"></div></div></div><span>Minimal</span>
         </div>
         <div class="card-style-opt" data-style="magazine" onclick="selectCardStyle('magazine',this)">
-          <div class="card-style-preview"><div class="cspr-magazine"><div class="cspr-mag-big"></div><div class="cspr-mag-small"><div></div><div></div></div></div></div>
-          <span>Magazine</span>
+          <div class="card-style-preview"><div class="cspr-magazine"><div class="cspr-mag-big"></div><div class="cspr-mag-small"><div></div><div></div></div></div></div><span>Magazine</span>
         </div>
       </div>
       <input type="hidden" id="storeCardStyle" value="grid">
@@ -997,16 +712,16 @@
     <div class="field">
       <label>Store Logo</label>
       <input type="file" id="storeLogoFile" accept="image/*" onchange="previewLogo(this)"
-        style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:8px 12px;color:var(--text);font-family:Outfit,sans-serif;">
+        style="width:100%;background:var(--surface-2);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:8px 12px;color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;outline:none;">
       <div id="storeLogoPreview" style="margin-top:8px;display:none;">
-        <img id="storeLogoImg" src="" style="height:52px;border-radius:8px;object-fit:contain;border:1px solid var(--border2);padding:4px;">
+        <img id="storeLogoImg" src="" style="height:52px;border-radius:10px;object-fit:contain;border:1px solid var(--border-md);padding:4px;">
       </div>
       <input type="hidden" id="storeLogoExisting">
     </div>
     <div class="field">
-      <label>Custom Domain (optional)</label>
-      <input type="text" id="storeCustomDomain" placeholder="e.g. shop.yourbrand.com">
-      <div class="field-hint">Point your domain's CNAME to <code style="font-family:'DM Mono',monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px;">storefront.aasaitech.in</code> first</div>
+      <label>Custom Domain <span style="color:var(--text-3);font-weight:400;">(optional)</span></label>
+      <input type="text" id="storeCustomDomain" placeholder="shop.yourbrand.com">
+      <div class="field-hint">Point CNAME to <code style="font-family:var(--mono);font-size:10.5px;background:var(--surface-3);padding:1px 6px;border-radius:4px;color:var(--accent-2);">storefront.aasaitech.in</code></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('storeModal')">Cancel</button>
@@ -1015,653 +730,158 @@
   </div>
 </div>
 
-
 <script>
-/* ══════════════════════════════════════════════════════════
-   SKELETON DISMISS
-   ─ Fades out only the main-area skeleton, not the sidebar.
-══════════════════════════════════════════════════════════ */
-function dismissSkeleton() {
-  const skel = document.getElementById('page-skeleton')
-  if (!skel || skel._dismissed) return
-  skel._dismissed = true
-  skel.classList.add('skel-hiding')
-  skel.addEventListener('transitionend', () => skel.remove(), { once: true })
-  setTimeout(() => { if (skel.parentNode) skel.remove() }, 500)
+function dismissSkeleton(){
+  const skel=document.getElementById('page-skeleton');
+  if(!skel||skel._dismissed)return;skel._dismissed=true;
+  skel.classList.add('skel-hiding');
+  skel.addEventListener('transitionend',()=>skel.remove(),{once:true});
+  setTimeout(()=>{if(skel.parentNode)skel.remove()},500);
+}
+function revealSidebarUser(){
+  const s=document.getElementById('sidebar-user-skel'),r=document.getElementById('sidebar-user-real');
+  if(s)s.classList.add('loaded');if(r)r.classList.remove('loading');
+}
+let _isDark=localStorage.getItem('ekart_theme')!=='light';
+function applyTheme(dark){
+  _isDark=dark;const root=document.documentElement;
+  if(dark){root.removeAttribute('data-theme');root.style.background='#07080D';const sk=document.getElementById('page-skeleton');if(sk)sk.style.background='#07080D';}
+  else{root.setAttribute('data-theme','light');root.style.background='#F2F3F9';const sk=document.getElementById('page-skeleton');if(sk)sk.style.background='#F2F3F9';}
+  const btn=document.getElementById('themeToggleBtn');if(btn)btn.textContent=dark?'🌙':'☀️';
+  localStorage.setItem('ekart_theme',dark?'dark':'light');
+}
+function toggleTheme(){applyTheme(!_isDark);}
+applyTheme(_isDark);
+
+let currentUser=null,allStores=[];
+const CNAME_TARGET='storefront.aasaitech.in';
+const REGISTRAR_STEPS={
+  godaddy:{label:'GoDaddy',steps:['Log in to <strong>GoDaddy</strong> → My Products → find your domain → click <strong>DNS</strong>','Click <strong>Add New Record</strong>','Fill in the record exactly as shown below, then click <strong>Save</strong>','DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min']},
+  namecheap:{label:'Namecheap',steps:['Log in to <strong>Namecheap</strong> → Domain List → click <strong>Manage</strong>','Go to the <strong>Advanced DNS</strong> tab','Click <strong>Add New Record</strong> and fill in the values below, then click ✔','DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min']},
+  cloudflare:{label:'Cloudflare',steps:['Log in to <strong>Cloudflare</strong> → select your domain → click <strong>DNS</strong>','Click <strong>Add record</strong>','Fill in the values below. Set <strong>Proxy status to DNS only</strong> (grey cloud 🌧)','Click <strong>Save</strong>. DNS propagates in seconds on Cloudflare']},
+  bigrock:{label:'BigRock',steps:['Log in to <strong>BigRock</strong> → Domains → click your domain → <strong>DNS</strong>','Under <strong>CNAME Records</strong> click <strong>Add CNAME Record</strong>','Fill in the values below, then click <strong>Update</strong>','DNS changes can take <strong>up to 48 hours</strong>']},
+  other:{label:'Other',steps:['Log in to your domain registrar or DNS provider','Navigate to <strong>DNS Settings / DNS Management / Zone Editor</strong>','Add a new <strong>CNAME</strong> record with the values below','Save / confirm. DNS changes can take <strong>up to 48 hours</strong>']}
+};
+function buildDnsGuideHtml(storeId){
+  const tabsHtml=Object.entries(REGISTRAR_STEPS).map(([key,r])=>`<button class="reg-tab${key==='godaddy'?' active':''}" onclick="switchRegTab('${storeId}','${key}',this)">${r.label}</button>`).join('');
+  const allPanels=Object.entries(REGISTRAR_STEPS).map(([key,r])=>{
+    const stepsHtml=r.steps.map((s,i)=>`<div class="dns-step"><div class="dns-step-num">${i+1}</div><div class="dns-step-text">${s}</div></div>`).join('');
+    const nameHint=key==='cloudflare'?'www <span style="font-size:9px;color:var(--text-3)">(subdomain only)</span>':'www';
+    return `<div class="reg-panel" data-reg="${key}" style="display:${key==='godaddy'?'block':'none'}"><div class="dns-steps">${stepsHtml}</div><div class="dns-record-box"><div class="dns-record-box-header">DNS Record to Add</div><div class="dns-record-row"><span class="dns-rec-key">Type</span><span class="dns-rec-val accent">CNAME</span></div><div class="dns-record-row"><span class="dns-rec-key">Name</span><span class="dns-rec-val">${nameHint}</span></div><div class="dns-record-row"><span class="dns-rec-key">Value</span><span class="dns-rec-val accent" style="word-break:break-all;">${CNAME_TARGET}</span><button class="dns-copy-btn" onclick="copyText('${CNAME_TARGET}','Copied!')">Copy</button></div><div class="dns-record-row"><span class="dns-rec-key">TTL</span><span class="dns-rec-val">1 hour (3600)</span></div></div></div>`;
+  }).join('');
+  return `<div class="dns-guide" id="dns-guide-${storeId}"><div class="dns-guide-header" onclick="toggleDnsGuide('${storeId}')"><span style="font-size:13px;">📖</span><span class="dns-guide-title">How to set up your domain →</span><span class="dns-guide-chevron" id="dns-chevron-${storeId}">▼</span></div><div class="dns-guide-body" id="dns-body-${storeId}"><div class="reg-tabs" id="reg-tabs-${storeId}">${tabsHtml}</div><div id="reg-panels-${storeId}">${allPanels}</div></div></div>`;
+}
+function toggleDnsGuide(storeId){const b=document.getElementById(`dns-body-${storeId}`),c=document.getElementById(`dns-chevron-${storeId}`);if(!b)return;const o=b.classList.toggle('open');if(c)c.classList.toggle('open',o);}
+function switchRegTab(storeId,key,btn){document.querySelectorAll(`#reg-tabs-${storeId} .reg-tab`).forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.querySelectorAll(`#reg-panels-${storeId} .reg-panel`).forEach(p=>{p.style.display=p.dataset.reg===key?'block':'none';});}
+function copyText(text,msg){navigator.clipboard.writeText(text).then(()=>toast(msg||'Copied!','success')).catch(()=>toast(text,'info'));}
+
+function renderDomainWidget(s){
+  const domain=(s.custom_domain||'').trim(),status=s.domain_status||(domain?'pending':'');
+  if(domain&&status==='connected'){const href=domain.startsWith('http')?domain:`https://${domain}`;return `<div class="domain-status-row connected"><a href="${href}" target="_blank" rel="noopener noreferrer" class="domain-link" title="Open ${domain}">${domain}<span class="domain-link-arrow">↗</span></a><div class="live-badge-wrap"><span class="live-pulse-dot"></span>LIVE</div><button class="domain-action-btn remove" onclick="clearDomain('${s._id}')" title="Remove domain">✕</button></div>`;}
+  if(domain&&status==='pending'){return `<div class="domain-status-row pending"><div class="domain-dot pending"></div><span class="domain-value pending" title="${domain}">${domain}</span><span class="domain-badge pending">Verifying…</span><button class="domain-action-btn" onclick="verifyDomain('${s._id}','${domain}')" title="Re-check">↻</button><button class="domain-action-btn remove" onclick="clearDomain('${s._id}')" title="Remove">✕</button></div><div class="dns-pending-hint">⏳ Waiting for DNS. Add a CNAME pointing to <code>${CNAME_TARGET}</code> then click ↻ to recheck.</div>${buildDnsGuideHtml(s._id)}`;}
+  return `<div class="domain-input-row"><input type="text" id="domain-inp-${s._id}" placeholder="shop.yourbrand.com" value="${domain}"><button class="domain-save-btn" onclick="saveDomain('${s._id}')">Save</button></div>${buildDnsGuideHtml(s._id)}`;
 }
 
-/* ══════════════════════════════════════════════════════════
-   SIDEBAR USER SHIMMER → REAL
-   Called after renderNav() resolves so we swap smoothly.
-══════════════════════════════════════════════════════════ */
-function revealSidebarUser() {
-  const shimmer = document.getElementById('sidebar-user-skel')
-  const real    = document.getElementById('sidebar-user-real')
-  if (shimmer) shimmer.classList.add('loaded')    // hides shimmer
-  if (real)    real.classList.remove('loading')   // shows real user row
-}
-
-/* ══════════════════════════════════════════════════════════
-   THEME SYSTEM
-══════════════════════════════════════════════════════════ */
-let _isDark = localStorage.getItem('ekart_theme') !== 'light'
-
-function applyTheme(dark) {
-  _isDark = dark
-  const root = document.documentElement
-  if (dark) {
-    root.removeAttribute('data-theme')
-    root.style.background = '#080910'
-    const skel = document.getElementById('page-skeleton')
-    if (skel) skel.style.background = '#080910'
-  } else {
-    root.setAttribute('data-theme', 'light')
-    root.style.background = '#f0f0f5'
-    const skel = document.getElementById('page-skeleton')
-    if (skel) skel.style.background = '#f0f0f5'
+function renderStores(){
+  const container=document.getElementById('page-content');
+  container.querySelector('.stores-grid')?.remove();container.querySelector('.stores-empty-state')?.remove();
+  const topbarNewBtn=document.getElementById('topbarNewStoreBtn');
+  if(topbarNewBtn)topbarNewBtn.style.display=allStores.length?'':'none';
+  if(!allStores.length){
+    container.insertAdjacentHTML('beforeend',`<div class="stores-empty-state"><div class="stores-empty-inner"><div class="stores-empty-icon-wrap">🏪</div><h3>No stores yet</h3><p>Create your first store and start selling in minutes. Your storefront goes live instantly.</p><button class="btn btn-primary stores-empty-btn" onclick="openCreateStore()">+ Create Your First Store</button></div></div>`);
+    return;
   }
-  const btn = document.getElementById('themeToggleBtn')
-  if (btn) btn.textContent = dark ? '🌙' : '☀️'
-  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
+  const grid=document.createElement('div');grid.className='stores-grid';
+  grid.innerHTML=allStores.map(s=>{
+    const bg=s.brand_color||'#7C6FFF';
+    const logo=s.logo_url?`<img class="store-banner-logo" src="${s.logo_url}" alt="${s.name}">`:`<span class="store-banner-initials" style="color:${bg};">${s.name.slice(0,2).toUpperCase()}</span>`;
+    return `<div class="store-card"><div class="store-banner" style="background:linear-gradient(135deg,${bg}F2,${bg}88,${bg}44);">${logo}</div><div class="store-card-body"><div class="store-name">${s.name}</div><div class="store-slug">/${s.slug}<button class="store-slug-copy-btn" onclick="copyStoreUrl('${s.slug}')" title="Copy URL">⎘</button></div><div class="domain-section"><div class="domain-section-label">Custom Domain</div>${renderDomainWidget(s)}</div><div class="store-badges"><span class="badge ${s.published?'badge-green':'badge-gray'}">${s.published?'● Live':'○ Draft'}</span><span class="badge badge-gray">📦 ${s.product_count||0}</span><span class="badge badge-gray">📋 ${s.order_count||0}</span></div><div class="store-kpis"><div class="store-kpi"><div class="store-kpi-val loading" id="kpi-rev-${s._id}">—</div><div class="store-kpi-label">Revenue</div></div><div class="store-kpi"><div class="store-kpi-val loading" id="kpi-ord-${s._id}">—</div><div class="store-kpi-label">Orders</div></div><div class="store-kpi"><div class="store-kpi-val loading" id="kpi-today-${s._id}">—</div><div class="store-kpi-label">Today</div></div></div><div class="store-actions">${s.published?`<a href="${s.published_url}" target="_blank" class="btn btn-secondary btn-sm">🌐 View</a>`:''}<button class="btn btn-secondary btn-sm" onclick="publishStore('${s._id}')">🚀 ${s.published?'Republish':'Publish'}</button><button class="btn btn-secondary btn-sm" onclick="openEditStore('${s._id}')">✏️ Edit</button><button class="btn btn-danger btn-sm" onclick="deleteStore('${s._id}','${s.name.replace(/'/g,"\\'")}')">🗑</button></div></div></div>`;
+  }).join('');
+  container.appendChild(grid);
 }
 
-function toggleTheme() { applyTheme(!_isDark) }
-
-applyTheme(_isDark)
-
-/* ══════════════════════════════════════════════════════════
-   APP STATE
-══════════════════════════════════════════════════════════ */
-let currentUser = null, allStores = []
-
-const CNAME_TARGET = 'storefront.aasaitech.in'
-
-/* ══════════════════════════════════════════════════════════
-   REGISTRAR DNS STEPS
-══════════════════════════════════════════════════════════ */
-const REGISTRAR_STEPS = {
-  godaddy: {
-    label: 'GoDaddy',
-    steps: [
-      'Log in to <strong>GoDaddy</strong> → My Products → find your domain → click <strong>DNS</strong>',
-      'Click <strong>Add New Record</strong>',
-      'Fill in the record exactly as shown below, then click <strong>Save</strong>',
-      'DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min'
-    ]
-  },
-  namecheap: {
-    label: 'Namecheap',
-    steps: [
-      'Log in to <strong>Namecheap</strong> → Domain List → click <strong>Manage</strong> next to your domain',
-      'Go to the <strong>Advanced DNS</strong> tab',
-      'Click <strong>Add New Record</strong> and fill in the values below, then click ✔',
-      'DNS changes can take <strong>up to 48 hours</strong> — usually under 30 min'
-    ]
-  },
-  cloudflare: {
-    label: 'Cloudflare',
-    steps: [
-      'Log in to <strong>Cloudflare</strong> → select your domain → click <strong>DNS</strong>',
-      'Click <strong>Add record</strong>',
-      'Fill in the values below. Set <strong>Proxy status to DNS only</strong> (grey cloud 🌧)',
-      'Click <strong>Save</strong>. DNS propagates in seconds on Cloudflare'
-    ]
-  },
-  bigrock: {
-    label: 'BigRock',
-    steps: [
-      'Log in to <strong>BigRock</strong> → Domains → click your domain → <strong>DNS</strong>',
-      'Under <strong>CNAME Records</strong> click <strong>Add CNAME Record</strong>',
-      'Fill in the values below, then click <strong>Update</strong>',
-      'DNS changes can take <strong>up to 48 hours</strong>'
-    ]
-  },
-  other: {
-    label: 'Other',
-    steps: [
-      'Log in to your domain registrar or DNS provider',
-      'Navigate to <strong>DNS Settings / DNS Management / Zone Editor</strong>',
-      'Add a new <strong>CNAME</strong> record with the values below',
-      'Save / confirm. DNS changes can take <strong>up to 48 hours</strong>'
-    ]
+window.addEventListener('DOMContentLoaded',async()=>{
+  const nav=await renderNav('stores');if(!nav)return;
+  currentUser=nav.user;revealSidebarUser();
+  document.getElementById('storeEmail').value=currentUser.email||'';
+  setTopbarActions(`<button class="btn btn-primary" id="topbarNewStoreBtn" onclick="openCreateStore()" style="display:none;">+ New Store</button>`);
+  const topbarRight=document.querySelector('.topbar-right');
+  if(topbarRight&&!document.getElementById('themeToggleBtn')){
+    const btn=document.createElement('button');btn.className='theme-toggle';btn.id='themeToggleBtn';btn.title='Toggle theme';btn.onclick=toggleTheme;btn.textContent=_isDark?'🌙':'☀️';
+    topbarRight.insertBefore(btn,topbarRight.firstChild);
   }
+  applyTheme(_isDark);await loadAll();
+});
+
+async function loadAll(){document.getElementById('page-content').querySelector('.stats-row')?.remove();await loadStores();}
+async function loadStores(){
+  allStores=await apiFetch('/stores');
+  const pc=document.getElementById('page-content');pc.style.display='';dismissSkeleton();
+  renderStores();renderStatsShell(allStores.length);
+  await Promise.allSettled(allStores.map(s=>loadStoreKPIs(s)));updateDashStats();
 }
-
-function buildDnsGuideHtml(storeId) {
-  const tabsHtml = Object.entries(REGISTRAR_STEPS).map(([key, r]) =>
-    `<button class="reg-tab${key==='godaddy'?' active':''}" onclick="switchRegTab('${storeId}','${key}',this)">${r.label}</button>`
-  ).join('')
-
-  const allPanels = Object.entries(REGISTRAR_STEPS).map(([key, r]) => {
-    const stepsHtml = r.steps.map((s, i) =>
-      `<div class="dns-step">
-        <div class="dns-step-num">${i+1}</div>
-        <div class="dns-step-text">${s}</div>
-      </div>`
-    ).join('')
-    const nameHint = key === 'cloudflare'
-      ? 'www <span style="font-size:9px;color:var(--text3)">(subdomain only)</span>'
-      : 'www'
-    return `<div class="reg-panel" data-reg="${key}" style="display:${key==='godaddy'?'block':'none'}">
-      <div class="dns-steps">${stepsHtml}</div>
-      <div class="dns-record-box">
-        <div class="dns-record-box-header">DNS Record to Add</div>
-        <div class="dns-record-row">
-          <span class="dns-rec-key">Type</span>
-          <span class="dns-rec-val accent">CNAME</span>
-        </div>
-        <div class="dns-record-row">
-          <span class="dns-rec-key">Name</span>
-          <span class="dns-rec-val">${nameHint}</span>
-        </div>
-        <div class="dns-record-row">
-          <span class="dns-rec-key">Value</span>
-          <span class="dns-rec-val accent" style="word-break:break-all;">${CNAME_TARGET}</span>
-          <button class="dns-copy-btn" onclick="copyText('${CNAME_TARGET}','Copied!')">Copy</button>
-        </div>
-        <div class="dns-record-row">
-          <span class="dns-rec-key">TTL</span>
-          <span class="dns-rec-val">1 hour (3600)</span>
-        </div>
-      </div>
-    </div>`
-  }).join('')
-
-  return `<div class="dns-guide" id="dns-guide-${storeId}">
-    <div class="dns-guide-header" onclick="toggleDnsGuide('${storeId}')">
-      <span style="font-size:14px;">📖</span>
-      <span class="dns-guide-title">How to set up your domain →</span>
-      <span class="dns-guide-chevron" id="dns-chevron-${storeId}">▼</span>
-    </div>
-    <div class="dns-guide-body" id="dns-body-${storeId}">
-      <div class="reg-tabs" id="reg-tabs-${storeId}">${tabsHtml}</div>
-      <div id="reg-panels-${storeId}">${allPanels}</div>
-    </div>
-  </div>`
+const _storeAnalytics={};
+function renderStatsShell(storeCount){
+  const pc=document.getElementById('page-content');pc.querySelector('.stats-row')?.remove();
+  pc.insertAdjacentHTML('afterbegin',`<div class="stats-row" id="dashStatsRow"><div class="stat-card"><div class="stat-icon-wrap">🏪</div><div class="stat-info"><div class="stat-label">My Stores</div><div class="stat-value" id="ds-stores">${storeCount}</div></div></div><div class="stat-card"><div class="stat-icon-wrap">📦</div><div class="stat-info"><div class="stat-label">Total Orders</div><div class="stat-value stat-loading" id="ds-orders">—</div></div></div><div class="stat-card"><div class="stat-icon-wrap">🕐</div><div class="stat-info"><div class="stat-label">Today</div><div class="stat-value stat-loading" id="ds-today">—</div></div></div><div class="stat-card"><div class="stat-icon-wrap">💰</div><div class="stat-info"><div class="stat-label">Revenue</div><div class="stat-value stat-loading" id="ds-revenue">—</div></div></div></div>`);
 }
-
-function toggleDnsGuide(storeId) {
-  const body = document.getElementById(`dns-body-${storeId}`)
-  const chev = document.getElementById(`dns-chevron-${storeId}`)
-  if (!body) return
-  const open = body.classList.toggle('open')
-  if (chev) chev.classList.toggle('open', open)
+function updateDashStats(){
+  let o=0,t=0,r=0;Object.values(_storeAnalytics).forEach(d=>{o+=d.total_orders||0;t+=d.today_orders||0;r+=d.total_revenue||0;});
+  const rs=r>=100000?'₹'+(r/100000).toFixed(1)+'L':r>=1000?'₹'+(r/1000).toFixed(1)+'k':'₹'+Math.round(r).toLocaleString('en-IN');
+  const oE=document.getElementById('ds-orders'),tE=document.getElementById('ds-today'),rE=document.getElementById('ds-revenue');
+  if(oE){oE.textContent=o;oE.classList.remove('stat-loading')}if(tE){tE.textContent=t;tE.classList.remove('stat-loading')}if(rE){rE.textContent=rs;rE.classList.remove('stat-loading')}
 }
-
-function switchRegTab(storeId, key, btn) {
-  document.querySelectorAll(`#reg-tabs-${storeId} .reg-tab`).forEach(t => t.classList.remove('active'))
-  btn.classList.add('active')
-  document.querySelectorAll(`#reg-panels-${storeId} .reg-panel`).forEach(p => {
-    p.style.display = p.dataset.reg === key ? 'block' : 'none'
-  })
+async function loadStoreKPIs(s){
+  try{
+    const data=await apiFetch(`/stores/${s._id}/analytics?days=30`);_storeAnalytics[s._id]=data;
+    const cur=s.currency==='USD'?'$':s.currency==='EUR'?'€':'₹',rev=data.total_revenue||0;
+    const rs=rev>=100000?cur+(rev/100000).toFixed(1)+'L':rev>=1000?cur+(rev/1000).toFixed(1)+'k':cur+rev.toFixed(0);
+    const rE=document.getElementById(`kpi-rev-${s._id}`),oE=document.getElementById(`kpi-ord-${s._id}`),tE=document.getElementById(`kpi-today-${s._id}`);
+    if(rE){rE.textContent=rs;rE.classList.remove('loading');rE.classList.add('rev')}
+    if(oE){oE.textContent=data.total_orders||0;oE.classList.remove('loading')}
+    if(tE){tE.textContent=data.today_orders||0;tE.classList.remove('loading');tE.classList.add('today')}
+    updateDashStats();
+  }catch{}
 }
-
-function copyText(text, msg) {
-  navigator.clipboard.writeText(text)
-    .then(() => toast(msg || 'Copied!', 'success'))
-    .catch(() => toast(text, 'info'))
+async function saveDomain(storeId){
+  const input=document.getElementById(`domain-inp-${storeId}`),domain=(input?.value||'').trim();
+  if(!domain)return toast('Enter a domain name','error');
+  if(!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/.test(domain))return toast('Enter a valid domain (e.g. shop.yourbrand.com)','error');
+  try{const fd=new FormData();fd.append('custom_domain',domain);const res=await fetch(API+`/stores/${storeId}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken()},body:fd});if(!res.ok){const e=await res.json();throw new Error(e.error)}const s=allStores.find(x=>x._id===storeId);if(s){s.custom_domain=domain;s.domain_status='pending'}toast('Domain saved! Now add the CNAME record.','info');renderStores();allStores.forEach(st=>loadStoreKPIs(st));setTimeout(()=>verifyDomain(storeId,domain),8000);}catch(e){toast(e.message,'error')}
 }
-
-/* ══════════════════════════════════════════════════════════
-   DOMAIN WIDGET RENDERER
-══════════════════════════════════════════════════════════ */
-function renderDomainWidget(s) {
-  const domain = (s.custom_domain || '').trim()
-  const status = s.domain_status || (domain ? 'pending' : '')
-
-  if (domain && status === 'connected') {
-    const href = domain.startsWith('http') ? domain : `https://${domain}`
-    return `
-      <div class="domain-status-row connected">
-        <a href="${href}" target="_blank" rel="noopener noreferrer"
-           class="domain-link" title="Open ${domain}">
-          ${domain}
-          <span class="domain-link-arrow">↗</span>
-        </a>
-        <div class="live-badge-wrap">
-          <span class="live-pulse-dot"></span>
-          LIVE
-        </div>
-        <button class="domain-action-btn remove"
-                onclick="clearDomain('${s._id}')"
-                title="Remove custom domain">✕</button>
-      </div>`
-  }
-
-  if (domain && status === 'pending') {
-    return `
-      <div class="domain-status-row pending">
-        <div class="domain-dot pending"></div>
-        <span class="domain-value pending" title="${domain}">${domain}</span>
-        <span class="domain-badge pending">Verifying…</span>
-        <button class="domain-action-btn"
-                onclick="verifyDomain('${s._id}','${domain}')"
-                title="Re-check now">↻</button>
-        <button class="domain-action-btn remove"
-                onclick="clearDomain('${s._id}')"
-                title="Remove domain">✕</button>
-      </div>
-      <div class="dns-pending-hint">
-        ⏳ Waiting for DNS. Make sure you've added a CNAME record pointing to
-        <code>${CNAME_TARGET}</code> at your registrar, then click ↻ to recheck.
-      </div>
-      ${buildDnsGuideHtml(s._id)}`
-  }
-
-  return `
-    <div class="domain-input-row">
-      <input type="text" id="domain-inp-${s._id}"
-             placeholder="shop.yourbrand.com" value="${domain}">
-      <button class="domain-save-btn" onclick="saveDomain('${s._id}')">Save</button>
-    </div>
-    ${buildDnsGuideHtml(s._id)}`
+async function verifyDomain(storeId,domain){
+  try{const data=await apiFetch(`/stores/${storeId}/verify-domain`);const s=allStores.find(x=>x._id===storeId);if(!s)return;if(data.connected){s.domain_status='connected';toast(`✓ ${domain} is connected!`,'success')}else{s.domain_status='pending';toast('DNS not verified yet — try again shortly.','info')}renderStores();allStores.forEach(st=>loadStoreKPIs(st));}catch{toast('Could not verify domain. Try again shortly.','error')}
 }
-
-/* ══════════════════════════════════════════════════════════
-   STORE CARD RENDERER
-══════════════════════════════════════════════════════════ */
-function renderStores() {
-  const container = document.getElementById('page-content')
-  container.querySelector('.stores-grid')?.remove()
-  container.querySelector('.stores-empty-state')?.remove()
-
-  const topbarNewBtn = document.getElementById('topbarNewStoreBtn')
-  if (topbarNewBtn) topbarNewBtn.style.display = allStores.length ? '' : 'none'
-
-  if (!allStores.length) {
-    container.insertAdjacentHTML('beforeend', `
-      <div class="stores-empty-state">
-        <div class="stores-empty-inner">
-          <div class="stores-empty-icon">🏪</div>
-          <h3>No stores yet</h3>
-          <p>Create your first store and start selling in minutes</p>
-          <button class="btn btn-primary stores-empty-btn" onclick="openCreateStore()">
-            + Create Your First Store
-          </button>
-        </div>
-      </div>`)
-    return
-  }
-
-  const grid = document.createElement('div')
-  grid.className = 'stores-grid'
-  grid.innerHTML = allStores.map(s => {
-    const bg   = s.brand_color || '#6c63ff'
-    const logo = s.logo_url
-      ? `<img class="store-banner-logo" src="${s.logo_url}" alt="${s.name}">`
-      : `<span class="store-banner-initials">${s.name.slice(0,2).toUpperCase()}</span>`
-
-    return `<div class="store-card">
-      <div class="store-banner" style="background:linear-gradient(135deg,${bg}ee,${bg}88);">
-        ${logo}
-      </div>
-      <div class="store-card-body">
-        <div class="store-name">${s.name}</div>
-        <div class="store-slug">
-          /${s.slug}
-          <button class="store-slug-copy-btn"
-                  onclick="copyStoreUrl('${s.slug}')"
-                  title="Copy store URL">📋</button>
-        </div>
-
-        <div class="domain-section">
-          <div class="domain-section-label">Custom Domain</div>
-          ${renderDomainWidget(s)}
-        </div>
-
-        <div class="store-badges">
-          <span class="badge ${s.published ? 'badge-green' : 'badge-gray'}">
-            ${s.published ? '● Live' : '○ Draft'}
-          </span>
-          <span class="badge badge-gray">📦 ${s.product_count || 0}</span>
-          <span class="badge badge-gray">📋 ${s.order_count || 0}</span>
-        </div>
-
-        <div class="store-kpis" style="padding:0 18px;">
-          <div class="store-kpi">
-            <div class="store-kpi-val loading" id="kpi-rev-${s._id}">—</div>
-            <div class="store-kpi-label">Revenue</div>
-          </div>
-          <div class="store-kpi">
-            <div class="store-kpi-val loading" id="kpi-ord-${s._id}">—</div>
-            <div class="store-kpi-label">Orders</div>
-          </div>
-          <div class="store-kpi">
-            <div class="store-kpi-val loading" id="kpi-today-${s._id}">—</div>
-            <div class="store-kpi-label">Today</div>
-          </div>
-        </div>
-
-        <div class="store-actions">
-          ${s.published ? `<a href="${s.published_url}" target="_blank" class="btn btn-secondary btn-sm">🌐 View</a>` : ''}
-          <button class="btn btn-secondary btn-sm" onclick="publishStore('${s._id}')">
-            🚀 ${s.published ? 'Republish' : 'Publish'}
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="openEditStore('${s._id}')">✏️ Edit</button>
-          <button class="btn btn-danger btn-sm"
-                  onclick="deleteStore('${s._id}','${s.name.replace(/'/g,"\\'")}')">🗑</button>
-        </div>
-      </div>
-    </div>`
-  }).join('')
-  container.appendChild(grid)
+async function clearDomain(storeId){
+  if(!confirm('Remove custom domain from this store?'))return;
+  try{const fd=new FormData();fd.append('custom_domain','');const res=await fetch(API+`/stores/${storeId}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken()},body:fd});if(!res.ok){const e=await res.json();throw new Error(e.error)}const s=allStores.find(x=>x._id===storeId);if(s){s.custom_domain='';s.domain_status=''}toast('Custom domain removed','info');renderStores();allStores.forEach(st=>loadStoreKPIs(st));}catch(e){toast(e.message,'error')}
 }
-
-/* ══════════════════════════════════════════════════════════
-   PAGE INIT
-══════════════════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('stores')
-  if (!nav) return
-  currentUser = nav.user
-
-  // Swap sidebar shimmer → real user info now that we have the data
-  revealSidebarUser()
-
-  document.getElementById('storeEmail').value = currentUser.email || ''
-  setTopbarActions(`<button class="btn btn-primary" id="topbarNewStoreBtn" onclick="openCreateStore()" style="display:none;">+ New Store</button>`)
-
-  // Theme toggle in topbar
-  const topbarRight = document.querySelector('.topbar-right')
-  if (topbarRight && !document.getElementById('themeToggleBtn')) {
-    const btn = document.createElement('button')
-    btn.className   = 'theme-toggle'
-    btn.id          = 'themeToggleBtn'
-    btn.title       = 'Toggle day / night mode'
-    btn.onclick     = toggleTheme
-    btn.textContent = _isDark ? '🌙' : '☀️'
-    topbarRight.insertBefore(btn, topbarRight.firstChild)
-  }
-  applyTheme(_isDark)
-
-  await loadAll()
-})
-
-async function loadAll() {
-  const pc = document.getElementById('page-content')
-  pc.querySelector('.stats-row')?.remove()
-  await loadStores()
+function openCreateStore(){
+  document.getElementById('storeModalTitle').textContent='Create New Store';
+  ['storeEditId','storeName','storeTagline','storeDesc','storePhone','storeLogoFile','storeLogoExisting','storeCustomDomain'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('storeEmail').value=currentUser?.email||'';document.getElementById('storeBrandColor').value='#7C6FFF';document.getElementById('storeLogoPreview').style.display='none';
+  selectCardStyle('grid',document.querySelector('[data-style="grid"]'));openModal('storeModal');
 }
-
-async function loadStores() {
-  allStores = await apiFetch('/stores')
-
-  // Show real content, fade out main skeleton
-  const pc = document.getElementById('page-content')
-  pc.style.display = ''
-  dismissSkeleton()
-
-  renderStores()
-  renderStatsShell(allStores.length)
-  await Promise.allSettled(allStores.map(s => loadStoreKPIs(s)))
-  updateDashStats()
+function openEditStore(id){
+  const s=allStores.find(x=>x._id===id);if(!s)return;
+  document.getElementById('storeModalTitle').textContent='Edit Store';
+  document.getElementById('storeEditId').value=id;document.getElementById('storeName').value=s.name;document.getElementById('storeTagline').value=s.tagline||'';document.getElementById('storeDesc').value=s.description||'';document.getElementById('storeEmail').value=s.contact_email||'';document.getElementById('storePhone').value=s.phone||'';document.getElementById('storeCurrency').value=s.currency||'INR';document.getElementById('storeBrandColor').value=s.brand_color||'#7C6FFF';document.getElementById('storeLogoFile').value='';document.getElementById('storeLogoExisting').value=s.logo_url||'';document.getElementById('storeCustomDomain').value=s.custom_domain||'';
+  const cs=s.card_style||'grid';selectCardStyle(cs,document.querySelector(`[data-style="${cs}"]`));
+  if(s.logo_url){document.getElementById('storeLogoImg').src=s.logo_url;document.getElementById('storeLogoPreview').style.display='block';}else{document.getElementById('storeLogoPreview').style.display='none';}
+  openModal('storeModal');
 }
-
-const _storeAnalytics = {}
-
-function renderStatsShell(storeCount) {
-  const pc = document.getElementById('page-content')
-  pc.querySelector('.stats-row')?.remove()
-  const html = `
-    <div class="stats-row" id="dashStatsRow">
-      <div class="stat-card">
-        <span class="stat-icon">🏪</span>
-        <div>
-          <div class="stat-label">My Stores</div>
-          <div class="stat-value" id="ds-stores">${storeCount}</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">📦</span>
-        <div>
-          <div class="stat-label">My Orders</div>
-          <div class="stat-value stat-loading" id="ds-orders">—</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">🕐</span>
-        <div>
-          <div class="stat-label">Today's Orders</div>
-          <div class="stat-value stat-loading" id="ds-today">—</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-icon">💰</span>
-        <div>
-          <div class="stat-label">My Revenue</div>
-          <div class="stat-value stat-loading" id="ds-revenue">—</div>
-        </div>
-      </div>
-    </div>`
-  pc.insertAdjacentHTML('afterbegin', html)
+async function saveStore(){
+  const id=document.getElementById('storeEditId').value,name=document.getElementById('storeName').value.trim();
+  if(!name)return toast('Store name is required','error');
+  const fd=new FormData();fd.append('name',name);fd.append('tagline',document.getElementById('storeTagline').value.trim());fd.append('description',document.getElementById('storeDesc').value.trim());fd.append('contact_email',document.getElementById('storeEmail').value.trim());fd.append('phone',document.getElementById('storePhone').value.trim());fd.append('currency',document.getElementById('storeCurrency').value);fd.append('brand_color',document.getElementById('storeBrandColor').value);fd.append('card_style',document.getElementById('storeCardStyle').value||'grid');fd.append('custom_domain',document.getElementById('storeCustomDomain').value.trim());
+  const logoFile=document.getElementById('storeLogoFile').files[0];if(logoFile)fd.append('logo',logoFile);else fd.append('logo_url',document.getElementById('storeLogoExisting').value||'');
+  try{const url=id?`/stores/${id}`:'/stores';const res=await fetch(API+url,{method:id?'PUT':'POST',headers:{'Authorization':'Bearer '+getToken()},body:fd});if(!res.ok){const e=await res.json();throw new Error(e.error)}closeModal('storeModal');await loadStores();toast(id?'Store updated!':'Store created!','success');}catch(e){toast(e.message,'error')}
 }
-
-function updateDashStats() {
-  let totalOrders = 0, todayOrders = 0, totalRevenue = 0
-  Object.values(_storeAnalytics).forEach(d => {
-    totalOrders  += d.total_orders  || 0
-    todayOrders  += d.today_orders  || 0
-    totalRevenue += d.total_revenue || 0
-  })
-  const revStr = totalRevenue >= 100000
-    ? '₹' + (totalRevenue/100000).toFixed(1) + 'L'
-    : totalRevenue >= 1000
-    ? '₹' + (totalRevenue/1000).toFixed(1) + 'k'
-    : '₹' + Math.round(totalRevenue).toLocaleString('en-IN')
-
-  const ordEl = document.getElementById('ds-orders')
-  const todEl = document.getElementById('ds-today')
-  const revEl = document.getElementById('ds-revenue')
-  if (ordEl) { ordEl.textContent = totalOrders;  ordEl.classList.remove('stat-loading') }
-  if (todEl) { todEl.textContent = todayOrders;  todEl.classList.remove('stat-loading') }
-  if (revEl) { revEl.textContent = revStr;        revEl.classList.remove('stat-loading') }
-}
-
-async function loadStoreKPIs(s) {
-  try {
-    const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
-    _storeAnalytics[s._id] = data
-
-    const cur    = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
-    const rev    = data.total_revenue || 0
-    const revStr = rev >= 100000 ? cur + (rev/100000).toFixed(1)+'L'
-                 : rev >= 1000   ? cur + (rev/1000).toFixed(1)+'k'
-                 : cur + rev.toFixed(0)
-
-    const revEl = document.getElementById(`kpi-rev-${s._id}`)
-    const ordEl = document.getElementById(`kpi-ord-${s._id}`)
-    const todEl = document.getElementById(`kpi-today-${s._id}`)
-    if (revEl) { revEl.textContent = revStr;                 revEl.classList.remove('loading'); revEl.classList.add('rev') }
-    if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
-    if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
-
-    updateDashStats()
-  } catch {}
-}
-
-/* ══════════════════════════════════════════════════════════
-   DOMAIN ACTIONS
-══════════════════════════════════════════════════════════ */
-async function saveDomain(storeId) {
-  const input  = document.getElementById(`domain-inp-${storeId}`)
-  const domain = (input?.value || '').trim()
-  if (!domain) return toast('Enter a domain name', 'error')
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/.test(domain)) {
-    return toast('Enter a valid domain (e.g. shop.yourbrand.com)', 'error')
-  }
-  try {
-    const fd = new FormData()
-    fd.append('custom_domain', domain)
-    const res = await fetch(API + `/stores/${storeId}`, {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + getToken() },
-      body: fd
-    })
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
-    const s = allStores.find(x => x._id === storeId)
-    if (s) { s.custom_domain = domain; s.domain_status = 'pending' }
-    toast('Domain saved! Now add the CNAME record at your registrar.', 'info')
-    renderStores()
-    allStores.forEach(st => loadStoreKPIs(st))
-    setTimeout(() => verifyDomain(storeId, domain), 8000)
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function verifyDomain(storeId, domain) {
-  try {
-    const data = await apiFetch(`/stores/${storeId}/verify-domain`)
-    const s = allStores.find(x => x._id === storeId)
-    if (!s) return
-    if (data.connected) {
-      s.domain_status = 'connected'
-      toast(`✓ ${domain} is connected!`, 'success')
-    } else {
-      s.domain_status = 'pending'
-      toast('DNS not verified yet — check your CNAME record and try again shortly.', 'info')
-    }
-    renderStores()
-    allStores.forEach(st => loadStoreKPIs(st))
-  } catch { toast('Could not verify domain right now. Try again shortly.', 'error') }
-}
-
-async function clearDomain(storeId) {
-  if (!confirm('Remove custom domain from this store?')) return
-  try {
-    const fd = new FormData()
-    fd.append('custom_domain', '')
-    const res = await fetch(API + `/stores/${storeId}`, {
-      method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + getToken() },
-      body: fd
-    })
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
-    const s = allStores.find(x => x._id === storeId)
-    if (s) { s.custom_domain = ''; s.domain_status = '' }
-    toast('Custom domain removed', 'info')
-    renderStores()
-    allStores.forEach(st => loadStoreKPIs(st))
-  } catch (e) { toast(e.message, 'error') }
-}
-
-/* ══════════════════════════════════════════════════════════
-   STORE CRUD
-══════════════════════════════════════════════════════════ */
-function openCreateStore() {
-  document.getElementById('storeModalTitle').textContent = 'Create New Store'
-  document.getElementById('storeEditId').value        = ''
-  document.getElementById('storeName').value          = ''
-  document.getElementById('storeTagline').value       = ''
-  document.getElementById('storeDesc').value          = ''
-  document.getElementById('storeEmail').value         = currentUser?.email || ''
-  document.getElementById('storePhone').value         = ''
-  document.getElementById('storeBrandColor').value    = '#6c63ff'
-  document.getElementById('storeLogoFile').value      = ''
-  document.getElementById('storeLogoExisting').value  = ''
-  document.getElementById('storeLogoPreview').style.display = 'none'
-  document.getElementById('storeCustomDomain').value  = ''
-  selectCardStyle('grid', document.querySelector('[data-style="grid"]'))
-  openModal('storeModal')
-}
-
-function openEditStore(id) {
-  const s = allStores.find(x => x._id === id); if (!s) return
-  document.getElementById('storeModalTitle').textContent = 'Edit Store'
-  document.getElementById('storeEditId').value        = id
-  document.getElementById('storeName').value          = s.name
-  document.getElementById('storeTagline').value       = s.tagline || ''
-  document.getElementById('storeDesc').value          = s.description || ''
-  document.getElementById('storeEmail').value         = s.contact_email || ''
-  document.getElementById('storePhone').value         = s.phone || ''
-  document.getElementById('storeCurrency').value      = s.currency || 'INR'
-  document.getElementById('storeBrandColor').value    = s.brand_color || '#6c63ff'
-  document.getElementById('storeLogoFile').value      = ''
-  document.getElementById('storeLogoExisting').value  = s.logo_url || ''
-  document.getElementById('storeCustomDomain').value  = s.custom_domain || ''
-  const cs = s.card_style || 'grid'
-  selectCardStyle(cs, document.querySelector(`[data-style="${cs}"]`))
-  if (s.logo_url) {
-    document.getElementById('storeLogoImg').src = s.logo_url
-    document.getElementById('storeLogoPreview').style.display = 'block'
-  } else {
-    document.getElementById('storeLogoPreview').style.display = 'none'
-  }
-  openModal('storeModal')
-}
-
-async function saveStore() {
-  const id   = document.getElementById('storeEditId').value
-  const name = document.getElementById('storeName').value.trim()
-  if (!name) return toast('Store name is required', 'error')
-
-  const fd = new FormData()
-  fd.append('name',          name)
-  fd.append('tagline',       document.getElementById('storeTagline').value.trim())
-  fd.append('description',   document.getElementById('storeDesc').value.trim())
-  fd.append('contact_email', document.getElementById('storeEmail').value.trim())
-  fd.append('phone',         document.getElementById('storePhone').value.trim())
-  fd.append('currency',      document.getElementById('storeCurrency').value)
-  fd.append('brand_color',   document.getElementById('storeBrandColor').value)
-  fd.append('card_style',    document.getElementById('storeCardStyle').value || 'grid')
-  fd.append('custom_domain', document.getElementById('storeCustomDomain').value.trim())
-
-  const logoFile = document.getElementById('storeLogoFile').files[0]
-  if (logoFile) fd.append('logo', logoFile)
-  else fd.append('logo_url', document.getElementById('storeLogoExisting').value || '')
-
-  try {
-    const url = id ? `/stores/${id}` : '/stores'
-    const res = await fetch(API + url, {
-      method: id ? 'PUT' : 'POST',
-      headers: { 'Authorization': 'Bearer ' + getToken() },
-      body: fd
-    })
-    if (!res.ok) { const e = await res.json(); throw new Error(e.error) }
-    closeModal('storeModal')
-    await loadStores()
-    toast(id ? 'Store updated!' : 'Store created!', 'success')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-function copyStoreUrl(slug) {
-  const url = `https://ekart.aasaitech.in/${slug}`
-  navigator.clipboard.writeText(url)
-    .then(() => toast('Store URL copied!', 'success'))
-    .catch(() => toast(url, 'info'))
-}
-
-async function publishStore(id) {
-  try {
-    const r = await apiFetch(`/stores/${id}/publish`, { method: 'POST', body: '{}' })
-    toast('Store published! URL copied.')
-    navigator.clipboard.writeText(r.url).catch(() => {})
-    await loadStores()
-  } catch (e) { toast(e.message, 'error') }
-}
-
-async function deleteStore(id, name) {
-  if (!confirm(`Delete "${name}" and all its data? This cannot be undone.`)) return
-  try {
-    await apiFetch(`/stores/${id}`, { method: 'DELETE', body: '{}' })
-    await loadStores()
-    toast('Store deleted')
-  } catch (e) { toast(e.message, 'error') }
-}
-
-function selectCardStyle(style, el) {
-  document.querySelectorAll('.card-style-opt').forEach(o => o.classList.remove('active'))
-  if (el) el.classList.add('active')
-  document.getElementById('storeCardStyle').value = style
-}
-
-function previewLogo(input) {
-  if (!input.files[0]) return
-  const r = new FileReader()
-  r.onload = e => {
-    document.getElementById('storeLogoImg').src = e.target.result
-    document.getElementById('storeLogoPreview').style.display = 'block'
-  }
-  r.readAsDataURL(input.files[0])
-}
+function copyStoreUrl(slug){const url=`https://ekart.aasaitech.in/${slug}`;navigator.clipboard.writeText(url).then(()=>toast('Store URL copied!','success')).catch(()=>toast(url,'info'));}
+async function publishStore(id){try{const r=await apiFetch(`/stores/${id}/publish`,{method:'POST',body:'{}'});toast('Store published! URL copied.');navigator.clipboard.writeText(r.url).catch(()=>{});await loadStores();}catch(e){toast(e.message,'error')}}
+async function deleteStore(id,name){if(!confirm(`Delete "${name}" and all its data? This cannot be undone.`))return;try{await apiFetch(`/stores/${id}`,{method:'DELETE',body:'{}'});await loadStores();toast('Store deleted');}catch(e){toast(e.message,'error')}}
+function selectCardStyle(style,el){document.querySelectorAll('.card-style-opt').forEach(o=>o.classList.remove('active'));if(el)el.classList.add('active');document.getElementById('storeCardStyle').value=style;}
+function previewLogo(input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{document.getElementById('storeLogoImg').src=e.target.result;document.getElementById('storeLogoPreview').style.display='block';};r.readAsDataURL(input.files[0]);}
 </script>
 </body>
 </html>
