@@ -20,6 +20,134 @@
 
 <style>
 /* ══════════════════════════════════════════════
+   SKELETON — mirrors the real sidebar + main layout
+   exactly so there's zero layout shift on load
+══════════════════════════════════════════════ */
+
+/* Shared shimmer animation */
+@keyframes skel-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.11) 50%,
+    rgba(0,0,0,0.06) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+
+/*
+  The skeleton wrapper must EXACTLY replicate the
+  CSS layout that nav.css applies to .sidebar + .main-wrap.
+  We use the same variable names so any overrides cascade.
+*/
+#page-skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 9999;
+  background: inherit;          /* inherits html background */
+  transition: opacity .25s ease;
+}
+#page-skeleton.skel-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Skeleton sidebar ─────────────────────────
+   Match .sidebar in nav.css:
+     width: 240px | padding: 20px 14px | position: fixed/flex-col
+   Adjust the width value if nav.css differs.
+────────────────────────────────────────────── */
+.skel-sidebar {
+  width: 240px;              /* ← must match .sidebar width in nav.css   */
+  flex-shrink: 0;
+  height: 100%;
+  background: #0d0e18;       /* match sidebar bg */
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-sidebar {
+  background: #fff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+
+/* ── Skeleton main area ───────────────────────
+   Match .main-wrap: flex-col, fills remaining width
+────────────────────────────────────────────── */
+.skel-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Skeleton topbar ──────────────────────────
+   Match .topbar: height ~60px, padding, flex row
+────────────────────────────────────────────── */
+.skel-topbar {
+  height: 60px;              /* ← must match .topbar height in nav.css   */
+  flex-shrink: 0;
+  background: #0d0e18;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-topbar {
+  background: #fff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+
+/* ── Skeleton content body ────────────────────
+   Match .content padding
+────────────────────────────────────────────── */
+.skel-body {
+  flex: 1;
+  padding: 24px;             /* ← must match .content padding in nav.css */
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar internal spacing helpers */
+.skel-sidebar-logo   { margin-bottom: 22px; }
+.skel-sidebar-user   { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 14px; }
+[data-theme="light"] .skel-sidebar-user { border-bottom-color: rgba(0,0,0,0.08); }
+.skel-sidebar-user-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.skel-nav-rows { display: flex; flex-direction: column; gap: 4px; }
+
+/* Stat cards row */
+.skel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .skel-stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* ══════════════════════════════════════════════
    LIGHT THEME OVERRIDES
 ══════════════════════════════════════════════ */
 [data-theme="light"] {
@@ -410,6 +538,71 @@ tbody td:last-child  { padding-right: 20px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── PAGE CONTENT TRANSITIONS ── */
+#page-content {
+  /* Inline transitions driven by JS for store-switch */
+  will-change: opacity, transform;
+}
+
+/* Initial page load animation */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageIn .3s ease both; }
+
+/* ── INLINE LOADING SKELETON (store switch) ── */
+/* Uses same .skel shimmer already defined above */
+.inline-skel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .inline-skel-stats { grid-template-columns: repeat(2,1fr); } }
+
+.inline-skel-card {
+  border-radius: 16px;
+  height: 88px;
+}
+.inline-skel-toolbar {
+  height: 54px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+.inline-skel-table {
+  border-radius: 16px;
+  overflow: hidden;
+}
+.inline-skel-thead {
+  height: 42px;
+  border-radius: 0;
+  margin-bottom: 1px;
+  opacity: .55;
+}
+.inline-skel-row {
+  height: 66px;
+  border-radius: 0;
+  margin-bottom: 1px;
+}
+
+/* ── STORE SELECTOR LOADING INDICATOR ── */
+.store-loading {
+  position: relative;
+}
+.store-loading::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(108,99,255,0.25);
+  border-top-color: var(--accent, #6c63ff);
+  animation: spin .65s linear infinite;
+  pointer-events: none;
+}
+
 /* ── LOADING ROW ANIMATION ── */
 @keyframes rowIn {
   from { opacity: 0; transform: translateX(-8px); }
@@ -438,46 +631,104 @@ tbody tr:nth-child(6) { animation-delay: .15s; }
 </head>
 <body>
 
-<!-- ── SKELETON ── -->
-<div id="page-skeleton">
+<!-- ══════════════════════════════════════════
+  SKELETON — perfectly mirrors the real layout:
+    skel-sidebar  → .sidebar
+    skel-topbar   → .topbar
+    skel-body     → .content
+
+  Hidden via JS once real nav + content paint.
+══════════════════════════════════════════ -->
+<div id="page-skeleton" aria-hidden="true">
+
+  <!-- LEFT: sidebar replica -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+    <!-- Logo -->
+    <div class="skel-sidebar-logo">
+      <div class="skel" style="height:20px;width:72px;border-radius:5px;"></div>
+    </div>
+
+    <!-- User row -->
+    <div class="skel-sidebar-user">
       <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      <div class="skel-sidebar-user-text">
+        <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:120px;border-radius:4px;"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+
+    <!-- Nav section label -->
+    <div class="skel" style="height:8px;width:56px;border-radius:4px;margin-bottom:8px;opacity:.45;"></div>
+
+    <!-- Nav items — active one slightly more opaque -->
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.78;"></div><!-- active -->
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+
+    <!-- Second nav section -->
+    <div class="skel" style="height:8px;width:64px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+
+    <!-- Third nav section -->
+    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
   </div>
+
+  <!-- RIGHT: main area replica -->
   <div class="skel-main">
+
+    <!-- Topbar -->
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:80px;border-radius:5px;"></div>
-      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
-    </div>
-    <div class="skel-body">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
-        <div class="skel" style="height:88px;border-radius:16px;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.8;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.6;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.4;"></div>
+      <div class="skel" style="height:16px;width:68px;border-radius:5px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="skel" style="height:34px;width:160px;border-radius:9px;opacity:.7;"></div>
+        <div class="skel" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
+        <div class="skel" style="height:30px;width:100px;border-radius:8px;opacity:.5;"></div>
       </div>
-      <div class="skel" style="height:56px;border-radius:14px;margin-bottom:14px;"></div>
-      <div class="skel" style="height:56px;border-radius:9px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:56px;border-radius:9px;margin-bottom:8px;opacity:.8;"></div>
-      <div class="skel" style="height:56px;border-radius:9px;margin-bottom:8px;opacity:.6;"></div>
-      <div class="skel" style="height:56px;border-radius:9px;margin-bottom:8px;opacity:.4;"></div>
+    </div>
+
+    <!-- Content body -->
+    <div class="skel-body">
+
+      <!-- Stat cards -->
+      <div class="skel-stats">
+        <div class="skel" style="height:88px;border-radius:16px;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.82;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.64;"></div>
+        <div class="skel" style="height:88px;border-radius:16px;opacity:.46;"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="skel" style="height:54px;border-radius:14px;margin-bottom:14px;opacity:.9;"></div>
+
+      <!-- Table card -->
+      <div style="border-radius:16px;overflow:hidden;">
+        <!-- thead -->
+        <div class="skel" style="height:42px;border-radius:0;opacity:.55;margin-bottom:1px;"></div>
+        <!-- rows -->
+        <div class="skel" style="height:66px;border-radius:0;opacity:.9;margin-bottom:1px;"></div>
+        <div class="skel" style="height:66px;border-radius:0;opacity:.74;margin-bottom:1px;"></div>
+        <div class="skel" style="height:66px;border-radius:0;opacity:.58;margin-bottom:1px;"></div>
+        <div class="skel" style="height:66px;border-radius:0;opacity:.42;margin-bottom:1px;"></div>
+        <div class="skel" style="height:66px;border-radius:0;opacity:.26;"></div>
+      </div>
+
     </div>
   </div>
 </div>
+<!-- /skeleton -->
 
-<!-- ── SIDEBAR ── -->
+<!-- ── SIDEBAR (rendered by nav.js) ── -->
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
   <div class="sidebar-user">
@@ -556,6 +807,87 @@ tbody tr:nth-child(6) { animation-delay: .15s; }
 
 <script>
 /* ══════════════════════════════════════════════
+   SKELETON DISMISSAL (initial page load)
+══════════════════════════════════════════════ */
+function hideSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel) return
+  skel.classList.add('skel-hidden')
+  setTimeout(() => skel.remove(), 280)
+}
+
+/* ══════════════════════════════════════════════
+   SMOOTH TRANSITION HELPERS
+   fadeOut → returns a Promise that resolves after
+   the CSS transition completes (180 ms).
+   fadeIn  → snaps opacity/transform to start,
+   then transitions to final state on next rAF.
+══════════════════════════════════════════════ */
+const FADE_MS = 180
+
+function fadeOut(el) {
+  return new Promise(resolve => {
+    el.style.transition = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
+    el.style.opacity    = '0'
+    el.style.transform  = 'translateY(-6px)'
+    el.style.pointerEvents = 'none'
+    setTimeout(resolve, FADE_MS)
+  })
+}
+
+function fadeIn(el) {
+  // Force the "from" state before browser paints
+  el.style.transition = 'none'
+  el.style.opacity    = '0'
+  el.style.transform  = 'translateY(8px)'
+  el.style.display    = ''
+  // Let the browser register the from-state, then animate to final
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transition = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
+      el.style.opacity    = '1'
+      el.style.transform  = 'translateY(0)'
+      el.style.pointerEvents = ''
+    })
+  })
+}
+
+/* ══════════════════════════════════════════════
+   INLINE SKELETON (shown during store switch)
+   Preserves the exact content layout so there's
+   no height jump — stat cards, toolbar, table.
+══════════════════════════════════════════════ */
+function inlineSkeletonHTML() {
+  const rows = [.95, .82, .69, .56, .43].map((op, i) =>
+    `<div class="skel inline-skel-row" style="opacity:${op};${i === 4 ? 'margin-bottom:0;' : ''}"></div>`
+  ).join('')
+  return `
+    <div class="inline-skel-stats">
+      <div class="skel inline-skel-card"></div>
+      <div class="skel inline-skel-card" style="opacity:.82;"></div>
+      <div class="skel inline-skel-card" style="opacity:.64;"></div>
+      <div class="skel inline-skel-card" style="opacity:.46;"></div>
+    </div>
+    <div class="skel inline-skel-toolbar"></div>
+    <div class="inline-skel-table">
+      <div class="skel inline-skel-thead"></div>
+      ${rows}
+    </div>`
+}
+
+/* ══════════════════════════════════════════════
+   STORE SELECTOR BUSY INDICATOR
+   Adds a tiny spinner next to the store <select>
+   while data is loading, removed when done.
+══════════════════════════════════════════════ */
+function setStoreLoading(on) {
+  const wrap = document.getElementById('store-select-wrap')
+  if (!wrap) return
+  if (on)  wrap.classList.add('store-loading')
+  else     wrap.classList.remove('store-loading')
+}
+
+/* ══════════════════════════════════════════════
    THEME SYSTEM
 ══════════════════════════════════════════════ */
 let _isDark = localStorage.getItem('ekart_theme') !== 'light'
@@ -579,8 +911,14 @@ applyTheme(_isDark)
 
 /* ══════════════════════════════════════════════
    STATE
+   _loadToken: incremented on every loadOrders call.
+   Each async run captures its own token; if it
+   doesn't match the current one on completion,
+   the user already switched stores → discard.
 ══════════════════════════════════════════════ */
-let allOrders = [], currentStoreId = ''
+let allOrders    = []
+let currentStoreId = ''
+let _loadToken   = 0
 
 /* ══════════════════════════════════════════════
    INIT
@@ -590,10 +928,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     currentStoreId = id
     loadOrders()
   })
-  if (!nav) return
+
+  if (!nav) { hideSkeleton(); return }
   currentStoreId = nav.currentStoreId
 
-  // Inject theme toggle
+  // Theme toggle button
   const topbarRight = document.querySelector('.topbar-right')
   if (topbarRight && !document.getElementById('themeToggleBtn')) {
     const btn = document.createElement('button')
@@ -607,26 +946,79 @@ window.addEventListener('DOMContentLoaded', async () => {
   applyTheme(_isDark)
 
   setTopbarActions(`<button class="btn btn-secondary btn-sm" onclick="exportCSV()" style="font-size:12px;">⬇ Export CSV</button>`)
+
   if (currentStoreId) await loadOrders()
-  else renderEmpty()
+  else { renderEmpty(); hideSkeleton() }
 })
 
+/* ══════════════════════════════════════════════
+   LOAD ORDERS — handles both first-load and
+   store-switch with a clean 3-phase transition:
+     Phase 1 → fade out current content
+     Phase 2 → show inline shimmer skeleton
+     Phase 3 → fetch, then fade in real content
+══════════════════════════════════════════════ */
 async function loadOrders() {
   if (!currentStoreId) return
-  document.getElementById('page-content').innerHTML = '<div class="spinner"></div>'
+
+  const token   = ++_loadToken     // capture for race-condition guard
+  const content = document.getElementById('page-content')
+  const isFirst = content.style.display === 'none'
+
+  setStoreLoading(true)
+
+  if (!isFirst) {
+    // ── Phase 1: fade out existing content ──
+    await fadeOut(content)
+    if (token !== _loadToken) return  // store switched again while fading
+
+    // ── Phase 2: inline skeleton fades in ──
+    content.innerHTML = inlineSkeletonHTML()
+    fadeIn(content)
+    // Let the skeleton be visible for at least one frame before fetching
+    // (the fetch and skeleton display are concurrent — fast APIs will still
+    //  show the skeleton for the fade-in duration, which feels intentional)
+  }
+
   try {
     allOrders = await apiFetch(`/stores/${currentStoreId}/orders`)
-    renderPage()
-  } catch (e) { toast(e.message, 'error') }
+
+    if (token !== _loadToken) return  // stale response — newer load running
+
+    if (!isFirst) {
+      // ── Phase 3a: fade out skeleton, swap in real content ──
+      await fadeOut(content)
+      if (token !== _loadToken) return
+    }
+
+    renderPage(isFirst)  // handles both first-load and switch paths
+
+  } catch (e) {
+    if (token !== _loadToken) return
+    if (isFirst) hideSkeleton()
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Failed to load orders</h3>
+        <p>${e.message}</p>
+      </div>`
+    fadeIn(content)
+    toast(e.message, 'error')
+  } finally {
+    if (token === _loadToken) setStoreLoading(false)
+  }
 }
 
-function renderPage() {
+/* ══════════════════════════════════════════════
+   RENDER PAGE
+══════════════════════════════════════════════ */
+function renderPage(isFirst = false) {
   const pending   = allOrders.filter(o => o.status === 'pending').length
-  const shipped   = allOrders.filter(o => o.status === 'shipped').length
   const delivered = allOrders.filter(o => o.status === 'delivered').length
   const revenue   = allOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0)
 
-  document.getElementById('page-content').innerHTML = `
+  const content = document.getElementById('page-content')
+  content.innerHTML = `
     <div class="order-stats">
       <div class="order-stat" style="--stat-color:var(--accent);--stat-bg:rgba(108,99,255,0.1);">
         <div class="order-stat-icon">📋</div>
@@ -692,14 +1084,31 @@ function renderPage() {
         <tbody id="ordersBody"></tbody>
       </table>
     </div>`
+
   renderOrders(allOrders)
+
+  if (isFirst) {
+    // First load: reveal content, then dismiss page skeleton
+    content.style.display = ''
+    requestAnimationFrame(() => hideSkeleton())
+  } else {
+    // Store switch: Phase 3b — fade in the freshly rendered content
+    fadeIn(content)
+  }
 }
 
+/* ══════════════════════════════════════════════
+   FILTER + RENDER ROWS
+══════════════════════════════════════════════ */
 function filterOrders() {
   const q      = document.getElementById('orderSearch')?.value.toLowerCase() || ''
   const status = document.getElementById('orderStatusFilter')?.value || ''
   let f = allOrders
-  if (q)      f = f.filter(o => o.order_number.toLowerCase().includes(q) || o.customer_name.toLowerCase().includes(q) || o.customer_email.toLowerCase().includes(q))
+  if (q)      f = f.filter(o =>
+    o.order_number.toLowerCase().includes(q) ||
+    o.customer_name.toLowerCase().includes(q) ||
+    o.customer_email.toLowerCase().includes(q)
+  )
   if (status) f = f.filter(o => o.status === status)
   document.getElementById('orderCount').textContent = `${f.length} order${f.length !== 1 ? 's' : ''}`
   renderOrders(f)
@@ -762,13 +1171,16 @@ function statusBadge(status) {
   return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`
 }
 
+/* ══════════════════════════════════════════════
+   ORDER DETAIL / EDIT MODAL
+══════════════════════════════════════════════ */
 function openOrderEdit(id) {
   const o = allOrders.find(x => x._id === id)
   if (!o) return
-  document.getElementById('orderEditId').value  = id
-  document.getElementById('orderStatus').value  = o.status
+  document.getElementById('orderEditId').value   = id
+  document.getElementById('orderStatus').value   = o.status
   document.getElementById('orderTracking').value = o.tracking_number || ''
-  document.getElementById('orderNotes').value   = o.notes || ''
+  document.getElementById('orderNotes').value    = o.notes || ''
   document.getElementById('orderDetailView').innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--accent2);">#${o.order_number}</span>
@@ -821,6 +1233,9 @@ async function saveOrder() {
   } catch (e) { toast(e.message, 'error') }
 }
 
+/* ══════════════════════════════════════════════
+   EXPORT CSV
+══════════════════════════════════════════════ */
 function exportCSV() {
   if (!allOrders.length) return toast('No orders to export', 'error')
   const rows = [['Order #', 'Customer', 'Email', 'Phone', 'Items', 'Total', 'Payment', 'Status', 'Date', 'Tracking']]
@@ -837,20 +1252,25 @@ function exportCSV() {
     ])
   })
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
-  const a = document.createElement('a')
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  const a   = document.createElement('a')
+  a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
   a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`
   a.click()
   toast('CSV downloaded!', 'success')
 }
 
+/* ══════════════════════════════════════════════
+   EMPTY STATE (no store selected)
+══════════════════════════════════════════════ */
 function renderEmpty() {
-  document.getElementById('page-content').innerHTML = `
+  const content = document.getElementById('page-content')
+  content.innerHTML = `
     <div class="empty-state">
       <div class="empty-icon">📋</div>
       <h3>No store selected</h3>
       <p>Select a store from the top bar to view orders</p>
     </div>`
+  content.style.display = ''
 }
 </script>
 </body>
