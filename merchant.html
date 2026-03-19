@@ -94,7 +94,7 @@
 [data-theme="light"] .sidebar                { background:#fff !important; border-right-color:rgba(0,0,0,0.09) !important; }
 [data-theme="light"] .main-wrap              { background:#f0f0f5 !important; }
 [data-theme="light"] .topbar                 { background:#fff !important; border-bottom-color:rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .topbar-title           { color:#111827 !important; }
+[data-theme="light"] .topbar-title           { color:#111827 !important; font-weight:600 !important; }
 [data-theme="light"] .content                { background:#f0f0f5 !important; }
 [data-theme="light"] .tab-shell              { background:#fff !important; border-color:rgba(0,0,0,0.10) !important; }
 [data-theme="light"] .tab-btn                { color:#6b7280 !important; }
@@ -158,9 +158,7 @@
 [data-theme="light"] .sidebar-user-email     { color:#9ca3af !important; }
 [data-theme="light"] .nav-section-label      { color:#9ca3af !important; }
 [data-theme="light"] .btn-logout             { color:#374151 !important; }
-[data-theme="light"] .store-select-wrap      { background:#f3f4f6 !important; border-color:rgba(0,0,0,0.12) !important; }
-[data-theme="light"] .store-selector         { color:#111827 !important; background:transparent !important; }
-[data-theme="light"] .store-select-label     { color:#9ca3af !important; }
+/* store/theme-toggle light overrides consolidated near component above */
 [data-theme="light"] .btn-secondary          { border-color:rgba(0,0,0,0.14) !important; color:#374151 !important; }
 [data-theme="light"] .btn-secondary:hover    { border-color:rgba(0,0,0,0.3) !important; color:#111827 !important; }
 [data-theme="light"] .btn-ghost:hover        { background:rgba(0,0,0,0.05) !important; color:#374151 !important; }
@@ -175,15 +173,141 @@
 [data-theme="light"] .cat-edit-modal         { background:#fff !important; border-color:rgba(0,0,0,0.10) !important; }
 [data-theme="light"] .cat-modal-field input  { background:#f3f4f6 !important; color:#111827 !important; border-color:rgba(0,0,0,0.12) !important; }
 
+/* ══════════════════════════════════════════════
+   TOPBAR — self-contained, overrides nav.css
+══════════════════════════════════════════════ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 20px 0 24px;
+  flex-shrink: 0;
+  gap: 12px;
+  /* surface + border defined by nav.css; we just guarantee the layout */
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.topbar-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #e2e4f0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -.01em;
+}
+
+/* Right cluster — store pill + theme toggle, always in a row */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Store selector pill ─────────────────────── */
+.store-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;                          /* label + select share one pill shape */
+  height: 34px;
+  background: var(--surface2, rgba(255,255,255,0.06));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+  overflow: hidden;                /* keep children clipped to pill radius */
+  transition: border-color .15s;
+}
+.store-select-wrap:focus-within {
+  border-color: rgba(108,99,255,.45);
+  box-shadow: 0 0 0 3px rgba(108,99,255,.1);
+}
+
+/* "Store" label badge on the left */
+.store-select-label {
+  flex-shrink: 0;
+  padding: 0 10px 0 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3, rgba(255,255,255,.35));
+  line-height: 1;
+  /* thin right divider */
+  border-right: 1px solid var(--border, rgba(255,255,255,.08));
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* The native <select> — flush, no extra chrome */
+.store-selector {
+  flex: 1;
+  min-width: 0;
+  max-width: 200px;
+  height: 100%;
+  padding: 0 28px 0 10px;         /* 28px right leaves room for custom arrow */
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, #e2e4f0);
+  /* custom chevron */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.store-selector option {
+  background: #1a1b2e;
+  color: #e2e4f0;
+  font-weight: 500;
+}
+[data-theme="light"] .store-selector option { background: #fff; color: #111827; }
+
 /* ── THEME TOGGLE ── */
 .theme-toggle {
-  width:34px; height:34px; border-radius:9px;
-  background:var(--surface2); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-size:16px; flex-shrink:0; transition:all .2s;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--surface2, rgba(255,255,255,0.06));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: border-color .2s, background .2s, transform .2s;
+  line-height: 1;
 }
-.theme-toggle:hover { border-color:rgba(108,99,255,0.4); background:rgba(108,99,255,0.08); transform:rotate(12deg) scale(1.05); }
-[data-theme="light"] .theme-toggle { background:#f3f4f6; border-color:rgba(0,0,0,0.12); color:#374151; }
+.theme-toggle:hover {
+  border-color: rgba(108,99,255,.4);
+  background: rgba(108,99,255,.08);
+  transform: rotate(15deg) scale(1.06);
+}
+[data-theme="light"] .store-select-wrap  { background:#f3f4f6 !important; border-color:rgba(0,0,0,0.11) !important; }
+[data-theme="light"] .store-select-label { color:#9ca3af !important; border-right-color:rgba(0,0,0,0.09) !important; }
+[data-theme="light"] .store-selector     { color:#111827 !important; }
+[data-theme="light"] .theme-toggle       { background:#f3f4f6 !important; border-color:rgba(0,0,0,0.11) !important; color:#374151 !important; }
 
 /* ══════════════════════════════════════════════
    TAB BAR
