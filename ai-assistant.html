@@ -77,10 +77,193 @@
 [data-theme="light"] .tag-pill           { background: rgba(108,99,255,0.08); color: #5b52e0; border-color: rgba(108,99,255,0.18); }
 [data-theme="light"] .insight-section h4 { color: #9ca3af; }
 [data-theme="light"] .quick-chips        { border-top-color: transparent; }
-/* Insight summary box */
 [data-theme="light"] .insight-summary-box { background: #f3f4f6; color: #374151; }
-/* Card category item BG */
 [data-theme="light"] .cat-item-wrap      { background: #f3f4f6; border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .store-switch-overlay { background: rgba(255,255,255,0.7); }
+
+/* ══════════════════════════════════════════════════════════
+   SKELETON — perfectly mirrors the real layout
+   Uses the SAME dimensions as .sidebar, .main-wrap, .topbar
+══════════════════════════════════════════════════════════ */
+#page-skeleton {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: inherit;
+  opacity: 1;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+#page-skeleton.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar skeleton — matches nav.css .sidebar width exactly */
+.skel-sidebar {
+  width: 220px;
+  min-width: 220px;
+  flex-shrink: 0;
+  padding: 22px 16px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--surface, #0d0f1a);
+}
+[data-theme="light"] .skel-sidebar {
+  background: #fff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+
+.skel-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Topbar skeleton — matches nav.css .topbar height exactly */
+.skel-topbar {
+  height: 56px;
+  min-height: 56px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: var(--surface, #0d0f1a);
+  flex-shrink: 0;
+}
+[data-theme="light"] .skel-topbar {
+  background: #fff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+
+.skel-body {
+  flex: 1;
+  padding: 16px;
+  display: grid;
+  /* Matches .ai-root grid-template-columns */
+  grid-template-columns: 1fr 388px;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.skel-chat {
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface, #0d0f1a);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+[data-theme="light"] .skel-chat {
+  background: #fff;
+  border-color: rgba(0,0,0,0.09);
+}
+
+.skel-chat-header {
+  height: 66px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+[data-theme="light"] .skel-chat-header {
+  border-bottom-color: rgba(0,0,0,0.07);
+}
+
+.skel-chat-body {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.skel-chat-footer {
+  height: 72px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+[data-theme="light"] .skel-chat-footer {
+  border-top-color: rgba(0,0,0,0.07);
+}
+
+.skel-action {
+  border-radius: 20px;
+  background: var(--surface, #0d0f1a);
+  border: 1px dashed rgba(255,255,255,0.07);
+  padding: 40px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+[data-theme="light"] .skel-action {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+}
+
+/* Generic shimmer block */
+.skel {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.04) 25%,
+    rgba(0,0,0,0.09) 50%,
+    rgba(0,0,0,0.04) 75%
+  );
+  background-size: 200% 100%;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Stagger shimmers slightly for realism */
+.skel:nth-child(2) { animation-delay: 0.1s; }
+.skel:nth-child(3) { animation-delay: 0.2s; }
+.skel:nth-child(4) { animation-delay: 0.3s; }
+.skel:nth-child(5) { animation-delay: 0.15s; }
+
+/* Message row shimmer */
+.skel-msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.skel-msg-row.user { flex-direction: row-reverse; }
+
+/* Mobile skeleton */
+@media (max-width: 900px) {
+  .skel-body {
+    grid-template-columns: 1fr;
+  }
+  .skel-action { display: none; }
+  .skel-sidebar { display: none; }
+}
 
 /* ─── Layout ─────────────────────────────────────────────── */
 .ai-root {
@@ -101,6 +284,8 @@
   border-radius: 20px;
   overflow: hidden;
   transition: border-color .2s;
+  /* Store-switch fade */
+  transition: border-color .2s, opacity .25s ease;
 }
 .chat-panel:focus-within {
   border-color: rgba(108,99,255,0.25);
@@ -126,7 +311,6 @@
 .chat-header-info h2 { font-size: 13.5px; font-weight: 800; letter-spacing: -0.01em; }
 .chat-header-info p  { font-size: 11px; color: var(--text3); margin-top: 1px; }
 
-/* Status dot with live pulse */
 .chat-status-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--green);
@@ -172,9 +356,16 @@
   flex-direction: column;
   gap: 16px;
   scroll-behavior: smooth;
+  transition: opacity .2s ease;
 }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Store-switch state */
+.chat-messages.store-switching {
+  opacity: 0.3;
+  pointer-events: none;
+}
 
 .msg {
   display: flex; gap: 10px; align-items: flex-end;
@@ -231,7 +422,10 @@
 .quick-chips {
   display: flex; flex-wrap: wrap; gap: 7px;
   padding: 8px 18px 4px;
+  transition: opacity .2s ease;
 }
+.quick-chips.store-switching { opacity: 0.3; pointer-events: none; }
+
 .chip {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -262,7 +456,10 @@
   align-items: flex-end;
   flex-shrink: 0;
   background: var(--surface);
+  transition: opacity .2s ease;
 }
+.chat-input-wrap.store-switching { opacity: 0.3; pointer-events: none; }
+
 .chat-input {
   flex: 1;
   background: var(--surface2);
@@ -386,9 +583,16 @@
   display: flex; flex-direction: column;
   gap: 0; overflow-y: auto; overflow-x: hidden;
   height: 100%; padding-bottom: 20px;
+  transition: opacity .25s ease;
 }
 .action-panel::-webkit-scrollbar { width: 4px; }
 .action-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* Store-switch dim on action panel */
+.action-panel.store-switching {
+  opacity: 0.3;
+  pointer-events: none;
+}
 
 .action-empty {
   background: var(--surface);
@@ -566,11 +770,54 @@
   border: 1px solid var(--border);
 }
 
+/* ── Store-switch overlay spinner ── */
+.store-switch-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(13,15,26,0.55);
+  border-radius: 20px;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+[data-theme="light"] .store-switch-overlay {
+  background: rgba(240,240,245,0.65);
+}
+.store-switch-overlay.active {
+  display: flex;
+  animation: overlayIn .2s ease;
+}
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.store-switch-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(108,99,255,0.25);
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.store-switch-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--text2); letter-spacing: .02em;
+}
+
+/* Chat panel needs position relative for overlay */
+.chat-panel { position: relative; }
+
 /* mobile */
 @media (max-width:900px) {
   .ai-root { grid-template-columns: 1fr; height: auto; }
   .chat-panel { height: 65vh; }
   .action-panel { overflow-y: visible; }
+  .skel-body { grid-template-columns: 1fr; }
 }
 </style>
 <script>
@@ -587,34 +834,114 @@
 </head>
 <body>
 
-<!-- ── Skeleton ── -->
+<!-- ══════════════════════════════════════════════════════════
+     SKELETON — perfectly mirrors the real layout
+     No JS needed, renders immediately on first paint
+══════════════════════════════════════════════════════════ -->
 <div id="page-skeleton">
+
+  <!-- Sidebar skeleton -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+    <!-- Logo -->
+    <div class="skel" style="height:22px;width:72px;border-radius:5px;margin-bottom:20px;"></div>
+    <!-- User row -->
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:14px;">
       <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
       <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+        <div class="skel" style="height:10px;width:80px;"></div>
+        <div class="skel" style="height:9px;width:110px;"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+    <!-- Section label -->
+    <div class="skel" style="height:9px;width:55px;margin-bottom:8px;opacity:.4;"></div>
+    <!-- Nav items -->
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.25;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.2;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.18;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.16;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:14px;opacity:.14;"></div>
+    <!-- Section label 2 -->
+    <div class="skel" style="height:9px;width:65px;margin-bottom:8px;opacity:.4;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.22;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:3px;opacity:.18;"></div>
+    <!-- Section label 3 -->
+    <div class="skel" style="height:9px;width:50px;margin-top:10px;margin-bottom:8px;opacity:.4;"></div>
+    <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
   </div>
+
+  <!-- Main area -->
   <div class="skel-main">
+
+    <!-- Topbar skeleton -->
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
-      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
-    </div>
-    <div class="skel-body">
-      <div style="display:grid;grid-template-columns:1fr 388px;gap:16px;height:80vh;">
-        <div class="skel" style="border-radius:20px;"></div>
-        <div class="skel" style="border-radius:20px;"></div>
+      <div class="skel" style="height:16px;width:110px;border-radius:5px;"></div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="skel" style="height:32px;width:130px;border-radius:8px;"></div>
+        <div class="skel" style="height:32px;width:34px;border-radius:9px;"></div>
       </div>
+    </div>
+
+    <!-- Page body -->
+    <div class="skel-body">
+
+      <!-- Chat skeleton -->
+      <div class="skel-chat">
+        <!-- Chat header -->
+        <div class="skel-chat-header">
+          <div class="skel" style="width:38px;height:38px;border-radius:12px;flex-shrink:0;"></div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+            <div class="skel" style="height:13px;width:140px;"></div>
+            <div class="skel" style="height:10px;width:210px;"></div>
+          </div>
+          <div class="skel" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:auto;"></div>
+        </div>
+
+        <!-- Chat messages -->
+        <div class="skel-chat-body">
+          <!-- AI message -->
+          <div class="skel-msg-row">
+            <div class="skel" style="width:28px;height:28px;border-radius:10px;flex-shrink:0;"></div>
+            <div class="skel" style="height:80px;width:68%;border-radius:16px;border-bottom-left-radius:4px;"></div>
+          </div>
+          <!-- User message -->
+          <div class="skel-msg-row user">
+            <div class="skel" style="width:28px;height:28px;border-radius:10px;flex-shrink:0;"></div>
+            <div class="skel" style="height:40px;width:42%;border-radius:16px;border-bottom-right-radius:4px;"></div>
+          </div>
+          <!-- AI message 2 -->
+          <div class="skel-msg-row">
+            <div class="skel" style="width:28px;height:28px;border-radius:10px;flex-shrink:0;"></div>
+            <div class="skel" style="height:52px;width:55%;border-radius:16px;border-bottom-left-radius:4px;"></div>
+          </div>
+          <!-- Chips row -->
+          <div style="display:flex;gap:7px;margin-top:4px;padding-left:38px;">
+            <div class="skel" style="height:30px;width:120px;border-radius:30px;"></div>
+            <div class="skel" style="height:30px;width:100px;border-radius:30px;"></div>
+            <div class="skel" style="height:30px;width:90px;border-radius:30px;"></div>
+          </div>
+        </div>
+
+        <!-- Chat input footer -->
+        <div class="skel-chat-footer">
+          <div class="skel" style="flex:1;height:44px;border-radius:13px;"></div>
+          <div class="skel" style="width:62px;height:44px;border-radius:13px;flex-shrink:0;"></div>
+          <div class="skel" style="width:44px;height:44px;border-radius:13px;flex-shrink:0;"></div>
+          <div class="skel" style="width:44px;height:44px;border-radius:13px;flex-shrink:0;"></div>
+        </div>
+      </div>
+
+      <!-- Action panel skeleton -->
+      <div class="skel-action">
+        <div class="skel" style="width:40px;height:40px;border-radius:12px;opacity:.3;"></div>
+        <div class="skel" style="height:14px;width:140px;border-radius:5px;opacity:.25;"></div>
+        <div class="skel" style="height:11px;width:220px;border-radius:4px;opacity:.18;"></div>
+        <div class="skel" style="height:11px;width:180px;border-radius:4px;opacity:.14;"></div>
+      </div>
+
     </div>
   </div>
 </div>
+<!-- END SKELETON -->
 
 <!-- ── Sidebar ── -->
 <div class="sidebar" id="sidebar">
@@ -628,16 +955,15 @@
   </div>
   <div class="nav-section"><div class="nav-section-label">Merchant</div>
     <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-     <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-    
     <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
     <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
   </div>
   <div class="nav-section"><div class="nav-section-label">Storefront</div>
     <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-     <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
+    <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
   </div>
   <div class="nav-section"><div class="nav-section-label">AI Tools</div>
     <a class="nav-item active" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
@@ -666,6 +992,13 @@
 
       <!-- LEFT: Chat -->
       <div class="chat-panel">
+
+        <!-- Store-switch overlay (sits inside chat panel) -->
+        <div class="store-switch-overlay" id="storeSwitchOverlay">
+          <div class="store-switch-spinner"></div>
+          <div class="store-switch-label">Loading store…</div>
+        </div>
+
         <div class="chat-header">
           <div class="chat-header-avatar">🤖</div>
           <div class="chat-header-info">
@@ -741,6 +1074,16 @@ function toggleTheme() { applyTheme(!_isDark) }
 applyTheme(_isDark)
 
 /* ══════════════════════════════════════════════════════════
+   SKELETON DISMISS — smooth fade out then remove
+══════════════════════════════════════════════════════════ */
+function dismissSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel) return
+  skel.classList.add('fade-out')
+  setTimeout(() => skel.remove(), 380)
+}
+
+/* ══════════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════════ */
 let currentStoreId      = ''
@@ -749,14 +1092,18 @@ let allCategories       = []
 let conversationHistory = []
 let isTyping            = false
 let userName            = ''
+let _storeSwitching     = false
 
 /* ══════════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('ai-assistant', (id) => {
-    currentStoreId = id
-    loadStoreData()
+    // Store changed callback — run smooth transition
+    if (id !== currentStoreId) {
+      currentStoreId = id
+      onStoreChange()
+    }
   })
   if (!nav) return
   currentStoreId = nav.currentStoreId
@@ -766,7 +1113,72 @@ window.addEventListener('DOMContentLoaded', async () => {
   addWelcomeMessage()
   showQuickChips(getInitialChips())
   initVoice()
+
+  // Reveal page content and dismiss skeleton together
+  const content = document.getElementById('page-content')
+  if (content) content.style.display = ''
+  dismissSkeleton()
 })
+
+/* ── Store change with smooth transition ─────────────── */
+async function onStoreChange() {
+  if (_storeSwitching) return
+  _storeSwitching = true
+
+  // 1. Show overlay spinner on chat panel
+  const overlay     = document.getElementById('storeSwitchOverlay')
+  const msgs        = document.getElementById('chatMessages')
+  const chips       = document.getElementById('quickChips')
+  const inputWrap   = document.querySelector('.chat-input-wrap')
+  const actionPanel = document.getElementById('actionPanel')
+
+  if (overlay)     overlay.classList.add('active')
+  if (msgs)        msgs.classList.add('store-switching')
+  if (chips)       chips.classList.add('store-switching')
+  if (inputWrap)   inputWrap.classList.add('store-switching')
+  if (actionPanel) actionPanel.classList.add('store-switching')
+
+  // 2. Load new store data
+  await loadStoreData()
+
+  // Small extra pause so transition feels intentional (not just fast flicker)
+  await new Promise(r => setTimeout(r, 320))
+
+  // 3. Reset conversation for new store
+  conversationHistory = []
+
+  // 4. Clear messages with a quick fade then repopulate
+  if (msgs) {
+    msgs.style.transition = 'opacity .18s ease'
+    msgs.style.opacity = '0'
+    await new Promise(r => setTimeout(r, 200))
+    msgs.innerHTML = ''
+    addWelcomeMessage()
+    msgs.style.opacity = '1'
+  }
+
+  // 5. Reset chips
+  showQuickChips(getInitialChips())
+
+  // 6. Reset action panel
+  if (actionPanel) {
+    actionPanel.innerHTML = `
+      <div class="action-empty" id="actionEmpty">
+        <div class="action-empty-icon">💬</div>
+        <h3>Start a conversation</h3>
+        <p>As you chat with the AI, smart action cards will appear here — ready for you to review and save with one click.</p>
+      </div>`
+  }
+
+  // 7. Remove overlay + switching states
+  if (overlay)     overlay.classList.remove('active')
+  if (msgs)        msgs.classList.remove('store-switching')
+  if (chips)       chips.classList.remove('store-switching')
+  if (inputWrap)   inputWrap.classList.remove('store-switching')
+  if (actionPanel) actionPanel.classList.remove('store-switching')
+
+  _storeSwitching = false
+}
 
 async function loadStoreData() {
   if (!currentStoreId) return
@@ -828,6 +1240,7 @@ function setupInput() {
 ══════════════════════════════════════════════════════════ */
 async function sendMessage() {
   if (_recActive) _stopVoice(false)
+  if (_storeSwitching) return  // block sends during store switch
   const inp  = document.getElementById('chatInput')
   const text = inp.value.trim()
   if (!text || isTyping) return
@@ -876,10 +1289,10 @@ async function callClaudeAPI(history) {
   const res = await apiFetch('/ai/website-builder', {
     method: 'POST',
     body: JSON.stringify({
-      message:     lastMsg,
-      history:     history.slice(0, -1).slice(-12),
+      message:       lastMsg,
+      history:       history.slice(0, -1).slice(-12),
       system_prompt: systemPrompt,
-      site_state:  { storeId: currentStoreId }
+      site_state:    { storeId: currentStoreId }
     })
   })
   const raw = res.reply || res.content || ''
