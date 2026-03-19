@@ -776,12 +776,12 @@ tr:hover td { background: rgba(108,99,255,0.03); }
     </div>
   </div>
 
-  <!-- TAB BAR — always visible, outside the fading content -->
+  <!-- TAB BAR — always visible, lives OUTSIDE #page-content so it is never wiped -->
   <div class="tabs-bar" id="tabs-bar">
-    <div class="tab-item active" data-tab="setup"         onclick="switchTab('setup')">⚙️ Setup</div>
-    <div class="tab-item"        data-tab="transactions"  onclick="switchTab('transactions')">📄 Transactions</div>
-    <div class="tab-item"        data-tab="payouts"       onclick="switchTab('payouts')">💰 Payouts</div>
-    <div class="tab-item"        data-tab="links"         onclick="switchTab('links')">🔗 Payment Links</div>
+    <div class="tab-item active" data-tab="setup"        onclick="switchTab('setup')">⚙️ Setup</div>
+    <div class="tab-item"        data-tab="transactions" onclick="switchTab('transactions')">📄 Transactions</div>
+    <div class="tab-item"        data-tab="payouts"      onclick="switchTab('payouts')">💰 Payouts</div>
+    <div class="tab-item"        data-tab="links"        onclick="switchTab('links')">🔗 Payment Links</div>
   </div>
 
   <!-- Page content — fades in/out on store switch -->
@@ -885,7 +885,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
           </div>
         </div>
       </div>
-    </div>
+    </div><!-- /tab-setup -->
 
     <!-- ── TRANSACTIONS TAB ── -->
     <div class="tab-panel" id="tab-transactions">
@@ -938,7 +938,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
           </div>
         </div>
       </div>
-    </div>
+    </div><!-- /tab-transactions -->
 
     <!-- ── PAYOUTS TAB ── -->
     <div class="tab-panel" id="tab-payouts">
@@ -976,7 +976,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
           </div>
         </div>
       </div>
-    </div>
+    </div><!-- /tab-payouts -->
 
     <!-- ── PAYMENT LINKS TAB ── -->
     <div class="tab-panel" id="tab-links">
@@ -1040,7 +1040,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
           </div>
         </div>
       </div>
-    </div>
+    </div><!-- /tab-links -->
 
   </div><!-- /page-content -->
 </div><!-- /main-wrap -->
@@ -1082,24 +1082,24 @@ const FADE_MS = 180
 
 function fadeOut(el) {
   return new Promise(resolve => {
-    el.style.transition   = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
-    el.style.opacity      = '0'
-    el.style.transform    = 'translateY(-6px)'
+    el.style.transition    = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
+    el.style.opacity       = '0'
+    el.style.transform     = 'translateY(-6px)'
     el.style.pointerEvents = 'none'
     setTimeout(resolve, FADE_MS)
   })
 }
 
 function fadeIn(el) {
-  el.style.transition   = 'none'
-  el.style.opacity      = '0'
-  el.style.transform    = 'translateY(8px)'
-  el.style.display      = ''
+  el.style.transition    = 'none'
+  el.style.opacity       = '0'
+  el.style.transform     = 'translateY(8px)'
+  el.style.display       = ''
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      el.style.transition   = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
-      el.style.opacity      = '1'
-      el.style.transform    = 'translateY(0)'
+      el.style.transition    = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
+      el.style.opacity       = '1'
+      el.style.transform     = 'translateY(0)'
       el.style.pointerEvents = ''
     })
   })
@@ -1108,9 +1108,6 @@ function fadeIn(el) {
 /* ══════════════════════════════════════════════
    INLINE SKELETON for store-switch
    Mirrors the active tab's content density.
-   For the Setup tab we show 2 large card shapes;
-   for data tabs (transactions/payouts) we show
-   stat cards + a table placeholder.
 ══════════════════════════════════════════════ */
 function inlineSkeletonHTML(tab) {
   if (tab === 'setup') {
@@ -1186,21 +1183,27 @@ applyTheme(_isDark)
 
 /* ══════════════════════════════════════════════
    STATE
-   _loadToken: race-condition guard — incremented
-   on every loadAll() call. Stale async results
-   are silently dropped when tokens don't match.
+   _loadToken    : race-condition guard
+   _originalHTML : snapshot of #page-content taken
+                   once on DOMContentLoaded, used to
+                   restore all tab panels after a
+                   store-switch wipes innerHTML.
 ══════════════════════════════════════════════ */
-let currentStoreId   = ''
-let paymentSettings  = null
-let allTxns          = []
-let refundTarget     = null
-let _activeTab       = 'setup'
-let _loadToken       = 0
+let currentStoreId  = ''
+let paymentSettings = null
+let allTxns         = []
+let refundTarget    = null
+let _activeTab      = 'setup'
+let _loadToken      = 0
+let _originalHTML   = ''   // ← THE FIX: snapshot of tab panel HTML
 
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  // Capture the full original tab HTML BEFORE anything modifies it.
+  _originalHTML = document.getElementById('page-content').innerHTML
+
   const nav = await renderNav('payments', (id) => {
     currentStoreId = id
     loadAll()
@@ -1242,7 +1245,7 @@ async function loadAll() {
     await fadeOut(content)
     if (token !== _loadToken) return
 
-    // Phase 2: inline skeleton matched to active tab
+    // Phase 2: show inline skeleton matched to active tab
     content.innerHTML = inlineSkeletonHTML(_activeTab)
     fadeIn(content)
   }
@@ -1256,7 +1259,7 @@ async function loadAll() {
       if (token !== _loadToken) return
     }
 
-    // Rebuild the full tab HTML and fade it in
+    // Phase 3: restore original tab HTML, repopulate form, show correct tab
     rebuildTabContent()
 
     if (isFirst) {
@@ -1266,7 +1269,7 @@ async function loadAll() {
       fadeIn(content)
     }
 
-    // Reload whichever tab is currently open
+    // Reload data for whichever tab is currently active
     if (_activeTab === 'transactions') loadTransactions()
     else if (_activeTab === 'payouts') loadPayouts()
     else if (_activeTab === 'links')   loadLinks()
@@ -1289,26 +1292,30 @@ async function loadAll() {
 
 /* ══════════════════════════════════════════════
    REBUILD TAB CONTENT
-   After a store switch the #page-content is
-   wiped, so we restore the full tab panel HTML
-   and re-apply the active tab state.
+   Restores the original tab panel HTML (which was
+   wiped by the inline skeleton during store-switch),
+   then re-populates form fields and re-applies the
+   active tab visual state.
 ══════════════════════════════════════════════ */
 function rebuildTabContent() {
   const content = document.getElementById('page-content')
 
-  // Restore setup form values
+  // ── KEY FIX: restore the full original HTML ──
+  content.innerHTML = _originalHTML
+
+  // Re-attach form values from loaded settings
   if (paymentSettings) {
-    const pi = content.querySelector('#pay-enabled')
-    const ki = content.querySelector('#key-id')
-    const ks = content.querySelector('#key-secret')
-    const cu = content.querySelector('#pay-currency')
+    const pi = document.getElementById('pay-enabled')
+    const ki = document.getElementById('key-id')
+    const ks = document.getElementById('key-secret')
+    const cu = document.getElementById('pay-currency')
     if (pi) pi.checked = paymentSettings.enabled
     if (ki) ki.value   = paymentSettings.razorpay_key_id || ''
     if (ks) ks.value   = paymentSettings.has_secret ? '••••••••••••••••••••' : ''
     if (cu) cu.value   = paymentSettings.currency || 'INR'
   }
 
-  // Restore active tab visual state
+  // Re-apply the active tab visual state
   applyActiveTab(_activeTab)
 }
 
@@ -1392,9 +1399,11 @@ async function verifyKeys() {
    TABS
 ══════════════════════════════════════════════ */
 function applyActiveTab(name) {
-  document.querySelectorAll('.tab-item').forEach(t => {
+  // Update the persistent tab bar (lives outside #page-content, never wiped)
+  document.querySelectorAll('#tabs-bar .tab-item').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === name)
   })
+  // Update the panels inside #page-content
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
   const panel = document.getElementById('tab-' + name)
   if (panel) panel.classList.add('active')
@@ -1412,13 +1421,17 @@ function switchTab(name) {
    TRANSACTIONS
 ══════════════════════════════════════════════ */
 async function loadTransactions() {
+  const notCfg  = document.getElementById('transactions-not-configured')
+  const content = document.getElementById('transactions-content')
+  if (!notCfg || !content) return
+
   if (!paymentSettings?.razorpay_key_id) {
-    document.getElementById('transactions-not-configured').style.display = 'block'
-    document.getElementById('transactions-content').style.display = 'none'
+    notCfg.style.display  = 'block'
+    content.style.display = 'none'
     return
   }
-  document.getElementById('transactions-not-configured').style.display = 'none'
-  document.getElementById('transactions-content').style.display = 'block'
+  notCfg.style.display  = 'none'
+  content.style.display = 'block'
 
   try {
     const [txns, summary] = await Promise.all([
@@ -1433,20 +1446,22 @@ async function loadTransactions() {
     document.getElementById('stat-failed').textContent    = summary.failed_count || 0
     renderTxns(allTxns)
   } catch(e) {
-    document.getElementById('txn-table-body').innerHTML =
+    const tbody = document.getElementById('txn-table-body')
+    if (tbody) tbody.innerHTML =
       `<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171;">⚠️ Error: ${e.message}</td></tr>`
   }
 }
 
 function renderTxns(items) {
   const tbody = document.getElementById('txn-table-body')
+  if (!tbody) return
   if (!items.length) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📄</div><h3>No transactions yet</h3></div></td></tr>`
     return
   }
-  const statusMap = { captured: 'badge-green', refunded: 'badge-yellow', failed: 'badge-red' }
+  const statusMap = { captured:'badge-green', refunded:'badge-yellow', failed:'badge-red' }
   tbody.innerHTML = items.map(p => {
-    const amt = (p.amount / 100).toFixed(2)
+    const amt      = (p.amount / 100).toFixed(2)
     const canRefund = p.status === 'captured'
     return `<tr>
       <td class="mono" style="font-size:12px;color:var(--accent2);">${p.id}</td>
@@ -1469,13 +1484,17 @@ function filterTxns() {
    PAYOUTS
 ══════════════════════════════════════════════ */
 async function loadPayouts() {
+  const notCfg  = document.getElementById('payouts-not-configured')
+  const content = document.getElementById('payouts-content')
+  if (!notCfg || !content) return
+
   if (!paymentSettings?.razorpay_key_id) {
-    document.getElementById('payouts-not-configured').style.display = 'block'
-    document.getElementById('payouts-content').style.display = 'none'
+    notCfg.style.display  = 'block'
+    content.style.display = 'none'
     return
   }
-  document.getElementById('payouts-not-configured').style.display = 'none'
-  document.getElementById('payouts-content').style.display = 'block'
+  notCfg.style.display  = 'none'
+  content.style.display = 'block'
 
   try {
     const [summary, txns] = await Promise.all([
@@ -1494,22 +1513,25 @@ async function loadPayouts() {
       const m = p.method || 'other'
       methods[m] = (methods[m] || 0) + p.amount / 100
     })
-    const total = Object.values(methods).reduce((a, b) => a + b, 0) || 1
-    const icons = { upi:'📱', card:'💳', netbanking:'🏦', wallet:'👛', emi:'📅', other:'💰' }
-    document.getElementById('method-breakdown').innerHTML = Object.entries(methods)
-      .sort((a, b) => b[1] - a[1])
-      .map(([m, amt]) => {
-        const pct = Math.round((amt / total) * 100)
-        return `<div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="display:flex;justify-content:space-between;font-size:13.5px;">
-            <span style="font-weight:600;">${icons[m]||'💰'} <span style="text-transform:capitalize;">${m}</span></span>
-            <span style="font-family:'DM Mono',monospace;font-weight:700;">₹${amt.toFixed(2)} <span style="color:var(--text3);">(${pct}%)</span></span>
-          </div>
-          <div style="height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),#a259ff);border-radius:4px;transition:width .6s;"></div>
-          </div>
-        </div>`
-      }).join('') || '<div style="color:var(--text2);font-size:13px;">No captured payments yet</div>'
+    const total  = Object.values(methods).reduce((a, b) => a + b, 0) || 1
+    const icons  = { upi:'📱', card:'💳', netbanking:'🏦', wallet:'👛', emi:'📅', other:'💰' }
+    const breakdown = document.getElementById('method-breakdown')
+    if (breakdown) {
+      breakdown.innerHTML = Object.entries(methods)
+        .sort((a, b) => b[1] - a[1])
+        .map(([m, amt]) => {
+          const pct = Math.round((amt / total) * 100)
+          return `<div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;font-size:13.5px;">
+              <span style="font-weight:600;">${icons[m]||'💰'} <span style="text-transform:capitalize;">${m}</span></span>
+              <span style="font-family:'DM Mono',monospace;font-weight:700;">₹${amt.toFixed(2)} <span style="color:var(--text3);">(${pct}%)</span></span>
+            </div>
+            <div style="height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),#a259ff);border-radius:4px;transition:width .6s;"></div>
+            </div>
+          </div>`
+        }).join('') || '<div style="color:var(--text2);font-size:13px;">No captured payments yet</div>'
+    }
   } catch(e) { toast('Failed to load payout data: ' + e.message, 'error') }
 }
 
@@ -1517,18 +1539,23 @@ async function loadPayouts() {
    PAYMENT LINKS
 ══════════════════════════════════════════════ */
 async function loadLinks() {
+  const notCfg  = document.getElementById('links-not-configured')
+  const content = document.getElementById('links-content')
+  if (!notCfg || !content) return
+
   if (!paymentSettings?.razorpay_key_id) {
-    document.getElementById('links-not-configured').style.display = 'block'
-    document.getElementById('links-content').style.display = 'none'
+    notCfg.style.display  = 'block'
+    content.style.display = 'none'
     return
   }
-  document.getElementById('links-not-configured').style.display = 'none'
-  document.getElementById('links-content').style.display = 'block'
+  notCfg.style.display  = 'none'
+  content.style.display = 'block'
 
   try {
-    const data  = await apiFetch(`/stores/${currentStoreId}/payment-links`)
-    const items = data.items || []
+    const data      = await apiFetch(`/stores/${currentStoreId}/payment-links`)
+    const items     = data.items || []
     const container = document.getElementById('links-list')
+    if (!container) return
     if (!items.length) {
       container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔗</div><h3>No payment links yet</h3><p>Create your first link using the form</p></div>`
       return
@@ -1562,7 +1589,7 @@ async function createPaymentLink() {
   const amount = parseFloat(document.getElementById('link-amount').value)
   const desc   = document.getElementById('link-desc').value.trim()
   if (!amount || amount < 1) { toast('Enter a valid amount', 'error'); return }
-  if (!desc) { toast('Enter a description', 'error'); return }
+  if (!desc)                  { toast('Enter a description', 'error'); return }
 
   btn.disabled = true; btn.innerHTML = '<span class="spinning">⏳</span> Generating…'
   try {
@@ -1580,7 +1607,8 @@ async function createPaymentLink() {
       toast('Link copied to clipboard!', 'success')
     }
     ;['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id => {
-      document.getElementById(id).value = ''
+      const el = document.getElementById(id)
+      if (el) el.value = ''
     })
     await loadLinks()
   } catch(e) {
@@ -1596,8 +1624,8 @@ async function createPaymentLink() {
 function openRefund(paymentId, amountPaise) {
   refundTarget = { paymentId, maxAmount: amountPaise / 100 }
   document.getElementById('refund-payment-id').textContent = paymentId
-  document.getElementById('refund-amount').placeholder    = `Full refund (₹${(amountPaise / 100).toFixed(2)})`
-  document.getElementById('refund-amount').value          = ''
+  document.getElementById('refund-amount').placeholder     = `Full refund (₹${(amountPaise / 100).toFixed(2)})`
+  document.getElementById('refund-amount').value           = ''
   openModal('modal-refund')
 }
 
