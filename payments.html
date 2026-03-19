@@ -20,6 +20,139 @@
 
 <style>
 /* ══════════════════════════════════════════════
+   SKELETON — mirrors sidebar + topbar + tabs + content
+   exactly so there is zero layout shift on load
+══════════════════════════════════════════════ */
+@keyframes skel-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.11) 50%,
+    rgba(0,0,0,0.06) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+
+#page-skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 9999;
+  background: inherit;
+  transition: opacity .25s ease;
+}
+#page-skeleton.skel-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar replica */
+.skel-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  height: 100%;
+  background: #0d0e18;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-sidebar {
+  background: #fff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+
+/* Main area replica */
+.skel-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Topbar replica */
+.skel-topbar {
+  height: 60px;
+  flex-shrink: 0;
+  background: #0d0e18;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-topbar {
+  background: #fff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+
+/* Tabs bar replica — payments has a sticky tabs row below topbar */
+.skel-tabs {
+  height: 48px;
+  flex-shrink: 0;
+  background: #0d0e18;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 28px;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-tabs {
+  background: #fff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+
+/* Content body */
+.skel-body {
+  flex: 1;
+  padding: 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar internal helpers */
+.skel-sidebar-user {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+}
+[data-theme="light"] .skel-sidebar-user { border-bottom-color: rgba(0,0,0,0.08); }
+.skel-sidebar-user-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.skel-nav-rows { display: flex; flex-direction: column; gap: 4px; }
+
+/* Inline stats row for store-switch skeleton */
+.inline-skel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) {
+  .inline-skel-stats { grid-template-columns: repeat(2,1fr); }
+}
+
+/* ══════════════════════════════════════════════
    LIGHT THEME OVERRIDES
 ══════════════════════════════════════════════ */
 [data-theme="light"] {
@@ -93,6 +226,7 @@
 [data-theme="light"] .modal-sub { color: #374151 !important; }
 [data-theme="light"] .empty-state h3 { color: #111827 !important; }
 [data-theme="light"] .empty-state p { color: #374151 !important; }
+[data-theme="light"] .payout-card { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
 
 /* ── THEME TOGGLE ── */
 .theme-toggle {
@@ -110,6 +244,33 @@
 }
 [data-theme="light"] .theme-toggle {
   background: #f3f4f6; border-color: rgba(0,0,0,0.12); color: #374151;
+}
+
+/* ══════════════════════════════════════════════
+   PAGE CONTENT TRANSITIONS
+══════════════════════════════════════════════ */
+#page-content {
+  will-change: opacity, transform;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageIn .3s ease both; }
+
+/* ── STORE SELECTOR LOADING INDICATOR ── */
+.store-loading { position: relative; }
+.store-loading::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(108,99,255,0.25);
+  border-top-color: var(--accent, #6c63ff);
+  animation: spin .65s linear infinite;
+  pointer-events: none;
 }
 
 /* ══════════════════════════════════════════════
@@ -175,6 +336,7 @@
   border-radius: 11px; color: var(--text);
   font-family: 'Outfit', sans-serif; font-size: 14px;
   outline: none; transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
 }
 .form-input:focus {
   border-color: rgba(108,99,255,0.55);
@@ -468,13 +630,6 @@ tr:hover td { background: rgba(108,99,255,0.03); }
 /* ── SPINNER ── */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinning { animation: spin .7s linear infinite; display: inline-block; }
-.spinner-block { text-align: center; padding: 60px; }
-.spinner-block::after {
-  content: ''; display: block; width: 32px; height: 32px;
-  border-radius: 50%; border: 3px solid var(--border2);
-  border-top-color: var(--accent);
-  animation: spin .7s linear infinite; margin: 0 auto;
-}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
@@ -482,6 +637,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
   .pay-stats { grid-template-columns: repeat(2, 1fr); }
   .payout-summary-grid { grid-template-columns: 1fr; }
   .tabs-bar { padding: 0 16px; overflow-x: auto; }
+  .inline-skel-stats { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 600px) {
   .pay-stats { grid-template-columns: 1fr 1fr; }
@@ -493,41 +649,89 @@ tr:hover td { background: rgba(108,99,255,0.03); }
 </head>
 <body>
 
-<!-- ── SKELETON ── -->
-<div id="page-skeleton">
+<!-- ══════════════════════════════════════════
+  SKELETON — perfectly mirrors the real layout:
+    skel-sidebar  → .sidebar
+    skel-topbar   → .topbar
+    skel-tabs     → .tabs-bar  (unique to payments)
+    skel-body     → .content
+══════════════════════════════════════════ -->
+<div id="page-skeleton" aria-hidden="true">
+
+  <!-- LEFT: sidebar replica -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+    <!-- Logo -->
+    <div style="margin-bottom:22px;">
+      <div class="skel" style="height:20px;width:72px;border-radius:5px;"></div>
+    </div>
+
+    <!-- User row -->
+    <div class="skel-sidebar-user">
       <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      <div class="skel-sidebar-user-text">
+        <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:120px;border-radius:4px;"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.35;"></div>
+
+    <!-- Section label -->
+    <div class="skel" style="height:8px;width:56px;border-radius:4px;margin-bottom:8px;opacity:.45;"></div>
+
+    <!-- Nav items — "Payments" row (4th) is active -->
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.78;"></div><!-- active -->
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+
+    <div class="skel" style="height:8px;width:64px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+
+    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
   </div>
+
+  <!-- RIGHT: main area replica -->
   <div class="skel-main">
+
+    <!-- Topbar -->
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:90px;border-radius:5px;"></div>
-      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
-    </div>
-    <div class="skel-body">
-      <div style="height:48px;background:var(--surface);border-bottom:1px solid var(--border);margin:-24px -28px 24px;"></div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;">
-        <div class="skel" style="height:88px;border-radius:16px;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.8;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.6;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.4;"></div>
+      <div class="skel" style="height:16px;width:80px;border-radius:5px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="skel" style="height:34px;width:160px;border-radius:9px;opacity:.7;"></div>
+        <div class="skel" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
       </div>
-      <div class="skel" style="height:360px;border-radius:16px;"></div>
     </div>
+
+    <!-- Tabs bar — 4 tab pills -->
+    <div class="skel-tabs">
+      <div class="skel" style="height:20px;width:72px;border-radius:5px;opacity:.9;"></div>
+      <div class="skel" style="height:20px;width:96px;border-radius:5px;opacity:.55;"></div>
+      <div class="skel" style="height:20px;width:72px;border-radius:5px;opacity:.38;"></div>
+      <div class="skel" style="height:20px;width:112px;border-radius:5px;opacity:.28;"></div>
+    </div>
+
+    <!-- Content body — mimics the Setup tab layout (2-col grid) -->
+    <div class="skel-body">
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start;">
+        <!-- Left: credentials card -->
+        <div class="skel" style="height:440px;border-radius:18px;"></div>
+        <!-- Right: how-to card -->
+        <div class="skel" style="height:440px;border-radius:18px;opacity:.7;"></div>
+      </div>
+    </div>
+
   </div>
 </div>
+<!-- /skeleton -->
 
 <!-- ── SIDEBAR ── -->
 <div class="sidebar" id="sidebar">
@@ -541,9 +745,8 @@ tr:hover td { background: rgba(108,99,255,0.03); }
   </div>
   <div class="nav-section"><div class="nav-section-label">Merchant</div>
     <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-     <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-   
     <a class="nav-item active" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
     <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
@@ -573,14 +776,15 @@ tr:hover td { background: rgba(108,99,255,0.03); }
     </div>
   </div>
 
-  <!-- TAB BAR -->
-  <div class="tabs-bar">
-    <div class="tab-item active" onclick="switchTab('setup')">⚙️ Setup</div>
-    <div class="tab-item" onclick="switchTab('transactions')">📄 Transactions</div>
-    <div class="tab-item" onclick="switchTab('payouts')">💰 Payouts</div>
-    <div class="tab-item" onclick="switchTab('links')">🔗 Payment Links</div>
+  <!-- TAB BAR — always visible, outside the fading content -->
+  <div class="tabs-bar" id="tabs-bar">
+    <div class="tab-item active" data-tab="setup"         onclick="switchTab('setup')">⚙️ Setup</div>
+    <div class="tab-item"        data-tab="transactions"  onclick="switchTab('transactions')">📄 Transactions</div>
+    <div class="tab-item"        data-tab="payouts"       onclick="switchTab('payouts')">💰 Payouts</div>
+    <div class="tab-item"        data-tab="links"         onclick="switchTab('links')">🔗 Payment Links</div>
   </div>
 
+  <!-- Page content — fades in/out on store switch -->
   <div id="page-content" class="content page-enter" style="display:none;">
 
     <!-- ── SETUP TAB ── -->
@@ -673,7 +877,7 @@ tr:hover td { background: rgba(108,99,255,0.03); }
               <li class="step">
                 <div class="step-num">5</div>
                 <div class="step-body">
-                  <h4>Test & save</h4>
+                  <h4>Test &amp; save</h4>
                   <p>Toggle Enable Payments on, click <strong>Test Connection</strong>, then <strong>Save Settings</strong>. You're live!</p>
                 </div>
               </li>
@@ -723,13 +927,8 @@ tr:hover td { background: rgba(108,99,255,0.03); }
             <table>
               <thead>
                 <tr>
-                  <th>Payment ID</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                  <th>Customer</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th></th>
+                  <th>Payment ID</th><th>Amount</th><th>Method</th>
+                  <th>Customer</th><th>Status</th><th>Date</th><th></th>
                 </tr>
               </thead>
               <tbody id="txn-table-body">
@@ -843,8 +1042,8 @@ tr:hover td { background: rgba(108,99,255,0.03); }
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /page-content -->
+</div><!-- /main-wrap -->
 
 <!-- ── REFUND MODAL ── -->
 <div class="modal-overlay" id="modal-refund">
@@ -857,7 +1056,8 @@ tr:hover td { background: rgba(108,99,255,0.03); }
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal('modal-refund')">Cancel</button>
-      <button class="btn-primary" id="btn-confirm-refund" onclick="confirmRefund()" style="background:linear-gradient(135deg,#f87171,#ef4444);box-shadow:0 4px 16px rgba(239,68,68,0.3);">
+      <button class="btn-primary" id="btn-confirm-refund" onclick="confirmRefund()"
+        style="background:linear-gradient(135deg,#f87171,#ef4444);box-shadow:0 4px 16px rgba(239,68,68,0.3);">
         💸 Confirm Refund
       </button>
     </div>
@@ -865,6 +1065,103 @@ tr:hover td { background: rgba(108,99,255,0.03); }
 </div>
 
 <script>
+/* ══════════════════════════════════════════════
+   SKELETON DISMISSAL
+══════════════════════════════════════════════ */
+function hideSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel) return
+  skel.classList.add('skel-hidden')
+  setTimeout(() => skel.remove(), 280)
+}
+
+/* ══════════════════════════════════════════════
+   SMOOTH TRANSITION HELPERS
+══════════════════════════════════════════════ */
+const FADE_MS = 180
+
+function fadeOut(el) {
+  return new Promise(resolve => {
+    el.style.transition   = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
+    el.style.opacity      = '0'
+    el.style.transform    = 'translateY(-6px)'
+    el.style.pointerEvents = 'none'
+    setTimeout(resolve, FADE_MS)
+  })
+}
+
+function fadeIn(el) {
+  el.style.transition   = 'none'
+  el.style.opacity      = '0'
+  el.style.transform    = 'translateY(8px)'
+  el.style.display      = ''
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transition   = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
+      el.style.opacity      = '1'
+      el.style.transform    = 'translateY(0)'
+      el.style.pointerEvents = ''
+    })
+  })
+}
+
+/* ══════════════════════════════════════════════
+   INLINE SKELETON for store-switch
+   Mirrors the active tab's content density.
+   For the Setup tab we show 2 large card shapes;
+   for data tabs (transactions/payouts) we show
+   stat cards + a table placeholder.
+══════════════════════════════════════════════ */
+function inlineSkeletonHTML(tab) {
+  if (tab === 'setup') {
+    return `
+      <div style="display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start;">
+        <div class="skel" style="height:420px;border-radius:18px;"></div>
+        <div class="skel" style="height:420px;border-radius:18px;opacity:.7;"></div>
+      </div>`
+  }
+  if (tab === 'links') {
+    return `
+      <div style="display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start;">
+        <div class="skel" style="height:480px;border-radius:18px;"></div>
+        <div class="skel" style="height:480px;border-radius:18px;opacity:.7;"></div>
+      </div>`
+  }
+  if (tab === 'payouts') {
+    const cards = [.95,.82,.69].map(op =>
+      `<div class="skel" style="height:160px;border-radius:18px;opacity:${op};"></div>`
+    ).join('')
+    return `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">${cards}</div>
+      <div class="skel" style="height:220px;border-radius:18px;opacity:.8;"></div>`
+  }
+  // transactions (default)
+  const rows = [.95,.82,.69,.56,.43].map((op, i) =>
+    `<div class="skel" style="height:56px;border-radius:0;opacity:${op};${i===4?'':'margin-bottom:1px;'}"></div>`
+  ).join('')
+  return `
+    <div class="inline-skel-stats">
+      <div class="skel" style="height:88px;border-radius:16px;"></div>
+      <div class="skel" style="height:88px;border-radius:16px;opacity:.82;"></div>
+      <div class="skel" style="height:88px;border-radius:16px;opacity:.64;"></div>
+      <div class="skel" style="height:88px;border-radius:16px;opacity:.46;"></div>
+    </div>
+    <div style="border-radius:16px;overflow:hidden;">
+      <div class="skel" style="height:48px;border-radius:0;opacity:.55;margin-bottom:1px;"></div>
+      <div class="skel" style="height:44px;border-radius:0;opacity:.55;margin-bottom:1px;"></div>
+      ${rows}
+    </div>`
+}
+
+/* ══════════════════════════════════════════════
+   STORE SELECTOR BUSY INDICATOR
+══════════════════════════════════════════════ */
+function setStoreLoading(on) {
+  const wrap = document.getElementById('store-select-wrap')
+  if (!wrap) return
+  on ? wrap.classList.add('store-loading') : wrap.classList.remove('store-loading')
+}
+
 /* ══════════════════════════════════════════════
    THEME SYSTEM
 ══════════════════════════════════════════════ */
@@ -889,21 +1186,33 @@ applyTheme(_isDark)
 
 /* ══════════════════════════════════════════════
    STATE
+   _loadToken: race-condition guard — incremented
+   on every loadAll() call. Stale async results
+   are silently dropped when tokens don't match.
 ══════════════════════════════════════════════ */
-let currentStoreId = '', paymentSettings = null, allTxns = [], refundTarget = null
+let currentStoreId   = ''
+let paymentSettings  = null
+let allTxns          = []
+let refundTarget     = null
+let _activeTab       = 'setup'
+let _loadToken       = 0
 
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('payments', (id) => { currentStoreId = id; loadAll() })
-  if (!nav) return
+  const nav = await renderNav('payments', (id) => {
+    currentStoreId = id
+    loadAll()
+  })
+
+  if (!nav) { hideSkeleton(); return }
   currentStoreId = nav.currentStoreId
 
-  // Theme toggle
+  // Theme toggle button
   const topbarRight = document.querySelector('.topbar-right')
   if (topbarRight && !document.getElementById('themeToggleBtn')) {
-    const btn = document.createElement('button')
+    const btn       = document.createElement('button')
     btn.className   = 'theme-toggle'
     btn.id          = 'themeToggleBtn'
     btn.title       = 'Toggle day / night mode'
@@ -912,22 +1221,116 @@ window.addEventListener('DOMContentLoaded', async () => {
     topbarRight.insertBefore(btn, topbarRight.firstChild)
   }
   applyTheme(_isDark)
+
   await loadAll()
 })
 
+/* ══════════════════════════════════════════════
+   LOAD ALL — 3-phase transition on store switch
+══════════════════════════════════════════════ */
 async function loadAll() {
-  await loadSettings()
+  if (!currentStoreId) return
+
+  const token   = ++_loadToken
+  const content = document.getElementById('page-content')
+  const isFirst = content.style.display === 'none'
+
+  setStoreLoading(true)
+
+  if (!isFirst) {
+    // Phase 1: fade out current content
+    await fadeOut(content)
+    if (token !== _loadToken) return
+
+    // Phase 2: inline skeleton matched to active tab
+    content.innerHTML = inlineSkeletonHTML(_activeTab)
+    fadeIn(content)
+  }
+
+  try {
+    await loadSettings(token)
+    if (token !== _loadToken) return
+
+    if (!isFirst) {
+      await fadeOut(content)
+      if (token !== _loadToken) return
+    }
+
+    // Rebuild the full tab HTML and fade it in
+    rebuildTabContent()
+
+    if (isFirst) {
+      content.style.display = ''
+      requestAnimationFrame(() => hideSkeleton())
+    } else {
+      fadeIn(content)
+    }
+
+    // Reload whichever tab is currently open
+    if (_activeTab === 'transactions') loadTransactions()
+    else if (_activeTab === 'payouts') loadPayouts()
+    else if (_activeTab === 'links')   loadLinks()
+
+  } catch (e) {
+    if (token !== _loadToken) return
+    if (isFirst) hideSkeleton()
+    content.innerHTML = `
+      <div class="empty-state" style="padding:80px 20px;">
+        <div class="empty-icon">⚠️</div>
+        <h3>Failed to load</h3>
+        <p>${e.message}</p>
+      </div>`
+    fadeIn(content)
+    toast(e.message, 'error')
+  } finally {
+    if (token === _loadToken) setStoreLoading(false)
+  }
 }
 
-async function loadSettings() {
+/* ══════════════════════════════════════════════
+   REBUILD TAB CONTENT
+   After a store switch the #page-content is
+   wiped, so we restore the full tab panel HTML
+   and re-apply the active tab state.
+══════════════════════════════════════════════ */
+function rebuildTabContent() {
+  const content = document.getElementById('page-content')
+
+  // Restore setup form values
+  if (paymentSettings) {
+    const pi = content.querySelector('#pay-enabled')
+    const ki = content.querySelector('#key-id')
+    const ks = content.querySelector('#key-secret')
+    const cu = content.querySelector('#pay-currency')
+    if (pi) pi.checked = paymentSettings.enabled
+    if (ki) ki.value   = paymentSettings.razorpay_key_id || ''
+    if (ks) ks.value   = paymentSettings.has_secret ? '••••••••••••••••••••' : ''
+    if (cu) cu.value   = paymentSettings.currency || 'INR'
+  }
+
+  // Restore active tab visual state
+  applyActiveTab(_activeTab)
+}
+
+/* ══════════════════════════════════════════════
+   LOAD SETTINGS
+══════════════════════════════════════════════ */
+async function loadSettings(token) {
   try {
     const data = await apiFetch(`/stores/${currentStoreId}/payment-settings`)
+    if (token !== undefined && token !== _loadToken) return
     paymentSettings = data
-    document.getElementById('pay-enabled').checked  = data.enabled
-    document.getElementById('key-id').value         = data.razorpay_key_id || ''
-    document.getElementById('key-secret').value     = data.has_secret ? '••••••••••••••••••••' : ''
-    document.getElementById('pay-currency').value   = data.currency || 'INR'
-  } catch(e) { paymentSettings = null }
+    const pi = document.getElementById('pay-enabled')
+    const ki = document.getElementById('key-id')
+    const ks = document.getElementById('key-secret')
+    const cu = document.getElementById('pay-currency')
+    if (pi) pi.checked = data.enabled
+    if (ki) ki.value   = data.razorpay_key_id || ''
+    if (ks) ks.value   = data.has_secret ? '••••••••••••••••••••' : ''
+    if (cu) cu.value   = data.currency || 'INR'
+  } catch(e) {
+    paymentSettings = null
+  }
 }
 
 async function saveEnabled() {
@@ -985,18 +1388,29 @@ async function verifyKeys() {
   }
 }
 
-/* ── TABS ── */
-function switchTab(name) {
-  const tabs = ['setup', 'transactions', 'payouts', 'links']
-  document.querySelectorAll('.tab-item').forEach((t, i) => t.classList.toggle('active', tabs[i] === name))
+/* ══════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════ */
+function applyActiveTab(name) {
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name)
+  })
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
-  document.getElementById('tab-' + name).classList.add('active')
-  if (name === 'transactions') loadTransactions()
-  if (name === 'payouts')      loadPayouts()
-  if (name === 'links')        loadLinks()
+  const panel = document.getElementById('tab-' + name)
+  if (panel) panel.classList.add('active')
 }
 
-/* ── TRANSACTIONS ── */
+function switchTab(name) {
+  _activeTab = name
+  applyActiveTab(name)
+  if (name === 'transactions') loadTransactions()
+  else if (name === 'payouts') loadPayouts()
+  else if (name === 'links')   loadLinks()
+}
+
+/* ══════════════════════════════════════════════
+   TRANSACTIONS
+══════════════════════════════════════════════ */
 async function loadTransactions() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('transactions-not-configured').style.display = 'block'
@@ -1019,7 +1433,8 @@ async function loadTransactions() {
     document.getElementById('stat-failed').textContent    = summary.failed_count || 0
     renderTxns(allTxns)
   } catch(e) {
-    document.getElementById('txn-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171;">⚠️ Error: ${e.message}</td></tr>`
+    document.getElementById('txn-table-body').innerHTML =
+      `<tr><td colspan="7" style="text-align:center;padding:30px;color:#f87171;">⚠️ Error: ${e.message}</td></tr>`
   }
 }
 
@@ -1040,7 +1455,7 @@ function renderTxns(items) {
       <td style="color:var(--text2);font-size:13px;">${p.email || p.contact || '—'}</td>
       <td><span class="badge ${statusMap[p.status] || 'badge-gray'}">${p.status}</span></td>
       <td style="color:var(--text2);font-size:12.5px;">${new Date(p.created_at * 1000).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})}</td>
-      <td>${canRefund ? `<button class="btn-refund" onclick="openRefund('${p.id}', ${p.amount})">💸 Refund</button>` : '—'}</td>
+      <td>${canRefund ? `<button class="btn-refund" onclick="openRefund('${p.id}',${p.amount})">💸 Refund</button>` : '—'}</td>
     </tr>`
   }).join('')
 }
@@ -1050,7 +1465,9 @@ function filterTxns() {
   renderTxns(q ? allTxns.filter(p => p.id.toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q)) : allTxns)
 }
 
-/* ── PAYOUTS ── */
+/* ══════════════════════════════════════════════
+   PAYOUTS
+══════════════════════════════════════════════ */
 async function loadPayouts() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('payouts-not-configured').style.display = 'block'
@@ -1096,7 +1513,9 @@ async function loadPayouts() {
   } catch(e) { toast('Failed to load payout data: ' + e.message, 'error') }
 }
 
-/* ── PAYMENT LINKS ── */
+/* ══════════════════════════════════════════════
+   PAYMENT LINKS
+══════════════════════════════════════════════ */
 async function loadLinks() {
   if (!paymentSettings?.razorpay_key_id) {
     document.getElementById('links-not-configured').style.display = 'block'
@@ -1107,7 +1526,7 @@ async function loadLinks() {
   document.getElementById('links-content').style.display = 'block'
 
   try {
-    const data = await apiFetch(`/stores/${currentStoreId}/payment-links`)
+    const data  = await apiFetch(`/stores/${currentStoreId}/payment-links`)
     const items = data.items || []
     const container = document.getElementById('links-list')
     if (!items.length) {
@@ -1154,13 +1573,15 @@ async function createPaymentLink() {
       customer_phone: document.getElementById('link-phone').value.trim(),
       expire_hours:   parseInt(document.getElementById('link-expiry').value) || undefined,
     }
-    const d = await apiFetch(`/stores/${currentStoreId}/payment-links`, { method: 'POST', body: JSON.stringify(body) })
+    const d = await apiFetch(`/stores/${currentStoreId}/payment-links`, { method:'POST', body: JSON.stringify(body) })
     toast('Payment link created!', 'success')
     if (d.link?.short_url) {
       navigator.clipboard.writeText(d.link.short_url).catch(() => {})
       toast('Link copied to clipboard!', 'success')
     }
-    ;['link-amount', 'link-desc', 'link-name', 'link-email', 'link-phone'].forEach(id => document.getElementById(id).value = '')
+    ;['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id => {
+      document.getElementById(id).value = ''
+    })
     await loadLinks()
   } catch(e) {
     toast(e.message || 'Failed to create link', 'error')
@@ -1169,7 +1590,9 @@ async function createPaymentLink() {
   }
 }
 
-/* ── REFUNDS ── */
+/* ══════════════════════════════════════════════
+   REFUNDS
+══════════════════════════════════════════════ */
 function openRefund(paymentId, amountPaise) {
   refundTarget = { paymentId, maxAmount: amountPaise / 100 }
   document.getElementById('refund-payment-id').textContent = paymentId
@@ -1197,7 +1620,9 @@ async function confirmRefund() {
   }
 }
 
-/* ── UTILS ── */
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
 function formatAmount(amount, currency) {
   const symbols = { INR:'₹', USD:'$', EUR:'€', GBP:'£', SGD:'S$', AED:'AED ' }
   return (symbols[currency] || '') + (amount || 0).toFixed(2)
