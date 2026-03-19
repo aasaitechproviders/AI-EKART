@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en" style="background:#080910">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<!-- nav.css referenced externally in real project -->
+<link rel="stylesheet" href="nav.css">
 
 <script>
 (function(){
@@ -20,31 +20,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════
-   CSS VARIABLES — dark (default)
-═══════════════════════════════════════════════════════ */
-:root {
-  --bg:#080910;
-  --surface:#0f1117;
-  --surface2:#161820;
-  --surface3:#1c1f2b;
-  --border:rgba(255,255,255,.07);
-  --border2:rgba(255,255,255,.11);
-  --text:#e8eaf4;
-  --text2:#a8adc4;
-  --text3:#6b7080;
-  --green:#22c55e;
-  --red:#ef4444;
-  --yellow:#f59e0b;
-  --blue:#3b82f6;
-  --accent:#6c63ff;
-  --accent2:#8b83ff;
-
-  --sidebar-w: 220px;
-  --topbar-h: 58px;
-}
-
-/* ═══════════════════════════════════════════════════════
-   LIGHT THEME
+   LIGHT THEME — only what nav.css doesn't already cover
 ═══════════════════════════════════════════════════════ */
 [data-theme="light"] {
   --bg:#f0f2f8; --surface:#fff; --surface2:#f0f2f8; --surface3:#e4e7f0;
@@ -54,27 +30,12 @@
   --accent:#5b52e8; --accent2:#7c72fa;
 }
 [data-theme="light"] body        { background:#f0f2f8 !important; }
-[data-theme="light"] .sidebar    { background:#fff !important; border-right-color:rgba(0,0,0,.08) !important; }
+[data-theme="light"] .sidebar    { background:#fff !important; }
 [data-theme="light"] .topbar     { background:#fff !important; border-bottom-color:rgba(0,0,0,.08) !important; }
 [data-theme="light"] .main-wrap  { background:#f0f2f8 !important; }
 
 /* ═══════════════════════════════════════════════════════
-   RESET / BASE
-═══════════════════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Outfit', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-a { text-decoration: none; color: inherit; }
-button, select, input, textarea { font-family: 'Outfit', sans-serif; }
-textarea { resize: vertical; }
-
-/* ═══════════════════════════════════════════════════════
-   SKELETON
+   SKELETON — matches nav.css sidebar (220px) + topbar (58px)
 ═══════════════════════════════════════════════════════ */
 @keyframes skshimmer {
   0%   { background-position: -600px 0; }
@@ -98,21 +59,23 @@ textarea { resize: vertical; }
 }
 #page-skeleton {
   position: fixed; inset: 0; z-index: 9999;
-  display: flex; background: var(--bg);
+  display: flex; background: inherit;
   transition: opacity .25s ease;
 }
 #page-skeleton.gone { opacity: 0; pointer-events: none; }
+
+/* sidebar shell: width=220px, same bg as .sidebar */
 .sk-sidebar {
-  width: var(--sidebar-w);
+  width: var(--sidebar-w, 220px);
   min-height: 100vh; flex-shrink: 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   padding: 22px 16px 16px;
 }
-.sk-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.sk-main { flex: 1; display: flex; flex-direction: column; }
 .sk-topbar {
-  height: var(--topbar-h); flex-shrink: 0;
+  height: 58px; flex-shrink: 0;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center;
@@ -127,245 +90,31 @@ textarea { resize: vertical; }
   gap: 14px; margin-bottom: 20px;
 }
 @media(max-width:900px){ .sk-stats { grid-template-columns: repeat(2,1fr); } }
-/* Hide sidebar skeleton on mobile */
-@media(max-width:767px){
-  .sk-sidebar { display: none; }
-  .sk-topbar { padding: 0 16px; }
-  .sk-body { padding: 16px; }
-  .sk-stats { grid-template-columns: 1fr 1fr; }
-}
 
 /* ═══════════════════════════════════════════════════════
-   LAYOUT — SIDEBAR
+   ORDERS PAGE STYLES
+   nav.css owns: body, .sidebar, .main-wrap, .topbar,
+   .btn, .modal-overlay, .modal, .field, .badge, .spinner
+   We only add what's orders-specific here.
 ═══════════════════════════════════════════════════════ */
-.sidebar {
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: var(--sidebar-w);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  z-index: 200;
-  transition: transform .3s cubic-bezier(.4,0,.2,1);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
 
-/* Mobile + Tablet (<900px): sidebar hidden off-screen, overlay on toggle */
-@media(max-width:899px){
-  .sidebar {
-    transform: translateX(-100%);
-    width: min(var(--sidebar-w), 82vw);
-    box-shadow: none;
-  }
-  .sidebar.open {
-    transform: translateX(0);
-    box-shadow: 8px 0 40px rgba(0,0,0,.5);
-  }
-}
-
-/* Desktop (900px+): always visible, not overlay */
-@media(min-width:900px){
-  .sidebar { transform: none !important; }
-}
-
-/* ── Sidebar backdrop overlay ── */
-.sidebar-backdrop {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 199;
-  opacity: 0;
-  transition: opacity .3s ease;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-}
-.sidebar-backdrop.visible {
-  display: block;
-}
-.sidebar-backdrop.active {
-  opacity: 1;
-}
-@media(min-width:900px){
-  .sidebar-backdrop { display: none !important; }
-}
-
-/* ── Sidebar inner components ── */
-.sidebar-logo {
-  display: flex; align-items: center;
-  font-size: 17px; font-weight: 900;
-  letter-spacing: -.03em; color: var(--text);
-  padding: 4px 8px 18px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 14px; flex-shrink: 0;
-}
-.logo-k { color: var(--accent2); }
-.logo-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--accent); display: inline-block;
-  margin-left: 2px; margin-bottom: 6px;
-}
-.sidebar-user {
-  display: flex; align-items: center; gap: 9px;
-  padding-bottom: 14px; border-bottom: 1px solid var(--border);
-  margin-bottom: 12px; flex-shrink: 0;
-}
-.sidebar-avatar {
-  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; color: #fff;
-}
-.sidebar-user-name  { font-size: 12.5px; font-weight: 700; line-height: 1.3; }
-.sidebar-user-email { font-size: 10.5px; color: var(--text3); }
-.nav-section { margin-bottom: 6px; flex-shrink: 0; }
-.nav-section-label {
-  font-size: 9px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--text3);
-  padding: 10px 8px 5px;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 9px;
-  font-size: 13px; font-weight: 600; color: var(--text2);
-  transition: background .14s, color .14s;
-  cursor: pointer;
-}
-.nav-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
-[data-theme="light"] .nav-item:hover { background: rgba(0,0,0,.04); }
-.nav-item.active {
-  background: rgba(108,99,255,.15); color: var(--accent2);
-}
-[data-theme="light"] .nav-item.active { background: rgba(91,82,232,.1); }
-.nav-icon { font-size: 15px; flex-shrink: 0; }
-.sidebar-bottom {
-  margin-top: auto; padding-top: 12px;
-  border-top: 1px solid var(--border); flex-shrink: 0;
-}
-.btn-logout {
-  width: 100%; padding: 9px 12px; border-radius: 9px;
-  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.15);
-  color: #ef4444; font-size: 12.5px; font-weight: 700;
-  cursor: pointer; transition: background .15s, border-color .15s;
-}
-.btn-logout:hover { background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.3); }
-[data-theme="light"] .btn-logout { background: rgba(220,38,38,.07); border-color: rgba(220,38,38,.15); color: #dc2626; }
-
-/* ═══════════════════════════════════════════════════════
-   MAIN WRAP
-═══════════════════════════════════════════════════════ */
-.main-wrap {
-  margin-left: var(--sidebar-w);
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  background: var(--bg);
-  transition: margin-left .3s cubic-bezier(.4,0,.2,1);
-}
-@media(max-width:899px){
-  .main-wrap { margin-left: 0; }
-}
-
-/* ═══════════════════════════════════════════════════════
-   TOPBAR
-═══════════════════════════════════════════════════════ */
-.topbar {
-  position: sticky; top: 0; z-index: 100;
-  height: var(--topbar-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  gap: 12px;
-}
-@media(max-width:899px){
-  .topbar { padding: 0 14px; gap: 8px; }
-}
-
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.topbar-title { font-size: 14px; font-weight: 800; letter-spacing: -.01em; }
-.topbar-right {
-  display: flex; align-items: center; gap: 9px;
-  margin-left: auto;
-}
-
-/* ── Hamburger button ── */
-.hamburger {
-  display: none;
-  width: 36px; height: 36px; border-radius: 9px;
-  background: var(--surface2); border: 1px solid var(--border2);
-  align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
-  transition: background .15s, border-color .15s, transform .15s;
-  padding: 0;
-}
-.hamburger:hover {
-  background: rgba(108,99,255,.1);
-  border-color: rgba(108,99,255,.3);
-  transform: scale(1.05);
-}
-.hamburger svg { display: block; }
-@media(max-width:899px){ .hamburger { display: flex; } }
-
-/* ── Store selector ── */
-.store-select-wrap {
-  display: flex; align-items: center; gap: 7px;
-  background: var(--surface2); border: 1.5px solid var(--border2);
-  border-radius: 9px; padding: 5px 10px;
-  position: relative;
-}
-.store-select-label {
-  font-size: 10px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--text3); white-space: nowrap;
-}
-.store-selector {
-  background: transparent; border: none; outline: none;
-  font-size: 12.5px; font-weight: 700; color: var(--text);
-  font-family: 'Outfit', sans-serif; cursor: pointer;
-  appearance: none; padding-right: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0 center;
-}
-.store-selector option { background: var(--surface2); color: var(--text); }
-
-/* Hide store label on very small screens */
-@media(max-width:479px){
-  .store-select-label { display: none; }
-  .store-select-wrap { padding: 5px 8px; }
-}
-
-/* ── Topbar actions area ── */
-#topbar-actions { display: flex; align-items: center; gap: 8px; }
-
-/* ═══════════════════════════════════════════════════════
-   CONTENT AREA
-═══════════════════════════════════════════════════════ */
-.content {
-  padding: 24px 28px;
-  flex: 1;
-}
-@media(max-width:899px){ .content { padding: 16px 14px; } }
-
-/* ═══════════════════════════════════════════════════════
-   STAT CARDS
-═══════════════════════════════════════════════════════ */
+/* ── STAT CARDS ── */
 .order-stats {
   display: grid;
   grid-template-columns: repeat(4,1fr);
   gap: 14px; margin-bottom: 20px;
 }
-@media(max-width:1100px){ .order-stats { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:479px)  { .order-stats { grid-template-columns: 1fr 1fr; gap: 10px; } }
+@media(max-width:900px) { .order-stats { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:520px) { .order-stats { grid-template-columns: 1fr 1fr; } }
 
 .ostat {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 16px 18px;
-  display: flex; align-items: center; gap: 12px;
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
   position: relative; overflow: hidden;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .ostat::after {
   content: ''; position: absolute; bottom: 0; left: 0; right: 0;
@@ -376,44 +125,37 @@ textarea { resize: vertical; }
 .ostat:hover::after { opacity: 1; }
 [data-theme="light"] .ostat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.07); }
 .ostat-icon {
-  width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; background: var(--oib, rgba(108,99,255,.1));
+  font-size: 19px; background: var(--oib, rgba(108,99,255,.1));
 }
 .ostat-body { min-width: 0; flex: 1; }
 .ostat-label {
-  font-size: 9.5px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--text3); margin-bottom: 4px;
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text3); margin-bottom: 5px;
 }
 .ostat-val {
-  font-size: 24px; font-weight: 900;
+  font-size: 26px; font-weight: 900;
   font-family: 'DM Mono', monospace;
   letter-spacing: -.04em; line-height: 1;
   color: var(--vc, var(--text));
 }
-@media(max-width:479px){
-  .ostat { padding: 12px 13px; gap: 9px; }
-  .ostat-icon { width: 34px; height: 34px; font-size: 15px; }
-  .ostat-val { font-size: 20px; }
-}
-.ostat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; font-weight: 500; }
+.ostat-sub { font-size: 10.5px; color: var(--text3); margin-top: 4px; font-weight: 500; }
 
-/* ═══════════════════════════════════════════════════════
-   TOOLBAR
-═══════════════════════════════════════════════════════ */
+/* ── TOOLBAR ── */
 .ord-toolbar {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 13px; padding: 10px 12px;
-  display: flex; align-items: center; gap: 8px;
+  border-radius: 13px; padding: 11px 14px;
+  display: flex; align-items: center; gap: 10px;
   margin-bottom: 14px; flex-wrap: wrap;
 }
-.ord-search-wrap { position: relative; flex: 1; min-width: 150px; }
+.ord-search-wrap { position: relative; flex: 1; min-width: 180px; }
 .ord-search-icon {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
   pointer-events: none; color: var(--text3);
 }
 .ord-search {
-  width: 100%; padding: 8px 10px 8px 32px;
+  width: 100%; padding: 8px 12px 8px 34px;
   background: var(--surface2); border: 1.5px solid var(--border2);
   border-radius: 9px; font-family: 'Outfit', sans-serif;
   font-size: 13px; color: var(--text);
@@ -426,63 +168,48 @@ textarea { resize: vertical; }
 }
 [data-theme="light"] .ord-search { background: #f0f2f8; }
 .ord-divider { width: 1px; height: 22px; background: var(--border2); flex-shrink: 0; }
-@media(max-width:479px){ .ord-divider { display: none; } }
 .ord-filter {
-  padding: 8px 28px 8px 10px;
+  padding: 8px 28px 8px 12px;
   background: var(--surface2); border: 1.5px solid var(--border2);
   border-radius: 9px; font-family: 'Outfit', sans-serif;
-  font-size: 12px; font-weight: 600; color: var(--text2);
+  font-size: 12.5px; font-weight: 600; color: var(--text2);
   outline: none; cursor: pointer; appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 8px center;
-  transition: border-color .15s; white-space: nowrap; flex-shrink: 0;
+  background-repeat: no-repeat; background-position: right 9px center;
+  transition: border-color .15s;
 }
 .ord-filter:focus { border-color: var(--accent); }
 .ord-filter option { background: var(--surface2); }
 [data-theme="light"] .ord-filter { background-color: #f0f2f8; }
 .ord-count {
-  margin-left: auto; font-size: 11px; font-weight: 700; color: var(--text3);
+  margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--text3);
   background: var(--surface2); border: 1px solid var(--border);
-  padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
-}
-@media(max-width:479px){
-  .ord-toolbar { padding: 8px 10px; }
-  .ord-count { display: none; }
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap;
 }
 
-/* ═══════════════════════════════════════════════════════
-   TABLE CARD
-═══════════════════════════════════════════════════════ */
-.ord-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; overflow: hidden;
-}
-
-/* Responsive table wrapper */
-.ord-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.ord-table { width: 100%; border-collapse: collapse; min-width: 560px; }
-
+/* ── TABLE CARD ── */
+.ord-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.ord-table { width: 100%; border-collapse: collapse; }
 .ord-table thead th {
-  padding: 10px 14px; text-align: left;
-  font-size: 9.5px; font-weight: 800;
+  padding: 11px 16px; text-align: left;
+  font-size: 10px; font-weight: 800;
   text-transform: uppercase; letter-spacing: .09em; color: var(--text3);
   background: var(--surface2); border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
-.ord-table thead th:first-child { padding-left: 18px; }
-.ord-table thead th:last-child  { padding-right: 18px; }
+.ord-table thead th:first-child { padding-left: 20px; }
+.ord-table thead th:last-child  { padding-right: 20px; }
 [data-theme="light"] .ord-table thead th { background: #f8f9fc; }
-
 .ord-table tbody td {
-  padding: 12px 14px; font-size: 13px;
+  padding: 13px 16px; font-size: 13.5px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle; transition: background .1s;
 }
 .ord-table tbody tr:last-child td { border-bottom: none; }
 .ord-table tbody tr:hover td { background: rgba(108,99,255,.03); }
 [data-theme="light"] .ord-table tbody tr:hover td { background: rgba(108,99,255,.025); }
-.ord-table tbody td:first-child { padding-left: 18px; }
-.ord-table tbody td:last-child  { padding-right: 18px; }
+.ord-table tbody td:first-child { padding-left: 20px; }
+.ord-table tbody td:last-child  { padding-right: 20px; }
 
 @keyframes rowIn {
   from { opacity: 0; transform: translateX(-6px); }
@@ -497,40 +224,38 @@ textarea { resize: vertical; }
 .ord-table tbody tr:nth-child(7)   { animation-delay: .18s; }
 
 /* ── CUSTOMER CELL ── */
-.cust-cell { display: flex; align-items: center; gap: 9px; }
+.cust-cell { display: flex; align-items: center; gap: 10px; }
 .cust-av {
-  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #fff;
+  font-size: 13px; font-weight: 800; color: #fff;
 }
-.cust-name  { font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
-.cust-email { font-size: 11px; color: var(--text3); margin-top: 1px; white-space: nowrap; }
+.cust-name  { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+.cust-email { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
 
 /* ── MONO DATA ── */
 .ord-num {
   font-family: 'DM Mono', monospace;
-  font-size: 11.5px; font-weight: 500; color: var(--accent2);
-  white-space: nowrap;
+  font-size: 12px; font-weight: 500; color: var(--accent2);
 }
 .ord-amount {
   font-family: 'DM Mono', monospace;
-  font-size: 13.5px; font-weight: 700; line-height: 1;
+  font-size: 14px; font-weight: 700; line-height: 1;
 }
 .ord-pay-chip {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10px; font-weight: 600; color: var(--text3);
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 600; color: var(--text3);
   background: var(--surface2); border: 1px solid var(--border);
-  padding: 2px 6px; border-radius: 5px; margin-top: 3px;
+  padding: 2px 7px; border-radius: 5px; margin-top: 3px;
 }
 
 /* ── STATUS BADGES ── */
 .sbadge {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 9px; border-radius: 20px;
-  font-size: 10px; font-weight: 800;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 800;
   text-transform: uppercase; letter-spacing: .04em;
-  white-space: nowrap;
 }
 .sbadge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .s-pending    { background: rgba(251,191,36,.12);  color: #fbbf24; }
@@ -546,11 +271,10 @@ textarea { resize: vertical; }
 /* ── UPDATE BUTTON ── */
 .btn-upd {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 11px; border-radius: 8px;
+  padding: 6px 13px; border-radius: 8px;
   background: var(--surface2); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 11.5px; font-weight: 700;
+  color: var(--text2); font-size: 12px; font-weight: 700;
   cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s;
-  white-space: nowrap;
 }
 .btn-upd:hover {
   background: rgba(108,99,255,.1); border-color: rgba(108,99,255,.35);
@@ -561,20 +285,15 @@ textarea { resize: vertical; }
 /* ── EXPORT BUTTON ── */
 .btn-export {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 13px; border-radius: 9px;
+  padding: 7px 14px; border-radius: 9px;
   background: var(--surface2); border: 1.5px solid var(--border2);
-  color: var(--text2); font-size: 12px; font-weight: 700;
+  color: var(--text2); font-size: 12.5px; font-weight: 700;
   cursor: pointer; font-family: 'Outfit', sans-serif;
   transition: all .15s; white-space: nowrap;
 }
 .btn-export:hover {
   border-color: rgba(108,99,255,.4); color: var(--accent2);
   background: rgba(108,99,255,.07);
-}
-/* Icon-only on small screens */
-@media(max-width:479px){
-  .btn-export .btn-label { display: none; }
-  .btn-export { padding: 7px 9px; }
 }
 
 /* ── THEME TOGGLE ── */
@@ -591,55 +310,28 @@ textarea { resize: vertical; }
   background: rgba(108,99,255,.08);
 }
 
-/* ═══════════════════════════════════════════════════════
-   MODAL
-═══════════════════════════════════════════════════════ */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.6); z-index: 500;
-  align-items: center; justify-content: center;
-  padding: 20px;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  animation: fadeOverlay .2s ease;
+/* ── MODAL DETAIL BOX ── */
+.od-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 11px; padding: 16px 18px;
+  margin-bottom: 18px; font-size: 13px;
 }
-@keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
-.modal-overlay.open { display: flex; }
-
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 18px;
-  padding: 26px;
-  width: 100%; max-width: 520px;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 80px rgba(0,0,0,.5);
-  animation: modalSlide .25s cubic-bezier(.22,1,.36,1);
+[data-theme="light"] .od-box { background: #f0f2f8; }
+.od-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.od-key { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 3px; }
+.od-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.od-items { background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.od-item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12.5px;
 }
-@keyframes modalSlide {
-  from { opacity: 0; transform: translateY(18px) scale(.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.od-item-row:last-child { border-bottom: none; }
+.od-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-top: 1px solid var(--border2);
+  font-size: 13px; font-weight: 800;
 }
-@media(max-width:599px){
-  .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
-  .modal {
-    border-radius: 20px 20px 0 0;
-    max-height: 92vh;
-    padding: 20px 16px;
-    animation: sheetSlide .28s cubic-bezier(.22,1,.36,1);
-  }
-  @keyframes sheetSlide {
-    from { opacity: 0; transform: translateY(40px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-}
-
-[data-theme="light"] .modal { background: #fff; box-shadow: 0 24px 60px rgba(0,0,0,.15); }
-
-/* ── Modal components ── */
 .modal-hdr {
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border);
@@ -653,298 +345,181 @@ textarea { resize: vertical; }
 .modal-hdr-title { font-size: 15px; font-weight: 800; color: var(--text); }
 .modal-hdr-sub   { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
 
-.modal-footer {
-  display: flex; gap: 10px; justify-content: flex-end;
-  padding-top: 18px; margin-top: 6px; border-top: 1px solid var(--border);
-}
-@media(max-width:599px){
-  .modal-footer { flex-direction: column-reverse; }
-  .modal-footer .btn { width: 100%; justify-content: center; }
-}
-
-/* ── Field ── */
-.field { margin-bottom: 14px; }
-.field label {
-  display: block; font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .06em;
-  color: var(--text3); margin-bottom: 7px;
-}
-.field input, .field select, .field textarea {
-  width: 100%; padding: 9px 12px;
-  background: var(--surface2); border: 1.5px solid var(--border2);
-  border-radius: 9px; font-size: 13px; color: var(--text);
-  outline: none; transition: border-color .15s, box-shadow .15s;
-}
-[data-theme="light"] .field input,
-[data-theme="light"] .field select,
-[data-theme="light"] .field textarea { background: #f0f2f8; }
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(108,99,255,.12);
-}
-.field textarea { min-height: 80px; }
-.field select option { background: var(--surface2); }
-
-/* ── Buttons ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 8px 16px; border-radius: 9px; border: none;
-  font-size: 13px; font-weight: 700; cursor: pointer;
-  font-family: 'Outfit', sans-serif; transition: all .15s;
-}
-.btn-primary {
-  background: var(--accent); color: #fff;
-}
-.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(108,99,255,.35); }
-.btn-secondary {
-  background: var(--surface2); border: 1px solid var(--border2); color: var(--text2);
-}
-.btn-secondary:hover { border-color: rgba(108,99,255,.35); color: var(--accent2); }
-.btn-sm { padding: 7px 14px; font-size: 12.5px; }
-
-/* ── Detail view box ── */
-.od-box {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 11px; padding: 15px 16px;
-  margin-bottom: 16px; font-size: 13px;
-}
-[data-theme="light"] .od-box { background: #f0f2f8; }
-.od-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 12px;
-}
-@media(max-width:479px){ .od-grid { grid-template-columns: 1fr; gap: 8px; } }
-.od-key { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 2px; }
-.od-val { font-size: 12.5px; font-weight: 600; color: var(--text); }
-.od-items { background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-.od-item-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 7px 11px; border-bottom: 1px solid var(--border); font-size: 12px;
-}
-.od-item-row:last-child { border-bottom: none; }
-.od-total-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 11px; border-top: 1px solid var(--border2);
-  font-size: 12.5px; font-weight: 800;
-}
-
-/* ═══════════════════════════════════════════════════════
-   INLINE SKELETON
-═══════════════════════════════════════════════════════ */
+/* ── INLINE SKELETON (store-switch) ── */
 .isk-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-@media(max-width:1100px){ .isk-stats { grid-template-columns: repeat(2,1fr); } }
-@media(max-width:479px)  { .isk-stats { grid-template-columns: 1fr 1fr; gap: 10px; } }
-.isk-card { border-radius: 14px; height: 88px; }
-.isk-bar  { border-radius: 13px; height: 50px; margin-bottom: 14px; }
-.isk-th   { height: 38px; border-radius: 0; opacity: .5; margin-bottom: 1px; }
-.isk-row  { height: 60px; border-radius: 0; margin-bottom: 1px; }
+@media(max-width:900px){ .isk-stats { grid-template-columns: repeat(2,1fr); } }
+.isk-card { border-radius: 14px; height: 92px; }
+.isk-bar  { border-radius: 13px; height: 52px; margin-bottom: 14px; }
+.isk-th   { height: 40px; border-radius: 0; opacity: .5; margin-bottom: 1px; }
+.isk-row  { height: 62px; border-radius: 0; margin-bottom: 1px; }
 
-/* ── Store loading ── */
+/* ── STORE SELECTOR SPINNER ── */
 .store-loading { position: relative; }
 .store-loading::after {
-  content: ''; position: absolute; right: -18px; top: 50%;
+  content: ''; position: absolute; right: -20px; top: 50%;
   transform: translateY(-50%);
-  width: 12px; height: 12px; border-radius: 50%;
+  width: 13px; height: 13px; border-radius: 50%;
   border: 2px solid rgba(108,99,255,.2); border-top-color: var(--accent);
   animation: ospin .62s linear infinite; pointer-events: none;
 }
 @keyframes ospin { to { transform: translateY(-50%) rotate(360deg); } }
 
-/* ── Empty ── */
+/* ── EMPTY STATE ── */
 .ord-empty {
-  padding: 56px 20px; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 64px 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
 }
 .ord-empty-icon {
-  width: 60px; height: 60px; border-radius: 16px;
+  width: 66px; height: 66px; border-radius: 18px;
   background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px; margin-bottom: 2px;
+  font-size: 28px; margin-bottom: 4px;
 }
-.ord-empty h3 { font-size: 14px; font-weight: 800; color: var(--text2); }
-.ord-empty p  { font-size: 12.5px; color: var(--text3); max-width: 240px; line-height: 1.6; }
+.ord-empty h3 { font-size: 15px; font-weight: 800; color: var(--text2); margin-bottom: 4px; }
+.ord-empty p  { font-size: 13px; color: var(--text3); max-width: 260px; line-height: 1.6; }
 
-/* ── Page transitions ── */
+/* ── PAGE TRANSITIONS ── */
 #page-content { will-change: opacity, transform; }
 @keyframes pgIn {
   from { opacity: 0; transform: translateY(7px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .pg-enter { animation: pgIn .28s cubic-bezier(.22,1,.36,1) both; }
-
-/* ── Toast ── */
-.toast-container {
-  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-  display: flex; flex-direction: column; gap: 8px;
-  pointer-events: none;
-}
-@media(max-width:479px){
-  .toast-container { bottom: 14px; right: 10px; left: 10px; }
-}
-.toast {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-radius: 10px;
-  font-size: 12.5px; font-weight: 700;
-  background: var(--surface); border: 1px solid var(--border2);
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  animation: toastIn .25s ease;
-  pointer-events: auto;
-}
-@keyframes toastIn {
-  from { opacity: 0; transform: translateY(10px) scale(.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.toast.success { border-color: rgba(52,211,153,.3); color: #34d399; }
-.toast.error   { border-color: rgba(248,113,113,.3); color: #f87171; }
 </style>
 
-<!-- In a real project, api.js and nav.js would be loaded here -->
-<!-- <script src="api.js"></script> -->
-<!-- <script src="nav.js"></script> -->
+<script src="api.js"></script>
+<script src="nav.js"></script>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-  PAGE SKELETON
-════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+  SKELETON — mirrors nav.css layout exactly:
+  .sidebar (fixed, 220px) + .main-wrap + .topbar
+════════════════════════════════════════════ -->
 <div id="page-skeleton" aria-hidden="true">
+  <!-- sidebar replica -->
   <div class="sk-sidebar">
     <div style="display:flex;align-items:center;gap:8px;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-      <div class="sk" style="width:22px;height:22px;border-radius:6px;flex-shrink:0;"></div>
-      <div class="sk" style="height:12px;width:48px;border-radius:5px;"></div>
+      <div class="sk" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;"></div>
+      <div class="sk" style="height:13px;width:52px;border-radius:5px;"></div>
     </div>
     <div style="display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:12px;">
-      <div class="sk" style="width:30px;height:30px;border-radius:50%;flex-shrink:0;"></div>
+      <div class="sk" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
       <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="sk" style="height:9px;width:72px;border-radius:4px;"></div>
-        <div class="sk" style="height:8px;width:100px;border-radius:4px;"></div>
+        <div class="sk" style="height:10px;width:84px;border-radius:4px;"></div>
+        <div class="sk" style="height:9px;width:116px;border-radius:4px;"></div>
       </div>
     </div>
-    <div class="sk" style="height:8px;width:48px;border-radius:4px;margin:10px 0 8px;opacity:.4;"></div>
+    <div class="sk" style="height:8px;width:52px;border-radius:4px;margin:10px 0 8px;opacity:.4;"></div>
     <div class="sk-nav-rows">
-      <div class="sk" style="height:32px;border-radius:9px;opacity:.25;"></div>
-      <div class="sk" style="height:32px;border-radius:9px;opacity:.25;"></div>
-      <div class="sk" style="height:32px;border-radius:9px;opacity:.82;"></div>
-      <div class="sk" style="height:32px;border-radius:9px;opacity:.25;"></div>
-      <div class="sk" style="height:32px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.82;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+    </div>
+    <div class="sk" style="height:8px;width:60px;border-radius:4px;margin:14px 0 8px;opacity:.4;"></div>
+    <div class="sk-nav-rows">
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+    </div>
+    <div class="sk" style="height:8px;width:48px;border-radius:4px;margin:14px 0 8px;opacity:.4;"></div>
+    <div class="sk-nav-rows">
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
     </div>
   </div>
+  <!-- main replica -->
   <div class="sk-main">
     <div class="sk-topbar">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="sk" style="height:28px;width:28px;border-radius:8px;opacity:.4;display:none;" id="sk-burger"></div>
-        <div class="sk" style="height:13px;width:52px;border-radius:5px;"></div>
-      </div>
+      <div class="sk" style="height:14px;width:58px;border-radius:5px;"></div>
       <div style="display:flex;align-items:center;gap:9px;">
-        <div class="sk" style="height:32px;width:140px;border-radius:8px;opacity:.7;"></div>
-        <div class="sk" style="height:32px;width:32px;border-radius:9px;opacity:.5;"></div>
-        <div class="sk" style="height:32px;width:100px;border-radius:9px;opacity:.45;"></div>
+        <div class="sk" style="height:32px;width:150px;border-radius:8px;opacity:.7;"></div>
+        <div class="sk" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
+        <div class="sk" style="height:32px;width:108px;border-radius:9px;opacity:.45;"></div>
       </div>
     </div>
     <div class="sk-body">
       <div class="sk-stats">
-        <div class="sk" style="height:88px;border-radius:14px;"></div>
-        <div class="sk" style="height:88px;border-radius:14px;opacity:.8;"></div>
-        <div class="sk" style="height:88px;border-radius:14px;opacity:.6;"></div>
-        <div class="sk" style="height:88px;border-radius:14px;opacity:.4;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.8;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.6;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.4;"></div>
       </div>
-      <div class="sk" style="height:50px;border-radius:13px;margin-bottom:14px;"></div>
+      <div class="sk" style="height:52px;border-radius:13px;margin-bottom:14px;"></div>
       <div style="border-radius:14px;overflow:hidden;">
-        <div class="sk" style="height:38px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
-        <div class="sk" style="height:60px;border-radius:0;margin-bottom:1px;"></div>
-        <div class="sk" style="height:60px;border-radius:0;opacity:.80;margin-bottom:1px;"></div>
-        <div class="sk" style="height:60px;border-radius:0;opacity:.60;margin-bottom:1px;"></div>
-        <div class="sk" style="height:60px;border-radius:0;opacity:.40;margin-bottom:1px;"></div>
-        <div class="sk" style="height:60px;border-radius:0;opacity:.22;"></div>
+        <div class="sk" style="height:40px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.80;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.60;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.40;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.22;"></div>
       </div>
     </div>
   </div>
 </div>
+<!-- /skeleton -->
 
-<!-- ════════════════════════════════════════
-  SIDEBAR BACKDROP (mobile/tablet)
-════════════════════════════════════════ -->
-<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
-
-<!-- ════════════════════════════════════════
-  SIDEBAR
-════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+  SIDEBAR — nav.css classes, nav.js populates
+════════════════════════════════════════════ -->
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">
     e<span class="logo-k">K</span>art<span class="logo-dot"></span>
   </a>
   <div class="sidebar-user">
-    <div class="sidebar-avatar" id="nav-avatar">A</div>
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
     <div style="min-width:0;">
-      <div class="sidebar-user-name" id="nav-user-name">Admin User</div>
-      <div class="sidebar-user-email" id="nav-user-email">admin@ekart.com</div>
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">Merchant</div>
-    <a class="nav-item" href="home.html" onclick="closeSidebar()"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="merchant.html" onclick="closeSidebar()"><span class="nav-icon">🎟️</span>Merchant Corner</a>
-    <a class="nav-item active" href="orders.html" onclick="closeSidebar()"><span class="nav-icon">📋</span>Orders</a>
-    <a class="nav-item" href="payments.html" onclick="closeSidebar()"><span class="nav-icon">💳</span>Payments</a>
-    <a class="nav-item" href="analytics.html" onclick="closeSidebar()"><span class="nav-icon">📊</span>Analytics</a>
-    <a class="nav-item" href="marketing.html" onclick="closeSidebar()"><span class="nav-icon">📣</span>Marketing</a>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
+    <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">Storefront</div>
-    <a class="nav-item" href="website-builder.html" onclick="closeSidebar()"><span class="nav-icon">🎨</span>Website Builder</a>
-    <a class="nav-item" href="ai-builder.html" onclick="closeSidebar()"><span class="nav-icon">🛠️</span>AI Builder</a>
+    <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+    <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">AI Tools</div>
-    <a class="nav-item" href="ai-assistant.html" onclick="closeSidebar()"><span class="nav-icon">🤖</span>AI Assistant</a>
+    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
   </div>
   <div class="sidebar-bottom">
     <button class="btn-logout" onclick="logout()">↩ Logout</button>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-  MAIN WRAP
-════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════
+  MAIN WRAP — nav.css sets margin-left:var(--sidebar-w)
+════════════════════════════════════════════ -->
 <div class="main-wrap">
   <div class="topbar">
     <div class="topbar-left">
-      <!-- Hamburger — shown on mobile + tablet -->
-      <button class="hamburger" id="hamburgerBtn" onclick="openSidebar()" aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="3" y1="6"  x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
       <span class="topbar-title">Orders</span>
     </div>
     <div class="topbar-right">
-      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       <div class="store-select-wrap" id="store-select-wrap">
         <span class="store-select-label">Store</span>
         <select class="store-selector" id="store-selector"></select>
       </div>
-      <div id="topbar-actions">
-        <button class="btn-export" onclick="exportCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7,10 12,15 17,10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          <span class="btn-label">Export CSV</span>
-        </button>
-      </div>
+      <div id="topbar-actions"></div>
     </div>
   </div>
 
   <div id="page-content" class="content" style="display:none;"></div>
 </div>
 
-<!-- ════════════════════════════════════════
+<!-- ════════════════════════════════════════════
   ORDER UPDATE MODAL
-════════════════════════════════════════ -->
+════════════════════════════════════════════ -->
 <div class="modal-overlay" id="orderModal">
   <div class="modal">
     <div class="modal-hdr">
@@ -982,7 +557,7 @@ textarea { resize: vertical; }
     <div class="modal-footer">
       <button class="btn btn-secondary btn-sm" onclick="closeModal('orderModal')">Cancel</button>
       <button class="btn btn-primary btn-sm" onclick="saveOrder()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
           <polyline points="17,21 17,13 7,13 7,21"/>
           <polyline points="7,3 7,8 15,8"/>
@@ -993,43 +568,8 @@ textarea { resize: vertical; }
   </div>
 </div>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
-
 <script>
-/* ════════════════════════════════════════
-   SIDEBAR OPEN / CLOSE
-════════════════════════════════════════ */
-function openSidebar() {
-  const sb = document.getElementById('sidebar');
-  const bd = document.getElementById('sidebarBackdrop');
-  sb.classList.add('open');
-  bd.classList.add('visible');
-  // slight delay so display:block kicks in before opacity transition
-  requestAnimationFrame(() => bd.classList.add('active'));
-  document.body.style.overflow = 'hidden';
-}
-function closeSidebar() {
-  const sb = document.getElementById('sidebar');
-  const bd = document.getElementById('sidebarBackdrop');
-  sb.classList.remove('open');
-  bd.classList.remove('active');
-  setTimeout(() => {
-    bd.classList.remove('visible');
-    document.body.style.overflow = '';
-  }, 300);
-}
-
-// Close sidebar on Escape
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
-
-// Close sidebar when resizing to desktop
-const mq = window.matchMedia('(min-width: 900px)');
-mq.addEventListener('change', e => { if (e.matches) closeSidebar(); });
-
-/* ════════════════════════════════════════
-   SKELETON
-════════════════════════════════════════ */
+/* ── SKELETON ── */
 function hideSkeleton() {
   const s = document.getElementById('page-skeleton');
   if (!s) return;
@@ -1037,9 +577,7 @@ function hideSkeleton() {
   setTimeout(() => s.remove(), 280);
 }
 
-/* ════════════════════════════════════════
-   TRANSITIONS
-════════════════════════════════════════ */
+/* ── TRANSITIONS ── */
 const FD = 165;
 function fadeOut(el) {
   return new Promise(r => {
@@ -1060,9 +598,7 @@ function fadeIn(el) {
   }));
 }
 
-/* ════════════════════════════════════════
-   INLINE SKELETON
-════════════════════════════════════════ */
+/* ── INLINE SKELETON ── */
 function inlineSkel() {
   const rows = [.95,.80,.65,.50,.35].map((op, i) =>
     `<div class="sk isk-row" style="opacity:${op};${i===4?'margin-bottom:0;':''}"></div>`
@@ -1080,9 +616,12 @@ function inlineSkel() {
     </div>`;
 }
 
-/* ════════════════════════════════════════
-   THEME
-════════════════════════════════════════ */
+/* ── STORE LOADING ── */
+function setStoreLoading(on) {
+  document.getElementById('store-select-wrap')?.classList.toggle('store-loading', on);
+}
+
+/* ── THEME ── */
 let _dark = localStorage.getItem('ekart_theme') !== 'light';
 function applyTheme(dark) {
   _dark = dark;
@@ -1096,99 +635,48 @@ function applyTheme(dark) {
 function toggleTheme() { applyTheme(!_dark); }
 applyTheme(_dark);
 
-/* ════════════════════════════════════════
-   MODAL
-════════════════════════════════════════ */
-function openModal(id) {
-  const m = document.getElementById(id);
-  if (m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
-}
-function closeModal(id) {
-  const m = document.getElementById(id);
-  if (m) { m.classList.remove('open'); document.body.style.overflow = ''; }
-}
-// Close modal on backdrop click
-document.getElementById('orderModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal('orderModal');
-});
-
-/* ════════════════════════════════════════
-   TOAST
-════════════════════════════════════════ */
-function toast(msg, type = 'success') {
-  const c = document.getElementById('toastContainer');
-  if (!c) return;
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(6px)'; t.style.transition = '.2s'; setTimeout(() => t.remove(), 220); }, 3000);
-}
-
-/* ════════════════════════════════════════
-   STORE LOADING INDICATOR
-════════════════════════════════════════ */
-function setStoreLoading(on) {
-  document.getElementById('store-select-wrap')?.classList.toggle('store-loading', on);
-}
-
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
+/* ── STATE ── */
 let allOrders = [], currentStoreId = '', _tok = 0;
 
-/* ════════════════════════════════════════
-   MOCK DATA (replace with real apiFetch calls)
-════════════════════════════════════════ */
-function mockOrders() {
-  const statuses = ['pending','confirmed','processing','shipped','delivered','cancelled'];
-  const names = ['Arjun Sharma','Priya Nair','Vikram Singh','Ananya Das','Rohit Kumar','Meera Patel','Sanjay Rao','Kavya Reddy'];
-  const products = ['Wireless Earbuds','Laptop Stand','Mechanical Keyboard','USB-C Hub','Webcam HD','LED Desk Lamp','Mouse Pad XL','Phone Case'];
-  return Array.from({length:12}, (_,i) => ({
-    _id: `ord_${i+1}`,
-    order_number: `ORD-2024-${String(1000+i).padStart(4,'0')}`,
-    customer_name: names[i % names.length],
-    customer_email: names[i % names.length].toLowerCase().replace(' ','.') + '@gmail.com',
-    customer_phone: `+91 98${String(Math.floor(Math.random()*100000000)).padStart(8,'0')}`,
-    status: statuses[i % statuses.length],
-    total: 499 + (i * 347) % 3000,
-    payment_method: i % 3 === 0 ? 'cod' : 'razorpay',
-    items: [
-      { name: products[i % products.length], qty: 1 + (i%3), price: (299 + i*100) },
-    ],
-    shipping_address: {
-      line1: `${i+1} MG Road`, city: 'Bengaluru', state: 'Karnataka', pincode: `5600${String(i+1).padStart(2,'0')}`
-    },
-    tracking_number: i % 2 === 0 ? `AWB${1000000+i*12345}` : '',
-    notes: '',
-    created_at: new Date(Date.now() - i * 86400000 * 2).toISOString()
-  }));
-}
-
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  // Populate mock store selector
-  const sel = document.getElementById('store-selector');
-  ['Main Store','Pop-up Shop','Outlet'].forEach((s,i) => {
-    const o = document.createElement('option');
-    o.value = `store_${i+1}`; o.textContent = s;
-    sel.appendChild(o);
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('orders', id => {
+    currentStoreId = id;
+    loadOrders();
   });
-  sel.addEventListener('change', () => { currentStoreId = sel.value; loadOrders(); });
-  currentStoreId = 'store_1';
+  if (!nav) { hideSkeleton(); return; }
+  currentStoreId = nav.currentStoreId;
 
-  loadOrders();
+  // Theme toggle into topbar-right
+  const tr = document.querySelector('.topbar-right');
+  if (tr && !document.getElementById('themeBtn')) {
+    const b = document.createElement('button');
+    b.className = 'theme-btn'; b.id = 'themeBtn';
+    b.title = 'Toggle theme'; b.onclick = toggleTheme;
+    b.textContent = _dark ? '🌙' : '☀️';
+    tr.insertBefore(b, tr.firstChild);
+  }
+  applyTheme(_dark);
+
+  setTopbarActions(`
+    <button class="btn-export" onclick="exportCSV()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7,10 12,15 17,10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export CSV
+    </button>`);
+
+  if (currentStoreId) await loadOrders();
+  else { renderEmpty(); hideSkeleton(); }
 });
 
-/* ════════════════════════════════════════
-   LOAD ORDERS
-════════════════════════════════════════ */
+/* ── LOAD ── */
 async function loadOrders() {
   if (!currentStoreId) return;
   const token = ++_tok;
-  const el = document.getElementById('page-content');
+  const el    = document.getElementById('page-content');
   const first = el.style.display === 'none' || !el.style.display;
 
   setStoreLoading(true);
@@ -1200,12 +688,8 @@ async function loadOrders() {
     fadeIn(el);
   }
 
-  // Simulate API delay
-  await new Promise(r => setTimeout(r, 600));
-
   try {
-    // In real project: allOrders = await apiFetch(`/stores/${currentStoreId}/orders`);
-    allOrders = mockOrders();
+    allOrders = await apiFetch(`/stores/${currentStoreId}/orders`);
     if (token !== _tok) return;
     if (!first) { await fadeOut(el); if (token !== _tok) return; }
     renderPage(first);
@@ -1223,9 +707,7 @@ async function loadOrders() {
   }
 }
 
-/* ════════════════════════════════════════
-   RENDER PAGE
-════════════════════════════════════════ */
+/* ── RENDER PAGE ── */
 function renderPage(first = false) {
   const pending   = allOrders.filter(o => o.status === 'pending').length;
   const delivered = allOrders.filter(o => o.status === 'delivered').length;
@@ -1273,7 +755,7 @@ function renderPage(first = false) {
         <svg class="ord-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
-        <input class="ord-search" id="orderSearch" placeholder="Search orders, customers…" oninput="filterOrders()">
+        <input class="ord-search" id="orderSearch" placeholder="Search orders, customers, emails…" oninput="filterOrders()">
       </div>
       <div class="ord-divider"></div>
       <select class="ord-filter" id="orderStatusFilter" onchange="filterOrders()">
@@ -1289,17 +771,15 @@ function renderPage(first = false) {
     </div>
 
     <div class="ord-card">
-      <div class="ord-table-wrap">
-        <table class="ord-table">
-          <thead>
-            <tr>
-              <th>Order #</th><th>Customer</th><th>Items</th>
-              <th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody"></tbody>
-        </table>
-      </div>
+      <table class="ord-table">
+        <thead>
+          <tr>
+            <th>Order #</th><th>Customer</th><th>Items</th>
+            <th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
     </div>`;
 
   renderOrders(allOrders);
@@ -1314,9 +794,7 @@ function renderPage(first = false) {
   }
 }
 
-/* ════════════════════════════════════════
-   FILTER
-════════════════════════════════════════ */
+/* ── FILTER ── */
 function filterOrders() {
   const q  = document.getElementById('orderSearch')?.value.toLowerCase() || '';
   const st = document.getElementById('orderStatusFilter')?.value || '';
@@ -1331,9 +809,7 @@ function filterOrders() {
   renderOrders(f);
 }
 
-/* ════════════════════════════════════════
-   RENDER ROWS
-════════════════════════════════════════ */
+/* ── RENDER ROWS ── */
 function renderOrders(orders) {
   const body = document.getElementById('ordersBody');
   if (!body) return;
@@ -1373,7 +849,7 @@ function renderOrders(orders) {
       </td>
       <td>
         <button class="btn-upd" onclick="openOrderEdit('${o._id}')">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
@@ -1384,18 +860,14 @@ function renderOrders(orders) {
   }).join('');
 }
 
-/* ════════════════════════════════════════
-   STATUS BADGE
-════════════════════════════════════════ */
+/* ── BADGE ── */
 function statusBadge(s) {
   const m = { pending:'s-pending', confirmed:'s-confirmed', processing:'s-processing',
                shipped:'s-shipped', delivered:'s-delivered', cancelled:'s-cancelled' };
   return `<span class="sbadge ${m[s]||''}"><span class="sbadge-dot"></span>${s}</span>`;
 }
 
-/* ════════════════════════════════════════
-   OPEN MODAL
-════════════════════════════════════════ */
+/* ── OPEN MODAL ── */
 function openOrderEdit(id) {
   const o = allOrders.find(x => x._id === id);
   if (!o) return;
@@ -1406,19 +878,19 @@ function openOrderEdit(id) {
   document.getElementById('modal-ord-num').textContent = `Order ${o.order_number}`;
 
   document.getElementById('orderDetailView').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span class="ord-num" style="font-size:12.5px;">#${o.order_number}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
+      <span class="ord-num" style="font-size:13px;">#${o.order_number}</span>
       ${statusBadge(o.status)}
     </div>
     <div class="od-grid">
       <div><div class="od-key">Customer</div><div class="od-val">${o.customer_name}</div></div>
-      <div><div class="od-key">Email</div><div class="od-val" style="font-size:11.5px;">${o.customer_email}</div></div>
+      <div><div class="od-key">Email</div><div class="od-val" style="font-size:12px;">${o.customer_email}</div></div>
       <div><div class="od-key">Phone</div><div class="od-val">${o.customer_phone||'—'}</div></div>
       <div><div class="od-key">Payment</div><div class="od-val">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</div></div>
     </div>
-    <div style="margin-bottom:11px;">
+    <div style="margin-bottom:12px;">
       <div class="od-key">Ship To</div>
-      <div class="od-val" style="font-size:12px;margin-top:3px;line-height:1.5;">
+      <div class="od-val" style="font-size:12.5px;margin-top:3px;line-height:1.5;">
         ${o.shipping_address?.line1}, ${o.shipping_address?.city},
         ${o.shipping_address?.state} — ${o.shipping_address?.pincode}
       </div>
@@ -1438,32 +910,23 @@ function openOrderEdit(id) {
   openModal('orderModal');
 }
 
-/* ════════════════════════════════════════
-   SAVE ORDER
-════════════════════════════════════════ */
+/* ── SAVE ── */
 async function saveOrder() {
   const id   = document.getElementById('orderEditId').value;
-  const newStatus = document.getElementById('orderStatus').value;
-  const tracking  = document.getElementById('orderTracking').value.trim();
-  const notes     = document.getElementById('orderNotes').value.trim();
-
-  // Update local state (replace with real apiFetch PUT in production)
-  const order = allOrders.find(o => o._id === id);
-  if (order) { order.status = newStatus; order.tracking_number = tracking; order.notes = notes; }
-
-  closeModal('orderModal');
-  renderOrders(allOrders.filter(o => {
-    const q = document.getElementById('orderSearch')?.value.toLowerCase() || '';
-    const st = document.getElementById('orderStatusFilter')?.value || '';
-    return (!q || o.customer_name.toLowerCase().includes(q) || o.order_number.toLowerCase().includes(q))
-        && (!st || o.status === st);
-  }));
-  toast('Order updated successfully', 'success');
+  const body = {
+    status:          document.getElementById('orderStatus').value,
+    tracking_number: document.getElementById('orderTracking').value.trim(),
+    notes:           document.getElementById('orderNotes').value.trim()
+  };
+  try {
+    await apiFetch(`/stores/${currentStoreId}/orders/${id}`, { method:'PUT', body:JSON.stringify(body) });
+    closeModal('orderModal');
+    await loadOrders();
+    toast('Order updated successfully', 'success');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
-/* ════════════════════════════════════════
-   EXPORT CSV
-════════════════════════════════════════ */
+/* ── EXPORT CSV ── */
 function exportCSV() {
   if (!allOrders.length) return toast('No orders to export', 'error');
   const rows = [['Order #','Customer','Email','Phone','Items','Total','Payment','Status','Date','Tracking']];
@@ -1481,16 +944,7 @@ function exportCSV() {
   toast('CSV downloaded', 'success');
 }
 
-/* ════════════════════════════════════════
-   LOGOUT (stub)
-════════════════════════════════════════ */
-function logout() {
-  toast('Logged out', 'success');
-}
-
-/* ════════════════════════════════════════
-   EMPTY STATE
-════════════════════════════════════════ */
+/* ── EMPTY ── */
 function renderEmpty() {
   const el = document.getElementById('page-content');
   el.innerHTML = `<div class="ord-empty">
