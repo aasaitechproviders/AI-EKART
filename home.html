@@ -894,8 +894,19 @@ async function loadAll(){document.getElementById('page-content').querySelector('
 async function loadStores(){
   allStores=await apiFetch('/stores');
   const pc=document.getElementById('page-content');pc.style.display='';dismissSkeleton();
+
+  // Never trust a stored 'connected' status — downgrade to 'pending' locally.
+  // verifyDomainSilent() below will flip it back only if DNS actually resolves.
+  allStores.forEach(s=>{
+    if(s.custom_domain&&s.domain_status==='connected') s.domain_status='pending';
+  });
+
   renderStores();renderStatsShell(allStores.length);
-  await Promise.allSettled(allStores.map(s=>loadStoreKPIs(s)));updateDashStats();
+  await Promise.allSettled(allStores.map(s=>loadStoreKPIs(s)));
+  updateDashStats();
+
+  // Re-verify all domains silently in background — only show LIVE after confirmed
+  allStores.filter(s=>s.custom_domain).forEach(s=>verifyDomainSilent(s));
 }
 const _storeAnalytics={};
 function renderStatsShell(storeCount){
@@ -924,10 +935,35 @@ async function saveDomain(storeId){
   const input=document.getElementById(`domain-inp-${storeId}`),domain=(input?.value||'').trim();
   if(!domain)return toast('Enter a domain name','error');
   if(!/^[a-zA-Z0-9][a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$/.test(domain))return toast('Enter a valid domain (e.g. shop.yourbrand.com)','error');
-  try{const fd=new FormData();fd.append('custom_domain',domain);const res=await fetch(API+`/stores/${storeId}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken()},body:fd});if(!res.ok){const e=await res.json();throw new Error(e.error)}const s=allStores.find(x=>x._id===storeId);if(s){s.custom_domain=domain;s.domain_status='pending'}toast('Domain saved! Now add the CNAME record.','info');renderStores();allStores.forEach(st=>loadStoreKPIs(st));setTimeout(()=>verifyDomain(storeId,domain),8000);}catch(e){toast(e.message,'error')}
+  try{
+    const fd=new FormData();fd.append('custom_domain',domain);
+    const res=await fetch(API+`/stores/${storeId}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken()},body:fd});
+    if(!res.ok){const e=await res.json();throw new Error(e.error)}
+    const s=allStores.find(x=>x._id===storeId);
+    // Always pending — never trust server response, DNS hasn't been verified yet
+    if(s){s.custom_domain=domain;s.domain_status='pending';}
+    toast('Domain saved! Add a CNAME record at your registrar, then click ↻ to verify.','info');
+    renderStores();allStores.forEach(st=>loadStoreKPIs(st));
+  }catch(e){toast(e.message,'error')}
 }
+// Silent background check — no toast, just updates the card if DNS resolves
+async function verifyDomainSilent(s){
+  try{
+    const data=await apiFetch(`/stores/${s._id}/verify-domain`);
+    const store=allStores.find(x=>x._id===s._id);if(!store)return;
+    store.domain_status=data.connected?'connected':'pending';
+    renderStores();
+  }catch{}
+}
+// Manual recheck triggered by user clicking ↻ — shows toast
 async function verifyDomain(storeId,domain){
-  try{const data=await apiFetch(`/stores/${storeId}/verify-domain`);const s=allStores.find(x=>x._id===storeId);if(!s)return;if(data.connected){s.domain_status='connected';toast(`✓ ${domain} is connected!`,'success')}else{s.domain_status='pending';toast('DNS not verified yet — try again shortly.','info')}renderStores();allStores.forEach(st=>loadStoreKPIs(st));}catch{toast('Could not verify domain. Try again shortly.','error')}
+  try{
+    const data=await apiFetch(`/stores/${storeId}/verify-domain`);
+    const s=allStores.find(x=>x._id===storeId);if(!s)return;
+    if(data.connected){s.domain_status='connected';toast(`✓ ${domain} is live!`,'success');}
+    else{s.domain_status='pending';toast('DNS not verified yet — check your CNAME and try again.','info');}
+    renderStores();allStores.forEach(st=>loadStoreKPIs(st));
+  }catch{toast('Could not verify domain. Try again shortly.','error')}
 }
 async function clearDomain(storeId){
   if(!confirm('Remove custom domain from this store?'))return;
