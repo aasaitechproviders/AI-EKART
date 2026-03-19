@@ -11,6 +11,251 @@
 <style>
 
 /* ══════════════════════════════════════════════════════════
+   SKELETON SYSTEM — self-contained, no nav.css dependency
+   Mirrors the EXACT layout: fixed sidebar + main-wrap
+══════════════════════════════════════════════════════════ */
+
+/* Shimmer keyframe */
+@keyframes skelShimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+/* Base skel block */
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.10) 40%,
+    rgba(255,255,255,0.04) 80%
+  );
+  background-size: 400px 100%;
+  animation: skelShimmer 1.4s ease-in-out infinite;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.05) 0%,
+    rgba(0,0,0,0.10) 40%,
+    rgba(0,0,0,0.05) 80%
+  );
+  background-size: 400px 100%;
+  animation: skelShimmer 1.4s ease-in-out infinite;
+}
+
+/* Skeleton root — full viewport, flex row, same structure as actual page */
+#page-skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+  z-index: 9999;
+  background: #080910;
+  opacity: 1;
+  transition: opacity 0.28s ease;
+  pointer-events: none; /* always non-interactive */
+}
+#page-skeleton.skel-hiding {
+  opacity: 0;
+}
+[data-theme="light"] #page-skeleton {
+  background: #f0f0f5;
+}
+
+/* ── Skeleton Sidebar ── */
+.skel-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: #13141f;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+[data-theme="light"] .skel-sidebar {
+  background: #ffffff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+
+/* Logo row */
+.skel-sidebar-logo {
+  height: 22px;
+  width: 68px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* Avatar + name row */
+.skel-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+[data-theme="light"] .skel-user-row {
+  border-bottom-color: rgba(0,0,0,0.07);
+}
+.skel-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.skel-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.skel-user-name  { height: 10px; width: 80px;  border-radius: 4px; }
+.skel-user-email { height: 9px;  width: 110px; border-radius: 4px; }
+
+/* Nav items */
+.skel-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.skel-nav-item {
+  height: 34px;
+  border-radius: 9px;
+}
+
+/* ── Skeleton Main ── */
+.skel-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Topbar */
+.skel-topbar {
+  height: 56px;
+  flex-shrink: 0;
+  background: #13141f;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+[data-theme="light"] .skel-topbar {
+  background: #ffffff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+.skel-topbar-title {
+  height: 16px;
+  width: 100px;
+  border-radius: 5px;
+}
+.skel-topbar-btn {
+  height: 34px;
+  width: 108px;
+  border-radius: 9px;
+}
+
+/* Scrollable body */
+.skel-body {
+  flex: 1;
+  padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 4-column stats row */
+.skel-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  flex-shrink: 0;
+}
+.skel-stat-card {
+  height: 78px;
+  border-radius: 13px;
+}
+
+/* 2-column store cards grid — mirrors actual stores-grid */
+.skel-stores-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  flex: 1;
+}
+
+/* Each store card skeleton mirrors the real card anatomy */
+.skel-store-card {
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.skel-store-banner {
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 0; /* full-width inside card */
+}
+.skel-store-body {
+  flex: 1;
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #13141f;
+}
+[data-theme="light"] .skel-store-body {
+  background: #ffffff;
+}
+.skel-store-name   { height: 14px; width: 55%; border-radius: 5px; }
+.skel-store-slug   { height: 10px; width: 38%; border-radius: 4px; }
+.skel-store-domain { height: 33px; border-radius: 9px; }
+.skel-store-badges { display: flex; gap: 7px; }
+.skel-badge        { height: 22px; width: 58px; border-radius: 20px; }
+.skel-store-kpis {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 10px;
+}
+[data-theme="light"] .skel-store-kpis {
+  border-top-color: rgba(0,0,0,0.06);
+}
+.skel-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+}
+.skel-kpi-val   { height: 14px; width: 44px; border-radius: 4px; }
+.skel-kpi-label { height: 8px;  width: 32px; border-radius: 3px; }
+.skel-store-actions { display: flex; gap: 7px; }
+.skel-action-btn { height: 30px; width: 60px; border-radius: 8px; }
+
+/* Responsive: collapse to 1-col on narrow screens */
+@media (max-width: 900px) {
+  .skel-stats-row    { grid-template-columns: repeat(2, 1fr); }
+  .skel-stores-grid  { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .skel-sidebar { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════
    DAY / NIGHT THEME OVERRIDES
 ══════════════════════════════════════════════════════════ */
 [data-theme="light"] {
@@ -37,7 +282,6 @@
 [data-theme="light"] .stat-card      { background: #fff !important; box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important; }
 [data-theme="light"] .modal          { background: #fff !important; }
 [data-theme="light"] .modal-overlay  { background: rgba(0,0,0,0.35) !important; }
-/* extra elements nav.css might hardcode */
 [data-theme="light"] .content        { background: #f0f0f5 !important; }
 [data-theme="light"] .sidebar-logo   { color: #111827 !important; }
 [data-theme="light"] .sidebar-user-name  { color: #111827 !important; }
@@ -298,7 +542,6 @@
   background: rgba(245,158,11,0.07);
 }
 
-/* Green pulsing dot for pending */
 .domain-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .domain-dot.pending {
   background: #f59e0b;
@@ -309,7 +552,6 @@
   50%      { opacity: 0.45; transform: scale(1.55); }
 }
 
-/* Clickable domain link */
 .domain-link {
   font-size: 11.5px;
   font-family: 'DM Mono', monospace;
@@ -341,7 +583,7 @@
 }
 .domain-value.pending { color: #d97706; }
 
-/* ── Live Badge — the star of the show ── */
+/* ── Live Badge ── */
 .live-badge-wrap {
   display: inline-flex; align-items: center; gap: 5px;
   background: rgba(34,197,94,0.12);
@@ -359,7 +601,6 @@
   color: #15803d;
 }
 
-/* Pulsing live dot */
 .live-pulse-dot {
   position: relative;
   width: 7px; height: 7px;
@@ -386,13 +627,10 @@
   70%  { transform: scale(2.6); opacity: 0;   }
   100% { transform: scale(2.6); opacity: 0;   }
 }
-
-/* Glow ring on connected badge hover */
 .live-badge-wrap:hover .live-pulse-dot::after {
   animation-duration: 0.9s;
 }
 
-/* Domain action buttons */
 .domain-badge {
   font-size: 9.5px; font-weight: 700;
   letter-spacing: 0.04em; flex-shrink: 0;
@@ -410,7 +648,6 @@
 .domain-action-btn:hover        { color: var(--accent2); background: rgba(108,99,255,0.1); }
 .domain-action-btn.remove:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
 
-/* Domain input row */
 .domain-input-row { display: flex; gap: 6px; margin-bottom: 7px; }
 .domain-input-row input {
   flex: 1; font-size: 11.5px;
@@ -526,12 +763,6 @@
   background: rgba(0,0,0,0.12); padding: 1px 5px; border-radius: 4px;
 }
 
-/* ── CUSTOM DOMAIN ANIMATIONS ── */
-@keyframes domain-pulse {
-  0%,100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.45; transform: scale(1.55); }
-}
-
 /* ── THEME TOGGLE BUTTON ── */
 .theme-toggle {
   width: 34px; height: 34px; border-radius: 9px;
@@ -611,6 +842,11 @@
 @media (max-width:900px) {
   .stats-row { grid-template-columns: repeat(2,1fr); }
   .stores-grid { grid-template-columns: 1fr; }
+  .skel-stats-row { grid-template-columns: repeat(2,1fr); }
+  .skel-stores-grid { grid-template-columns: 1fr; }
+}
+@media (max-width:640px) {
+  .skel-sidebar { display: none; }
 }
 </style>
 <script>
@@ -630,46 +866,112 @@
 </head>
 <body>
 
-<!-- ── Skeleton ── -->
+<!-- ══════════════════════════════════════════════════════════
+     PAGE SKELETON
+     Mirrors exact layout: fixed 220px sidebar + flex main
+     Each section matches actual rendered content proportions
+══════════════════════════════════════════════════════════ -->
 <div id="page-skeleton">
+
+  <!-- Sidebar clone -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+    <div class="skel skel-sidebar-logo"></div>
+    <div class="skel-user-row">
+      <div class="skel skel-avatar"></div>
+      <div class="skel-user-info">
+        <div class="skel skel-user-name"></div>
+        <div class="skel skel-user-email"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+    <div class="skel-nav-items">
+      <div class="skel skel-nav-item" style="opacity:1.0;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.55;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.45;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.38;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.30;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.22;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.16;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.10;"></div>
+    </div>
   </div>
+
+  <!-- Main clone -->
   <div class="skel-main">
+
+    <!-- Topbar clone -->
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
+      <div class="skel skel-topbar-title"></div>
+      <div class="skel skel-topbar-btn"></div>
     </div>
+
+    <!-- Content body clone -->
     <div class="skel-body">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
-        <div class="skel" style="height:78px;border-radius:13px;"></div>
+
+      <!-- 4 stat cards -->
+      <div class="skel-stats-row">
+        <div class="skel skel-stat-card"></div>
+        <div class="skel skel-stat-card" style="opacity:0.85;"></div>
+        <div class="skel skel-stat-card" style="opacity:0.70;"></div>
+        <div class="skel skel-stat-card" style="opacity:0.55;"></div>
       </div>
-      <div class="skel" style="height:40px;border-radius:9px;margin-bottom:10px;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:1.0;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.82;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.64;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.46;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:0.28;"></div>
-    </div>
-  </div>
-</div>
+
+      <!-- 2 store cards — matching actual card anatomy -->
+      <div class="skel-stores-grid">
+
+        <!-- Store card 1 -->
+        <div class="skel-store-card">
+          <div class="skel skel-store-banner" style="border-radius:20px 20px 0 0;"></div>
+          <div class="skel-store-body">
+            <div class="skel skel-store-name"></div>
+            <div class="skel skel-store-slug"></div>
+            <div class="skel skel-store-domain"></div>
+            <div class="skel-store-badges">
+              <div class="skel skel-badge"></div>
+              <div class="skel skel-badge" style="width:44px;"></div>
+              <div class="skel skel-badge" style="width:44px;"></div>
+            </div>
+            <div class="skel-store-kpis">
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+            </div>
+            <div class="skel-store-actions">
+              <div class="skel skel-action-btn"></div>
+              <div class="skel skel-action-btn"></div>
+              <div class="skel skel-action-btn"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Store card 2 -->
+        <div class="skel-store-card" style="opacity:0.72;">
+          <div class="skel skel-store-banner" style="border-radius:20px 20px 0 0;"></div>
+          <div class="skel-store-body">
+            <div class="skel skel-store-name" style="width:48%;"></div>
+            <div class="skel skel-store-slug" style="width:32%;"></div>
+            <div class="skel skel-store-domain"></div>
+            <div class="skel-store-badges">
+              <div class="skel skel-badge"></div>
+              <div class="skel skel-badge" style="width:44px;"></div>
+              <div class="skel skel-badge" style="width:44px;"></div>
+            </div>
+            <div class="skel-store-kpis">
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+              <div class="skel-kpi"><div class="skel skel-kpi-val"></div><div class="skel skel-kpi-label"></div></div>
+            </div>
+            <div class="skel-store-actions">
+              <div class="skel skel-action-btn"></div>
+              <div class="skel skel-action-btn"></div>
+              <div class="skel skel-action-btn"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /skel-body -->
+  </div><!-- /skel-main -->
+</div><!-- /#page-skeleton -->
 
 <!-- ── Sidebar ── -->
 <div class="sidebar" id="sidebar">
@@ -786,6 +1088,19 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════
+   SKELETON DISMISS — smooth fade, then remove from DOM
+══════════════════════════════════════════════════════════ */
+function dismissSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel || skel._dismissed) return
+  skel._dismissed = true
+  skel.classList.add('skel-hiding')
+  skel.addEventListener('transitionend', () => skel.remove(), { once: true })
+  // Safety fallback — remove even if transition doesn't fire
+  setTimeout(() => { if (skel.parentNode) skel.remove() }, 500)
+}
+
+/* ══════════════════════════════════════════════════════════
    THEME SYSTEM
 ══════════════════════════════════════════════════════════ */
 let _isDark = localStorage.getItem('ekart_theme') !== 'light'
@@ -796,9 +1111,14 @@ function applyTheme(dark) {
   if (dark) {
     root.removeAttribute('data-theme')
     root.style.background = '#080910'
+    // keep skeleton background in sync
+    const skel = document.getElementById('page-skeleton')
+    if (skel) skel.style.background = '#080910'
   } else {
     root.setAttribute('data-theme', 'light')
     root.style.background = '#f0f0f5'
+    const skel = document.getElementById('page-skeleton')
+    if (skel) skel.style.background = '#f0f0f5'
   }
   const btn = document.getElementById('themeToggleBtn')
   if (btn) btn.textContent = dark ? '🌙' : '☀️'
@@ -948,7 +1268,6 @@ function renderDomainWidget(s) {
   const domain = (s.custom_domain || '').trim()
   const status = s.domain_status || (domain ? 'pending' : '')
 
-  /* ── CONNECTED — clickable link + animated LIVE badge ── */
   if (domain && status === 'connected') {
     const href = domain.startsWith('http') ? domain : `https://${domain}`
     return `
@@ -968,7 +1287,6 @@ function renderDomainWidget(s) {
       </div>`
   }
 
-  /* ── PENDING / VERIFYING ── */
   if (domain && status === 'pending') {
     return `
       <div class="domain-status-row pending">
@@ -989,7 +1307,6 @@ function renderDomainWidget(s) {
       ${buildDnsGuideHtml(s._id)}`
   }
 
-  /* ── NO DOMAIN YET ── */
   return `
     <div class="domain-input-row">
       <input type="text" id="domain-inp-${s._id}"
@@ -1004,11 +1321,9 @@ function renderDomainWidget(s) {
 ══════════════════════════════════════════════════════════ */
 function renderStores() {
   const container = document.getElementById('page-content')
-  // Remove both the grid AND any existing empty state on every render
   container.querySelector('.stores-grid')?.remove()
   container.querySelector('.stores-empty-state')?.remove()
 
-  // Show/hide the topbar "+ New Store" button based on whether stores exist
   const topbarNewBtn = document.getElementById('topbarNewStoreBtn')
   if (topbarNewBtn) topbarNewBtn.style.display = allStores.length ? '' : 'none'
 
@@ -1101,7 +1416,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('storeEmail').value = currentUser.email || ''
   setTopbarActions(`<button class="btn btn-primary" id="topbarNewStoreBtn" onclick="openCreateStore()" style="display:none;">+ New Store</button>`)
 
-  // Inject theme toggle directly into .topbar-right — independent of setTopbarActions
+  // Inject theme toggle into .topbar-right
   const topbarRight = document.querySelector('.topbar-right')
   if (topbarRight && !document.getElementById('themeToggleBtn')) {
     const btn = document.createElement('button')
@@ -1119,27 +1434,28 @@ window.addEventListener('DOMContentLoaded', async () => {
 async function loadAll() {
   const pc = document.getElementById('page-content')
   pc.querySelector('.stats-row')?.remove()
-  // Load stores first, then derive all stats from user-scoped store data only
   await loadStores()
 }
 
 async function loadStores() {
   allStores = await apiFetch('/stores')
+
+  // Show actual content, dismiss skeleton
+  const pc = document.getElementById('page-content')
+  pc.style.display = ''
+  dismissSkeleton()
+
   renderStores()
-  // Render stats shell immediately with correct store count
   renderStatsShell(allStores.length)
-  // Load per-store analytics in parallel, accumulate into user-scoped totals
   const analyticsResults = await Promise.allSettled(
     allStores.map(s => loadStoreKPIs(s))
   )
-  // Sum up all per-store results to build the top stats row
   updateDashStats()
 }
 
 // Holds per-store analytics keyed by store _id
 const _storeAnalytics = {}
 
-// Render the stats shell with shimmer placeholders
 function renderStatsShell(storeCount) {
   const pc = document.getElementById('page-content')
   pc.querySelector('.stats-row')?.remove()
@@ -1177,7 +1493,6 @@ function renderStatsShell(storeCount) {
   pc.insertAdjacentHTML('afterbegin', html)
 }
 
-// Recompute top stats entirely from user's own store analytics
 function updateDashStats() {
   let totalOrders = 0, todayOrders = 0, totalRevenue = 0
   Object.values(_storeAnalytics).forEach(d => {
@@ -1202,7 +1517,6 @@ function updateDashStats() {
 async function loadStoreKPIs(s) {
   try {
     const data = await apiFetch(`/stores/${s._id}/analytics?days=30`)
-    // Cache analytics for this store so updateDashStats can sum them
     _storeAnalytics[s._id] = data
 
     const cur  = s.currency === 'USD' ? '$' : s.currency === 'EUR' ? '€' : '₹'
@@ -1217,7 +1531,6 @@ async function loadStoreKPIs(s) {
     if (ordEl) { ordEl.textContent = data.total_orders || 0; ordEl.classList.remove('loading') }
     if (todEl) { todEl.textContent = data.today_orders || 0; todEl.classList.remove('loading'); todEl.classList.add('today') }
 
-    // Update the top dash stats live as each store resolves
     updateDashStats()
   } catch {}
 }
