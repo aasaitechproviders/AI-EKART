@@ -1,611 +1,555 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#080910">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — Orders</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="nav.css">
-
-<script>
-(function(){
-  if (localStorage.getItem('ekart_theme') === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light')
-    document.documentElement.style.background = '#f0f0f5'
-  }
-})()
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* ══════════════════════════════════════════════
-   SKELETON — mirrors the real sidebar + main layout
-   exactly so there's zero layout shift on load
-══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Shared shimmer animation */
-@keyframes skel-shimmer {
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
+:root {
+  --bg:         #0a0b0f;
+  --bg2:        #0f1117;
+  --bg3:        #13151d;
+  --surface:    #161820;
+  --surface2:   #1c1f2b;
+  --surface3:   #222535;
+  --border:     rgba(255,255,255,0.06);
+  --border2:    rgba(255,255,255,0.10);
+  --border3:    rgba(255,255,255,0.15);
+  --text:       #f0f2f8;
+  --text2:      #9ba3be;
+  --text3:      #5a6280;
+  --text4:      #3a4060;
+  --brand:      #4f6ef7;
+  --brand2:     #3d5ae0;
+  --brand3:     #6b85f8;
+  --brand-glow: rgba(79,110,247,0.18);
+  --brand-soft: rgba(79,110,247,0.08);
+  --green:      #22d3a0;
+  --green-soft: rgba(34,211,160,0.08);
+  --amber:      #f5a623;
+  --amber-soft: rgba(245,166,35,0.08);
+  --red:        #f56565;
+  --red-soft:   rgba(245,101,101,0.08);
+  --sky:        #38bdf8;
+  --sky-soft:   rgba(56,189,248,0.08);
+  --violet:     #a78bfa;
+  --violet-soft:rgba(167,139,250,0.08);
+  --sidebar-w:  248px;
+  --topbar-h:   58px;
+  --radius:     12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --font:       'Sora', sans-serif;
+  --mono:       'JetBrains Mono', monospace;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow:     0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-brand: 0 4px 20px rgba(79,110,247,0.3);
+  --t:          all 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+[data-theme="light"] {
+  --bg:         #f5f6fb;
+  --bg2:        #eef0f8;
+  --bg3:        #e8eaf4;
+  --surface:    #ffffff;
+  --surface2:   #f5f6fb;
+  --surface3:   #eef0f8;
+  --border:     rgba(0,0,0,0.06);
+  --border2:    rgba(0,0,0,0.09);
+  --border3:    rgba(0,0,0,0.13);
+  --text:       #0f1117;
+  --text2:      #374151;
+  --text3:      #6b7280;
+  --text4:      #9ca3af;
+  --brand-glow: rgba(79,110,247,0.12);
+  --brand-soft: rgba(79,110,247,0.06);
+  --green-soft: rgba(34,211,160,0.06);
+  --amber-soft: rgba(245,166,35,0.06);
+  --red-soft:   rgba(245,101,101,0.06);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:     0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.07);
+}
+
+html { background: var(--bg); }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text4); }
+
+/* ─── SKELETON ─── */
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
 }
 .skel {
-  border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.09) 50%,
-    rgba(255,255,255,0.04) 75%
-  );
-  background-size: 600px 100%;
-  animation: skel-shimmer 1.4s infinite linear;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
-[data-theme="light"] .skel {
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.11) 50%,
-    rgba(0,0,0,0.06) 75%
-  );
-  background-size: 600px 100%;
-  animation: skel-shimmer 1.4s infinite linear;
-}
-
-/*
-  The skeleton wrapper must EXACTLY replicate the
-  CSS layout that nav.css applies to .sidebar + .main-wrap.
-  We use the same variable names so any overrides cascade.
-*/
 #page-skeleton {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  z-index: 9999;
-  background: inherit;          /* inherits html background */
-  transition: opacity .25s ease;
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; background: var(--bg);
+  transition: opacity .3s ease;
 }
-#page-skeleton.skel-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ── Skeleton sidebar ─────────────────────────
-   Match .sidebar in nav.css:
-     width: 240px | padding: 20px 14px | position: fixed/flex-col
-   Adjust the width value if nav.css differs.
-────────────────────────────────────────────── */
+#page-skeleton.hidden { opacity: 0; pointer-events: none; }
 .skel-sidebar {
-  width: 240px;              /* ← must match .sidebar width in nav.css   */
-  flex-shrink: 0;
-  height: 100%;
-  background: #0d0e18;       /* match sidebar bg */
-  border-right: 1px solid rgba(255,255,255,0.06);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  box-sizing: border-box;
+  width: var(--sidebar-w); flex-shrink: 0; height: 100%;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  padding: 24px 16px; display: flex; flex-direction: column; gap: 0;
 }
-[data-theme="light"] .skel-sidebar {
-  background: #fff;
-  border-right-color: rgba(0,0,0,0.09);
-}
-
-/* ── Skeleton main area ───────────────────────
-   Match .main-wrap: flex-col, fills remaining width
-────────────────────────────────────────────── */
-.skel-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* ── Skeleton topbar ──────────────────────────
-   Match .topbar: height ~60px, padding, flex row
-────────────────────────────────────────────── */
+.skel-main { flex: 1; display: flex; flex-direction: column; }
 .skel-topbar {
-  height: 60px;              /* ← must match .topbar height in nav.css   */
+  height: var(--topbar-h); background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+}
+.skel-body { flex: 1; padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+.skel-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
   flex-shrink: 0;
-  background: #0d0e18;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  height: 100vh;
+  position: fixed;
+  top: 0; left: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  box-sizing: border-box;
-}
-[data-theme="light"] .skel-topbar {
-  background: #fff;
-  border-bottom-color: rgba(0,0,0,0.09);
-}
-
-/* ── Skeleton content body ────────────────────
-   Match .content padding
-────────────────────────────────────────────── */
-.skel-body {
-  flex: 1;
-  padding: 24px;             /* ← must match .content padding in nav.css */
+  flex-direction: column;
+  padding: 0;
+  z-index: 100;
   overflow: hidden;
-  box-sizing: border-box;
 }
 
-/* Sidebar internal spacing helpers */
-.skel-sidebar-logo   { margin-bottom: 22px; }
-.skel-sidebar-user   { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 14px; }
-[data-theme="light"] .skel-sidebar-user { border-bottom-color: rgba(0,0,0,0.08); }
-.skel-sidebar-user-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.skel-nav-rows { display: flex; flex-direction: column; gap: 4px; }
-
-/* Stat cards row */
-.skel-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 12px 20px;
 }
-@media (max-width: 900px) { .skel-stats { grid-template-columns: repeat(2, 1fr); } }
 
-/* ══════════════════════════════════════════════
-   LIGHT THEME OVERRIDES
-══════════════════════════════════════════════ */
-[data-theme="light"] {
-  --surface:  #ffffff;
-  --surface2: #f3f4f6;
-  --surface3: #e9eaf0;
-  --border:   rgba(0,0,0,0.10);
-  --border2:  rgba(0,0,0,0.14);
-  --text:     #111827;
-  --text2:    #374151;
-  --text3:    #9ca3af;
-  --accent:   #6c63ff;
-  --accent2:  #5b52e0;
-  --green:    #16a34a;
-  --red:      #dc2626;
-  --yellow:   #ca8a04;
-  background: #f0f0f5 !important;
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 8px 20px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
 }
-[data-theme="light"] body              { background: #f0f0f5 !important; }
-[data-theme="light"] .sidebar          { background: #fff !important; border-right-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .main-wrap        { background: #f0f0f5 !important; }
-[data-theme="light"] .topbar           { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .topbar-title     { color: #111827 !important; }
-[data-theme="light"] .content          { background: #f0f0f5 !important; }
-[data-theme="light"] .nav-item         { color: #374151 !important; }
-[data-theme="light"] .nav-item:hover,
-[data-theme="light"] .nav-item.active  { background: rgba(108,99,255,0.08) !important; color: #5b52e0 !important; }
-[data-theme="light"] .sidebar-logo     { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-name  { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-email { color: #9ca3af !important; }
-[data-theme="light"] .nav-section-label  { color: #9ca3af !important; }
-[data-theme="light"] .btn-logout       { color: #374151 !important; }
-[data-theme="light"] .store-select-wrap { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; }
-[data-theme="light"] .store-selector  { color: #111827 !important; background: transparent !important; }
-[data-theme="light"] .store-select-label { color: #9ca3af !important; }
-[data-theme="light"] .order-stat       { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .order-stat-label { color: #9ca3af !important; }
-[data-theme="light"] .section-card     { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .search-field     { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; color: #111827 !important; }
-[data-theme="light"] .filter-select    { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; color: #111827 !important; }
-[data-theme="light"] .toolbar          { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] table thead th    { background: #f9fafb !important; color: #6b7280 !important; border-color: rgba(0,0,0,0.06) !important; }
-[data-theme="light"] table tbody td    { border-color: rgba(0,0,0,0.04) !important; }
-[data-theme="light"] table tbody tr:hover td { background: rgba(108,99,255,0.03) !important; }
-[data-theme="light"] .modal            { background: #fff !important; border-color: rgba(0,0,0,0.12) !important; }
-[data-theme="light"] .modal h2         { color: #111827 !important; }
-[data-theme="light"] .order-detail-box { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.10) !important; color: #374151 !important; }
-[data-theme="light"] .order-detail-box strong { color: #111827 !important; }
-[data-theme="light"] .field label      { color: #374151 !important; }
-[data-theme="light"] .field input,
-[data-theme="light"] .field textarea,
-[data-theme="light"] .field select     { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; color: #111827 !important; }
-[data-theme="light"] .badge-gray       { background: #e9eaf0 !important; color: #374151 !important; }
-[data-theme="light"] .empty-state h3   { color: #111827 !important; }
-
-/* ── THEME TOGGLE ── */
-.theme-toggle {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--brand);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; flex-shrink: 0;
-  transition: all .2s;
+  font-size: 16px; font-weight: 800; color: white;
+  box-shadow: 0 4px 12px rgba(79,110,247,0.4);
+  flex-shrink: 0;
+  font-family: var(--mono);
 }
-.theme-toggle:hover {
-  border-color: rgba(108,99,255,0.4);
-  background: rgba(108,99,255,0.08);
-  transform: rotate(12deg) scale(1.05);
+.logo-text {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.02em;
 }
-[data-theme="light"] .theme-toggle {
-  background: #f3f4f6; border-color: rgba(0,0,0,0.12); color: #374151;
-}
+.logo-text em { color: var(--brand3); font-style: normal; }
 
-/* ══════════════════════════════════════════════
-   ORDERS PAGE STYLES — PRODUCTION GRADE
-══════════════════════════════════════════════ */
-
-/* ── STAT CARDS ── */
-.order-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
-}
-.order-stat {
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 8px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  transition: transform .2s, box-shadow .2s, border-color .2s;
-  position: relative;
-  overflow: hidden;
 }
-.order-stat::after {
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), #7c6bfb);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.user-info { min-width: 0; flex: 1; }
+.user-name { font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.nav-section { margin-bottom: 24px; }
+.nav-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text4);
+  padding: 0 8px; margin-bottom: 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text3); text-decoration: none;
+  transition: var(--t); margin-bottom: 2px;
+  white-space: nowrap; position: relative;
+}
+.nav-item:hover {
+  color: var(--text); background: var(--surface);
+}
+.nav-item.active {
+  color: var(--brand3);
+  background: var(--brand-soft);
+  font-weight: 600;
+}
+.nav-item.active::before {
   content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--stat-color, var(--accent));
-  opacity: 0;
-  transition: opacity .2s;
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 16px; border-radius: 0 2px 2px 0;
+  background: var(--brand);
 }
-.order-stat:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.14); }
-.order-stat:hover::after { opacity: 1; }
-.order-stat-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-  background: var(--stat-bg, rgba(108,99,255,0.1));
-  flex-shrink: 0;
+.nav-icon {
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
 }
-.order-stat-body { min-width: 0; }
-.order-stat-label {
-  font-size: 10.5px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 5px;
-}
-.order-stat-value {
-  font-size: 24px; font-weight: 900;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-.order-stat-sub {
-  font-size: 11px; color: var(--text3);
-  margin-top: 4px; font-weight: 500;
+.nav-badge {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  background: var(--amber-soft); color: var(--amber);
+  padding: 2px 6px; border-radius: 20px;
 }
 
-/* ── TOOLBAR ── */
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+.sidebar-bottom {
+  margin-top: auto; padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.btn-logout {
+  width: 100%; display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; color: var(--text3);
+  background: none; border: none; cursor: pointer; font-family: var(--font);
+  transition: var(--t);
+}
+.btn-logout:hover { color: var(--red); background: var(--red-soft); }
+
+/* ─── MAIN LAYOUT ─── */
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* ─── TOPBAR ─── */
+.topbar {
+  height: var(--topbar-h); flex-shrink: 0;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(12px);
+}
+.topbar-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.01em;
+}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+.store-select-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 0 12px 0 10px; height: 36px;
+  transition: var(--t);
+}
+.store-select-wrap:hover { border-color: var(--border3); }
+.store-select-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text3); flex-shrink: 0;
+}
+.store-selector {
+  background: none; border: none; outline: none;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text); cursor: pointer; max-width: 140px;
+}
+.store-selector option { background: var(--surface2); }
+
+/* ─── CONTENT ─── */
+.content {
+  flex: 1; padding: 28px;
+  display: none;
+}
+.content.visible { display: block; }
+
+/* ─── STAT CARDS ─── */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 14px; margin-bottom: 24px;
+}
+.stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px 16px;
-  flex-wrap: wrap;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  cursor: default;
+}
+.stat-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: var(--stat-accent, var(--brand));
+  opacity: 0; transition: opacity .2s;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: var(--border2);
+}
+.stat-card:hover::after { opacity: 1; }
+.stat-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.stat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  background: var(--stat-bg, var(--brand-soft));
+}
+.stat-trend {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+  background: var(--green-soft); color: var(--green);
+}
+.stat-trend.down { background: var(--red-soft); color: var(--red); }
+.stat-val {
+  font-family: var(--mono); font-size: 26px; font-weight: 600;
+  color: var(--text); letter-spacing: -0.04em; line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 11.5px; font-weight: 600; color: var(--text3);
+}
+.stat-sub {
+  font-size: 11px; color: var(--text4); margin-top: 2px;
+}
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 10px 14px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.search-wrap { position: relative; flex: 1; min-width: 180px; }
+.search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text3); pointer-events: none;
 }
 .search-field {
-  flex: 1; min-width: 180px;
-  padding: 9px 14px 9px 38px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border2);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  font-size: 13.5px;
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 12px center;
+  width: 100%; padding: 8px 14px 8px 34px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 9px; font-family: var(--font); font-size: 13px;
+  color: var(--text); outline: none; transition: var(--t);
 }
+.search-field::placeholder { color: var(--text4); }
 .search-field:focus {
-  border-color: rgba(108,99,255,0.55);
-  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+  border-color: var(--brand); background: var(--bg2);
+  box-shadow: 0 0 0 3px var(--brand-glow);
 }
-.filter-select {
-  padding: 9px 32px 9px 12px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border2);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: 'Outfit', sans-serif;
-  font-size: 13px; font-weight: 600;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color .15s;
+.filter-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 9px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  font-family: var(--font); font-size: 12.5px; font-weight: 600;
+  color: var(--text2); cursor: pointer; outline: none;
+  transition: var(--t); appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235a6280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+  padding-right: 28px;
 }
-.filter-select:focus { border-color: rgba(108,99,255,0.55); outline: none; }
-.toolbar-count {
-  margin-left: auto;
-  font-size: 12px; font-weight: 700;
-  color: var(--text3);
-  white-space: nowrap;
+.filter-pill:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
+.filter-pill option { background: var(--surface2); }
+.toolbar-sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+.count-chip {
+  font-size: 11.5px; font-weight: 700; color: var(--text3);
+  white-space: nowrap; margin-left: auto;
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px;
 }
 
-/* ── TABLE ── */
-.section-card {
+/* ─── TABLE ─── */
+.table-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 table { width: 100%; border-collapse: collapse; }
 thead th {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 10.5px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text3);
-  background: var(--surface2);
+  padding: 11px 16px; text-align: left;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text3); background: var(--bg2);
   border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+  white-space: nowrap; user-select: none;
 }
-thead th:first-child { border-radius: 0; padding-left: 20px; }
+thead th:first-child { padding-left: 20px; }
 thead th:last-child  { padding-right: 20px; }
 tbody td {
-  padding: 14px 16px;
-  font-size: 13.5px;
+  padding: 14px 16px; font-size: 13.5px;
   border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-  transition: background .12s;
+  vertical-align: middle; transition: background .12s;
 }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(108,99,255,0.03); }
+tbody tr { transition: background .12s; }
+tbody tr:hover td { background: var(--brand-soft); }
 tbody td:first-child { padding-left: 20px; }
 tbody td:last-child  { padding-right: 20px; }
 
-/* ── STATUS BADGES ── */
+/* ─── CUSTOMER CELL ─── */
+.cust-cell { display: flex; align-items: center; gap: 10px; }
+.cust-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--brand), #7c6bfb);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: white;
+  box-shadow: 0 2px 8px rgba(79,110,247,0.25);
+}
+.cust-name  { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.cust-email { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+
+/* ─── MONO DATA ─── */
+.mono { font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
+.order-num { color: var(--brand3); font-weight: 600; }
+
+/* ─── BADGES ─── */
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 4px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.05em;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
 }
-.badge::before {
-  content: '';
+.badge-dot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: currentColor;
+  background: currentColor; flex-shrink: 0;
 }
-.badge-pending   { background: rgba(251,191,36,.12);  color: #fbbf24; }
-.badge-confirmed { background: rgba(167,139,250,.12); color: #a78bfa; }
-.badge-processing{ background: rgba(96,165,250,.12);  color: #60a5fa; }
-.badge-shipped   { background: rgba(56,189,248,.12);  color: #38bdf8; }
-.badge-delivered { background: rgba(52,211,153,.12);  color: #34d399; }
-.badge-cancelled { background: rgba(248,113,113,.12); color: #f87171; }
-.badge-gray      { background: rgba(255,255,255,.07); color: var(--text2); }
+.badge-pending    { background: var(--amber-soft);  color: var(--amber); }
+.badge-confirmed  { background: var(--violet-soft);  color: var(--violet); }
+.badge-processing { background: var(--brand-soft);   color: var(--brand3); }
+.badge-shipped    { background: var(--sky-soft);     color: var(--sky); }
+.badge-delivered  { background: var(--green-soft);   color: var(--green); }
+.badge-cancelled  { background: var(--red-soft);     color: var(--red); }
 
-/* ── CUSTOMER CELL ── */
-.customer-cell { display: flex; align-items: center; gap: 10px; }
-.customer-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #a259ff);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; color: white;
-  flex-shrink: 0;
+/* ─── PAYMENT CHIP ─── */
+.pay-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; color: var(--text3);
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 2px 7px; border-radius: 6px; margin-top: 3px;
 }
-.customer-name  { font-weight: 700; font-size: 13.5px; line-height: 1.2; }
-.customer-email { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
 
-/* ── ACTION BUTTON ── */
+/* ─── ACTION BTN ─── */
 .btn-action {
-  padding: 6px 14px; border-radius: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--text2);
-  font-size: 12px; font-weight: 700;
-  cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  transition: all .15s;
   display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font); transition: var(--t);
 }
 .btn-action:hover {
-  background: var(--accent);
-  color: white; border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(108,99,255,0.3);
+  background: var(--brand-soft); border-color: var(--brand);
+  color: var(--brand3);
+  box-shadow: 0 2px 8px var(--brand-glow);
 }
 
-/* ── DETAIL BOX IN MODAL ── */
-.order-detail-box {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 18px;
-  font-size: 13px;
-  line-height: 2;
-  margin-bottom: 18px;
-  color: var(--text2);
-}
-.order-detail-box strong { color: var(--text); }
-.order-detail-section {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 12px;
-}
-.order-detail-row { display: flex; flex-direction: column; gap: 2px; }
-.order-detail-key {
-  font-size: 10px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3);
-}
-.order-detail-val { font-size: 13px; font-weight: 600; color: var(--text); }
-
-/* ── EMPTY STATE ── */
-.empty-state {
-  padding: 60px 20px; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-}
-.empty-icon { font-size: 44px; opacity: 0.4; }
-.empty-state h3 { font-size: 16px; font-weight: 800; color: var(--text); }
-.empty-state p  { font-size: 13px; color: var(--text3); }
-
-/* ── MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px);
-  z-index: 1000; display: none;
-  align-items: center; justify-content: center;
-  padding: 20px;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 28px;
-  width: 100%; max-width: 520px;
-  animation: modalIn .25s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.94) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.modal h2 {
-  font-size: 18px; font-weight: 800;
-  margin-bottom: 18px; color: var(--text);
-  display: flex; align-items: center; gap: 10px;
-}
-.modal h2 span { font-size: 22px; }
-.modal-footer {
-  display: flex; gap: 10px; justify-content: flex-end;
-  margin-top: 22px; padding-top: 18px;
-  border-top: 1px solid var(--border);
-}
-
-/* ── FORM FIELDS IN MODAL ── */
-.field { margin-bottom: 16px; }
-.field label {
-  display: block; font-size: 11px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 7px;
-}
-.field input, .field textarea, .field select {
-  width: 100%; padding: 11px 14px;
-  background: var(--surface2); color: var(--text);
-  border: 1.5px solid var(--border2);
-  border-radius: 11px;
-  font-family: 'Outfit', sans-serif; font-size: 13.5px;
-  outline: none; transition: border-color .15s, box-shadow .15s;
-}
-.field input:focus, .field textarea:focus, .field select:focus {
-  border-color: rgba(108,99,255,0.55);
-  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
-}
-.field textarea { min-height: 80px; resize: vertical; }
-
-/* ── BUTTONS ── */
+/* ─── BUTTONS ─── */
 .btn {
-  padding: 10px 20px; border-radius: 11px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 13.5px; font-weight: 700;
-  cursor: pointer; border: none;
-  transition: all .2s;
   display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border-radius: 10px;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; transition: var(--t);
 }
 .btn-primary {
-  background: linear-gradient(135deg, #6c63ff, #a259ff);
-  color: white;
-  box-shadow: 0 4px 16px rgba(108,99,255,0.3);
+  background: var(--brand); color: white;
+  box-shadow: 0 2px 10px rgba(79,110,247,0.35);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(108,99,255,0.4); }
+.btn-primary:hover {
+  background: var(--brand2); transform: translateY(-1px);
+  box-shadow: var(--shadow-brand);
+}
+.btn-primary:active { transform: translateY(0); }
 .btn-secondary {
-  background: var(--surface2);
-  border: 1px solid var(--border2) !important;
-  color: var(--text2);
+  background: var(--surface2); border: 1px solid var(--border2); color: var(--text2);
 }
-.btn-secondary:hover { border-color: rgba(108,99,255,0.4) !important; color: var(--accent); }
+.btn-secondary:hover { border-color: var(--brand); color: var(--brand3); background: var(--brand-soft); }
+.btn-ghost {
+  background: none; border: none; color: var(--text3); padding: 9px 14px;
+}
+.btn-ghost:hover { color: var(--text); background: var(--surface2); }
 .btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
 
-/* ── SPINNER ── */
+/* ─── EXPORT BTN ─── */
+.btn-export {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: 9px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font); transition: var(--t);
+}
+.btn-export:hover { border-color: var(--brand3); color: var(--brand3); background: var(--brand-soft); }
+
+/* ─── THEME TOGGLE ─── */
+.theme-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: var(--t);
+  flex-shrink: 0;
+}
+.theme-btn:hover {
+  border-color: var(--brand); background: var(--brand-soft);
+  transform: rotate(15deg) scale(1.05);
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  padding: 72px 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.empty-illustration {
+  width: 72px; height: 72px; border-radius: 20px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 4px;
+}
+.empty-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.empty-sub   { font-size: 13px; color: var(--text3); max-width: 260px; }
+
+/* ─── SPINNER ─── */
 .spinner {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 3px solid var(--border2);
-  border-top-color: var(--accent);
-  animation: spin .7s linear infinite;
-  margin: 60px auto;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2.5px solid var(--border2); border-top-color: var(--brand);
+  animation: spin .65s linear infinite; margin: 72px auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── PAGE CONTENT TRANSITIONS ── */
-#page-content {
-  /* Inline transitions driven by JS for store-switch */
-  will-change: opacity, transform;
-}
-
-/* Initial page load animation */
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(6px); }
+/* ─── PAGE TRANSITIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.page-enter { animation: pageIn .3s ease both; }
+.page-enter { animation: fadeUp .3s ease both; }
 
-/* ── INLINE LOADING SKELETON (store switch) ── */
-/* Uses same .skel shimmer already defined above */
-.inline-skel-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
-}
-@media (max-width: 900px) { .inline-skel-stats { grid-template-columns: repeat(2,1fr); } }
-
-.inline-skel-card {
-  border-radius: 16px;
-  height: 88px;
-}
-.inline-skel-toolbar {
-  height: 54px;
-  border-radius: 14px;
-  margin-bottom: 14px;
-}
-.inline-skel-table {
-  border-radius: 16px;
-  overflow: hidden;
-}
-.inline-skel-thead {
-  height: 42px;
-  border-radius: 0;
-  margin-bottom: 1px;
-  opacity: .55;
-}
-.inline-skel-row {
-  height: 66px;
-  border-radius: 0;
-  margin-bottom: 1px;
-}
-
-/* ── STORE SELECTOR LOADING INDICATOR ── */
-.store-loading {
-  position: relative;
-}
-.store-loading::after {
-  content: '';
-  position: absolute;
-  right: -20px; top: 50%;
-  transform: translateY(-50%);
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(108,99,255,0.25);
-  border-top-color: var(--accent, #6c63ff);
-  animation: spin .65s linear infinite;
-  pointer-events: none;
-}
-
-/* ── LOADING ROW ANIMATION ── */
 @keyframes rowIn {
-  from { opacity: 0; transform: translateX(-8px); }
+  from { opacity: 0; transform: translateX(-6px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 tbody tr { animation: rowIn .2s ease both; }
@@ -614,154 +558,249 @@ tbody tr:nth-child(3) { animation-delay: .06s; }
 tbody tr:nth-child(4) { animation-delay: .09s; }
 tbody tr:nth-child(5) { animation-delay: .12s; }
 tbody tr:nth-child(6) { animation-delay: .15s; }
+tbody tr:nth-child(7) { animation-delay: .18s; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .order-stats { grid-template-columns: repeat(2, 1fr); }
+/* ─── INLINE SKELETON ─── */
+.inline-skel-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.inline-skel-card  { border-radius: var(--radius-lg); height: 100px; }
+.inline-skel-bar   { border-radius: var(--radius-lg); height: 52px; margin-bottom: 14px; }
+.inline-skel-thead { height: 40px; border-radius: 0; margin-bottom: 1px; opacity: .5; }
+.inline-skel-row   { height: 64px; border-radius: 0; margin-bottom: 1px; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000; display: none;
+  align-items: center; justify-content: center; padding: 20px;
 }
-@media (max-width: 560px) {
-  .order-stats { grid-template-columns: repeat(2, 1fr); }
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-xl); padding: 28px;
+  width: 100%; max-width: 520px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn .28s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.93) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--brand-soft); border: 1px solid rgba(79,110,247,0.2);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.modal-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.modal-footer {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border);
+}
+
+/* ─── ORDER DETAIL ─── */
+.order-detail-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.detail-cell {}
+.detail-key { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text4); margin-bottom: 3px; }
+.detail-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.items-list {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 9px; overflow: hidden;
+}
+.item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.item-row:last-child { border-bottom: none; }
+.item-total {
+  border-top: 1px solid var(--border); padding: 10px 12px;
+  display: flex; justify-content: space-between;
+  font-size: 13px; font-weight: 700;
+}
+
+/* ─── FORM FIELDS ─── */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3); margin-bottom: 6px;
+}
+.field input, .field textarea, .field select {
+  width: 100%; padding: 10px 13px;
+  background: var(--bg2); color: var(--text);
+  border: 1.5px solid var(--border2); border-radius: 10px;
+  font-family: var(--font); font-size: 13.5px; outline: none;
+  transition: var(--t);
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow);
+  background: var(--bg);
+}
+.field textarea { min-height: 80px; resize: vertical; }
+.field select { appearance: none; cursor: pointer; }
+
+/* ─── STORE LOADING ─── */
+.store-loading { position: relative; }
+.store-loading::after {
+  content: ''; position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid var(--border2); border-top-color: var(--brand);
+  animation: spin .6s linear infinite; pointer-events: none;
+}
+
+/* ─── LIGHT THEME OVERRIDES ─── */
+[data-theme="light"] .sidebar    { background: #fff; }
+[data-theme="light"] .topbar     { background: rgba(255,255,255,0.9); }
+[data-theme="light"] .stat-card  { background: #fff; }
+[data-theme="light"] .toolbar    { background: #fff; }
+[data-theme="light"] .table-card { background: #fff; }
+[data-theme="light"] thead th    { background: #f9fafb; }
+[data-theme="light"] .modal      { background: #fff; }
+[data-theme="light"] .order-detail-box { background: #f5f6fb; }
+[data-theme="light"] .items-list { background: #fff; }
+[data-theme="light"] .field input,
+[data-theme="light"] .field textarea,
+[data-theme="light"] .field select { background: #f5f6fb; }
+[data-theme="light"] .search-field { background: #f5f6fb; }
+[data-theme="light"] .filter-pill  { background: #f5f6fb; }
+[data-theme="light"] .store-select-wrap { background: #fff; }
+[data-theme="light"] .skel-sidebar { background: #fff; }
+[data-theme="light"] .skel-topbar  { background: #fff; }
+[data-theme="light"] .skel { background: linear-gradient(90deg,rgba(0,0,0,.04) 25%,rgba(0,0,0,.08) 50%,rgba(0,0,0,.04) 75%); background-size:800px 100%; animation:shimmer 1.6s ease-in-out infinite; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1100px) {
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .inline-skel-stats { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 700px) {
+  :root { --sidebar-w: 0px; }
+  .sidebar { transform: translateX(-100%); }
+  .topbar { padding: 0 16px; }
+  .content { padding: 16px; }
+  .stat-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
   .toolbar { flex-direction: column; align-items: stretch; }
-  .search-field { min-width: 0; }
+  .search-wrap { min-width: 0; }
 }
 </style>
+
+<script>
+(function(){
+  if(localStorage.getItem('ekart_theme')==='light'){
+    document.documentElement.setAttribute('data-theme','light');
+    document.documentElement.style.background='#f5f6fb';
+  }
+})();
+</script>
 
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-  SKELETON — perfectly mirrors the real layout:
-    skel-sidebar  → .sidebar
-    skel-topbar   → .topbar
-    skel-body     → .content
-
-  Hidden via JS once real nav + content paint.
-══════════════════════════════════════════ -->
+<!-- SKELETON -->
 <div id="page-skeleton" aria-hidden="true">
-
-  <!-- LEFT: sidebar replica -->
-  <div class="skel-sidebar">
-    <!-- Logo -->
-    <div class="skel-sidebar-logo">
-      <div class="skel" style="height:20px;width:72px;border-radius:5px;"></div>
+  <div class="skel-sidebar" style="width:248px;flex-shrink:0;height:100%;background:var(--bg2);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:0;">
+    <div style="display:flex;align-items:center;gap:10px;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:20px;">
+      <div class="skel" style="width:32px;height:32px;border-radius:8px;flex-shrink:0;"></div>
+      <div class="skel" style="height:14px;width:60px;border-radius:5px;"></div>
     </div>
-
-    <!-- User row -->
-    <div class="skel-sidebar-user">
-      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div class="skel-sidebar-user-text">
-        <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:120px;border-radius:4px;"></div>
-      </div>
-    </div>
-
-    <!-- Nav section label -->
-    <div class="skel" style="height:8px;width:56px;border-radius:4px;margin-bottom:8px;opacity:.45;"></div>
-
-    <!-- Nav items — active one slightly more opaque -->
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.78;"></div><!-- active -->
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-    </div>
-
-    <!-- Second nav section -->
-    <div class="skel" style="height:8px;width:64px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-    </div>
-
-    <!-- Third nav section -->
-    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    <div class="skel" style="height:48px;border-radius:var(--radius);margin-bottom:20px;opacity:.7;"></div>
+    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin-bottom:8px;opacity:.35;"></div>
+    <div style="display:flex;flex-direction:column;gap:3px;">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.75;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
     </div>
   </div>
-
-  <!-- RIGHT: main area replica -->
-  <div class="skel-main">
-
-    <!-- Topbar -->
-    <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:68px;border-radius:5px;"></div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="skel" style="height:34px;width:160px;border-radius:9px;opacity:.7;"></div>
-        <div class="skel" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
-        <div class="skel" style="height:30px;width:100px;border-radius:8px;opacity:.5;"></div>
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <div style="height:58px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;">
+      <div class="skel" style="height:14px;width:56px;border-radius:5px;"></div>
+      <div style="display:flex;gap:10px;">
+        <div class="skel" style="height:36px;width:150px;border-radius:10px;opacity:.7;"></div>
+        <div class="skel" style="height:36px;width:36px;border-radius:10px;opacity:.5;"></div>
+        <div class="skel" style="height:36px;width:110px;border-radius:9px;opacity:.45;"></div>
       </div>
     </div>
-
-    <!-- Content body -->
-    <div class="skel-body">
-
-      <!-- Stat cards -->
-      <div class="skel-stats">
-        <div class="skel" style="height:88px;border-radius:16px;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.82;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.64;"></div>
-        <div class="skel" style="height:88px;border-radius:16px;opacity:.46;"></div>
+    <div style="flex:1;padding:28px;display:flex;flex-direction:column;gap:18px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+        <div class="skel" style="height:100px;border-radius:16px;"></div>
+        <div class="skel" style="height:100px;border-radius:16px;opacity:.8;"></div>
+        <div class="skel" style="height:100px;border-radius:16px;opacity:.6;"></div>
+        <div class="skel" style="height:100px;border-radius:16px;opacity:.4;"></div>
       </div>
-
-      <!-- Toolbar -->
-      <div class="skel" style="height:54px;border-radius:14px;margin-bottom:14px;opacity:.9;"></div>
-
-      <!-- Table card -->
+      <div class="skel" style="height:52px;border-radius:14px;"></div>
       <div style="border-radius:16px;overflow:hidden;">
-        <!-- thead -->
-        <div class="skel" style="height:42px;border-radius:0;opacity:.55;margin-bottom:1px;"></div>
-        <!-- rows -->
-        <div class="skel" style="height:66px;border-radius:0;opacity:.9;margin-bottom:1px;"></div>
-        <div class="skel" style="height:66px;border-radius:0;opacity:.74;margin-bottom:1px;"></div>
-        <div class="skel" style="height:66px;border-radius:0;opacity:.58;margin-bottom:1px;"></div>
-        <div class="skel" style="height:66px;border-radius:0;opacity:.42;margin-bottom:1px;"></div>
-        <div class="skel" style="height:66px;border-radius:0;opacity:.26;"></div>
+        <div class="skel" style="height:40px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
+        <div class="skel" style="height:64px;border-radius:0;margin-bottom:1px;"></div>
+        <div class="skel" style="height:64px;border-radius:0;opacity:.8;margin-bottom:1px;"></div>
+        <div class="skel" style="height:64px;border-radius:0;opacity:.6;margin-bottom:1px;"></div>
+        <div class="skel" style="height:64px;border-radius:0;opacity:.4;margin-bottom:1px;"></div>
+        <div class="skel" style="height:64px;border-radius:0;opacity:.2;"></div>
       </div>
-
     </div>
   </div>
 </div>
-<!-- /skeleton -->
 
-<!-- ── SIDEBAR (rendered by nav.js) ── -->
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
-  <div class="sidebar-user">
-    <div class="sidebar-avatar" id="nav-avatar">…</div>
-    <div style="min-width:0;">
-      <div class="sidebar-user-name" id="nav-user-name">…</div>
-      <div class="sidebar-user-email" id="nav-user-email">…</div>
+  <div class="sidebar-inner">
+    <a class="sidebar-logo" href="home.html">
+      <div class="logo-icon">eK</div>
+      <span class="logo-text">e<em>K</em>art</span>
+    </a>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar user-avatar" id="nav-avatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="nav-user-name">Loading…</div>
+        <div class="user-role" id="nav-user-email">merchant</div>
+      </div>
     </div>
-  </div>
-  <div class="nav-section"><div class="nav-section-label">Merchant</div>
-    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
-    <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
-    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-  </div>
-  <div class="nav-section"><div class="nav-section-label">Storefront</div>
-    <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-    <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
-  </div>
-  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
-    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
-  </div>
-  <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+    <div class="nav-section">
+      <div class="nav-label">Merchant</div>
+      <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+      <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
+      <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders<span class="nav-badge" id="pending-badge" style="display:none;"></span></a>
+      <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+      <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+      <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Storefront</div>
+      <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+      <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">AI Tools</div>
+      <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="logout()">
+        <span style="font-size:14px;">↩</span> Sign Out
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- ── MAIN ── -->
+<!-- MAIN -->
 <div class="main-wrap">
   <div class="topbar">
-    <div class="topbar-left"><span class="topbar-title">Orders</span></div>
+    <div class="topbar-title">Orders</div>
     <div class="topbar-right">
       <div class="store-select-wrap" id="store-select-wrap">
         <span class="store-select-label">Store</span>
@@ -770,13 +809,19 @@ tbody tr:nth-child(6) { animation-delay: .15s; }
       <div id="topbar-actions"></div>
     </div>
   </div>
-  <div id="page-content" class="content page-enter" style="display:none;"></div>
+  <div id="page-content" class="content page-enter"></div>
 </div>
 
-<!-- ── ORDER MODAL ── -->
+<!-- ORDER MODAL -->
 <div class="modal-overlay" id="orderModal">
   <div class="modal">
-    <h2><span>📦</span> Update Order</h2>
+    <div class="modal-header">
+      <div class="modal-icon">📦</div>
+      <div>
+        <div class="modal-title">Update Order</div>
+        <div class="modal-subtitle" id="modal-order-num">–</div>
+      </div>
+    </div>
     <input type="hidden" id="orderEditId">
     <div class="order-detail-box" id="orderDetailView"></div>
     <div class="field">
@@ -792,75 +837,56 @@ tbody tr:nth-child(6) { animation-delay: .15s; }
     </div>
     <div class="field">
       <label>Tracking Number</label>
-      <input type="text" id="orderTracking" placeholder="AWB12345678" style="font-family:'DM Mono',monospace;">
+      <input type="text" id="orderTracking" placeholder="AWB12345678" style="font-family:var(--mono);">
     </div>
     <div class="field">
       <label>Internal Notes</label>
-      <textarea id="orderNotes" placeholder="Any notes about this order..."></textarea>
+      <textarea id="orderNotes" placeholder="Any notes about this order…"></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('orderModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveOrder()">💾 Update Order</button>
+      <button class="btn btn-ghost" onclick="closeModal('orderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+        Save Changes
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-/* ══════════════════════════════════════════════
-   SKELETON DISMISSAL (initial page load)
-══════════════════════════════════════════════ */
+/* ── SKELETON ── */
 function hideSkeleton() {
-  const skel = document.getElementById('page-skeleton')
-  if (!skel) return
-  skel.classList.add('skel-hidden')
-  setTimeout(() => skel.remove(), 280)
+  const s = document.getElementById('page-skeleton');
+  if(!s) return;
+  s.classList.add('hidden');
+  setTimeout(()=>s.remove(), 320);
 }
 
-/* ══════════════════════════════════════════════
-   SMOOTH TRANSITION HELPERS
-   fadeOut → returns a Promise that resolves after
-   the CSS transition completes (180 ms).
-   fadeIn  → snaps opacity/transform to start,
-   then transitions to final state on next rAF.
-══════════════════════════════════════════════ */
-const FADE_MS = 180
-
+/* ── TRANSITIONS ── */
+const FADE = 160;
 function fadeOut(el) {
-  return new Promise(resolve => {
-    el.style.transition = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
-    el.style.opacity    = '0'
-    el.style.transform  = 'translateY(-6px)'
-    el.style.pointerEvents = 'none'
-    setTimeout(resolve, FADE_MS)
-  })
+  return new Promise(r => {
+    el.style.transition = `opacity ${FADE}ms ease, transform ${FADE}ms ease`;
+    el.style.opacity = '0'; el.style.transform = 'translateY(-5px)';
+    el.style.pointerEvents = 'none';
+    setTimeout(r, FADE);
+  });
 }
-
 function fadeIn(el) {
-  // Force the "from" state before browser paints
-  el.style.transition = 'none'
-  el.style.opacity    = '0'
-  el.style.transform  = 'translateY(8px)'
-  el.style.display    = ''
-  // Let the browser register the from-state, then animate to final
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.style.transition = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
-      el.style.opacity    = '1'
-      el.style.transform  = 'translateY(0)'
-      el.style.pointerEvents = ''
-    })
-  })
+  el.style.transition = 'none';
+  el.style.opacity = '0'; el.style.transform = 'translateY(7px)';
+  el.style.display = 'block';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.transition = `opacity ${FADE+40}ms ease, transform ${FADE+40}ms ease`;
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+    el.style.pointerEvents = '';
+  }));
 }
 
-/* ══════════════════════════════════════════════
-   INLINE SKELETON (shown during store switch)
-   Preserves the exact content layout so there's
-   no height jump — stat cards, toolbar, table.
-══════════════════════════════════════════════ */
-function inlineSkeletonHTML() {
-  const rows = [.95, .82, .69, .56, .43].map((op, i) =>
-    `<div class="skel inline-skel-row" style="opacity:${op};${i === 4 ? 'margin-bottom:0;' : ''}"></div>`
-  ).join('')
+/* ── INLINE SKELETON ── */
+function inlineSkel() {
+  const rows = [.95,.82,.69,.56,.43].map((op,i)=>
+    `<div class="skel inline-skel-row" style="opacity:${op};${i===4?'margin-bottom:0;':''}"></div>`).join('');
   return `
     <div class="inline-skel-stats">
       <div class="skel inline-skel-card"></div>
@@ -868,211 +894,161 @@ function inlineSkeletonHTML() {
       <div class="skel inline-skel-card" style="opacity:.64;"></div>
       <div class="skel inline-skel-card" style="opacity:.46;"></div>
     </div>
-    <div class="skel inline-skel-toolbar"></div>
-    <div class="inline-skel-table">
-      <div class="skel inline-skel-thead"></div>
-      ${rows}
-    </div>`
+    <div class="skel inline-skel-bar"></div>
+    <div style="border-radius:16px;overflow:hidden;">
+      <div class="skel inline-skel-thead"></div>${rows}
+    </div>`;
 }
 
-/* ══════════════════════════════════════════════
-   STORE SELECTOR BUSY INDICATOR
-   Adds a tiny spinner next to the store <select>
-   while data is loading, removed when done.
-══════════════════════════════════════════════ */
+/* ── STORE LOADING ── */
 function setStoreLoading(on) {
-  const wrap = document.getElementById('store-select-wrap')
-  if (!wrap) return
-  if (on)  wrap.classList.add('store-loading')
-  else     wrap.classList.remove('store-loading')
+  document.getElementById('store-select-wrap')?.classList.toggle('store-loading',on);
 }
 
-/* ══════════════════════════════════════════════
-   THEME SYSTEM
-══════════════════════════════════════════════ */
-let _isDark = localStorage.getItem('ekart_theme') !== 'light'
-
+/* ── THEME ── */
+let _dark = localStorage.getItem('ekart_theme') !== 'light';
 function applyTheme(dark) {
-  _isDark = dark
-  const root = document.documentElement
-  if (dark) {
-    root.removeAttribute('data-theme')
-    root.style.background = '#080910'
-  } else {
-    root.setAttribute('data-theme', 'light')
-    root.style.background = '#f0f0f5'
-  }
-  const btn = document.getElementById('themeToggleBtn')
-  if (btn) btn.textContent = dark ? '🌙' : '☀️'
-  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
+  _dark = dark;
+  const root = document.documentElement;
+  if(dark){ root.removeAttribute('data-theme'); root.style.background='#0a0b0f'; }
+  else    { root.setAttribute('data-theme','light'); root.style.background='#f5f6fb'; }
+  const btn = document.getElementById('themeBtn');
+  if(btn) btn.textContent = dark ? '🌙' : '☀️';
+  localStorage.setItem('ekart_theme', dark?'dark':'light');
 }
-function toggleTheme() { applyTheme(!_isDark) }
-applyTheme(_isDark)
+function toggleTheme(){ applyTheme(!_dark); }
+applyTheme(_dark);
 
-/* ══════════════════════════════════════════════
-   STATE
-   _loadToken: incremented on every loadOrders call.
-   Each async run captures its own token; if it
-   doesn't match the current one on completion,
-   the user already switched stores → discard.
-══════════════════════════════════════════════ */
-let allOrders    = []
-let currentStoreId = ''
-let _loadToken   = 0
+/* ── STATE ── */
+let allOrders = [], currentStoreId = '', _tok = 0;
 
-/* ══════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('orders', (id) => {
-    currentStoreId = id
-    loadOrders()
-  })
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded', async()=>{
+  const nav = await renderNav('orders', id=>{ currentStoreId=id; loadOrders(); });
+  if(!nav){ hideSkeleton(); return; }
+  currentStoreId = nav.currentStoreId;
 
-  if (!nav) { hideSkeleton(); return }
-  currentStoreId = nav.currentStoreId
-
-  // Theme toggle button
-  const topbarRight = document.querySelector('.topbar-right')
-  if (topbarRight && !document.getElementById('themeToggleBtn')) {
-    const btn = document.createElement('button')
-    btn.className   = 'theme-toggle'
-    btn.id          = 'themeToggleBtn'
-    btn.title       = 'Toggle day / night mode'
-    btn.onclick     = toggleTheme
-    btn.textContent = _isDark ? '🌙' : '☀️'
-    topbarRight.insertBefore(btn, topbarRight.firstChild)
+  const tr = document.querySelector('.topbar-right');
+  if(tr && !document.getElementById('themeBtn')){
+    const b = document.createElement('button');
+    b.className='theme-btn'; b.id='themeBtn'; b.title='Toggle theme';
+    b.onclick=toggleTheme; b.textContent=_dark?'🌙':'☀️';
+    tr.insertBefore(b, tr.firstChild);
   }
-  applyTheme(_isDark)
+  applyTheme(_dark);
+  setTopbarActions(`<button class="btn-export" onclick="exportCSV()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export CSV
+  </button>`);
 
-  setTopbarActions(`<button class="btn btn-secondary btn-sm" onclick="exportCSV()" style="font-size:12px;">⬇ Export CSV</button>`)
+  if(currentStoreId) await loadOrders();
+  else { renderEmpty(); hideSkeleton(); }
+});
 
-  if (currentStoreId) await loadOrders()
-  else { renderEmpty(); hideSkeleton() }
-})
+/* ── LOAD ORDERS ── */
+async function loadOrders(){
+  if(!currentStoreId) return;
+  const token = ++_tok;
+  const el    = document.getElementById('page-content');
+  const first = el.style.display === '' && el.classList.contains('page-enter') && !el.innerHTML || el.style.display === 'none' || !el.style.display;
 
-/* ══════════════════════════════════════════════
-   LOAD ORDERS — handles both first-load and
-   store-switch with a clean 3-phase transition:
-     Phase 1 → fade out current content
-     Phase 2 → show inline shimmer skeleton
-     Phase 3 → fetch, then fade in real content
-══════════════════════════════════════════════ */
-async function loadOrders() {
-  if (!currentStoreId) return
+  setStoreLoading(true);
 
-  const token   = ++_loadToken     // capture for race-condition guard
-  const content = document.getElementById('page-content')
-  const isFirst = content.style.display === 'none'
-
-  setStoreLoading(true)
-
-  if (!isFirst) {
-    // ── Phase 1: fade out existing content ──
-    await fadeOut(content)
-    if (token !== _loadToken) return  // store switched again while fading
-
-    // ── Phase 2: inline skeleton fades in ──
-    content.innerHTML = inlineSkeletonHTML()
-    fadeIn(content)
-    // Let the skeleton be visible for at least one frame before fetching
-    // (the fetch and skeleton display are concurrent — fast APIs will still
-    //  show the skeleton for the fade-in duration, which feels intentional)
+  if(!first){
+    await fadeOut(el);
+    if(token!==_tok) return;
+    el.innerHTML = inlineSkel();
+    fadeIn(el);
   }
 
   try {
-    allOrders = await apiFetch(`/stores/${currentStoreId}/orders`)
-
-    if (token !== _loadToken) return  // stale response — newer load running
-
-    if (!isFirst) {
-      // ── Phase 3a: fade out skeleton, swap in real content ──
-      await fadeOut(content)
-      if (token !== _loadToken) return
-    }
-
-    renderPage(isFirst)  // handles both first-load and switch paths
-
-  } catch (e) {
-    if (token !== _loadToken) return
-    if (isFirst) hideSkeleton()
-    content.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
-        <h3>Failed to load orders</h3>
-        <p>${e.message}</p>
-      </div>`
-    fadeIn(content)
-    toast(e.message, 'error')
+    allOrders = await apiFetch(`/stores/${currentStoreId}/orders`);
+    if(token!==_tok) return;
+    if(!first){ await fadeOut(el); if(token!==_tok) return; }
+    renderPage(first);
+  } catch(e){
+    if(token!==_tok) return;
+    if(first) hideSkeleton();
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-illustration">⚠️</div>
+      <div class="empty-title">Failed to load orders</div>
+      <div class="empty-sub">${e.message}</div>
+    </div>`;
+    el.style.display='block'; fadeIn(el); toast(e.message,'error');
   } finally {
-    if (token === _loadToken) setStoreLoading(false)
+    if(token===_tok) setStoreLoading(false);
   }
 }
 
-/* ══════════════════════════════════════════════
-   RENDER PAGE
-══════════════════════════════════════════════ */
-function renderPage(isFirst = false) {
-  const pending   = allOrders.filter(o => o.status === 'pending').length
-  const delivered = allOrders.filter(o => o.status === 'delivered').length
-  const revenue   = allOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0)
+/* ── RENDER PAGE ── */
+function renderPage(first=false){
+  const pending   = allOrders.filter(o=>o.status==='pending').length;
+  const delivered = allOrders.filter(o=>o.status==='delivered').length;
+  const revenue   = allOrders.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
 
-  const content = document.getElementById('page-content')
-  content.innerHTML = `
-    <div class="order-stats">
-      <div class="order-stat" style="--stat-color:var(--accent);--stat-bg:rgba(108,99,255,0.1);">
-        <div class="order-stat-icon">📋</div>
-        <div class="order-stat-body">
-          <div class="order-stat-label">Total Orders</div>
-          <div class="order-stat-value">${allOrders.length}</div>
-          <div class="order-stat-sub">All time</div>
+  const b = document.getElementById('pending-badge');
+  if(b){ if(pending>0){ b.textContent=pending; b.style.display=''; } else b.style.display='none'; }
+
+  const el = document.getElementById('page-content');
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card" style="--stat-accent:var(--brand);--stat-bg:var(--brand-soft);">
+        <div class="stat-top">
+          <div class="stat-icon">📋</div>
+          <span class="stat-trend">All time</span>
         </div>
+        <div class="stat-val">${allOrders.length}</div>
+        <div class="stat-label">Total Orders</div>
       </div>
-      <div class="order-stat" style="--stat-color:#fbbf24;--stat-bg:rgba(251,191,36,0.1);">
-        <div class="order-stat-icon">⏳</div>
-        <div class="order-stat-body">
-          <div class="order-stat-label">Pending</div>
-          <div class="order-stat-value" style="color:#fbbf24;">${pending}</div>
-          <div class="order-stat-sub">Need attention</div>
+      <div class="stat-card" style="--stat-accent:var(--amber);--stat-bg:var(--amber-soft);">
+        <div class="stat-top">
+          <div class="stat-icon">⏳</div>
+          <span class="stat-trend${pending===0?' down':''}">Need action</span>
         </div>
+        <div class="stat-val" style="color:var(--amber);">${pending}</div>
+        <div class="stat-label">Pending</div>
       </div>
-      <div class="order-stat" style="--stat-color:#34d399;--stat-bg:rgba(52,211,153,0.1);">
-        <div class="order-stat-icon">✅</div>
-        <div class="order-stat-body">
-          <div class="order-stat-label">Delivered</div>
-          <div class="order-stat-value" style="color:#34d399;">${delivered}</div>
-          <div class="order-stat-sub">Completed</div>
+      <div class="stat-card" style="--stat-accent:var(--green);--stat-bg:var(--green-soft);">
+        <div class="stat-top">
+          <div class="stat-icon">✅</div>
+          <span class="stat-trend">Completed</span>
         </div>
+        <div class="stat-val" style="color:var(--green);">${delivered}</div>
+        <div class="stat-label">Delivered</div>
       </div>
-      <div class="order-stat" style="--stat-color:#a78bfa;--stat-bg:rgba(167,139,250,0.1);">
-        <div class="order-stat-icon">💰</div>
-        <div class="order-stat-body">
-          <div class="order-stat-label">Revenue</div>
-          <div class="order-stat-value" style="color:#a78bfa;">₹${(revenue / 1000).toFixed(1)}k</div>
-          <div class="order-stat-sub">Excl. cancelled</div>
+      <div class="stat-card" style="--stat-accent:var(--violet);--stat-bg:var(--violet-soft);">
+        <div class="stat-top">
+          <div class="stat-icon">💰</div>
+          <span class="stat-trend">Excl. cancelled</span>
         </div>
+        <div class="stat-val" style="color:var(--violet);">₹${(revenue/1000).toFixed(1)}k</div>
+        <div class="stat-label">Revenue</div>
       </div>
     </div>
 
     <div class="toolbar">
-      <input class="search-field" id="orderSearch" placeholder="Search orders, customers, emails…" oninput="filterOrders()">
-      <select class="filter-select" id="orderStatusFilter" onchange="filterOrders()">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-field" id="orderSearch" placeholder="Search orders, customers…" oninput="filterOrders()">
+      </div>
+      <div class="toolbar-sep"></div>
+      <select class="filter-pill" id="orderStatusFilter" onchange="filterOrders()">
         <option value="">All Status</option>
-        <option value="pending">⏳ Pending</option>
-        <option value="confirmed">✅ Confirmed</option>
-        <option value="processing">⚙️ Processing</option>
-        <option value="shipped">🚚 Shipped</option>
-        <option value="delivered">🎉 Delivered</option>
-        <option value="cancelled">❌ Cancelled</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="processing">Processing</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
       </select>
-      <span class="toolbar-count" id="orderCount">${allOrders.length} orders</span>
+      <span class="count-chip" id="orderCount">${allOrders.length} orders</span>
     </div>
 
-    <div class="section-card">
+    <div class="table-card">
       <table>
         <thead>
           <tr>
-            <th>Order #</th>
+            <th>Order</th>
             <th>Customer</th>
             <th>Items</th>
             <th>Total</th>
@@ -1083,194 +1059,151 @@ function renderPage(isFirst = false) {
         </thead>
         <tbody id="ordersBody"></tbody>
       </table>
-    </div>`
+    </div>`;
 
-  renderOrders(allOrders)
+  renderOrders(allOrders);
 
-  if (isFirst) {
-    // First load: reveal content, then dismiss page skeleton
-    content.style.display = ''
-    requestAnimationFrame(() => hideSkeleton())
+  if(first){
+    el.style.display='block';
+    requestAnimationFrame(()=>hideSkeleton());
   } else {
-    // Store switch: Phase 3b — fade in the freshly rendered content
-    fadeIn(content)
+    fadeIn(el);
   }
 }
 
-/* ══════════════════════════════════════════════
-   FILTER + RENDER ROWS
-══════════════════════════════════════════════ */
-function filterOrders() {
-  const q      = document.getElementById('orderSearch')?.value.toLowerCase() || ''
-  const status = document.getElementById('orderStatusFilter')?.value || ''
-  let f = allOrders
-  if (q)      f = f.filter(o =>
-    o.order_number.toLowerCase().includes(q) ||
-    o.customer_name.toLowerCase().includes(q) ||
-    o.customer_email.toLowerCase().includes(q)
-  )
-  if (status) f = f.filter(o => o.status === status)
-  document.getElementById('orderCount').textContent = `${f.length} order${f.length !== 1 ? 's' : ''}`
-  renderOrders(f)
+/* ── FILTER ── */
+function filterOrders(){
+  const q  = document.getElementById('orderSearch')?.value.toLowerCase()||'';
+  const st = document.getElementById('orderStatusFilter')?.value||'';
+  let f = allOrders;
+  if(q)  f=f.filter(o=>o.order_number.toLowerCase().includes(q)||o.customer_name.toLowerCase().includes(q)||o.customer_email.toLowerCase().includes(q));
+  if(st) f=f.filter(o=>o.status===st);
+  document.getElementById('orderCount').textContent=`${f.length} order${f.length!==1?'s':''}`;
+  renderOrders(f);
 }
 
-function renderOrders(orders) {
-  const body = document.getElementById('ordersBody')
-  if (!body) return
-  if (!orders.length) {
-    body.innerHTML = `<tr><td colspan="7">
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <h3>No orders found</h3>
-        <p>Try adjusting your search or filters</p>
-      </div>
-    </td></tr>`
-    return
+/* ── RENDER ROWS ── */
+function renderOrders(orders){
+  const body = document.getElementById('ordersBody');
+  if(!body) return;
+  if(!orders.length){
+    body.innerHTML=`<tr><td colspan="7"><div class="empty-state">
+      <div class="empty-illustration">📋</div>
+      <div class="empty-title">No orders found</div>
+      <div class="empty-sub">Try adjusting your search or filters</div>
+    </div></td></tr>`;
+    return;
   }
-  body.innerHTML = orders.map(o => {
-    const initial = (o.customer_name || '?')[0].toUpperCase()
+  body.innerHTML = orders.map(o=>{
+    const init=(o.customer_name||'?')[0].toUpperCase();
+    const d=new Date(o.created_at);
     return `<tr>
-      <td>
-        <span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--accent2);">${o.order_number}</span>
-      </td>
-      <td>
-        <div class="customer-cell">
-          <div class="customer-avatar">${initial}</div>
-          <div>
-            <div class="customer-name">${o.customer_name}</div>
-            <div class="customer-email">${o.customer_email}</div>
-          </div>
+      <td><span class="mono order-num">${o.order_number}</span></td>
+      <td><div class="cust-cell">
+        <div class="cust-avatar">${init}</div>
+        <div>
+          <div class="cust-name">${o.customer_name}</div>
+          <div class="cust-email">${o.customer_email}</div>
         </div>
+      </div></td>
+      <td>
+        <span style="font-weight:700;">${o.items?.length||0}</span>
+        <span style="color:var(--text3);font-size:12px;"> item${(o.items?.length||0)!==1?'s':''}</span>
       </td>
       <td>
-        <span style="font-weight:700;">${o.items?.length || 0}</span>
-        <span style="color:var(--text3);font-size:12px;"> item${(o.items?.length || 0) !== 1 ? 's' : ''}</span>
+        <div class="mono" style="font-size:14px;font-weight:600;">₹${o.total?.toFixed(2)}</div>
+        <span class="pay-chip">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</span>
       </td>
+      <td>${badge(o.status)}</td>
       <td>
-        <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:14px;">₹${o.total?.toFixed(2)}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${o.payment_method === 'razorpay' ? '⚡ Razorpay' : '💵 COD'}</div>
+        <div style="font-size:13px;font-weight:600;">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:11px;color:var(--text3);">${d.toLocaleDateString('en-IN',{year:'numeric'})}</div>
       </td>
-      <td>${statusBadge(o.status)}</td>
-      <td>
-        <div style="font-size:12.5px;font-weight:600;">${new Date(o.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short'})}</div>
-        <div style="font-size:11px;color:var(--text3);">${new Date(o.created_at).toLocaleDateString('en-IN', {year:'numeric'})}</div>
-      </td>
-      <td>
-        <button class="btn-action" onclick="openOrderEdit('${o._id}')">✏️ Update</button>
-      </td>
-    </tr>`
-  }).join('')
+      <td><button class="btn-action" onclick="openOrderEdit('${o._id}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Update
+      </button></td>
+    </tr>`;
+  }).join('');
 }
 
-function statusBadge(status) {
-  const map = {
-    pending: 'badge-pending', confirmed: 'badge-confirmed',
-    processing: 'badge-processing', shipped: 'badge-shipped',
-    delivered: 'badge-delivered', cancelled: 'badge-cancelled'
-  }
-  return `<span class="badge ${map[status] || 'badge-gray'}">${status}</span>`
+function badge(status){
+  const m={pending:'badge-pending',confirmed:'badge-confirmed',processing:'badge-processing',shipped:'badge-shipped',delivered:'badge-delivered',cancelled:'badge-cancelled'};
+  return `<span class="badge ${m[status]||''}"><span class="badge-dot"></span>${status}</span>`;
 }
 
-/* ══════════════════════════════════════════════
-   ORDER DETAIL / EDIT MODAL
-══════════════════════════════════════════════ */
-function openOrderEdit(id) {
-  const o = allOrders.find(x => x._id === id)
-  if (!o) return
-  document.getElementById('orderEditId').value   = id
-  document.getElementById('orderStatus').value   = o.status
-  document.getElementById('orderTracking').value = o.tracking_number || ''
-  document.getElementById('orderNotes').value    = o.notes || ''
+/* ── OPEN EDIT MODAL ── */
+function openOrderEdit(id){
+  const o=allOrders.find(x=>x._id===id);
+  if(!o) return;
+  document.getElementById('orderEditId').value  = id;
+  document.getElementById('orderStatus').value  = o.status;
+  document.getElementById('orderTracking').value= o.tracking_number||'';
+  document.getElementById('orderNotes').value   = o.notes||'';
+  document.getElementById('modal-order-num').textContent = `Order ${o.order_number}`;
   document.getElementById('orderDetailView').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--accent2);">#${o.order_number}</span>
-      ${statusBadge(o.status)}
+    <div class="detail-grid">
+      <div class="detail-cell"><div class="detail-key">Customer</div><div class="detail-val">${o.customer_name}</div></div>
+      <div class="detail-cell"><div class="detail-key">Email</div><div class="detail-val" style="font-size:12px;">${o.customer_email}</div></div>
+      <div class="detail-cell"><div class="detail-key">Phone</div><div class="detail-val">${o.customer_phone||'—'}</div></div>
+      <div class="detail-cell"><div class="detail-key">Payment</div><div class="detail-val">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</div></div>
     </div>
-    <div class="order-detail-section">
-      <div class="order-detail-row">
-        <span class="order-detail-key">Customer</span>
-        <span class="order-detail-val">${o.customer_name}</span>
-      </div>
-      <div class="order-detail-row">
-        <span class="order-detail-key">Email</span>
-        <span class="order-detail-val" style="font-size:12px;">${o.customer_email}</span>
-      </div>
-      <div class="order-detail-row">
-        <span class="order-detail-key">Phone</span>
-        <span class="order-detail-val">${o.customer_phone || '—'}</span>
-      </div>
-      <div class="order-detail-row">
-        <span class="order-detail-key">Payment</span>
-        <span class="order-detail-val">${o.payment_method === 'razorpay' ? '⚡ Razorpay' : '💵 COD'}</span>
-      </div>
+    <div class="detail-cell" style="margin-bottom:12px;">
+      <div class="detail-key">Ship To</div>
+      <div class="detail-val" style="font-size:12.5px;">${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}</div>
     </div>
-    <div class="order-detail-row" style="margin-bottom:10px;">
-      <span class="order-detail-key">Ship to</span>
-      <span class="order-detail-val" style="font-size:12.5px;">${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}</span>
-    </div>
-    <div style="background:var(--surface3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);">
-      ${(o.items || []).map(i => `<div style="display:flex;justify-content:space-between;padding:2px 0;">${i.name} ×${i.qty} <strong style="color:var(--text);">₹${i.price}</strong></div>`).join('')}
-      <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;">
-        <strong style="color:var(--text);">Total</strong>
-        <strong style="font-family:'DM Mono',monospace;color:var(--accent2);">₹${o.total?.toFixed(2)}</strong>
+    <div class="items-list">
+      ${(o.items||[]).map(i=>`<div class="item-row"><span style="color:var(--text2);">${i.name} <span style="color:var(--text4);">×${i.qty}</span></span><span class="mono" style="font-weight:600;">₹${i.price}</span></div>`).join('')}
+      <div class="item-total">
+        <span style="color:var(--text2);">Total</span>
+        <span class="mono" style="color:var(--brand3);">₹${o.total?.toFixed(2)}</span>
       </div>
-    </div>`
-  openModal('orderModal')
+    </div>`;
+  openModal('orderModal');
 }
 
-async function saveOrder() {
-  const id   = document.getElementById('orderEditId').value
-  const body = {
+async function saveOrder(){
+  const id=document.getElementById('orderEditId').value;
+  const body={
     status:          document.getElementById('orderStatus').value,
     tracking_number: document.getElementById('orderTracking').value.trim(),
     notes:           document.getElementById('orderNotes').value.trim()
-  }
+  };
   try {
-    await apiFetch(`/stores/${currentStoreId}/orders/${id}`, { method: 'PUT', body: JSON.stringify(body) })
-    closeModal('orderModal')
-    await loadOrders()
-    toast('Order updated!', 'success')
-  } catch (e) { toast(e.message, 'error') }
+    await apiFetch(`/stores/${currentStoreId}/orders/${id}`,{method:'PUT',body:JSON.stringify(body)});
+    closeModal('orderModal');
+    await loadOrders();
+    toast('Order updated successfully','success');
+  } catch(e){ toast(e.message,'error'); }
 }
 
-/* ══════════════════════════════════════════════
-   EXPORT CSV
-══════════════════════════════════════════════ */
-function exportCSV() {
-  if (!allOrders.length) return toast('No orders to export', 'error')
-  const rows = [['Order #', 'Customer', 'Email', 'Phone', 'Items', 'Total', 'Payment', 'Status', 'Date', 'Tracking']]
-  allOrders.forEach(o => {
-    rows.push([
-      o.order_number, o.customer_name, o.customer_email,
-      o.customer_phone || '',
-      (o.items || []).map(i => `${i.name} x${i.qty}`).join(' | '),
-      o.total?.toFixed(2),
-      o.payment_method === 'razorpay' ? 'Razorpay' : 'COD',
-      o.status,
-      new Date(o.created_at).toLocaleDateString('en-IN'),
-      o.tracking_number || ''
-    ])
-  })
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
-  const a   = document.createElement('a')
-  a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
-  a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  toast('CSV downloaded!', 'success')
+/* ── EXPORT CSV ── */
+function exportCSV(){
+  if(!allOrders.length) return toast('No orders to export','error');
+  const rows=[['Order #','Customer','Email','Phone','Items','Total','Payment','Status','Date','Tracking']];
+  allOrders.forEach(o=>rows.push([
+    o.order_number,o.customer_name,o.customer_email,o.customer_phone||'',
+    (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(' | '),
+    o.total?.toFixed(2),o.payment_method==='razorpay'?'Razorpay':'COD',
+    o.status,new Date(o.created_at).toLocaleDateString('en-IN'),o.tracking_number||''
+  ]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('CSV exported','success');
 }
 
-/* ══════════════════════════════════════════════
-   EMPTY STATE (no store selected)
-══════════════════════════════════════════════ */
-function renderEmpty() {
-  const content = document.getElementById('page-content')
-  content.innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <h3>No store selected</h3>
-      <p>Select a store from the top bar to view orders</p>
-    </div>`
-  content.style.display = ''
+/* ── EMPTY STATE ── */
+function renderEmpty(){
+  const el=document.getElementById('page-content');
+  el.innerHTML=`<div class="empty-state">
+    <div class="empty-illustration">📋</div>
+    <div class="empty-title">No store selected</div>
+    <div class="empty-sub">Select a store from the top bar to view your orders</div>
+  </div>`;
+  el.style.display='block';
 }
 </script>
 </body>
