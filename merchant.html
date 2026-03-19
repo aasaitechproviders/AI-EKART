@@ -22,6 +22,142 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ══════════════════════════════════════════════════════════
+   SKELETON SYSTEM — fully self-contained, no nav.css dependency
+   Mirrors exact layout: fixed 220px sidebar + flex main column
+══════════════════════════════════════════════════════════ */
+@keyframes skelShimmer {
+  0%   { background-position: -500px 0; }
+  100% { background-position:  500px 0; }
+}
+
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.10) 40%,
+    rgba(255,255,255,0.04) 80%
+  );
+  background-size: 500px 100%;
+  animation: skelShimmer 1.5s ease-in-out infinite;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.05) 0%,
+    rgba(0,0,0,0.10) 40%,
+    rgba(0,0,0,0.05) 80%
+  );
+  background-size: 500px 100%;
+  animation: skelShimmer 1.5s ease-in-out infinite;
+}
+
+/* Root — fixed full viewport, flex row */
+#page-skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: row;
+  z-index: 9999;
+  background: #080910;
+  opacity: 1;
+  transition: opacity 0.28s ease;
+  pointer-events: none;
+}
+#page-skeleton.skel-hiding { opacity: 0; }
+[data-theme="light"] #page-skeleton { background: #f0f0f5; }
+
+/* ── Skeleton Sidebar ── */
+.skel-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: #13141f;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+[data-theme="light"] .skel-sidebar {
+  background: #ffffff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+.skel-logo  { height: 22px; width: 68px; border-radius: 5px; margin-bottom: 20px; flex-shrink: 0; }
+.skel-user-row {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 14px; flex-shrink: 0;
+}
+[data-theme="light"] .skel-user-row { border-bottom-color: rgba(0,0,0,0.07); }
+.skel-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; }
+.skel-user-info { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.skel-user-name  { height: 10px; width: 80px;  border-radius: 4px; }
+.skel-user-email { height: 9px;  width: 110px; border-radius: 4px; }
+.skel-nav-items  { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.skel-nav-item   { height: 34px; border-radius: 9px; }
+
+/* ── Skeleton Main ── */
+.skel-main {
+  flex: 1; min-width: 0; display: flex;
+  flex-direction: column; height: 100vh; overflow: hidden;
+}
+
+/* Topbar */
+.skel-topbar {
+  height: 56px; flex-shrink: 0;
+  background: #13141f;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 24px; gap: 12px;
+}
+[data-theme="light"] .skel-topbar { background: #ffffff; border-bottom-color: rgba(0,0,0,0.09); }
+.skel-topbar-title   { height: 16px; width: 130px; border-radius: 5px; }
+.skel-topbar-right   { display: flex; align-items: center; gap: 10px; }
+.skel-store-sel      { height: 34px; width: 160px; border-radius: 9px; }
+.skel-theme-btn      { height: 34px; width: 34px;  border-radius: 9px; }
+
+/* Content body */
+.skel-body {
+  flex: 1; padding: 24px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Tab bar — mirrors .tab-shell */
+.skel-tab-bar { height: 46px; width: 440px; max-width: 100%; border-radius: 13px; flex-shrink: 0; }
+
+/* Stats row — 4 tiles */
+.skel-stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; flex-shrink: 0;
+}
+.skel-stat-tile { height: 88px; border-radius: 14px; }
+
+/* Toolbar — search + filters */
+.skel-toolbar { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.skel-search  { flex: 1; height: 40px; border-radius: 10px; max-width: 320px; }
+.skel-filter  { height: 38px; width: 100px; border-radius: 10px; }
+
+/* Data card — table */
+.skel-table-card { border-radius: 16px; overflow: hidden; flex: 1; display: flex; flex-direction: column; }
+.skel-table-header { height: 50px; border-radius: 0; flex-shrink: 0; }
+.skel-table-rows   { display: flex; flex-direction: column; gap: 1px; flex: 1; background: #13141f; padding: 0 0 4px; }
+[data-theme="light"] .skel-table-rows { background: #ffffff; }
+.skel-table-row { height: 54px; border-radius: 0; }
+
+@media (max-width: 900px) {
+  .skel-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .skel-tab-bar   { width: 100%; }
+}
+@media (max-width: 640px) {
+  .skel-sidebar { display: none; }
+  .skel-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ══════════════════════════════════════════════
    LIGHT THEME OVERRIDES
 ══════════════════════════════════════════════ */
@@ -124,22 +260,16 @@
 /* ── THEME TOGGLE BUTTON ── */
 .theme-toggle {
   width: 34px; height: 34px; border-radius: 9px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface2); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; flex-shrink: 0;
-  transition: all .2s;
+  cursor: pointer; font-size: 16px; flex-shrink: 0; transition: all .2s;
 }
 .theme-toggle:hover {
   border-color: rgba(108,99,255,0.4);
   background: rgba(108,99,255,0.08);
   transform: rotate(12deg) scale(1.05);
 }
-[data-theme="light"] .theme-toggle {
-  background: #f3f4f6;
-  border-color: rgba(0,0,0,0.12);
-  color: #374151;
-}
+[data-theme="light"] .theme-toggle { background: #f3f4f6; border-color: rgba(0,0,0,0.12); color: #374151; }
 
 /* ══════════════════════════════════════════════
    TAB BAR
@@ -175,6 +305,40 @@
 @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
 /* ══════════════════════════════════════════════
+   PAGE LOADING OVERLAY — for store-switch UX
+   Shows a gentle dimming + spinner over page-content
+   while data reloads, without disrupting layout
+══════════════════════════════════════════════ */
+#reload-overlay {
+  display: none;
+  position: absolute; inset: 0; z-index: 100;
+  background: rgba(8,9,16,0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: 0;
+  align-items: center; justify-content: center;
+  animation: fadeIn .15s ease;
+}
+#reload-overlay.visible { display: flex; }
+[data-theme="light"] #reload-overlay { background: rgba(240,240,245,0.65); }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.reload-spinner {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.reload-spinner-ring {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid rgba(108,99,255,0.15);
+  border-top-color: #7b74ff;
+  animation: spin .7s linear infinite;
+}
+.reload-spinner-label {
+  font-size: 13px; font-weight: 700; color: var(--text3);
+  font-family: 'Outfit', sans-serif; letter-spacing: 0.02em;
+}
+[data-theme="light"] .reload-spinner-label { color: #6b7280; }
+
+/* ══════════════════════════════════════════════
    INLINE CREATE BOX
 ══════════════════════════════════════════════ */
 .create-box {
@@ -186,9 +350,7 @@
   letter-spacing: .09em; color: var(--text3); margin-bottom: 14px;
   display: flex; align-items: center; gap: 7px;
 }
-.create-row {
-  display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
-}
+.create-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
 .create-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
 .create-field label {
   font-size: 10.5px; font-weight: 800; text-transform: uppercase;
@@ -220,8 +382,7 @@
 .product-form-box {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; padding: 22px; margin-bottom: 18px;
-  display: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  display: none; box-shadow: 0 4px 24px rgba(0,0,0,0.12);
 }
 .product-form-box.open { display: block; animation: fadeUp .2s ease; }
 .pf-header {
@@ -265,8 +426,7 @@
 /* ── AI BOX ── */
 .ai-box {
   background: linear-gradient(135deg,rgba(108,99,255,.08),rgba(167,139,250,.03));
-  border: 1px solid rgba(108,99,255,.2);
-  border-radius: 14px; padding: 16px; margin-bottom: 14px;
+  border: 1px solid rgba(108,99,255,.2); border-radius: 14px; padding: 16px; margin-bottom: 14px;
 }
 .ai-box-title { font-size: 10.5px; font-weight: 900; color: #a89bff; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
 .ai-field-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
@@ -321,8 +481,7 @@
 ══════════════════════════════════════════════ */
 .data-card {
   background:var(--surface); border:1px solid var(--border);
-  border-radius:16px; overflow:hidden;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  border-radius:16px; overflow:hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
 .data-card-header {
   display:flex; align-items:center; justify-content:space-between;
@@ -435,8 +594,6 @@ input:checked + .toggle-track::before { transform:translateX(16px); background:#
 .btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
 .btn-ghost { background:none; border:none; cursor:pointer; font-family:'Outfit',sans-serif; font-size:12px; font-weight:700; color:var(--text3); padding:4px 8px; border-radius:7px; transition:all .15s; }
 .btn-ghost:hover { color:var(--text); background:rgba(255,255,255,.06); }
-
-/* ── AI Generate Button ── */
 .btn-ai-fill {
   display:inline-flex; align-items:center; gap:6px;
   padding:7px 14px; border-radius:9px;
@@ -480,39 +637,80 @@ input:checked + .toggle-track::before { transform:translateX(16px); background:#
 </head>
 <body>
 
-<!-- ── SKELETON ── -->
+<!-- ══════════════════════════════════════════════════════════
+     PAGE SKELETON
+     Mirrors exact rendered layout so zero layout shift occurs
+══════════════════════════════════════════════════════════ -->
 <div id="page-skeleton">
+
+  <!-- Sidebar clone -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
-      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+    <div class="skel skel-logo"></div>
+    <div class="skel-user-row">
+      <div class="skel skel-avatar"></div>
+      <div class="skel-user-info">
+        <div class="skel skel-user-name"></div>
+        <div class="skel skel-user-email"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
+    <div class="skel-nav-items">
+      <div class="skel skel-nav-item" style="opacity:0.30;"></div>
+      <div class="skel skel-nav-item" style="opacity:1.00;"></div><!-- active -->
+      <div class="skel skel-nav-item" style="opacity:0.30;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.22;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.16;"></div>
+      <div class="skel skel-nav-item" style="opacity:0.10;"></div>
+    </div>
   </div>
+
+  <!-- Main clone -->
   <div class="skel-main">
+
+    <!-- Topbar clone -->
     <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
-      <div class="skel" style="height:32px;width:150px;border-radius:8px;"></div>
+      <div class="skel skel-topbar-title"></div>
+      <div class="skel-topbar-right">
+        <div class="skel skel-store-sel"></div>
+        <div class="skel skel-theme-btn"></div>
+      </div>
     </div>
+
+    <!-- Body clone -->
     <div class="skel-body">
-      <div class="skel" style="height:46px;width:440px;border-radius:12px;margin-bottom:18px;"></div>
-      <div class="skel" style="height:90px;border-radius:14px;margin-bottom:14px;"></div>
-      <div class="skel" style="height:40px;border-radius:9px;margin-bottom:10px;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;margin-bottom:8px;opacity:.75;"></div>
-      <div class="skel" style="height:52px;border-radius:9px;opacity:.5;"></div>
-    </div>
-  </div>
-</div>
+
+      <!-- Tab bar -->
+      <div class="skel skel-tab-bar"></div>
+
+      <!-- Stats row (products tab default) -->
+      <div class="skel-stats-row">
+        <div class="skel skel-stat-tile"></div>
+        <div class="skel skel-stat-tile" style="opacity:0.82;"></div>
+        <div class="skel skel-stat-tile" style="opacity:0.64;"></div>
+        <div class="skel skel-stat-tile" style="opacity:0.48;"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="skel-toolbar">
+        <div class="skel skel-search"></div>
+        <div class="skel skel-filter"></div>
+        <div class="skel skel-filter" style="width:80px;opacity:0.7;"></div>
+      </div>
+
+      <!-- Table card -->
+      <div class="skel-table-card">
+        <div class="skel skel-table-header" style="background:rgba(255,255,255,0.04);border-radius:16px 16px 0 0;"></div>
+        <div class="skel-table-rows">
+          <div class="skel skel-table-row" style="opacity:1.0;  margin:0 0 1px;"></div>
+          <div class="skel skel-table-row" style="opacity:0.80; margin:0 0 1px;"></div>
+          <div class="skel skel-table-row" style="opacity:0.60; margin:0 0 1px;"></div>
+          <div class="skel skel-table-row" style="opacity:0.42; margin:0 0 1px;"></div>
+          <div class="skel skel-table-row" style="opacity:0.26;"></div>
+        </div>
+      </div>
+
+    </div><!-- /skel-body -->
+  </div><!-- /skel-main -->
+</div><!-- /#page-skeleton -->
 
 <!-- ── SIDEBAR ── -->
 <div class="sidebar" id="sidebar">
@@ -557,160 +755,196 @@ input:checked + .toggle-track::before { transform:translateX(16px); background:#
     </div>
   </div>
 
-  <div id="page-content" class="content page-enter" style="display:none;">
+  <!-- Wrap content in position:relative so reload overlay positions correctly -->
+  <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column;">
 
-    <!-- TABS -->
-    <div class="tab-shell">
-      <button class="tab-btn active" data-tab="products" onclick="switchTab('products')">
-        <span>📦</span><span class="tab-text">Products</span>
-        <span class="tab-badge" id="badge-products">0</span>
-      </button>
-      <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">
-        <span>🗂️</span><span class="tab-text">Categories</span>
-        <span class="tab-badge" id="badge-categories">0</span>
-      </button>
-      <button class="tab-btn" data-tab="coupons" onclick="switchTab('coupons')">
-        <span>🎟️</span><span class="tab-text">Coupons</span>
-        <span class="tab-badge" id="badge-coupons">0</span>
-      </button>
-      <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">
-        <span>📋</span><span class="tab-text">Inventory</span>
-        <span class="tab-badge" id="badge-inventory">0</span>
-      </button>
-    </div>
-
-    <!-- PRODUCTS PANEL -->
-    <div class="tab-panel active" id="panel-products">
-      <div id="productFormBox" class="product-form-box">
-        <div class="pf-header">
-          <div class="pf-title"><span>📦</span><span id="productFormLabel">Add Product</span></div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn-ai-fill" onclick="aiGenerateProduct()" id="aiGenBtn">✨ AI Fill</button>
-            <button class="btn btn-ghost btn-sm" onclick="closeProductForm()">✕ Cancel</button>
-          </div>
-        </div>
-        <input type="hidden" id="productEditId">
-        <div id="aiProductResult" style="display:none;margin-bottom:14px;"></div>
-
-        <div class="pf-row full">
-          <div class="pf-field"><label>Product Name *</label>
-            <input type="text" id="productName" placeholder="e.g. Wireless Headphones">
-          </div>
-        </div>
-        <div class="pf-row full">
-          <div class="pf-field"><label>Description</label>
-            <textarea id="productDesc" placeholder="Describe your product…"></textarea>
-          </div>
-        </div>
-        <div class="pf-row">
-          <div class="pf-field"><label>Price *</label><input type="number" id="productPrice" placeholder="999" step="0.01" min="0"></div>
-          <div class="pf-field"><label>Compare at Price</label><input type="number" id="productCompare" placeholder="1499" step="0.01" min="0"></div>
-        </div>
-        <div class="pf-row">
-          <div class="pf-field"><label>SKU</label><input type="text" id="productSku" placeholder="SKU-001"></div>
-          <div class="pf-field"><label>Category</label>
-            <select id="productCategory"><option value="">No Category</option></select>
-          </div>
-        </div>
-        <div class="pf-row">
-          <div class="pf-field"><label>Stock Qty</label><input type="number" id="productStock" placeholder="100" min="0"></div>
-          <div class="pf-field"><label>Status</label>
-            <select id="productStatus">
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-        </div>
-        <div class="pf-row full">
-          <div class="pf-field"><label>Tags (comma separated)</label>
-            <input type="text" id="productTags" placeholder="electronics, wireless, audio">
-          </div>
-        </div>
-        <hr class="pf-divider">
-        <div class="pf-section">Product Images (up to 5)</div>
-        <input type="file" id="productImageFiles" accept="image/*" multiple onchange="previewProductImages(this)"
-          style="width:100%;background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;">
-        <div class="img-previews" id="productImagesPreview"></div>
-        <div class="img-previews" id="existingImagesWrap"></div>
-        <hr class="pf-divider">
-        <div class="pf-section">Variants</div>
-        <div id="variantsList"></div>
-        <button class="btn btn-ghost" onclick="addVariantRow()" style="margin-top:4px;">+ Add Variant</button>
-        <div class="pf-hint" style="margin-top:4px;">e.g. "Size: S, M, L" or "Color: Red, Blue"</div>
-        <div class="pf-footer">
-          <button class="btn btn-secondary" onclick="closeProductForm()">Cancel</button>
-          <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
-        </div>
+    <!-- Store-switch reload overlay (non-skeleton, inline, non-blocking) -->
+    <div id="reload-overlay">
+      <div class="reload-spinner">
+        <div class="reload-spinner-ring"></div>
+        <span class="reload-spinner-label">Switching store…</span>
       </div>
-      <div id="products-content"></div>
     </div>
 
-    <!-- CATEGORIES PANEL -->
-    <div class="tab-panel" id="panel-categories">
-      <div class="create-box">
-        <div class="create-box-label"><span>🗂️</span> Add Category</div>
-        <div class="create-row">
-          <div class="create-field">
-            <label>Category Name</label>
-            <input class="create-input" type="text" id="catNewName"
-              placeholder="e.g. Electronics"
-              onkeydown="if(event.key==='Enter')createCategory()">
-          </div>
-          <button class="btn btn-primary" onclick="createCategory()" style="height:44px;">+ Add Category</button>
-        </div>
-        <div class="create-hint">Press Enter or click Add</div>
+    <div id="page-content" class="content page-enter" style="display:none;">
+
+      <!-- TABS -->
+      <div class="tab-shell">
+        <button class="tab-btn active" data-tab="products" onclick="switchTab('products')">
+          <span>📦</span><span class="tab-text">Products</span>
+          <span class="tab-badge" id="badge-products">0</span>
+        </button>
+        <button class="tab-btn" data-tab="categories" onclick="switchTab('categories')">
+          <span>🗂️</span><span class="tab-text">Categories</span>
+          <span class="tab-badge" id="badge-categories">0</span>
+        </button>
+        <button class="tab-btn" data-tab="coupons" onclick="switchTab('coupons')">
+          <span>🎟️</span><span class="tab-text">Coupons</span>
+          <span class="tab-badge" id="badge-coupons">0</span>
+        </button>
+        <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">
+          <span>📋</span><span class="tab-text">Inventory</span>
+          <span class="tab-badge" id="badge-inventory">0</span>
+        </button>
       </div>
-      <div id="categories-content"></div>
-    </div>
 
-    <!-- COUPONS PANEL -->
-    <div class="tab-panel" id="panel-coupons">
-      <div class="create-box">
-        <div class="create-box-label"><span>🎟️</span> Create Coupon</div>
-        <div class="create-row">
-          <div class="create-field" style="min-width:150px;">
-            <label>Coupon Code *</label>
-            <input class="create-input mono" type="text" id="couponCode" placeholder="SAVE20">
+      <!-- PRODUCTS PANEL -->
+      <div class="tab-panel active" id="panel-products">
+        <div id="productFormBox" class="product-form-box">
+          <div class="pf-header">
+            <div class="pf-title"><span>📦</span><span id="productFormLabel">Add Product</span></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn-ai-fill" onclick="aiGenerateProduct()" id="aiGenBtn">✨ AI Fill</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeProductForm()">✕ Cancel</button>
+            </div>
           </div>
-          <div class="create-field" style="max-width:170px;">
-            <label>Discount Type</label>
-            <select class="create-select" id="couponType">
-              <option value="percent">Percentage (%)</option>
-              <option value="flat">Flat Amount</option>
-            </select>
+          <input type="hidden" id="productEditId">
+          <div id="aiProductResult" style="display:none;margin-bottom:14px;"></div>
+
+          <div class="pf-row full">
+            <div class="pf-field"><label>Product Name *</label>
+              <input type="text" id="productName" placeholder="e.g. Wireless Headphones">
+            </div>
           </div>
-          <div class="create-field" style="max-width:110px;">
-            <label>Value *</label>
-            <input class="create-input" type="number" id="couponValue" placeholder="20" min="0" step="0.01">
+          <div class="pf-row full">
+            <div class="pf-field"><label>Description</label>
+              <textarea id="productDesc" placeholder="Describe your product…"></textarea>
+            </div>
           </div>
-          <div class="create-field" style="max-width:130px;">
-            <label>Min Order</label>
-            <input class="create-input" type="number" id="couponMinOrder" placeholder="0" min="0">
+          <div class="pf-row">
+            <div class="pf-field"><label>Price *</label><input type="number" id="productPrice" placeholder="999" step="0.01" min="0"></div>
+            <div class="pf-field"><label>Compare at Price</label><input type="number" id="productCompare" placeholder="1499" step="0.01" min="0"></div>
           </div>
-          <div class="create-field" style="max-width:120px;">
-            <label>Max Uses</label>
-            <input class="create-input" type="number" id="couponMaxUses" placeholder="Unlimited" min="1">
+          <div class="pf-row">
+            <div class="pf-field"><label>SKU</label><input type="text" id="productSku" placeholder="SKU-001"></div>
+            <div class="pf-field"><label>Category</label>
+              <select id="productCategory"><option value="">No Category</option></select>
+            </div>
           </div>
-          <div class="create-field" style="max-width:170px;">
-            <label>Expiry Date</label>
-            <input class="create-input" type="date" id="couponExpiry">
+          <div class="pf-row">
+            <div class="pf-field"><label>Stock Qty</label><input type="number" id="productStock" placeholder="100" min="0"></div>
+            <div class="pf-field"><label>Status</label>
+              <select id="productStatus">
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
           </div>
-          <button class="btn btn-primary" onclick="saveCoupon()" style="height:44px;">+ Create</button>
+          <div class="pf-row full">
+            <div class="pf-field"><label>Tags (comma separated)</label>
+              <input type="text" id="productTags" placeholder="electronics, wireless, audio">
+            </div>
+          </div>
+          <hr class="pf-divider">
+          <div class="pf-section">Product Images (up to 5)</div>
+          <input type="file" id="productImageFiles" accept="image/*" multiple onchange="previewProductImages(this)"
+            style="width:100%;background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;">
+          <div class="img-previews" id="productImagesPreview"></div>
+          <div class="img-previews" id="existingImagesWrap"></div>
+          <hr class="pf-divider">
+          <div class="pf-section">Variants</div>
+          <div id="variantsList"></div>
+          <button class="btn btn-ghost" onclick="addVariantRow()" style="margin-top:4px;">+ Add Variant</button>
+          <div class="pf-hint" style="margin-top:4px;">e.g. "Size: S, M, L" or "Color: Red, Blue"</div>
+          <div class="pf-footer">
+            <button class="btn btn-secondary" onclick="closeProductForm()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+          </div>
         </div>
+        <div id="products-content"></div>
       </div>
-      <div id="coupons-content"></div>
-    </div>
 
-    <!-- INVENTORY PANEL -->
-    <div class="tab-panel" id="panel-inventory">
-      <div id="inventory-content"></div>
-    </div>
+      <!-- CATEGORIES PANEL -->
+      <div class="tab-panel" id="panel-categories">
+        <div class="create-box">
+          <div class="create-box-label"><span>🗂️</span> Add Category</div>
+          <div class="create-row">
+            <div class="create-field">
+              <label>Category Name</label>
+              <input class="create-input" type="text" id="catNewName"
+                placeholder="e.g. Electronics"
+                onkeydown="if(event.key==='Enter')createCategory()">
+            </div>
+            <button class="btn btn-primary" onclick="createCategory()" style="height:44px;">+ Add Category</button>
+          </div>
+          <div class="create-hint">Press Enter or click Add</div>
+        </div>
+        <div id="categories-content"></div>
+      </div>
 
-  </div>
-</div>
+      <!-- COUPONS PANEL -->
+      <div class="tab-panel" id="panel-coupons">
+        <div class="create-box">
+          <div class="create-box-label"><span>🎟️</span> Create Coupon</div>
+          <div class="create-row">
+            <div class="create-field" style="min-width:150px;">
+              <label>Coupon Code *</label>
+              <input class="create-input mono" type="text" id="couponCode" placeholder="SAVE20">
+            </div>
+            <div class="create-field" style="max-width:170px;">
+              <label>Discount Type</label>
+              <select class="create-select" id="couponType">
+                <option value="percent">Percentage (%)</option>
+                <option value="flat">Flat Amount</option>
+              </select>
+            </div>
+            <div class="create-field" style="max-width:110px;">
+              <label>Value *</label>
+              <input class="create-input" type="number" id="couponValue" placeholder="20" min="0" step="0.01">
+            </div>
+            <div class="create-field" style="max-width:130px;">
+              <label>Min Order</label>
+              <input class="create-input" type="number" id="couponMinOrder" placeholder="0" min="0">
+            </div>
+            <div class="create-field" style="max-width:120px;">
+              <label>Max Uses</label>
+              <input class="create-input" type="number" id="couponMaxUses" placeholder="Unlimited" min="1">
+            </div>
+            <div class="create-field" style="max-width:170px;">
+              <label>Expiry Date</label>
+              <input class="create-input" type="date" id="couponExpiry">
+            </div>
+            <button class="btn btn-primary" onclick="saveCoupon()" style="height:44px;">+ Create</button>
+          </div>
+        </div>
+        <div id="coupons-content"></div>
+      </div>
+
+      <!-- INVENTORY PANEL -->
+      <div class="tab-panel" id="panel-inventory">
+        <div id="inventory-content"></div>
+      </div>
+
+    </div><!-- /#page-content -->
+  </div><!-- /position:relative wrapper -->
+</div><!-- /.main-wrap -->
 
 <script>
+/* ══════════════════════════════════════════════════════════
+   SKELETON DISMISS — smooth fade, remove from DOM
+══════════════════════════════════════════════════════════ */
+function dismissSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel || skel._dismissed) return
+  skel._dismissed = true
+  skel.classList.add('skel-hiding')
+  skel.addEventListener('transitionend', () => skel.remove(), { once: true })
+  setTimeout(() => { if (skel.parentNode) skel.remove() }, 500)
+}
+
+/* ══════════════════════════════════════════════════════════
+   RELOAD OVERLAY — shown during store switch, hides when done
+══════════════════════════════════════════════════════════ */
+function showReloadOverlay() {
+  const el = document.getElementById('reload-overlay')
+  if (el) el.classList.add('visible')
+}
+function hideReloadOverlay() {
+  const el = document.getElementById('reload-overlay')
+  if (el) el.classList.remove('visible')
+}
+
 /* ══════════════════════════════════════════════
    THEME SYSTEM
 ══════════════════════════════════════════════ */
@@ -722,9 +956,13 @@ function applyTheme(dark) {
   if (dark) {
     root.removeAttribute('data-theme')
     root.style.background = '#080910'
+    const skel = document.getElementById('page-skeleton')
+    if (skel) skel.style.background = '#080910'
   } else {
     root.setAttribute('data-theme', 'light')
     root.style.background = '#f0f0f5'
+    const skel = document.getElementById('page-skeleton')
+    if (skel) skel.style.background = '#f0f0f5'
   }
   const btn = document.getElementById('themeToggleBtn')
   if (btn) btn.textContent = dark ? '🌙' : '☀️'
@@ -752,7 +990,18 @@ let activeInvFilter = 'all'
    INIT
 ══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  const nav = await renderNav('manage', (id) => { currentStoreId = id; loadAll() })
+  /* Pass store-change callback into renderNav.
+     When the user picks a different store from the dropdown,
+     this callback fires with the new store ID. */
+  const nav = await renderNav('manage', async (id) => {
+    if (id === currentStoreId) return        // same store, no-op
+    currentStoreId = id
+    closeProductForm()                       // close any open form
+    invChanges = {}                          // discard unsaved inv edits
+    showReloadOverlay()
+    await loadAll()
+    hideReloadOverlay()
+  })
   if (!nav) return
   currentStoreId = nav.currentStoreId
 
@@ -769,9 +1018,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
   applyTheme(_isDark)
 
-  if (currentStoreId) await loadAll()
-  else renderNoStore()
+  if (currentStoreId) {
+    await loadAll()
+  } else {
+    renderNoStore()
+  }
 
+  // Handle AI pre-fill from AI Assistant page
   const prefill = sessionStorage.getItem('ai_product_prefill')
   if (prefill) {
     try {
@@ -785,15 +1038,28 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 })
 
+/* ── Show content + dismiss skeleton together ── */
 async function loadAll() {
-  document.getElementById('page-content').style.display = 'block'
-  document.getElementById('page-skeleton').style.display = 'none'
+  const pc = document.getElementById('page-content')
+
+  // Reset badges so stale counts aren't visible after store switch
+  ;['products','categories','coupons','inventory'].forEach(t => {
+    const badge = document.getElementById(`badge-${t}`)
+    if (badge) badge.textContent = '0'
+  })
+
+  // Run all four tab loads in parallel for speed
   await Promise.all([loadProducts(), loadCategories(), loadCoupons(), loadInventory()])
+
+  // Show content and dismiss skeleton on first load
+  pc.style.display = 'block'
+  dismissSkeleton()
 }
 
 function renderNoStore() {
-  document.getElementById('page-content').style.display = 'block'
-  document.getElementById('page-skeleton').style.display = 'none'
+  const pc = document.getElementById('page-content')
+  pc.style.display = 'block'
+  dismissSkeleton()
   ;['products','categories','coupons','inventory'].forEach(t => {
     const el = document.getElementById(`${t}-content`)
     if (el) el.innerHTML = `<div class="empty-state"><div class="empty-icon">🏪</div><h3>No store selected</h3><p>Select a store from the top bar</p></div>`
@@ -821,8 +1087,8 @@ async function loadProducts() {
     if (sel) sel.innerHTML = '<option value="">No Category</option>' + allCategories.map(c => `<option value="${c._id}">${c.name}</option>`).join('')
     renderProductsPanel()
   } catch (e) {
-    document.getElementById('products-content').innerHTML =
-      `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
+    const el = document.getElementById('products-content')
+    if (el) el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
   }
 }
 
@@ -973,8 +1239,10 @@ function openEditProduct(id) {
 }
 
 function closeProductForm() {
-  document.getElementById('productFormBox').classList.remove('open')
-  document.getElementById('aiProductResult').style.display = 'none'
+  const box = document.getElementById('productFormBox')
+  if (box) box.classList.remove('open')
+  const ai = document.getElementById('aiProductResult')
+  if (ai) ai.style.display = 'none'
 }
 
 async function saveProduct() {
@@ -1118,12 +1386,14 @@ async function loadCategories() {
     document.getElementById('badge-categories').textContent = allCategories.length
     renderCategoriesPanel()
   } catch(e) {
-    document.getElementById('categories-content').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
+    const el = document.getElementById('categories-content')
+    if (el) el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
   }
 }
 
 function renderCategoriesPanel() {
   const el = document.getElementById('categories-content')
+  if (!el) return
   if (!allCategories.length) {
     el.innerHTML = `<div class="data-card" style="padding:24px;">
       <div class="empty-state" style="padding:30px 0;">
@@ -1173,7 +1443,8 @@ async function loadCoupons() {
     document.getElementById('badge-coupons').textContent = allCoupons.length
     renderCouponsPanel()
   } catch(e) {
-    document.getElementById('coupons-content').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
+    const el = document.getElementById('coupons-content')
+    if (el) el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
   }
 }
 
@@ -1181,7 +1452,9 @@ function renderCouponsPanel() {
   const active    = allCoupons.filter(c => c.active).length
   const totalUses = allCoupons.reduce((s,c) => s + (c.uses||0), 0)
   const cur       = getCur()
-  document.getElementById('coupons-content').innerHTML = `
+  const el = document.getElementById('coupons-content')
+  if (!el) return
+  el.innerHTML = `
     <div class="stats-row cols3">
       <div class="stat-tile"><div class="stat-label">Total Coupons</div><div class="stat-value">${allCoupons.length}</div></div>
       <div class="stat-tile"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--green);">${active}</div></div>
@@ -1232,14 +1505,18 @@ async function saveCoupon() {
 }
 
 async function toggleCoupon(id, active) {
-  try { await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method:'PUT', body:JSON.stringify({active}) }); toast(active ? 'Activated' : 'Deactivated', 'success') }
-  catch(e) { toast(e.message, 'error'); await loadCoupons() }
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method:'PUT', body:JSON.stringify({active}) })
+    toast(active ? 'Activated' : 'Deactivated', 'success')
+  } catch(e) { toast(e.message, 'error'); await loadCoupons() }
 }
 
 async function deleteCoupon(id, code) {
   if (!confirm(`Delete coupon "${code}"?`)) return
-  try { await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method:'DELETE', body:'{}' }); await loadCoupons(); toast('Coupon deleted') }
-  catch(e) { toast(e.message, 'error') }
+  try {
+    await apiFetch(`/stores/${currentStoreId}/coupons/${id}`, { method:'DELETE', body:'{}' })
+    await loadCoupons(); toast('Coupon deleted')
+  } catch(e) { toast(e.message, 'error') }
 }
 
 function copyCode(code) { navigator.clipboard.writeText(code).then(() => toast(`Copied "${code}"!`, 'info')) }
@@ -1269,12 +1546,15 @@ async function loadInventory() {
     if (!document.getElementById('invBody')) renderInventoryPanel(total, lowCnt, outCnt, threshold)
     else renderInvTable(invProducts)
   } catch(e) {
-    document.getElementById('inventory-content').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
+    const el = document.getElementById('inventory-content')
+    if (el) el.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>${e.message}</h3></div>`
   }
 }
 
 function renderInventoryPanel(total, lowCnt, outCnt, threshold) {
-  document.getElementById('inventory-content').innerHTML = `
+  const el = document.getElementById('inventory-content')
+  if (!el) return
+  el.innerHTML = `
     <div class="stats-row cols4">
       <div class="stat-tile">
         <div class="stat-label">Total Products</div>
