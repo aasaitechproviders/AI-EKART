@@ -183,8 +183,11 @@ tr:hover td{background:rgba(255,255,255,.018)}
 [data-theme="light"] .data-card-title .count{background:#f0f0f5;border-color:rgba(0,0,0,.08)}
 .prod-name-main{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
 .prod-name-sku{font-size:10.5px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;letter-spacing:.03em}
-.product-thumb{width:32px;height:32px;border-radius:7px;object-fit:cover;background:var(--surface2);flex-shrink:0;border:1px solid var(--border)}
-.product-ph{width:32px;height:32px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;border:1px solid var(--border)}
+.product-thumb{width:32px;height:32px;border-radius:7px;object-fit:cover;background:var(--surface2);flex-shrink:0;border:1px solid var(--border);transition:opacity .15s}
+.product-thumb.broken{display:none}
+.product-ph{width:32px;height:32px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border);color:var(--text3)}
+.product-ph svg{width:14px;height:14px;opacity:.45;flex-shrink:0}
+.product-ph.ph-hidden{display:none}
 .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;font-size:10.5px;font-weight:600;letter-spacing:.02em;text-transform:capitalize}
 .status-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .badge-active{background:var(--green-dim);color:var(--green)}
@@ -277,8 +280,11 @@ select.filter-pill{padding-right:28px;background-image:url("data:image/svg+xml,%
 .variant-row .rem-btn:hover{color:var(--red);border-color:rgba(239,68,68,.3);background:var(--red-dim)}
 [data-theme="light"] .variant-row input{background:#f5f5f7;border-color:rgba(0,0,0,.12);color:#0f0f1a}
 .img-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.img-previews img{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);transition:transform .2s}
+.img-previews img{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);transition:transform .2s,opacity .15s}
 .img-previews img:hover{transform:scale(1.05)}
+.img-previews img.broken{display:none}
+.img-previews .img-ph{width:52px;height:52px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3)}
+.img-previews .img-ph svg{width:20px;height:20px;opacity:.35}
 .ai-box{background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(167,139,250,.03));border:1px solid rgba(99,102,241,.18);border-radius:var(--r-md);padding:16px;margin-bottom:14px}
 .ai-box-title{font-size:10px;font-weight:700;color:var(--accent-light);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
 .ai-field-row{display:flex;gap:8px;margin-bottom:6px;align-items:flex-start}
@@ -312,8 +318,11 @@ select.filter-pill{padding-right:28px;background-image:url("data:image/svg+xml,%
 .cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;display:flex;align-items:center;gap:11px;transition:all .2s var(--ease);cursor:default}
 .cat-card:hover{border-color:rgba(99,102,241,.25);transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.cat-card-img{width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
-.cat-card-ph{width:38px;height:38px;border-radius:8px;flex-shrink:0;background:var(--accent-dim);border:1px solid rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;font-size:16px}
+.cat-card-img{width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);transition:opacity .15s}
+.cat-card-img.broken{display:none}
+.cat-card-ph{width:38px;height:38px;border-radius:8px;flex-shrink:0;background:var(--accent-dim);border:1px solid rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;color:var(--accent-light)}
+.cat-card-ph svg{width:18px;height:18px;opacity:.6;flex-shrink:0}
+.cat-card-ph.ph-hidden{display:none}
 .cat-info{flex:1;min-width:0}
 .cat-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cat-slug{font-size:10.5px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
@@ -670,6 +679,10 @@ input:checked + .toggle-track::before{transform:translateX(16px);background:#fff
 </div>
 
 <script>
+const _SVG_PROD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+const _SVG_CAT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+const _SVG_IMG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+
 function dismissContentSkeleton(){
   const sk=document.getElementById('content-skeleton'),ct=document.getElementById('page-content');
   if(!sk||sk.classList.contains('sk-hidden'))return;
@@ -793,7 +806,7 @@ function renderProductsTable(products){
   const body=document.getElementById('productsBody');if(!body)return;const cur=getCur();
   if(!products.length){body.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon-wrap">📦</div><h3>No products found</h3><p>Add your first product or adjust your filters</p></div></td></tr>`;return;}
   body.innerHTML=products.map(p=>{
-    const thumb=p.images?.[0]?`<img class="product-thumb" src="${p.images[0]}" alt="">`:`<div class="product-ph">📦</div>`;
+    const thumb=p.images?.[0]?`<img class="product-thumb" src="${p.images[0]}" alt="" onerror="this.classList.add('broken');var n=this.nextElementSibling;if(n)n.classList.remove('ph-hidden');"><div class="product-ph ph-hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>`:"<div class='product-ph'>${_SVG_PROD}</div>";
     const catName=catMap[p.category_id]||catMap[p.category_id?.$oid]||'—';
     const isLow=p.track_inventory&&p.stock_qty<=5;
     const stCls={active:'badge-active',draft:'badge-draft',archived:'badge-archived'}[p.status]||'badge-draft';
@@ -826,7 +839,7 @@ function openEditProduct(id){
   document.getElementById('productSku').value=p.sku||'';document.getElementById('productStock').value=p.stock_qty||'';
   document.getElementById('productTags').value=(p.tags||[]).join(', ');document.getElementById('productImageFiles').value='';
   document.getElementById('productImagesPreview').innerHTML='';
-  document.getElementById('existingImagesWrap').innerHTML=(p.images||[]).map(img=>`<img src="${img}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);">`).join('');
+  document.getElementById('existingImagesWrap').innerHTML=(p.images||[]).map(img=>`<img src="${img}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);" onerror="this.classList.add('broken');var p=document.createElement('div');p.className='img-ph';p.style.cssText='width:52px;height:52px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;';p.innerHTML=_SVG_IMG;this.parentNode.insertBefore(p,this.nextSibling);">`).join('');
   document.getElementById('productStatus').value=p.status||'active';document.getElementById('aiProductResult').style.display='none';
   const catId=p.category_id?.$oid||p.category_id||'';const sel=document.getElementById('productCategory');
   sel.innerHTML='<option value="">No Category</option>'+allCategories.map(c=>`<option value="${c._id}" ${c._id===catId?'selected':''}>${c.name}</option>`).join('');
@@ -912,7 +925,7 @@ function renderCategoriesPanel(){
   if(!allCategories.length){el.innerHTML=`<div class="data-card" style="padding:24px;"><div class="empty-state"><div class="empty-icon-wrap">🗂️</div><h3>No categories yet</h3><p>Add your first category to organise your products</p></div></div>`;return;}
   el.innerHTML=`<div class="data-card" style="padding:18px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:14px;">${allCategories.length} Categor${allCategories.length===1?'y':'ies'}</div><div class="cats-grid" id="catsGrid"></div></div>`;
   document.getElementById('catsGrid').innerHTML=allCategories.map(c=>{
-    const imgHtml=c.image_url?`<img class="cat-card-img" src="${c.image_url}" alt="${c.name}" loading="lazy">`:`<div class="cat-card-ph">🗂️</div>`;
+    const imgHtml=c.image_url?`<img class="cat-card-img" src="${c.image_url}" alt="${c.name}" loading="lazy" onerror="this.classList.add('broken');var n=this.nextElementSibling;if(n)n.classList.remove('ph-hidden');"><div class="cat-card-ph ph-hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>`:`<div class="cat-card-ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>`;
     return`<div class="cat-card">${imgHtml}<div class="cat-info"><div class="cat-name">${c.name}</div><div class="cat-slug">${c.slug}</div></div><div class="cat-actions"><button class="cat-edit" onclick="openCatModal('${c._id}')">Edit</button><button class="cat-del" onclick="deleteCategory('${c._id}','${c.name.replace(/'/g,"\\'")}')">✕</button></div></div>`;
   }).join('');
 }
@@ -1046,7 +1059,7 @@ function renderInvTable(products){
   const body=document.getElementById('invBody');if(!body)return;
   if(!products.length){body.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon-wrap">📦</div><h3>No products found</h3></div></td></tr>`;return;}
   body.innerHTML=products.map(p=>{
-    const thumb=p.images?.[0]?`<img class="product-thumb" src="${p.images[0]}" alt="">`:`<div class="product-ph">📦</div>`;
+    const thumb=p.images?.[0]?`<img class="product-thumb" src="${p.images[0]}" alt="" onerror="this.classList.add('broken');var n=this.nextElementSibling;if(n)n.classList.remove('ph-hidden');"><div class="product-ph ph-hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>`:"<div class='product-ph'>${_SVG_PROD}</div>";
     const isOut=p.is_out_of_stock,isLow=p.is_low_stock;
     const stLabel=isOut?'Out of Stock':isLow?'Low Stock':'In Stock';
     const stStyle=isOut?'background:var(--red-dim);color:var(--red);':isLow?'background:var(--yellow-dim);color:var(--yellow);':'background:var(--green-dim);color:var(--green);';
