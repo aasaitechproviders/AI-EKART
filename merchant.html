@@ -227,25 +227,62 @@
 .tab-panel.active { display:block; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
 
-/* ── RELOAD OVERLAY ── */
-#reload-overlay {
-  display:none; position:absolute; inset:0; z-index:100;
-  background:rgba(8,9,16,0.55); backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
-  align-items:center; justify-content:center;
-  animation:fadeIn .15s ease;
+/* ══════════════════════════════════════════════════════
+   STORE-SWITCH 3-PHASE TRANSITION  ← NEW
+══════════════════════════════════════════════════════ */
+
+/* Phase 1 — content exits */
+@keyframes swExit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
 }
-#reload-overlay.visible { display:flex; }
-[data-theme="light"] #reload-overlay { background:rgba(240,240,245,0.65); }
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.reload-spinner { display:flex; flex-direction:column; align-items:center; gap:14px; }
-.reload-spinner-ring {
-  width:44px; height:44px; border-radius:50%;
-  border:3px solid rgba(108,99,255,0.15); border-top-color:#7b74ff;
-  animation:spin .7s linear infinite;
+/* Phase 3 — content enters */
+@keyframes swEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.reload-spinner-label { font-size:13px; font-weight:700; color:var(--text3); font-family:'Outfit',sans-serif; }
-[data-theme="light"] .reload-spinner-label { color:#6b7280; }
+
+.sw-exiting {
+  animation: swExit .18s cubic-bezier(.4,0,1,1) forwards;
+  pointer-events: none;
+}
+.sw-entering {
+  animation: swEnter .26s cubic-bezier(.2,0,.2,1) forwards;
+}
+
+/* Phase 2 — in-place shimmer skeleton (sits inside the relative wrapper) */
+#switch-skeleton {
+  display: none;
+  position: absolute; inset: 0;
+  z-index: 90;
+  padding: 24px;
+  flex-direction: column;
+  gap: 16px;
+  pointer-events: none;
+  overflow: hidden;
+  /* inherits the page background so it fills the content well */
+  background: inherit;
+}
+[data-theme="light"] #switch-skeleton { background: #f0f0f5; }
+#switch-skeleton.sk-on { display: flex; }
+
+/* Skeleton piece classes — all rely on the shared .skel shimmer */
+.sw-tabs  { height: 46px; width: 420px; max-width: 100%; border-radius: 13px; flex-shrink: 0; }
+.sw-s4    { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; flex-shrink: 0; }
+.sw-st    { height: 88px; border-radius: 14px; }
+.sw-tb    { display: flex; gap: 10px; flex-shrink: 0; align-items: center; }
+.sw-srch  { height: 40px; flex: 1; max-width: 320px; border-radius: 10px; }
+.sw-filt  { height: 40px; width: 100px; border-radius: 10px; }
+.sw-card  { border-radius: 16px; overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.sw-ch    { height: 50px; border-radius: 0; flex-shrink: 0; }
+.sw-rows  { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+.sw-row   { height: 54px; border-radius: 0; flex-shrink: 0; }
+
+@media(max-width:900px){ .sw-s4 { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:640px){ .sw-tabs { width: 100%; } }
+
+/* ── Legacy overlay (kept to avoid any HTML removal side-effects, but visually unused) ── */
+#reload-overlay { display: none !important; }
 
 /* ══════════════════════════════════════════════
    INLINE CREATE BOX
@@ -508,6 +545,8 @@ input:checked + .toggle-track::before { transform:translateX(16px); background:#
 @keyframes spin{to{transform:rotate(360deg);}}
 .spin { animation:spin .7s linear infinite; display:inline-block; }
 
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
 @media(max-width:900px){.stats-row.cols4{grid-template-columns:repeat(2,1fr);}.pf-row{grid-template-columns:1fr;}.create-row{flex-direction:column;}.cats-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}}
 @media(max-width:600px){.tab-btn .tab-text{display:none;}.stats-row{grid-template-columns:repeat(2,1fr) !important;}.pf-row.cols3{grid-template-columns:1fr 1fr;}}
 </style>
@@ -615,11 +654,41 @@ input:checked + .toggle-track::before { transform:translateX(16px); background:#
     </div>
   </div>
 
-  <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column;">
-    <div id="reload-overlay">
-      <div class="reload-spinner">
-        <div class="reload-spinner-ring"></div>
-        <span class="reload-spinner-label">Switching store…</span>
+  <!-- ── position:relative wrapper so the skeleton overlay can be absolute ── -->
+  <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column;">
+
+    <!-- Legacy overlay element kept for DOM completeness; hidden via CSS -->
+    <div id="reload-overlay"></div>
+
+    <!-- ══ IN-PLACE SWITCH SKELETON  ← NEW ══
+         Sits inside the same stacking context as #page-content.
+         Shown during Phase 2; shimmer uses the global .skel keyframe.           -->
+    <div id="switch-skeleton">
+      <!-- tab bar -->
+      <div class="skel sw-tabs"></div>
+      <!-- 4-up stat tiles -->
+      <div class="sw-s4">
+        <div class="skel sw-st"></div>
+        <div class="skel sw-st" style="opacity:.82"></div>
+        <div class="skel sw-st" style="opacity:.64"></div>
+        <div class="skel sw-st" style="opacity:.46"></div>
+      </div>
+      <!-- toolbar row -->
+      <div class="sw-tb">
+        <div class="skel sw-srch"></div>
+        <div class="skel sw-filt"></div>
+        <div class="skel sw-filt" style="width:80px;opacity:.7"></div>
+      </div>
+      <!-- table card -->
+      <div class="sw-card">
+        <div class="skel sw-ch"></div>
+        <div class="sw-rows">
+          <div class="skel sw-row"></div>
+          <div class="skel sw-row" style="opacity:.80"></div>
+          <div class="skel sw-row" style="opacity:.60"></div>
+          <div class="skel sw-row" style="opacity:.42"></div>
+          <div class="skel sw-row" style="opacity:.26"></div>
+        </div>
       </div>
     </div>
 
@@ -801,9 +870,6 @@ function dismissSkeleton() {
   setTimeout(() => { if (skel.parentNode) skel.remove() }, 500)
 }
 
-function showReloadOverlay() { document.getElementById('reload-overlay')?.classList.add('visible') }
-function hideReloadOverlay() { document.getElementById('reload-overlay')?.classList.remove('visible') }
-
 /* ══════════════════════════════════════════════
    THEME
 ══════════════════════════════════════════════ */
@@ -842,6 +908,62 @@ let activeInvFilter = 'all'
 let _catEditRemoveImg = false   // user clicked ✕ on existing image in edit modal
 
 /* ══════════════════════════════════════════════
+   3-PHASE STORE-SWITCH TRANSITION  ← NEW
+   ─────────────────────────────────────────────
+   _switchGen is a monotonically-increasing
+   counter. Each store switch grabs its own gen
+   number. If the gen has advanced by the time
+   loadAll() resolves, a newer switch won the
+   race and we silently abort the stale render.
+══════════════════════════════════════════════ */
+let _switchGen = 0
+
+// Duration must match the swExit CSS animation (ms)
+const SW_EXIT_MS = 190
+
+/**
+ * Phase 1 → 2
+ * Fades out #page-content, then replaces it with the shimmer skeleton.
+ * Returns the generation number so the caller can detect races.
+ */
+function showReloadOverlay() {
+  const gen = ++_switchGen
+  const ct  = document.getElementById('page-content')
+  const sk  = document.getElementById('switch-skeleton')
+  if (!ct) return
+
+  // Phase 1 — animate content out
+  ct.classList.remove('sw-entering')
+  ct.classList.add('sw-exiting')
+
+  // Phase 2 — after exit animation completes, swap to skeleton
+  setTimeout(() => {
+    if (_switchGen !== gen) return       // a newer switch already started; bail out
+    ct.style.visibility = 'hidden'      // keep it in the layout but invisible
+    ct.classList.remove('sw-exiting')
+    if (sk) sk.classList.add('sk-on')
+  }, SW_EXIT_MS)
+}
+
+/**
+ * Phase 3
+ * Hides the skeleton and fades #page-content back in.
+ * Only called when the current generation still matches.
+ */
+function hideReloadOverlay() {
+  const ct = document.getElementById('page-content')
+  const sk = document.getElementById('switch-skeleton')
+  if (!ct) return
+
+  if (sk) sk.classList.remove('sk-on')
+  ct.style.visibility = ''
+  ct.classList.remove('sw-exiting', 'sw-entering')
+  void ct.offsetWidth                   // force reflow so animation restarts cleanly
+  ct.classList.add('sw-entering')
+  ct.addEventListener('animationend', () => ct.classList.remove('sw-entering'), { once: true })
+}
+
+/* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
@@ -849,8 +971,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (id === currentStoreId) return
     currentStoreId = id
     closeProductForm(); invChanges = {}
+
+    // Kick off Phase 1 + 2, capture this switch's generation
     showReloadOverlay()
+    const myGen = _switchGen             // ← race guard
+
     await loadAll()
+
+    // Only do Phase 3 if we're still the latest switch
+    if (_switchGen !== myGen) return
     hideReloadOverlay()
   })
   if (!nav) return
@@ -1172,7 +1301,7 @@ async function bulkAction(action) {
 }
 
 /* ══════════════════════════════════════════════
-   CATEGORIES — with image upload (NEW)
+   CATEGORIES — with image upload (unchanged)
 ══════════════════════════════════════════════ */
 async function loadCategories() {
   try {
