@@ -468,12 +468,141 @@ input:checked + .toggle-track::before{transform:translateX(16px);background:#fff
   .content{padding:16px !important}
   .create-box{padding:16px}
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE SIDEBAR — slide-in overlay
+══════════════════════════════════════════════ */
+
+/* Hamburger button — hidden on desktop */
+.mob-menu-btn{
+  display:none;
+  width:36px;height:36px;
+  align-items:center;justify-content:center;
+  border:1px solid var(--border2);
+  background:var(--surface2);
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  flex-shrink:0;
+  color:var(--text2);
+  transition:background .15s,border-color .15s,color .15s;
+  margin-right:8px;
+}
+.mob-menu-btn:hover{background:var(--accent-dim);border-color:rgba(99,102,241,.35);color:var(--accent-light)}
+[data-theme="light"] .mob-menu-btn{background:#f0f0f5;border-color:rgba(0,0,0,.12);color:#3d3d5c}
+
+/* Sidebar overlay scrim */
+.sidebar-scrim{
+  display:none;
+  position:fixed;inset:0;z-index:298;
+  background:rgba(0,0,0,0);
+  transition:background .28s var(--ease);
+  pointer-events:none;
+}
+.sidebar-scrim.visible{
+  display:block;
+  background:rgba(0,0,0,.55);
+  pointer-events:all;
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+}
+[data-theme="light"] .sidebar-scrim.visible{background:rgba(0,0,0,.35)}
+
+/* ── RESPONSIVE BREAKPOINTS ── */
+
+/* Tablet: hide sidebar text labels, show icon-only rail */
+@media(max-width:1024px) and (min-width:641px){
+  .sidebar{width:64px !important;overflow:hidden}
+  .sidebar-logo{padding:0 !important;justify-content:center !important;font-size:18px}
+  .logo-k,.logo-dot{display:none}
+  .sidebar-user{padding:12px 10px !important}
+  .sidebar-user-name,.sidebar-user-email,.nav-section-label{display:none !important}
+  .sidebar-avatar{margin:0 auto}
+  .nav-item{padding:10px !important;justify-content:center !important;border-radius:var(--r-sm) !important}
+  .nav-item span:not(.nav-icon){display:none !important}
+  .nav-icon{margin:0 !important;font-size:18px !important}
+  .sidebar-bottom{padding:10px !important}
+  .btn-logout{font-size:0 !important;padding:10px !important;justify-content:center}
+  .btn-logout::before{content:'↩';font-size:16px}
+}
+
+/* Mobile: full overlay sidebar */
+@media(max-width:640px){
+  .mob-menu-btn{display:flex}
+
+  /* Sidebar becomes a fixed overlay panel */
+  .sidebar{
+    position:fixed !important;
+    top:0;left:0;bottom:0;
+    z-index:299;
+    width:280px !important;
+    transform:translateX(-100%);
+    transition:transform .3s var(--ease-out);
+    box-shadow:none;
+    overflow-y:auto;
+  }
+  .sidebar.mob-open{
+    transform:translateX(0);
+    box-shadow:4px 0 40px rgba(0,0,0,.5);
+  }
+
+  /* Main layout takes full width */
+  .main-wrap{margin-left:0 !important;width:100% !important}
+
+  /* Content padding tighter on mobile */
+  .content{padding:12px !important}
+
+  /* Topbar tighter */
+  .topbar{padding:0 12px !important}
+  .topbar-title{font-size:13px}
+
+  /* Store selector shrinks */
+  .store-select-label{display:none !important}
+  .store-selector{max-width:130px !important;padding-left:8px !important}
+
+  /* Stats always 2-col */
+  .stats-row{grid-template-columns:repeat(2,1fr) !important}
+  .stats-row.cols3{grid-template-columns:repeat(2,1fr) !important}
+
+  /* Tabs scroll horizontally */
+  .tab-shell{display:flex;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:var(--r-sm)}
+  .tab-shell::-webkit-scrollbar{display:none}
+  .tab-btn{flex-shrink:0;padding:7px 12px}
+
+  /* Drawers full-width on mobile */
+  .drawer{width:100vw !important}
+
+  /* Table: horizontal scroll with shadow hint */
+  .table-scroll{-webkit-overflow-scrolling:touch}
+
+  /* Toolbar wraps nicely */
+  .toolbar-row{gap:6px}
+  .search-wrap{max-width:100% !important;flex:1 1 100%}
+
+  /* Bulk bar wraps */
+  .bulk-bar{padding:8px 10px}
+
+  /* Data card header wraps */
+  .data-card-header{padding:10px 14px}
+
+  /* Stat tile compact */
+  .stat-tile{padding:14px 14px}
+  .stat-value{font-size:24px}
+  .stat-label{font-size:9.5px}
+
+  /* Inventory threshold wrap */
+  .threshold-wrap{flex-wrap:wrap}
+
+  /* pf-row single col on mobile */
+  .pf-row{grid-template-columns:1fr !important}
+  .pf-row.cols3{grid-template-columns:1fr !important}
+}
 </style>
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
+<div class="sidebar-scrim" id="sidebarScrim" onclick="closeMobSidebar()"></div>
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
   <div class="sidebar-user">
@@ -506,6 +635,11 @@ input:checked + .toggle-track::before{transform:translateX(16px);background:#fff
 <div class="main-wrap">
   <div class="topbar">
     <div class="topbar-left">
+      <button class="mob-menu-btn" id="mobMenuBtn" onclick="toggleMobSidebar()" aria-label="Open menu" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
       <span class="topbar-title">Merchant Corner</span>
     </div>
     <div class="topbar-right">
@@ -1110,6 +1244,41 @@ function openCouponDrawer(){
 }
 function closeCouponDrawer(){closeDrawer('couponDrawer');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAllDrawers();});
+
+
+/* ── MOBILE SIDEBAR ── */
+function openMobSidebar(){
+  document.getElementById('sidebar').classList.add('mob-open');
+  document.getElementById('sidebarScrim').classList.add('visible');
+  document.getElementById('mobMenuBtn').setAttribute('aria-expanded','true');
+  document.body.style.overflow='hidden';
+}
+function closeMobSidebar(){
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('sidebarScrim').classList.remove('visible');
+  document.getElementById('mobMenuBtn').setAttribute('aria-expanded','false');
+  document.body.style.overflow='';
+}
+function toggleMobSidebar(){
+  const isOpen=document.getElementById('sidebar').classList.contains('mob-open');
+  isOpen?closeMobSidebar():openMobSidebar();
+}
+// Close sidebar when a nav link is tapped on mobile
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>{
+    if(window.innerWidth<=640)closeMobSidebar();
+  });
+});
+// Swipe left to close sidebar
+(function(){
+  let startX=0,startY=0;
+  document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=Math.abs(e.changedTouches[0].clientY-startY);
+    if(dx<-50&&dy<40&&document.getElementById('sidebar').classList.contains('mob-open'))closeMobSidebar();
+  },{passive:true});
+})();
 
 function getCur(){return storeCurrency==='USD'?'$':storeCurrency==='EUR'?'€':'₹';}
 </script>
