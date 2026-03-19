@@ -21,6 +21,111 @@
 
 <style>
 /* ══════════════════════════════════════════════
+   SKELETON — mirrors sidebar + topbar + content
+   exactly so there is zero layout shift on load
+══════════════════════════════════════════════ */
+@keyframes skel-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+[data-theme="light"] .skel {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.11) 50%,
+    rgba(0,0,0,0.06) 75%
+  );
+  background-size: 600px 100%;
+  animation: skel-shimmer 1.4s infinite linear;
+}
+
+#page-skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 9999;
+  background: inherit;
+  transition: opacity .25s ease;
+}
+#page-skeleton.skel-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar replica */
+.skel-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  height: 100%;
+  background: #0d0e18;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-sidebar {
+  background: #fff;
+  border-right-color: rgba(0,0,0,0.09);
+}
+
+/* Main area */
+.skel-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Topbar replica */
+.skel-topbar {
+  height: 60px;
+  flex-shrink: 0;
+  background: #0d0e18;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+[data-theme="light"] .skel-topbar {
+  background: #fff;
+  border-bottom-color: rgba(0,0,0,0.09);
+}
+
+/* Content body */
+.skel-body {
+  flex: 1;
+  padding: 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar internals */
+.skel-sidebar-user {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 14px;
+}
+[data-theme="light"] .skel-sidebar-user { border-bottom-color: rgba(0,0,0,0.08); }
+.skel-sidebar-user-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.skel-nav-rows { display: flex; flex-direction: column; gap: 4px; }
+
+/* ══════════════════════════════════════════════
    LIGHT THEME OVERRIDES
 ══════════════════════════════════════════════ */
 [data-theme="light"] {
@@ -104,6 +209,32 @@
 }
 
 /* ══════════════════════════════════════════════
+   PAGE CONTENT TRANSITIONS
+══════════════════════════════════════════════ */
+#page-content { will-change: opacity, transform; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageIn .3s ease both; }
+
+/* ── STORE SELECTOR LOADING INDICATOR ── */
+.store-loading { position: relative; }
+.store-loading::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(108,99,255,0.25);
+  border-top-color: var(--accent, #6c63ff);
+  animation: spin .65s linear infinite;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════
    MARKETING LAYOUT
 ══════════════════════════════════════════════ */
 .marketing-layout {
@@ -128,11 +259,9 @@
 }
 .tool-card::before {
   content: '';
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background: linear-gradient(135deg, rgba(108,99,255,0.06), transparent 60%);
-  opacity: 0;
-  transition: opacity .2s;
+  opacity: 0; transition: opacity .2s;
   pointer-events: none;
 }
 .tool-card:hover {
@@ -160,7 +289,10 @@
   flex-shrink: 0;
   transition: background .2s;
 }
-.tool-card.active .tool-card-icon { background: rgba(108,99,255,0.15); border-color: rgba(108,99,255,0.25); }
+.tool-card.active .tool-card-icon {
+  background: rgba(108,99,255,0.15);
+  border-color: rgba(108,99,255,0.25);
+}
 .tool-card-name { font-size: 14px; font-weight: 800; color: var(--text); }
 .tool-card-desc { font-size: 11.5px; color: var(--text3); line-height: 1.5; padding-left: 50px; }
 .tool-card-arrow {
@@ -197,7 +329,7 @@
 .tool-panel-header p  { font-size: 12px; color: var(--text3); line-height: 1.5; }
 .tool-panel-body { padding: 24px; }
 
-/* ── FORM FIELDS (scoped to tool panel) ── */
+/* ── FORM FIELDS ── */
 .tool-panel-body .field { margin-bottom: 16px; }
 .tool-panel-body .field label {
   display: block; font-size: 11px; font-weight: 800;
@@ -213,6 +345,7 @@
   border-radius: 11px;
   font-family: 'Outfit', sans-serif; font-size: 13.5px;
   outline: none; transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
 }
 .tool-panel-body .field input:focus,
 .tool-panel-body .field textarea:focus,
@@ -297,7 +430,7 @@
   display: flex; align-items: center; gap: 5px;
 }
 .result-copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-.result-copy-btn.copied { background: var(--green); color: white; border-color: var(--green); }
+.result-copy-btn.copied { background: var(--green, #16a34a); color: white; border-color: var(--green, #16a34a); }
 
 .result-body { padding: 14px 16px; }
 .result-content {
@@ -328,11 +461,11 @@
   margin-top: 10px; padding: 5px 10px;
   border-radius: 7px;
 }
-.char-counter.ok   { background: rgba(22,163,74,0.1);  color: var(--green); }
-.char-counter.warn { background: rgba(202,138,4,0.1);  color: var(--yellow); }
-.char-counter.over { background: rgba(220,38,38,0.1);  color: var(--red); }
+.char-counter.ok   { background: rgba(22,163,74,0.1);  color: var(--green, #16a34a); }
+.char-counter.warn { background: rgba(202,138,4,0.1);  color: var(--yellow, #ca8a04); }
+.char-counter.over { background: rgba(220,38,38,0.1);  color: var(--red, #dc2626); }
 
-/* ── PLATFORM TABS (inside result for multi-variant) ── */
+/* ── PLATFORM TABS ── */
 .platform-tabs {
   display: flex; gap: 5px;
   background: var(--surface2);
@@ -361,7 +494,11 @@
 .empty-panel-icon { font-size: 40px; opacity: 0.4; }
 .empty-panel-text { font-size: 13px; font-weight: 600; }
 
-.loading-dots { display: flex; gap: 5px; align-items: center; justify-content: center; padding: 40px 0; }
+.loading-dots {
+  display: flex; gap: 5px;
+  align-items: center; justify-content: center;
+  padding: 40px 0;
+}
 .loading-dots span {
   width: 8px; height: 8px; border-radius: 50%;
   background: var(--accent);
@@ -374,17 +511,22 @@
   40%           { transform: scale(1);   opacity: 1; }
 }
 
-/* ── COPY TOAST ── */
-@keyframes fadeInOut {
-  0%   { opacity: 0; transform: translateY(8px); }
-  15%  { opacity: 1; transform: translateY(0); }
-  80%  { opacity: 1; }
-  100% { opacity: 0; }
+/* ── INLINE SKELETON FOR STORE SWITCH ── */
+/* Mirrors the 2-col marketing layout exactly */
+.inline-skel-marketing {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
 }
+
+/* ── SPINNER (used in button) ── */
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* responsive */
 @media (max-width: 860px) {
   .marketing-layout { grid-template-columns: 1fr; }
+  .inline-skel-marketing { grid-template-columns: 1fr; }
   .tool-list { flex-direction: row; flex-wrap: wrap; }
   .tool-card { flex: 1; min-width: 140px; }
   .tool-card-desc { padding-left: 0; }
@@ -399,46 +541,92 @@
 </head>
 <body>
 
-<!-- ── Skeleton ── -->
-<div id="page-skeleton">
+<!-- ══════════════════════════════════════════
+  SKELETON — perfectly mirrors the real layout:
+    skel-sidebar  → .sidebar
+    skel-topbar   → .topbar
+    skel-body     → .content
+
+  Marketing-specific body:
+    260px tool-list column + 1fr tool-panel card
+══════════════════════════════════════════ -->
+<div id="page-skeleton" aria-hidden="true">
+
+  <!-- LEFT: sidebar replica -->
   <div class="skel-sidebar">
-    <div class="skel" style="height:22px;width:68px;border-radius:5px;margin-bottom:20px;"></div>
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+    <!-- Logo -->
+    <div style="margin-bottom:22px;">
+      <div class="skel" style="height:20px;width:72px;border-radius:5px;"></div>
+    </div>
+
+    <!-- User row -->
+    <div class="skel-sidebar-user">
       <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:10px;width:80px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:110px;border-radius:4px;"></div>
+      <div class="skel-sidebar-user-text">
+        <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
+        <div class="skel" style="height:9px;width:120px;border-radius:4px;"></div>
       </div>
     </div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.65;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-    <div class="skel" style="height:34px;border-radius:9px;margin-bottom:2px;opacity:.3;"></div>
-  </div>
-  <div class="skel-main">
-    <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:100px;border-radius:5px;"></div>
-      <div class="skel" style="height:32px;width:160px;border-radius:8px;"></div>
+
+    <!-- Section label -->
+    <div class="skel" style="height:8px;width:56px;border-radius:4px;margin-bottom:8px;opacity:.45;"></div>
+
+    <!-- Nav items — "Marketing" (6th) is active -->
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.78;"></div><!-- active: Marketing -->
     </div>
+
+    <div class="skel" style="height:8px;width:64px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+
+    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
+    <div class="skel-nav-rows">
+      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: main area replica -->
+  <div class="skel-main">
+
+    <!-- Topbar -->
+    <div class="skel-topbar">
+      <div class="skel" style="height:16px;width:90px;border-radius:5px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="skel" style="height:34px;width:160px;border-radius:9px;opacity:.7;"></div>
+        <div class="skel" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
+      </div>
+    </div>
+
+    <!-- Content body — 260px tool cards + 1fr tool panel -->
     <div class="skel-body">
-      <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;">
+      <div class="inline-skel-marketing">
+
+        <!-- Tool card list (4 cards) -->
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="skel" style="height:74px;border-radius:14px;"></div>
-          <div class="skel" style="height:74px;border-radius:14px;opacity:.8;"></div>
-          <div class="skel" style="height:74px;border-radius:14px;opacity:.6;"></div>
-          <div class="skel" style="height:74px;border-radius:14px;opacity:.4;"></div>
+          <div class="skel" style="height:76px;border-radius:16px;"></div>
+          <div class="skel" style="height:76px;border-radius:16px;opacity:.80;"></div>
+          <div class="skel" style="height:76px;border-radius:16px;opacity:.60;"></div>
+          <div class="skel" style="height:76px;border-radius:16px;opacity:.40;"></div>
         </div>
-        <div class="skel" style="height:480px;border-radius:18px;"></div>
+
+        <!-- Tool panel card -->
+        <div class="skel" style="height:500px;border-radius:20px;opacity:.9;"></div>
+
       </div>
     </div>
   </div>
 </div>
+<!-- /skeleton -->
 
-<!-- ── Sidebar ── -->
+<!-- ── SIDEBAR ── -->
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
   <div class="sidebar-user">
@@ -452,7 +640,6 @@
     <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
     <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
-    
     <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
     <a class="nav-item active" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
@@ -469,7 +656,7 @@
   </div>
 </div>
 
-<!-- ── Main ── -->
+<!-- ── MAIN ── -->
 <div class="main-wrap">
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">Marketing</span></div>
@@ -485,6 +672,73 @@
 </div>
 
 <script>
+/* ══════════════════════════════════════════════
+   SKELETON DISMISSAL
+══════════════════════════════════════════════ */
+function hideSkeleton() {
+  const skel = document.getElementById('page-skeleton')
+  if (!skel) return
+  skel.classList.add('skel-hidden')
+  setTimeout(() => skel.remove(), 280)
+}
+
+/* ══════════════════════════════════════════════
+   SMOOTH TRANSITION HELPERS
+══════════════════════════════════════════════ */
+const FADE_MS = 180
+
+function fadeOut(el) {
+  return new Promise(resolve => {
+    el.style.transition    = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
+    el.style.opacity       = '0'
+    el.style.transform     = 'translateY(-6px)'
+    el.style.pointerEvents = 'none'
+    setTimeout(resolve, FADE_MS)
+  })
+}
+
+function fadeIn(el) {
+  el.style.transition    = 'none'
+  el.style.opacity       = '0'
+  el.style.transform     = 'translateY(8px)'
+  el.style.display       = ''
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.transition    = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
+      el.style.opacity       = '1'
+      el.style.transform     = 'translateY(0)'
+      el.style.pointerEvents = ''
+    })
+  })
+}
+
+/* ══════════════════════════════════════════════
+   INLINE SKELETON for store-switch
+   Mirrors the marketing 2-col grid exactly:
+   260px tool-card column + 1fr tool-panel
+══════════════════════════════════════════════ */
+function inlineSkeletonHTML() {
+  return `
+    <div class="inline-skel-marketing">
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="skel" style="height:76px;border-radius:16px;"></div>
+        <div class="skel" style="height:76px;border-radius:16px;opacity:.80;"></div>
+        <div class="skel" style="height:76px;border-radius:16px;opacity:.60;"></div>
+        <div class="skel" style="height:76px;border-radius:16px;opacity:.40;"></div>
+      </div>
+      <div class="skel" style="height:500px;border-radius:20px;opacity:.9;"></div>
+    </div>`
+}
+
+/* ══════════════════════════════════════════════
+   STORE SELECTOR BUSY INDICATOR
+══════════════════════════════════════════════ */
+function setStoreLoading(on) {
+  const wrap = document.getElementById('store-select-wrap')
+  if (!wrap) return
+  on ? wrap.classList.add('store-loading') : wrap.classList.remove('store-loading')
+}
+
 /* ══════════════════════════════════════════════
    THEME SYSTEM
 ══════════════════════════════════════════════ */
@@ -504,14 +758,20 @@ function applyTheme(dark) {
   if (btn) btn.textContent = dark ? '🌙' : '☀️'
   localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
 }
-
 function toggleTheme() { applyTheme(!_isDark) }
 applyTheme(_isDark)
 
 /* ══════════════════════════════════════════════
    STATE
+   _loadToken: race-condition guard.
+   allProducts: refreshed per store.
+   currentTool: persists across store switches
+     so the user stays on the same tool.
 ══════════════════════════════════════════════ */
-let currentStoreId = '', currentTool = 'instagram', allProducts = []
+let currentStoreId = ''
+let currentTool    = 'instagram'
+let allProducts    = []
+let _loadToken     = 0
 
 const TOOLS = {
   instagram: {
@@ -542,16 +802,16 @@ const TOOLS = {
 window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('marketing', (id) => {
     currentStoreId = id
-    loadProducts()
+    loadStoreData()
   })
-  if (!nav) return
-  currentStoreId = nav.currentStoreId
-  if (currentStoreId) await loadProducts()
 
-  // Inject theme toggle
+  if (!nav) { hideSkeleton(); return }
+  currentStoreId = nav.currentStoreId
+
+  // Theme toggle button
   const topbarRight = document.querySelector('.topbar-right')
   if (topbarRight && !document.getElementById('themeToggleBtn')) {
-    const btn = document.createElement('button')
+    const btn       = document.createElement('button')
     btn.className   = 'theme-toggle'
     btn.id          = 'themeToggleBtn'
     btn.title       = 'Toggle day / night mode'
@@ -561,20 +821,91 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
   applyTheme(_isDark)
 
-  renderPage()
+  if (currentStoreId) await loadStoreDataFirstLoad()
+  else {
+    renderPage()
+    const content = document.getElementById('page-content')
+    content.style.display = ''
+    hideSkeleton()
+  }
 })
 
-async function loadProducts() {
-  if (!currentStoreId) return
-  try { allProducts = await apiFetch(`/stores/${currentStoreId}/products`) } catch {}
+/* ══════════════════════════════════════════════
+   FIRST LOAD — skeleton visible while fetching,
+   then reveal content and dismiss skeleton.
+══════════════════════════════════════════════ */
+async function loadStoreDataFirstLoad() {
+  const token   = ++_loadToken
+  const content = document.getElementById('page-content')
+  setStoreLoading(true)
+
+  try {
+    allProducts = await apiFetch(`/stores/${currentStoreId}/products`)
+    if (token !== _loadToken) return
+  } catch (_) {
+    allProducts = []
+  }
+
+  if (token !== _loadToken) return
+
+  renderPage()
+  content.style.display = ''
+  requestAnimationFrame(() => hideSkeleton())
+  setStoreLoading(false)
+}
+
+/* ══════════════════════════════════════════════
+   STORE SWITCH — 3-phase transition
+   Phase 1 → fade out current content
+   Phase 2 → inline shimmer skeleton
+   Phase 3 → fetch products → fade in real content
+══════════════════════════════════════════════ */
+async function loadStoreData() {
+  const token   = ++_loadToken
+  const content = document.getElementById('page-content')
+  const isFirst = content.style.display === 'none'
+
+  if (isFirst) { await loadStoreDataFirstLoad(); return }
+
+  setStoreLoading(true)
+
+  // Phase 1: fade out
+  await fadeOut(content)
+  if (token !== _loadToken) return
+
+  // Phase 2: inline skeleton
+  content.innerHTML = inlineSkeletonHTML()
+  fadeIn(content)
+
+  // Fetch products for the new store
+  try {
+    allProducts = await apiFetch(`/stores/${currentStoreId}/products`)
+  } catch (_) {
+    allProducts = []
+  }
+
+  if (token !== _loadToken) return
+
+  // Phase 3: fade out skeleton, render real content, fade in
+  await fadeOut(content)
+  if (token !== _loadToken) return
+
+  renderPage()
+  fadeIn(content)
+  setStoreLoading(false)
 }
 
 /* ══════════════════════════════════════════════
    PAGE RENDER
+   Builds the full marketing layout.
+   Preserves currentTool selection across
+   store switches.
 ══════════════════════════════════════════════ */
 function renderPage() {
-  const content = document.getElementById('page-content')
-  const productOptions = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
+  const content        = document.getElementById('page-content')
+  const productOptions = allProducts.map(p =>
+    `<option value="${p._id}">${p.name}</option>`
+  ).join('')
 
   content.innerHTML = `
     <div class="marketing-layout">
@@ -596,12 +927,20 @@ function renderPage() {
       <div class="tool-panel" id="toolPanel">
         ${renderToolPanel(productOptions)}
       </div>
+
     </div>`
 }
 
+/* ══════════════════════════════════════════════
+   TOOL PANEL HTML
+══════════════════════════════════════════════ */
 function renderToolPanel(productOptions) {
-  const t = TOOLS[currentTool]
+  const t        = TOOLS[currentTool]
   const hasOffer = currentTool === 'email' || currentTool === 'whatsapp'
+  const label    = currentTool === 'instagram' ? 'Post'
+                 : currentTool === 'email'     ? 'Email'
+                 : currentTool === 'sms'       ? 'SMS'
+                 : 'Message'
 
   return `
     <div class="tool-panel-header">
@@ -611,12 +950,14 @@ function renderToolPanel(productOptions) {
         <p>${t.help}</p>
       </div>
     </div>
+
     <div class="tool-panel-body">
       <div class="field">
         <label>Campaign Goal *</label>
         <input type="text" id="mktGoal"
           placeholder="e.g. Promote summer sale, Announce new product, Drive store traffic…">
       </div>
+
       <div class="field-row">
         <div class="field">
           <label>Product <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
@@ -628,20 +969,22 @@ function renderToolPanel(productOptions) {
         <div class="field">
           <label>Tone</label>
           <select id="mktTone">
-            <option value="friendly">😊 Friendly & Warm</option>
+            <option value="friendly">😊 Friendly &amp; Warm</option>
             <option value="professional">💼 Professional</option>
             <option value="urgent">🔥 Urgent / FOMO</option>
-            <option value="playful">🎉 Playful & Fun</option>
-            <option value="luxurious">✨ Premium & Luxurious</option>
+            <option value="playful">🎉 Playful &amp; Fun</option>
+            <option value="luxurious">✨ Premium &amp; Luxurious</option>
           </select>
         </div>
       </div>
+
       ${hasOffer ? `
       <div class="field">
         <label>Offer / Discount <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
         <input type="text" id="mktOffer"
           placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal">
       </div>` : ''}
+
       <div class="field">
         <label>Brand / Store Name</label>
         <input type="text" id="mktBrand" placeholder="Your store or brand name">
@@ -649,7 +992,7 @@ function renderToolPanel(productOptions) {
 
       <button class="btn-generate" onclick="generateMarketing()" id="mktGenBtn">
         <span class="sparkle">✨</span>
-        Generate ${currentTool === 'instagram' ? 'Post' : currentTool === 'email' ? 'Email' : currentTool === 'sms' ? 'SMS' : 'Message'}
+        Generate ${label}
       </button>
 
       <div id="mktResult"></div>
@@ -658,31 +1001,41 @@ function renderToolPanel(productOptions) {
 
 /* ══════════════════════════════════════════════
    SWITCH TOOL
+   Updates tool card active state and re-renders
+   the panel in place — no full-page transition
+   needed since switching tools is instant and
+   doesn't require a network round trip.
 ══════════════════════════════════════════════ */
 function switchTool(tool) {
   currentTool = tool
-  // Update sidebar active state
-  document.querySelectorAll('.tool-card').forEach((c, i) => {
-    const key = Object.keys(TOOLS)[i]
-    c.classList.toggle('active', key === tool)
+  // Update left sidebar active state
+  document.querySelectorAll('.tool-card').forEach((card, i) => {
+    card.classList.toggle('active', Object.keys(TOOLS)[i] === tool)
   })
-  const productOptions = allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('')
+  // Re-render panel
+  const productOptions = allProducts.map(p =>
+    `<option value="${p._id}">${p.name}</option>`
+  ).join('')
   document.getElementById('toolPanel').innerHTML = renderToolPanel(productOptions)
 }
 
 /* ══════════════════════════════════════════════
-   GENERATE
+   GENERATE MARKETING CONTENT
 ══════════════════════════════════════════════ */
 async function generateMarketing() {
   if (!currentStoreId) return toast('Select a store first', 'error')
   const goal = document.getElementById('mktGoal').value.trim()
-  if (!goal) return toast('Enter a campaign goal', 'error')
+  if (!goal)  return toast('Enter a campaign goal', 'error')
 
-  const btn = document.getElementById('mktGenBtn')
+  const btn     = document.getElementById('mktGenBtn')
+  const resultEl = document.getElementById('mktResult')
+  const label   = currentTool === 'instagram' ? 'Post'
+                : currentTool === 'email'     ? 'Email'
+                : currentTool === 'sms'       ? 'SMS'
+                : 'Message'
+
   btn.disabled = true
   btn.innerHTML = `<span style="display:inline-flex;gap:5px;align-items:center;"><span style="display:inline-block;animation:spin .7s linear infinite">⏳</span> Generating…</span>`
-
-  const resultEl = document.getElementById('mktResult')
   resultEl.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`
 
   const productId = document.getElementById('mktProduct')?.value || ''
@@ -700,7 +1053,9 @@ async function generateMarketing() {
       body: JSON.stringify({
         store_name:          brand || store?.name || 'My Store',
         product_name:        product ? product.name : goal,
-        product_description: product ? (product.description || '') + (offer ? ' Offer: ' + offer : '') : (offer || goal),
+        product_description: product
+          ? (product.description || '') + (offer ? ' Offer: ' + offer : '')
+          : (offer || goal),
         platform:            currentTool,
         tone,
         currency:            'INR',
@@ -710,18 +1065,17 @@ async function generateMarketing() {
 
     const allContent = r.content
     let content
-    if      (currentTool === 'instagram')  content = allContent.instagram || allContent
-    else if (currentTool === 'whatsapp')   content = allContent.whatsapp  || allContent
-    else if (currentTool === 'email')      content = allContent.email      || allContent
-    else if (currentTool === 'sms')        content = { message: allContent.sms || allContent.message || '' }
-    else                                   content = allContent
+    if      (currentTool === 'instagram') content = allContent.instagram || allContent
+    else if (currentTool === 'whatsapp')  content = allContent.whatsapp  || allContent
+    else if (currentTool === 'email')     content = allContent.email     || allContent
+    else if (currentTool === 'sms')       content = { message: allContent.sms || allContent.message || '' }
+    else                                  content = allContent
 
     renderResult(content)
   } catch (e) {
-    resultEl.innerHTML = `<div style="padding:16px;color:var(--red);font-size:13px;font-weight:600;">⚠️ ${e.message}</div>`
+    resultEl.innerHTML = `<div style="padding:16px;color:var(--red,#f87171);font-size:13px;font-weight:600;">⚠️ ${e.message}</div>`
   }
 
-  const label = currentTool === 'instagram' ? 'Post' : currentTool === 'email' ? 'Email' : currentTool === 'sms' ? 'SMS' : 'Message'
   btn.disabled = false
   btn.innerHTML = `<span class="sparkle">✨</span> Generate ${label}`
 }
@@ -731,7 +1085,10 @@ async function generateMarketing() {
 ══════════════════════════════════════════════ */
 function renderResult(content) {
   const res = document.getElementById('mktResult')
-  if (!content) { res.innerHTML = '<p style="color:var(--red);padding-top:12px;">No content generated</p>'; return }
+  if (!content) {
+    res.innerHTML = '<p style="color:var(--red,#f87171);padding-top:12px;">No content generated</p>'
+    return
+  }
 
   let html = '<div class="mkt-results">'
 
@@ -772,8 +1129,8 @@ function renderResult(content) {
   } else if (currentTool === 'sms') {
     const msg = content.message || content.text || ''
     const len = msg.length
-    const cls = len > 160 ? 'over' : len > 140 ? 'warn' : 'ok'
-    const icon = len > 160 ? '⚠️' : len > 140 ? '⚡' : '✓'
+    const cls  = len > 160 ? 'over' : len > 140 ? 'warn' : 'ok'
+    const icon = len > 160 ? '⚠️'  : len > 140 ? '⚡'   : '✓'
     html += `<div class="result-block">
       <div class="result-block-header">
         <span class="result-block-title">📱 SMS Message</span>
@@ -802,6 +1159,9 @@ function resultBlock(title, text, id) {
   </div>`
 }
 
+/* ══════════════════════════════════════════════
+   COPY TO CLIPBOARD
+══════════════════════════════════════════════ */
 function copyBlock(id, btn) {
   const el = document.getElementById(id)
   if (!el) return
