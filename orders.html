@@ -1,806 +1,510 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#080910">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>eKart — Orders</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:         #0a0b0f;
-  --bg2:        #0f1117;
-  --bg3:        #13151d;
-  --surface:    #161820;
-  --surface2:   #1c1f2b;
-  --surface3:   #222535;
-  --border:     rgba(255,255,255,0.06);
-  --border2:    rgba(255,255,255,0.10);
-  --border3:    rgba(255,255,255,0.15);
-  --text:       #f0f2f8;
-  --text2:      #9ba3be;
-  --text3:      #5a6280;
-  --text4:      #3a4060;
-  --brand:      #4f6ef7;
-  --brand2:     #3d5ae0;
-  --brand3:     #6b85f8;
-  --brand-glow: rgba(79,110,247,0.18);
-  --brand-soft: rgba(79,110,247,0.08);
-  --green:      #22d3a0;
-  --green-soft: rgba(34,211,160,0.08);
-  --amber:      #f5a623;
-  --amber-soft: rgba(245,166,35,0.08);
-  --red:        #f56565;
-  --red-soft:   rgba(245,101,101,0.08);
-  --sky:        #38bdf8;
-  --sky-soft:   rgba(56,189,248,0.08);
-  --violet:     #a78bfa;
-  --violet-soft:rgba(167,139,250,0.08);
-  --sidebar-w:  248px;
-  --topbar-h:   58px;
-  --radius:     12px;
-  --radius-lg:  16px;
-  --radius-xl:  20px;
-  --font:       'Sora', sans-serif;
-  --mono:       'JetBrains Mono', monospace;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
-  --shadow:     0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
-  --shadow-lg:  0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-brand: 0 4px 20px rgba(79,110,247,0.3);
-  --t:          all 0.18s cubic-bezier(0.4,0,0.2,1);
-}
-
-[data-theme="light"] {
-  --bg:         #f5f6fb;
-  --bg2:        #eef0f8;
-  --bg3:        #e8eaf4;
-  --surface:    #ffffff;
-  --surface2:   #f5f6fb;
-  --surface3:   #eef0f8;
-  --border:     rgba(0,0,0,0.06);
-  --border2:    rgba(0,0,0,0.09);
-  --border3:    rgba(0,0,0,0.13);
-  --text:       #0f1117;
-  --text2:      #374151;
-  --text3:      #6b7280;
-  --text4:      #9ca3af;
-  --brand-glow: rgba(79,110,247,0.12);
-  --brand-soft: rgba(79,110,247,0.06);
-  --green-soft: rgba(34,211,160,0.06);
-  --amber-soft: rgba(245,166,35,0.06);
-  --red-soft:   rgba(245,101,101,0.06);
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow:     0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
-  --shadow-lg:  0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.07);
-}
-
-html { background: var(--bg); }
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text4); }
-
-/* ─── SKELETON ─── */
-@keyframes shimmer {
-  0%   { background-position: -800px 0; }
-  100% { background-position:  800px 0; }
-}
-.skel {
-  border-radius: 8px;
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
-}
-#page-skeleton {
-  position: fixed; inset: 0; z-index: 9999;
-  display: flex; background: var(--bg);
-  transition: opacity .3s ease;
-}
-#page-skeleton.hidden { opacity: 0; pointer-events: none; }
-.skel-sidebar {
-  width: var(--sidebar-w); flex-shrink: 0; height: 100%;
-  background: var(--bg2); border-right: 1px solid var(--border);
-  padding: 24px 16px; display: flex; flex-direction: column; gap: 0;
-}
-.skel-main { flex: 1; display: flex; flex-direction: column; }
-.skel-topbar {
-  height: var(--topbar-h); background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
-}
-.skel-body { flex: 1; padding: 28px; display: flex; flex-direction: column; gap: 20px; }
-.skel-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
-
-/* ─── SIDEBAR ─── */
-.sidebar {
-  width: var(--sidebar-w);
-  flex-shrink: 0;
-  height: 100vh;
-  position: fixed;
-  top: 0; left: 0;
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  z-index: 100;
-  overflow: hidden;
-}
-
-.sidebar-inner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 20px 12px 20px;
-}
-
-.sidebar-logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 4px 8px 20px;
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.logo-icon {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--brand);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 800; color: white;
-  box-shadow: 0 4px 12px rgba(79,110,247,0.4);
-  flex-shrink: 0;
-  font-family: var(--mono);
-}
-.logo-text {
-  font-size: 16px; font-weight: 700; color: var(--text);
-  letter-spacing: -0.02em;
-}
-.logo-text em { color: var(--brand3); font-style: normal; }
-
-.sidebar-user {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 8px;
-  border-radius: var(--radius);
-  margin-bottom: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-.user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand), #7c6bfb);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: white;
-  flex-shrink: 0;
-}
-.user-info { min-width: 0; flex: 1; }
-.user-name { font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-role { font-size: 11px; color: var(--text3); margin-top: 1px; }
-
-.nav-section { margin-bottom: 24px; }
-.nav-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--text4);
-  padding: 0 8px; margin-bottom: 6px;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 10px;
-  font-size: 13px; font-weight: 500;
-  color: var(--text3); text-decoration: none;
-  transition: var(--t); margin-bottom: 2px;
-  white-space: nowrap; position: relative;
-}
-.nav-item:hover {
-  color: var(--text); background: var(--surface);
-}
-.nav-item.active {
-  color: var(--brand3);
-  background: var(--brand-soft);
-  font-weight: 600;
-}
-.nav-item.active::before {
-  content: '';
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  width: 3px; height: 16px; border-radius: 0 2px 2px 0;
-  background: var(--brand);
-}
-.nav-icon {
-  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
-}
-.nav-badge {
-  margin-left: auto; font-size: 10px; font-weight: 700;
-  background: var(--amber-soft); color: var(--amber);
-  padding: 2px 6px; border-radius: 20px;
-}
-
-.sidebar-bottom {
-  margin-top: auto; padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.btn-logout {
-  width: 100%; display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 10px;
-  font-size: 13px; font-weight: 500; color: var(--text3);
-  background: none; border: none; cursor: pointer; font-family: var(--font);
-  transition: var(--t);
-}
-.btn-logout:hover { color: var(--red); background: var(--red-soft); }
-
-/* ─── MAIN LAYOUT ─── */
-.main-wrap {
-  margin-left: var(--sidebar-w);
-  flex: 1; display: flex; flex-direction: column; min-height: 100vh;
-}
-
-/* ─── TOPBAR ─── */
-.topbar {
-  height: var(--topbar-h); flex-shrink: 0;
-  background: var(--bg2); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 28px; position: sticky; top: 0; z-index: 50;
-  backdrop-filter: blur(12px);
-}
-.topbar-title {
-  font-size: 15px; font-weight: 700; color: var(--text);
-  letter-spacing: -0.01em;
-}
-.topbar-right { display: flex; align-items: center; gap: 10px; }
-
-.store-select-wrap {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 10px; padding: 0 12px 0 10px; height: 36px;
-  transition: var(--t);
-}
-.store-select-wrap:hover { border-color: var(--border3); }
-.store-select-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--text3); flex-shrink: 0;
-}
-.store-selector {
-  background: none; border: none; outline: none;
-  font-family: var(--font); font-size: 13px; font-weight: 600;
-  color: var(--text); cursor: pointer; max-width: 140px;
-}
-.store-selector option { background: var(--surface2); }
-
-/* ─── CONTENT ─── */
-.content {
-  flex: 1; padding: 28px;
-  display: none;
-}
-.content.visible { display: block; }
-
-/* ─── STAT CARDS ─── */
-.stat-grid {
-  display: grid; grid-template-columns: repeat(4,1fr);
-  gap: 14px; margin-bottom: 24px;
-}
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  position: relative; overflow: hidden;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-  cursor: default;
-}
-.stat-card::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: var(--stat-accent, var(--brand));
-  opacity: 0; transition: opacity .2s;
-}
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
-  border-color: var(--border2);
-}
-.stat-card:hover::after { opacity: 1; }
-.stat-top {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 14px;
-}
-.stat-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  background: var(--stat-bg, var(--brand-soft));
-}
-.stat-trend {
-  font-size: 11px; font-weight: 700;
-  padding: 3px 8px; border-radius: 20px;
-  background: var(--green-soft); color: var(--green);
-}
-.stat-trend.down { background: var(--red-soft); color: var(--red); }
-.stat-val {
-  font-family: var(--mono); font-size: 26px; font-weight: 600;
-  color: var(--text); letter-spacing: -0.04em; line-height: 1;
-  margin-bottom: 6px;
-}
-.stat-label {
-  font-size: 11.5px; font-weight: 600; color: var(--text3);
-}
-.stat-sub {
-  font-size: 11px; color: var(--text4); margin-top: 2px;
-}
-
-/* ─── TOOLBAR ─── */
-.toolbar {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 10px 14px;
-  margin-bottom: 14px; flex-wrap: wrap;
-}
-.search-wrap { position: relative; flex: 1; min-width: 180px; }
-.search-icon {
-  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
-  color: var(--text3); pointer-events: none;
-}
-.search-field {
-  width: 100%; padding: 8px 14px 8px 34px;
-  background: var(--surface2); border: 1.5px solid var(--border);
-  border-radius: 9px; font-family: var(--font); font-size: 13px;
-  color: var(--text); outline: none; transition: var(--t);
-}
-.search-field::placeholder { color: var(--text4); }
-.search-field:focus {
-  border-color: var(--brand); background: var(--bg2);
-  box-shadow: 0 0 0 3px var(--brand-glow);
-}
-.filter-pill {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 12px; border-radius: 9px;
-  background: var(--surface2); border: 1.5px solid var(--border);
-  font-family: var(--font); font-size: 12.5px; font-weight: 600;
-  color: var(--text2); cursor: pointer; outline: none;
-  transition: var(--t); appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%235a6280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 10px center;
-  padding-right: 28px;
-}
-.filter-pill:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow); }
-.filter-pill option { background: var(--surface2); }
-.toolbar-sep { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
-.count-chip {
-  font-size: 11.5px; font-weight: 700; color: var(--text3);
-  white-space: nowrap; margin-left: auto;
-  background: var(--surface2); border: 1px solid var(--border);
-  padding: 4px 10px; border-radius: 20px;
-}
-
-/* ─── TABLE ─── */
-.table-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-table { width: 100%; border-collapse: collapse; }
-thead th {
-  padding: 11px 16px; text-align: left;
-  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text3); background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap; user-select: none;
-}
-thead th:first-child { padding-left: 20px; }
-thead th:last-child  { padding-right: 20px; }
-tbody td {
-  padding: 14px 16px; font-size: 13.5px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle; transition: background .12s;
-}
-tbody tr:last-child td { border-bottom: none; }
-tbody tr { transition: background .12s; }
-tbody tr:hover td { background: var(--brand-soft); }
-tbody td:first-child { padding-left: 20px; }
-tbody td:last-child  { padding-right: 20px; }
-
-/* ─── CUSTOMER CELL ─── */
-.cust-cell { display: flex; align-items: center; gap: 10px; }
-.cust-avatar {
-  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--brand), #7c6bfb);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: white;
-  box-shadow: 0 2px 8px rgba(79,110,247,0.25);
-}
-.cust-name  { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
-.cust-email { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
-
-/* ─── MONO DATA ─── */
-.mono { font-family: var(--mono); font-size: 12.5px; font-weight: 500; }
-.order-num { color: var(--brand3); font-weight: 600; }
-
-/* ─── BADGES ─── */
-.badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
-}
-.badge-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: currentColor; flex-shrink: 0;
-}
-.badge-pending    { background: var(--amber-soft);  color: var(--amber); }
-.badge-confirmed  { background: var(--violet-soft);  color: var(--violet); }
-.badge-processing { background: var(--brand-soft);   color: var(--brand3); }
-.badge-shipped    { background: var(--sky-soft);     color: var(--sky); }
-.badge-delivered  { background: var(--green-soft);   color: var(--green); }
-.badge-cancelled  { background: var(--red-soft);     color: var(--red); }
-
-/* ─── PAYMENT CHIP ─── */
-.pay-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; font-weight: 600; color: var(--text3);
-  background: var(--surface2); border: 1px solid var(--border);
-  padding: 2px 7px; border-radius: 6px; margin-top: 3px;
-}
-
-/* ─── ACTION BTN ─── */
-.btn-action {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 13px; border-radius: 8px;
-  background: var(--surface2); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 12px; font-weight: 600;
-  cursor: pointer; font-family: var(--font); transition: var(--t);
-}
-.btn-action:hover {
-  background: var(--brand-soft); border-color: var(--brand);
-  color: var(--brand3);
-  box-shadow: 0 2px 8px var(--brand-glow);
-}
-
-/* ─── BUTTONS ─── */
-.btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 18px; border-radius: 10px;
-  font-family: var(--font); font-size: 13px; font-weight: 600;
-  cursor: pointer; border: none; transition: var(--t);
-}
-.btn-primary {
-  background: var(--brand); color: white;
-  box-shadow: 0 2px 10px rgba(79,110,247,0.35);
-}
-.btn-primary:hover {
-  background: var(--brand2); transform: translateY(-1px);
-  box-shadow: var(--shadow-brand);
-}
-.btn-primary:active { transform: translateY(0); }
-.btn-secondary {
-  background: var(--surface2); border: 1px solid var(--border2); color: var(--text2);
-}
-.btn-secondary:hover { border-color: var(--brand); color: var(--brand3); background: var(--brand-soft); }
-.btn-ghost {
-  background: none; border: none; color: var(--text3); padding: 9px 14px;
-}
-.btn-ghost:hover { color: var(--text); background: var(--surface2); }
-.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
-
-/* ─── EXPORT BTN ─── */
-.btn-export {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 13px; border-radius: 9px;
-  background: var(--surface); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 12px; font-weight: 600;
-  cursor: pointer; font-family: var(--font); transition: var(--t);
-}
-.btn-export:hover { border-color: var(--brand3); color: var(--brand3); background: var(--brand-soft); }
-
-/* ─── THEME TOGGLE ─── */
-.theme-btn {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; transition: var(--t);
-  flex-shrink: 0;
-}
-.theme-btn:hover {
-  border-color: var(--brand); background: var(--brand-soft);
-  transform: rotate(15deg) scale(1.05);
-}
-
-/* ─── EMPTY STATE ─── */
-.empty-state {
-  padding: 72px 20px; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
-}
-.empty-illustration {
-  width: 72px; height: 72px; border-radius: 20px;
-  background: var(--surface2); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 32px; margin-bottom: 4px;
-}
-.empty-title { font-size: 15px; font-weight: 700; color: var(--text); }
-.empty-sub   { font-size: 13px; color: var(--text3); max-width: 260px; }
-
-/* ─── SPINNER ─── */
-.spinner {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 2.5px solid var(--border2); border-top-color: var(--brand);
-  animation: spin .65s linear infinite; margin: 72px auto;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── PAGE TRANSITIONS ─── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.page-enter { animation: fadeUp .3s ease both; }
-
-@keyframes rowIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-tbody tr { animation: rowIn .2s ease both; }
-tbody tr:nth-child(2) { animation-delay: .03s; }
-tbody tr:nth-child(3) { animation-delay: .06s; }
-tbody tr:nth-child(4) { animation-delay: .09s; }
-tbody tr:nth-child(5) { animation-delay: .12s; }
-tbody tr:nth-child(6) { animation-delay: .15s; }
-tbody tr:nth-child(7) { animation-delay: .18s; }
-
-/* ─── INLINE SKELETON ─── */
-.inline-skel-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
-.inline-skel-card  { border-radius: var(--radius-lg); height: 100px; }
-.inline-skel-bar   { border-radius: var(--radius-lg); height: 52px; margin-bottom: 14px; }
-.inline-skel-thead { height: 40px; border-radius: 0; margin-bottom: 1px; opacity: .5; }
-.inline-skel-row   { height: 64px; border-radius: 0; margin-bottom: 1px; }
-
-/* ─── MODAL ─── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.7);
-  backdrop-filter: blur(8px);
-  z-index: 1000; display: none;
-  align-items: center; justify-content: center; padding: 20px;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: var(--radius-xl); padding: 28px;
-  width: 100%; max-width: 520px;
-  box-shadow: var(--shadow-lg);
-  animation: modalIn .28s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(.93) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.modal-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 20px; padding-bottom: 18px;
-  border-bottom: 1px solid var(--border);
-}
-.modal-icon {
-  width: 40px; height: 40px; border-radius: 11px;
-  background: var(--brand-soft); border: 1px solid rgba(79,110,247,0.2);
-  display: flex; align-items: center; justify-content: center; font-size: 20px;
-}
-.modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
-.modal-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
-.modal-footer {
-  display: flex; gap: 10px; justify-content: flex-end;
-  margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border);
-}
-
-/* ─── ORDER DETAIL ─── */
-.order-detail-box {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px 18px;
-  margin-bottom: 18px;
-}
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-.detail-cell {}
-.detail-key { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text4); margin-bottom: 3px; }
-.detail-val { font-size: 13px; font-weight: 600; color: var(--text); }
-.items-list {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 9px; overflow: hidden;
-}
-.item-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 9px 12px; border-bottom: 1px solid var(--border);
-  font-size: 12.5px;
-}
-.item-row:last-child { border-bottom: none; }
-.item-total {
-  border-top: 1px solid var(--border); padding: 10px 12px;
-  display: flex; justify-content: space-between;
-  font-size: 13px; font-weight: 700;
-}
-
-/* ─── FORM FIELDS ─── */
-.field { margin-bottom: 14px; }
-.field label {
-  display: block; font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 6px;
-}
-.field input, .field textarea, .field select {
-  width: 100%; padding: 10px 13px;
-  background: var(--bg2); color: var(--text);
-  border: 1.5px solid var(--border2); border-radius: 10px;
-  font-family: var(--font); font-size: 13.5px; outline: none;
-  transition: var(--t);
-}
-.field input:focus, .field textarea:focus, .field select:focus {
-  border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-glow);
-  background: var(--bg);
-}
-.field textarea { min-height: 80px; resize: vertical; }
-.field select { appearance: none; cursor: pointer; }
-
-/* ─── STORE LOADING ─── */
-.store-loading { position: relative; }
-.store-loading::after {
-  content: ''; position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
-  width: 13px; height: 13px; border-radius: 50%;
-  border: 2px solid var(--border2); border-top-color: var(--brand);
-  animation: spin .6s linear infinite; pointer-events: none;
-}
-
-/* ─── LIGHT THEME OVERRIDES ─── */
-[data-theme="light"] .sidebar    { background: #fff; }
-[data-theme="light"] .topbar     { background: rgba(255,255,255,0.9); }
-[data-theme="light"] .stat-card  { background: #fff; }
-[data-theme="light"] .toolbar    { background: #fff; }
-[data-theme="light"] .table-card { background: #fff; }
-[data-theme="light"] thead th    { background: #f9fafb; }
-[data-theme="light"] .modal      { background: #fff; }
-[data-theme="light"] .order-detail-box { background: #f5f6fb; }
-[data-theme="light"] .items-list { background: #fff; }
-[data-theme="light"] .field input,
-[data-theme="light"] .field textarea,
-[data-theme="light"] .field select { background: #f5f6fb; }
-[data-theme="light"] .search-field { background: #f5f6fb; }
-[data-theme="light"] .filter-pill  { background: #f5f6fb; }
-[data-theme="light"] .store-select-wrap { background: #fff; }
-[data-theme="light"] .skel-sidebar { background: #fff; }
-[data-theme="light"] .skel-topbar  { background: #fff; }
-[data-theme="light"] .skel { background: linear-gradient(90deg,rgba(0,0,0,.04) 25%,rgba(0,0,0,.08) 50%,rgba(0,0,0,.04) 75%); background-size:800px 100%; animation:shimmer 1.6s ease-in-out infinite; }
-
-/* ─── RESPONSIVE ─── */
-@media (max-width: 1100px) {
-  .stat-grid { grid-template-columns: repeat(2,1fr); }
-  .inline-skel-stats { grid-template-columns: repeat(2,1fr); }
-}
-@media (max-width: 700px) {
-  :root { --sidebar-w: 0px; }
-  .sidebar { transform: translateX(-100%); }
-  .topbar { padding: 0 16px; }
-  .content { padding: 16px; }
-  .stat-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .search-wrap { min-width: 0; }
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="nav.css">
 
 <script>
 (function(){
   if(localStorage.getItem('ekart_theme')==='light'){
     document.documentElement.setAttribute('data-theme','light');
-    document.documentElement.style.background='#f5f6fb';
+    document.documentElement.style.background='#f0f2f8';
   }
 })();
 </script>
+
+<style>
+/* ═══════════════════════════════════════════════════════
+   LIGHT THEME — only what nav.css doesn't already cover
+═══════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  --bg:#f0f2f8; --surface:#fff; --surface2:#f0f2f8; --surface3:#e4e7f0;
+  --border:rgba(0,0,0,.07); --border2:rgba(0,0,0,.11);
+  --text:#0d1020; --text2:#374060; --text3:#6b7490;
+  --green:#16a34a; --red:#dc2626; --yellow:#ca8a04; --blue:#2563eb;
+  --accent:#5b52e8; --accent2:#7c72fa;
+}
+[data-theme="light"] body        { background:#f0f2f8 !important; }
+[data-theme="light"] .sidebar    { background:#fff !important; }
+[data-theme="light"] .topbar     { background:#fff !important; border-bottom-color:rgba(0,0,0,.08) !important; }
+[data-theme="light"] .main-wrap  { background:#f0f2f8 !important; }
+
+/* ═══════════════════════════════════════════════════════
+   SKELETON — matches nav.css sidebar (220px) + topbar (58px)
+═══════════════════════════════════════════════════════ */
+@keyframes skshimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.sk {
+  border-radius: 7px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.03) 25%,
+    rgba(255,255,255,.08) 50%,
+    rgba(255,255,255,.03) 75%
+  );
+  background-size: 600px 100%;
+  animation: skshimmer 1.5s linear infinite;
+}
+[data-theme="light"] .sk {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,.05) 25%, rgba(0,0,0,.10) 50%, rgba(0,0,0,.05) 75%
+  );
+  background-size: 600px 100%;
+}
+#page-skeleton {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; background: inherit;
+  transition: opacity .25s ease;
+}
+#page-skeleton.gone { opacity: 0; pointer-events: none; }
+
+/* sidebar shell: width=220px, same bg as .sidebar */
+.sk-sidebar {
+  width: var(--sidebar-w, 220px);
+  min-height: 100vh; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 22px 16px 16px;
+}
+.sk-main { flex: 1; display: flex; flex-direction: column; }
+.sk-topbar {
+  height: 58px; flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between; padding: 0 28px;
+}
+[data-theme="light"] .sk-sidebar,
+[data-theme="light"] .sk-topbar { background: #fff; }
+.sk-body { padding: 24px 28px; flex: 1; }
+.sk-nav-rows { display: flex; flex-direction: column; gap: 3px; }
+.sk-stats {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 14px; margin-bottom: 20px;
+}
+@media(max-width:900px){ .sk-stats { grid-template-columns: repeat(2,1fr); } }
+
+/* ═══════════════════════════════════════════════════════
+   ORDERS PAGE STYLES
+   nav.css owns: body, .sidebar, .main-wrap, .topbar,
+   .btn, .modal-overlay, .modal, .field, .badge, .spinner
+   We only add what's orders-specific here.
+═══════════════════════════════════════════════════════ */
+
+/* ── STAT CARDS ── */
+.order-stats {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 14px; margin-bottom: 20px;
+}
+@media(max-width:900px) { .order-stats { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:520px) { .order-stats { grid-template-columns: 1fr 1fr; } }
+
+.ostat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  position: relative; overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.ostat::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--oc, var(--accent));
+  opacity: 0; transition: opacity .18s;
+}
+.ostat:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+.ostat:hover::after { opacity: 1; }
+[data-theme="light"] .ostat:hover { box-shadow: 0 6px 20px rgba(0,0,0,.07); }
+.ostat-icon {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; background: var(--oib, rgba(108,99,255,.1));
+}
+.ostat-body { min-width: 0; flex: 1; }
+.ostat-label {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text3); margin-bottom: 5px;
+}
+.ostat-val {
+  font-size: 26px; font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: -.04em; line-height: 1;
+  color: var(--vc, var(--text));
+}
+.ostat-sub { font-size: 10.5px; color: var(--text3); margin-top: 4px; font-weight: 500; }
+
+/* ── TOOLBAR ── */
+.ord-toolbar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 13px; padding: 11px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.ord-search-wrap { position: relative; flex: 1; min-width: 180px; }
+.ord-search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: var(--text3);
+}
+.ord-search {
+  width: 100%; padding: 8px 12px 8px 34px;
+  background: var(--surface2); border: 1.5px solid var(--border2);
+  border-radius: 9px; font-family: 'Outfit', sans-serif;
+  font-size: 13px; color: var(--text);
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.ord-search::placeholder { color: var(--text3); }
+.ord-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108,99,255,.12);
+}
+[data-theme="light"] .ord-search { background: #f0f2f8; }
+.ord-divider { width: 1px; height: 22px; background: var(--border2); flex-shrink: 0; }
+.ord-filter {
+  padding: 8px 28px 8px 12px;
+  background: var(--surface2); border: 1.5px solid var(--border2);
+  border-radius: 9px; font-family: 'Outfit', sans-serif;
+  font-size: 12.5px; font-weight: 600; color: var(--text2);
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 9px center;
+  transition: border-color .15s;
+}
+.ord-filter:focus { border-color: var(--accent); }
+.ord-filter option { background: var(--surface2); }
+[data-theme="light"] .ord-filter { background-color: #f0f2f8; }
+.ord-count {
+  margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--text3);
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap;
+}
+
+/* ── TABLE CARD ── */
+.ord-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.ord-table { width: 100%; border-collapse: collapse; }
+.ord-table thead th {
+  padding: 11px 16px; text-align: left;
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--text3);
+  background: var(--surface2); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ord-table thead th:first-child { padding-left: 20px; }
+.ord-table thead th:last-child  { padding-right: 20px; }
+[data-theme="light"] .ord-table thead th { background: #f8f9fc; }
+.ord-table tbody td {
+  padding: 13px 16px; font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle; transition: background .1s;
+}
+.ord-table tbody tr:last-child td { border-bottom: none; }
+.ord-table tbody tr:hover td { background: rgba(108,99,255,.03); }
+[data-theme="light"] .ord-table tbody tr:hover td { background: rgba(108,99,255,.025); }
+.ord-table tbody td:first-child { padding-left: 20px; }
+.ord-table tbody td:last-child  { padding-right: 20px; }
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.ord-table tbody tr                { animation: rowIn .2s ease both; }
+.ord-table tbody tr:nth-child(2)   { animation-delay: .03s; }
+.ord-table tbody tr:nth-child(3)   { animation-delay: .06s; }
+.ord-table tbody tr:nth-child(4)   { animation-delay: .09s; }
+.ord-table tbody tr:nth-child(5)   { animation-delay: .12s; }
+.ord-table tbody tr:nth-child(6)   { animation-delay: .15s; }
+.ord-table tbody tr:nth-child(7)   { animation-delay: .18s; }
+
+/* ── CUSTOMER CELL ── */
+.cust-cell { display: flex; align-items: center; gap: 10px; }
+.cust-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff;
+}
+.cust-name  { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+.cust-email { font-size: 11.5px; color: var(--text3); margin-top: 1px; }
+
+/* ── MONO DATA ── */
+.ord-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; font-weight: 500; color: var(--accent2);
+}
+.ord-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; font-weight: 700; line-height: 1;
+}
+.ord-pay-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 600; color: var(--text3);
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 2px 7px; border-radius: 5px; margin-top: 3px;
+}
+
+/* ── STATUS BADGES ── */
+.sbadge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 10.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.sbadge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.s-pending    { background: rgba(251,191,36,.12);  color: #fbbf24; }
+.s-confirmed  { background: rgba(167,139,250,.12); color: #a78bfa; }
+.s-processing { background: rgba(96,165,250,.12);  color: #60a5fa; }
+.s-shipped    { background: rgba(56,189,248,.12);  color: #38bdf8; }
+.s-delivered  { background: rgba(52,211,153,.12);  color: #34d399; }
+.s-cancelled  { background: rgba(248,113,113,.12); color: #f87171; }
+[data-theme="light"] .s-pending   { color: #b45309; background: rgba(245,158,11,.10); }
+[data-theme="light"] .s-delivered { color: #15803d; background: rgba(22,163,74,.10);  }
+[data-theme="light"] .s-cancelled { color: #b91c1c; background: rgba(220,38,38,.10);  }
+
+/* ── UPDATE BUTTON ── */
+.btn-upd {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: 'Outfit', sans-serif; transition: all .15s;
+}
+.btn-upd:hover {
+  background: rgba(108,99,255,.1); border-color: rgba(108,99,255,.35);
+  color: var(--accent2); transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(108,99,255,.18);
+}
+
+/* ── EXPORT BUTTON ── */
+.btn-export {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px;
+  background: var(--surface2); border: 1.5px solid var(--border2);
+  color: var(--text2); font-size: 12.5px; font-weight: 700;
+  cursor: pointer; font-family: 'Outfit', sans-serif;
+  transition: all .15s; white-space: nowrap;
+}
+.btn-export:hover {
+  border-color: rgba(108,99,255,.4); color: var(--accent2);
+  background: rgba(108,99,255,.07);
+}
+
+/* ── THEME TOGGLE ── */
+.theme-btn {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px; flex-shrink: 0;
+  transition: transform .2s, border-color .15s, background .15s;
+}
+.theme-btn:hover {
+  transform: rotate(14deg) scale(1.07);
+  border-color: rgba(108,99,255,.4);
+  background: rgba(108,99,255,.08);
+}
+
+/* ── MODAL DETAIL BOX ── */
+.od-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 11px; padding: 16px 18px;
+  margin-bottom: 18px; font-size: 13px;
+}
+[data-theme="light"] .od-box { background: #f0f2f8; }
+.od-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.od-key { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 3px; }
+.od-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.od-items { background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.od-item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12.5px;
+}
+.od-item-row:last-child { border-bottom: none; }
+.od-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-top: 1px solid var(--border2);
+  font-size: 13px; font-weight: 800;
+}
+.modal-hdr {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border);
+}
+.modal-hdr-icon {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: rgba(108,99,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.modal-hdr-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.modal-hdr-sub   { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+
+/* ── INLINE SKELETON (store-switch) ── */
+.isk-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+@media(max-width:900px){ .isk-stats { grid-template-columns: repeat(2,1fr); } }
+.isk-card { border-radius: 14px; height: 92px; }
+.isk-bar  { border-radius: 13px; height: 52px; margin-bottom: 14px; }
+.isk-th   { height: 40px; border-radius: 0; opacity: .5; margin-bottom: 1px; }
+.isk-row  { height: 62px; border-radius: 0; margin-bottom: 1px; }
+
+/* ── STORE SELECTOR SPINNER ── */
+.store-loading { position: relative; }
+.store-loading::after {
+  content: ''; position: absolute; right: -20px; top: 50%;
+  transform: translateY(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid rgba(108,99,255,.2); border-top-color: var(--accent);
+  animation: ospin .62s linear infinite; pointer-events: none;
+}
+@keyframes ospin { to { transform: translateY(-50%) rotate(360deg); } }
+
+/* ── EMPTY STATE ── */
+.ord-empty {
+  padding: 64px 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.ord-empty-icon {
+  width: 66px; height: 66px; border-radius: 18px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 4px;
+}
+.ord-empty h3 { font-size: 15px; font-weight: 800; color: var(--text2); margin-bottom: 4px; }
+.ord-empty p  { font-size: 13px; color: var(--text3); max-width: 260px; line-height: 1.6; }
+
+/* ── PAGE TRANSITIONS ── */
+#page-content { will-change: opacity, transform; }
+@keyframes pgIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pg-enter { animation: pgIn .28s cubic-bezier(.22,1,.36,1) both; }
+</style>
 
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
-<!-- SKELETON -->
+<!-- ════════════════════════════════════════════
+  SKELETON — mirrors nav.css layout exactly:
+  .sidebar (fixed, 220px) + .main-wrap + .topbar
+════════════════════════════════════════════ -->
 <div id="page-skeleton" aria-hidden="true">
-  <div class="skel-sidebar" style="width:248px;flex-shrink:0;height:100%;background:var(--bg2);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:0;">
-    <div style="display:flex;align-items:center;gap:10px;padding-bottom:20px;border-bottom:1px solid var(--border);margin-bottom:20px;">
-      <div class="skel" style="width:32px;height:32px;border-radius:8px;flex-shrink:0;"></div>
-      <div class="skel" style="height:14px;width:60px;border-radius:5px;"></div>
+  <!-- sidebar replica -->
+  <div class="sk-sidebar">
+    <div style="display:flex;align-items:center;gap:8px;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <div class="sk" style="width:24px;height:24px;border-radius:6px;flex-shrink:0;"></div>
+      <div class="sk" style="height:13px;width:52px;border-radius:5px;"></div>
     </div>
-    <div class="skel" style="height:48px;border-radius:var(--radius);margin-bottom:20px;opacity:.7;"></div>
-    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin-bottom:8px;opacity:.35;"></div>
-    <div style="display:flex;flex-direction:column;gap:3px;">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.75;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.25;"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:12px;">
+      <div class="sk" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+        <div class="sk" style="height:10px;width:84px;border-radius:4px;"></div>
+        <div class="sk" style="height:9px;width:116px;border-radius:4px;"></div>
+      </div>
+    </div>
+    <div class="sk" style="height:8px;width:52px;border-radius:4px;margin:10px 0 8px;opacity:.4;"></div>
+    <div class="sk-nav-rows">
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.82;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+    </div>
+    <div class="sk" style="height:8px;width:60px;border-radius:4px;margin:14px 0 8px;opacity:.4;"></div>
+    <div class="sk-nav-rows">
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
+    </div>
+    <div class="sk" style="height:8px;width:48px;border-radius:4px;margin:14px 0 8px;opacity:.4;"></div>
+    <div class="sk-nav-rows">
+      <div class="sk" style="height:33px;border-radius:9px;opacity:.25;"></div>
     </div>
   </div>
-  <div style="flex:1;display:flex;flex-direction:column;">
-    <div style="height:58px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;">
-      <div class="skel" style="height:14px;width:56px;border-radius:5px;"></div>
-      <div style="display:flex;gap:10px;">
-        <div class="skel" style="height:36px;width:150px;border-radius:10px;opacity:.7;"></div>
-        <div class="skel" style="height:36px;width:36px;border-radius:10px;opacity:.5;"></div>
-        <div class="skel" style="height:36px;width:110px;border-radius:9px;opacity:.45;"></div>
+  <!-- main replica -->
+  <div class="sk-main">
+    <div class="sk-topbar">
+      <div class="sk" style="height:14px;width:58px;border-radius:5px;"></div>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div class="sk" style="height:32px;width:150px;border-radius:8px;opacity:.7;"></div>
+        <div class="sk" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
+        <div class="sk" style="height:32px;width:108px;border-radius:9px;opacity:.45;"></div>
       </div>
     </div>
-    <div style="flex:1;padding:28px;display:flex;flex-direction:column;gap:18px;">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
-        <div class="skel" style="height:100px;border-radius:16px;"></div>
-        <div class="skel" style="height:100px;border-radius:16px;opacity:.8;"></div>
-        <div class="skel" style="height:100px;border-radius:16px;opacity:.6;"></div>
-        <div class="skel" style="height:100px;border-radius:16px;opacity:.4;"></div>
+    <div class="sk-body">
+      <div class="sk-stats">
+        <div class="sk" style="height:92px;border-radius:14px;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.8;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.6;"></div>
+        <div class="sk" style="height:92px;border-radius:14px;opacity:.4;"></div>
       </div>
-      <div class="skel" style="height:52px;border-radius:14px;"></div>
-      <div style="border-radius:16px;overflow:hidden;">
-        <div class="skel" style="height:40px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
-        <div class="skel" style="height:64px;border-radius:0;margin-bottom:1px;"></div>
-        <div class="skel" style="height:64px;border-radius:0;opacity:.8;margin-bottom:1px;"></div>
-        <div class="skel" style="height:64px;border-radius:0;opacity:.6;margin-bottom:1px;"></div>
-        <div class="skel" style="height:64px;border-radius:0;opacity:.4;margin-bottom:1px;"></div>
-        <div class="skel" style="height:64px;border-radius:0;opacity:.2;"></div>
+      <div class="sk" style="height:52px;border-radius:13px;margin-bottom:14px;"></div>
+      <div style="border-radius:14px;overflow:hidden;">
+        <div class="sk" style="height:40px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.80;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.60;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.40;margin-bottom:1px;"></div>
+        <div class="sk" style="height:62px;border-radius:0;opacity:.22;"></div>
       </div>
     </div>
   </div>
 </div>
+<!-- /skeleton -->
 
-<!-- SIDEBAR -->
+<!-- ════════════════════════════════════════════
+  SIDEBAR — nav.css classes, nav.js populates
+════════════════════════════════════════════ -->
 <div class="sidebar" id="sidebar">
-  <div class="sidebar-inner">
-    <a class="sidebar-logo" href="home.html">
-      <div class="logo-icon">eK</div>
-      <span class="logo-text">e<em>K</em>art</span>
-    </a>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar user-avatar" id="nav-avatar">U</div>
-      <div class="user-info">
-        <div class="user-name" id="nav-user-name">Loading…</div>
-        <div class="user-role" id="nav-user-email">merchant</div>
-      </div>
+  <a class="sidebar-logo" href="home.html">
+    e<span class="logo-k">K</span>art<span class="logo-dot"></span>
+  </a>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar" id="nav-avatar">…</div>
+    <div style="min-width:0;">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
+      <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
-    <div class="nav-section">
-      <div class="nav-label">Merchant</div>
-      <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-      <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
-      <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders<span class="nav-badge" id="pending-badge" style="display:none;"></span></a>
-      <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
-      <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
-      <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Storefront</div>
-      <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
-      <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">AI Tools</div>
-      <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
-    </div>
-    <div class="sidebar-bottom">
-      <button class="btn-logout" onclick="logout()">
-        <span style="font-size:14px;">↩</span> Sign Out
-      </button>
-    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Merchant</div>
+    <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
+    <a class="nav-item active" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
+    <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
+    <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
+    <a class="nav-item" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Storefront</div>
+    <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
+    <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">AI Tools</div>
+    <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
+  </div>
+  <div class="sidebar-bottom">
+    <button class="btn-logout" onclick="logout()">↩ Logout</button>
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- ════════════════════════════════════════════
+  MAIN WRAP — nav.css sets margin-left:var(--sidebar-w)
+════════════════════════════════════════════ -->
 <div class="main-wrap">
   <div class="topbar">
-    <div class="topbar-title">Orders</div>
+    <div class="topbar-left">
+      <span class="topbar-title">Orders</span>
+    </div>
     <div class="topbar-right">
       <div class="store-select-wrap" id="store-select-wrap">
         <span class="store-select-label">Store</span>
@@ -809,21 +513,26 @@ tbody tr:nth-child(7) { animation-delay: .18s; }
       <div id="topbar-actions"></div>
     </div>
   </div>
-  <div id="page-content" class="content page-enter"></div>
+
+  <div id="page-content" class="content" style="display:none;"></div>
 </div>
 
-<!-- ORDER MODAL -->
+<!-- ════════════════════════════════════════════
+  ORDER UPDATE MODAL
+════════════════════════════════════════════ -->
 <div class="modal-overlay" id="orderModal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-icon">📦</div>
+    <div class="modal-hdr">
+      <div class="modal-hdr-icon">📦</div>
       <div>
-        <div class="modal-title">Update Order</div>
-        <div class="modal-subtitle" id="modal-order-num">–</div>
+        <div class="modal-hdr-title">Update Order</div>
+        <div class="modal-hdr-sub" id="modal-ord-num">—</div>
       </div>
     </div>
+
     <input type="hidden" id="orderEditId">
-    <div class="order-detail-box" id="orderDetailView"></div>
+    <div class="od-box" id="orderDetailView"></div>
+
     <div class="field">
       <label>Status</label>
       <select id="orderStatus">
@@ -837,16 +546,22 @@ tbody tr:nth-child(7) { animation-delay: .18s; }
     </div>
     <div class="field">
       <label>Tracking Number</label>
-      <input type="text" id="orderTracking" placeholder="AWB12345678" style="font-family:var(--mono);">
+      <input type="text" id="orderTracking" placeholder="AWB12345678"
+        style="font-family:'DM Mono',monospace;letter-spacing:.02em;">
     </div>
     <div class="field">
       <label>Internal Notes</label>
-      <textarea id="orderNotes" placeholder="Any notes about this order…"></textarea>
+      <textarea id="orderNotes" placeholder="Add any internal notes about this order…"></textarea>
     </div>
+
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('orderModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveOrder()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('orderModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveOrder()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17,21 17,13 7,13 7,21"/>
+          <polyline points="7,3 7,8 15,8"/>
+        </svg>
         Save Changes
       </button>
     </div>
@@ -857,27 +572,27 @@ tbody tr:nth-child(7) { animation-delay: .18s; }
 /* ── SKELETON ── */
 function hideSkeleton() {
   const s = document.getElementById('page-skeleton');
-  if(!s) return;
-  s.classList.add('hidden');
-  setTimeout(()=>s.remove(), 320);
+  if (!s) return;
+  s.classList.add('gone');
+  setTimeout(() => s.remove(), 280);
 }
 
 /* ── TRANSITIONS ── */
-const FADE = 160;
+const FD = 165;
 function fadeOut(el) {
   return new Promise(r => {
-    el.style.transition = `opacity ${FADE}ms ease, transform ${FADE}ms ease`;
+    el.style.transition = `opacity ${FD}ms ease, transform ${FD}ms ease`;
     el.style.opacity = '0'; el.style.transform = 'translateY(-5px)';
     el.style.pointerEvents = 'none';
-    setTimeout(r, FADE);
+    setTimeout(r, FD);
   });
 }
 function fadeIn(el) {
   el.style.transition = 'none';
-  el.style.opacity = '0'; el.style.transform = 'translateY(7px)';
+  el.style.opacity = '0'; el.style.transform = 'translateY(8px)';
   el.style.display = 'block';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    el.style.transition = `opacity ${FADE+40}ms ease, transform ${FADE+40}ms ease`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.style.transition = `opacity ${FD+40}ms ease, transform ${FD+40}ms ease`;
     el.style.opacity = '1'; el.style.transform = 'translateY(0)';
     el.style.pointerEvents = '';
   }));
@@ -885,176 +600,182 @@ function fadeIn(el) {
 
 /* ── INLINE SKELETON ── */
 function inlineSkel() {
-  const rows = [.95,.82,.69,.56,.43].map((op,i)=>
-    `<div class="skel inline-skel-row" style="opacity:${op};${i===4?'margin-bottom:0;':''}"></div>`).join('');
+  const rows = [.95,.80,.65,.50,.35].map((op, i) =>
+    `<div class="sk isk-row" style="opacity:${op};${i===4?'margin-bottom:0;':''}"></div>`
+  ).join('');
   return `
-    <div class="inline-skel-stats">
-      <div class="skel inline-skel-card"></div>
-      <div class="skel inline-skel-card" style="opacity:.82;"></div>
-      <div class="skel inline-skel-card" style="opacity:.64;"></div>
-      <div class="skel inline-skel-card" style="opacity:.46;"></div>
+    <div class="isk-stats">
+      <div class="sk isk-card"></div>
+      <div class="sk isk-card" style="opacity:.82;"></div>
+      <div class="sk isk-card" style="opacity:.64;"></div>
+      <div class="sk isk-card" style="opacity:.46;"></div>
     </div>
-    <div class="skel inline-skel-bar"></div>
-    <div style="border-radius:16px;overflow:hidden;">
-      <div class="skel inline-skel-thead"></div>${rows}
+    <div class="sk isk-bar"></div>
+    <div style="border-radius:14px;overflow:hidden;">
+      <div class="sk isk-th"></div>${rows}
     </div>`;
 }
 
 /* ── STORE LOADING ── */
 function setStoreLoading(on) {
-  document.getElementById('store-select-wrap')?.classList.toggle('store-loading',on);
+  document.getElementById('store-select-wrap')?.classList.toggle('store-loading', on);
 }
 
 /* ── THEME ── */
 let _dark = localStorage.getItem('ekart_theme') !== 'light';
 function applyTheme(dark) {
   _dark = dark;
-  const root = document.documentElement;
-  if(dark){ root.removeAttribute('data-theme'); root.style.background='#0a0b0f'; }
-  else    { root.setAttribute('data-theme','light'); root.style.background='#f5f6fb'; }
-  const btn = document.getElementById('themeBtn');
-  if(btn) btn.textContent = dark ? '🌙' : '☀️';
-  localStorage.setItem('ekart_theme', dark?'dark':'light');
+  const r = document.documentElement;
+  if (dark) { r.removeAttribute('data-theme'); r.style.background = '#080910'; }
+  else      { r.setAttribute('data-theme','light'); r.style.background = '#f0f2f8'; }
+  const b = document.getElementById('themeBtn');
+  if (b) b.textContent = dark ? '🌙' : '☀️';
+  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light');
 }
-function toggleTheme(){ applyTheme(!_dark); }
+function toggleTheme() { applyTheme(!_dark); }
 applyTheme(_dark);
 
 /* ── STATE ── */
 let allOrders = [], currentStoreId = '', _tok = 0;
 
 /* ── INIT ── */
-window.addEventListener('DOMContentLoaded', async()=>{
-  const nav = await renderNav('orders', id=>{ currentStoreId=id; loadOrders(); });
-  if(!nav){ hideSkeleton(); return; }
+window.addEventListener('DOMContentLoaded', async () => {
+  const nav = await renderNav('orders', id => {
+    currentStoreId = id;
+    loadOrders();
+  });
+  if (!nav) { hideSkeleton(); return; }
   currentStoreId = nav.currentStoreId;
 
+  // Theme toggle into topbar-right
   const tr = document.querySelector('.topbar-right');
-  if(tr && !document.getElementById('themeBtn')){
+  if (tr && !document.getElementById('themeBtn')) {
     const b = document.createElement('button');
-    b.className='theme-btn'; b.id='themeBtn'; b.title='Toggle theme';
-    b.onclick=toggleTheme; b.textContent=_dark?'🌙':'☀️';
+    b.className = 'theme-btn'; b.id = 'themeBtn';
+    b.title = 'Toggle theme'; b.onclick = toggleTheme;
+    b.textContent = _dark ? '🌙' : '☀️';
     tr.insertBefore(b, tr.firstChild);
   }
   applyTheme(_dark);
-  setTopbarActions(`<button class="btn-export" onclick="exportCSV()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Export CSV
-  </button>`);
 
-  if(currentStoreId) await loadOrders();
+  setTopbarActions(`
+    <button class="btn-export" onclick="exportCSV()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7,10 12,15 17,10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Export CSV
+    </button>`);
+
+  if (currentStoreId) await loadOrders();
   else { renderEmpty(); hideSkeleton(); }
 });
 
-/* ── LOAD ORDERS ── */
-async function loadOrders(){
-  if(!currentStoreId) return;
+/* ── LOAD ── */
+async function loadOrders() {
+  if (!currentStoreId) return;
   const token = ++_tok;
   const el    = document.getElementById('page-content');
-  const first = el.style.display === '' && el.classList.contains('page-enter') && !el.innerHTML || el.style.display === 'none' || !el.style.display;
+  const first = el.style.display === 'none' || !el.style.display;
 
   setStoreLoading(true);
 
-  if(!first){
+  if (!first) {
     await fadeOut(el);
-    if(token!==_tok) return;
+    if (token !== _tok) return;
     el.innerHTML = inlineSkel();
     fadeIn(el);
   }
 
   try {
     allOrders = await apiFetch(`/stores/${currentStoreId}/orders`);
-    if(token!==_tok) return;
-    if(!first){ await fadeOut(el); if(token!==_tok) return; }
+    if (token !== _tok) return;
+    if (!first) { await fadeOut(el); if (token !== _tok) return; }
     renderPage(first);
-  } catch(e){
-    if(token!==_tok) return;
-    if(first) hideSkeleton();
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-illustration">⚠️</div>
-      <div class="empty-title">Failed to load orders</div>
-      <div class="empty-sub">${e.message}</div>
+  } catch (e) {
+    if (token !== _tok) return;
+    if (first) hideSkeleton();
+    el.innerHTML = `<div class="ord-empty">
+      <div class="ord-empty-icon">⚠️</div>
+      <h3>Couldn't load orders</h3><p>${e.message}</p>
     </div>`;
-    el.style.display='block'; fadeIn(el); toast(e.message,'error');
+    el.style.display = 'block'; fadeIn(el);
+    toast(e.message, 'error');
   } finally {
-    if(token===_tok) setStoreLoading(false);
+    if (token === _tok) setStoreLoading(false);
   }
 }
 
 /* ── RENDER PAGE ── */
-function renderPage(first=false){
-  const pending   = allOrders.filter(o=>o.status==='pending').length;
-  const delivered = allOrders.filter(o=>o.status==='delivered').length;
-  const revenue   = allOrders.filter(o=>o.status!=='cancelled').reduce((s,o)=>s+(o.total||0),0);
+function renderPage(first = false) {
+  const pending   = allOrders.filter(o => o.status === 'pending').length;
+  const delivered = allOrders.filter(o => o.status === 'delivered').length;
+  const revenue   = allOrders.filter(o => o.status !== 'cancelled')
+                             .reduce((s, o) => s + (o.total || 0), 0);
 
-  const b = document.getElementById('pending-badge');
-  if(b){ if(pending>0){ b.textContent=pending; b.style.display=''; } else b.style.display='none'; }
-
-  const el = document.getElementById('page-content');
-  el.innerHTML = `
-    <div class="stat-grid">
-      <div class="stat-card" style="--stat-accent:var(--brand);--stat-bg:var(--brand-soft);">
-        <div class="stat-top">
-          <div class="stat-icon">📋</div>
-          <span class="stat-trend">All time</span>
+  document.getElementById('page-content').innerHTML = `
+    <div class="order-stats">
+      <div class="ostat" style="--oc:var(--accent);--oib:rgba(108,99,255,.1);">
+        <div class="ostat-icon">📋</div>
+        <div class="ostat-body">
+          <div class="ostat-label">Total Orders</div>
+          <div class="ostat-val">${allOrders.length}</div>
+          <div class="ostat-sub">All time</div>
         </div>
-        <div class="stat-val">${allOrders.length}</div>
-        <div class="stat-label">Total Orders</div>
       </div>
-      <div class="stat-card" style="--stat-accent:var(--amber);--stat-bg:var(--amber-soft);">
-        <div class="stat-top">
-          <div class="stat-icon">⏳</div>
-          <span class="stat-trend${pending===0?' down':''}">Need action</span>
+      <div class="ostat" style="--oc:#fbbf24;--oib:rgba(251,191,36,.1);">
+        <div class="ostat-icon">⏳</div>
+        <div class="ostat-body">
+          <div class="ostat-label">Pending</div>
+          <div class="ostat-val" style="color:#fbbf24;">${pending}</div>
+          <div class="ostat-sub">Need attention</div>
         </div>
-        <div class="stat-val" style="color:var(--amber);">${pending}</div>
-        <div class="stat-label">Pending</div>
       </div>
-      <div class="stat-card" style="--stat-accent:var(--green);--stat-bg:var(--green-soft);">
-        <div class="stat-top">
-          <div class="stat-icon">✅</div>
-          <span class="stat-trend">Completed</span>
+      <div class="ostat" style="--oc:#34d399;--oib:rgba(52,211,153,.1);">
+        <div class="ostat-icon">✅</div>
+        <div class="ostat-body">
+          <div class="ostat-label">Delivered</div>
+          <div class="ostat-val" style="color:#34d399;">${delivered}</div>
+          <div class="ostat-sub">Completed</div>
         </div>
-        <div class="stat-val" style="color:var(--green);">${delivered}</div>
-        <div class="stat-label">Delivered</div>
       </div>
-      <div class="stat-card" style="--stat-accent:var(--violet);--stat-bg:var(--violet-soft);">
-        <div class="stat-top">
-          <div class="stat-icon">💰</div>
-          <span class="stat-trend">Excl. cancelled</span>
+      <div class="ostat" style="--oc:#a78bfa;--oib:rgba(167,139,250,.1);">
+        <div class="ostat-icon">💰</div>
+        <div class="ostat-body">
+          <div class="ostat-label">Revenue</div>
+          <div class="ostat-val" style="color:#a78bfa;">₹${(revenue/1000).toFixed(1)}k</div>
+          <div class="ostat-sub">Excl. cancelled</div>
         </div>
-        <div class="stat-val" style="color:var(--violet);">₹${(revenue/1000).toFixed(1)}k</div>
-        <div class="stat-label">Revenue</div>
       </div>
     </div>
 
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input class="search-field" id="orderSearch" placeholder="Search orders, customers…" oninput="filterOrders()">
+    <div class="ord-toolbar">
+      <div class="ord-search-wrap">
+        <svg class="ord-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input class="ord-search" id="orderSearch" placeholder="Search orders, customers, emails…" oninput="filterOrders()">
       </div>
-      <div class="toolbar-sep"></div>
-      <select class="filter-pill" id="orderStatusFilter" onchange="filterOrders()">
+      <div class="ord-divider"></div>
+      <select class="ord-filter" id="orderStatusFilter" onchange="filterOrders()">
         <option value="">All Status</option>
-        <option value="pending">Pending</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="processing">Processing</option>
-        <option value="shipped">Shipped</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
+        <option value="pending">⏳ Pending</option>
+        <option value="confirmed">✅ Confirmed</option>
+        <option value="processing">⚙️ Processing</option>
+        <option value="shipped">🚚 Shipped</option>
+        <option value="delivered">🎉 Delivered</option>
+        <option value="cancelled">❌ Cancelled</option>
       </select>
-      <span class="count-chip" id="orderCount">${allOrders.length} orders</span>
+      <span class="ord-count" id="orderCount">${allOrders.length} orders</span>
     </div>
 
-    <div class="table-card">
-      <table>
+    <div class="ord-card">
+      <table class="ord-table">
         <thead>
           <tr>
-            <th>Order</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th>Order #</th><th>Customer</th><th>Items</th>
+            <th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
           </tr>
         </thead>
         <tbody id="ordersBody"></tbody>
@@ -1063,44 +784,51 @@ function renderPage(first=false){
 
   renderOrders(allOrders);
 
-  if(first){
-    el.style.display='block';
-    requestAnimationFrame(()=>hideSkeleton());
+  const el = document.getElementById('page-content');
+  if (first) {
+    el.style.display = 'block';
+    el.classList.add('pg-enter');
+    requestAnimationFrame(() => hideSkeleton());
   } else {
     fadeIn(el);
   }
 }
 
 /* ── FILTER ── */
-function filterOrders(){
-  const q  = document.getElementById('orderSearch')?.value.toLowerCase()||'';
-  const st = document.getElementById('orderStatusFilter')?.value||'';
+function filterOrders() {
+  const q  = document.getElementById('orderSearch')?.value.toLowerCase() || '';
+  const st = document.getElementById('orderStatusFilter')?.value || '';
   let f = allOrders;
-  if(q)  f=f.filter(o=>o.order_number.toLowerCase().includes(q)||o.customer_name.toLowerCase().includes(q)||o.customer_email.toLowerCase().includes(q));
-  if(st) f=f.filter(o=>o.status===st);
-  document.getElementById('orderCount').textContent=`${f.length} order${f.length!==1?'s':''}`;
+  if (q)  f = f.filter(o =>
+    o.order_number.toLowerCase().includes(q) ||
+    o.customer_name.toLowerCase().includes(q) ||
+    o.customer_email.toLowerCase().includes(q));
+  if (st) f = f.filter(o => o.status === st);
+  const c = document.getElementById('orderCount');
+  if (c) c.textContent = `${f.length} order${f.length !== 1 ? 's' : ''}`;
   renderOrders(f);
 }
 
 /* ── RENDER ROWS ── */
-function renderOrders(orders){
+function renderOrders(orders) {
   const body = document.getElementById('ordersBody');
-  if(!body) return;
-  if(!orders.length){
-    body.innerHTML=`<tr><td colspan="7"><div class="empty-state">
-      <div class="empty-illustration">📋</div>
-      <div class="empty-title">No orders found</div>
-      <div class="empty-sub">Try adjusting your search or filters</div>
-    </div></td></tr>`;
+  if (!body) return;
+  if (!orders.length) {
+    body.innerHTML = `<tr><td colspan="7">
+      <div class="ord-empty">
+        <div class="ord-empty-icon">📋</div>
+        <h3>No orders found</h3>
+        <p>Try adjusting your search or status filter.</p>
+      </div></td></tr>`;
     return;
   }
-  body.innerHTML = orders.map(o=>{
-    const init=(o.customer_name||'?')[0].toUpperCase();
-    const d=new Date(o.created_at);
+  body.innerHTML = orders.map(o => {
+    const init = (o.customer_name || '?')[0].toUpperCase();
+    const d    = new Date(o.created_at);
     return `<tr>
-      <td><span class="mono order-num">${o.order_number}</span></td>
+      <td><span class="ord-num">${o.order_number}</span></td>
       <td><div class="cust-cell">
-        <div class="cust-avatar">${init}</div>
+        <div class="cust-av">${init}</div>
         <div>
           <div class="cust-name">${o.customer_name}</div>
           <div class="cust-email">${o.customer_email}</div>
@@ -1111,99 +839,120 @@ function renderOrders(orders){
         <span style="color:var(--text3);font-size:12px;"> item${(o.items?.length||0)!==1?'s':''}</span>
       </td>
       <td>
-        <div class="mono" style="font-size:14px;font-weight:600;">₹${o.total?.toFixed(2)}</div>
-        <span class="pay-chip">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</span>
+        <div class="ord-amount">₹${o.total?.toFixed(2)}</div>
+        <span class="ord-pay-chip">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</span>
       </td>
-      <td>${badge(o.status)}</td>
+      <td>${statusBadge(o.status)}</td>
       <td>
-        <div style="font-size:13px;font-weight:600;">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
-        <div style="font-size:11px;color:var(--text3);">${d.toLocaleDateString('en-IN',{year:'numeric'})}</div>
+        <div style="font-size:13px;font-weight:700;line-height:1.2;">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${d.toLocaleDateString('en-IN',{year:'numeric'})}</div>
       </td>
-      <td><button class="btn-action" onclick="openOrderEdit('${o._id}')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Update
-      </button></td>
+      <td>
+        <button class="btn-upd" onclick="openOrderEdit('${o._id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Update
+        </button>
+      </td>
     </tr>`;
   }).join('');
 }
 
-function badge(status){
-  const m={pending:'badge-pending',confirmed:'badge-confirmed',processing:'badge-processing',shipped:'badge-shipped',delivered:'badge-delivered',cancelled:'badge-cancelled'};
-  return `<span class="badge ${m[status]||''}"><span class="badge-dot"></span>${status}</span>`;
+/* ── BADGE ── */
+function statusBadge(s) {
+  const m = { pending:'s-pending', confirmed:'s-confirmed', processing:'s-processing',
+               shipped:'s-shipped', delivered:'s-delivered', cancelled:'s-cancelled' };
+  return `<span class="sbadge ${m[s]||''}"><span class="sbadge-dot"></span>${s}</span>`;
 }
 
-/* ── OPEN EDIT MODAL ── */
-function openOrderEdit(id){
-  const o=allOrders.find(x=>x._id===id);
-  if(!o) return;
-  document.getElementById('orderEditId').value  = id;
-  document.getElementById('orderStatus').value  = o.status;
-  document.getElementById('orderTracking').value= o.tracking_number||'';
-  document.getElementById('orderNotes').value   = o.notes||'';
-  document.getElementById('modal-order-num').textContent = `Order ${o.order_number}`;
+/* ── OPEN MODAL ── */
+function openOrderEdit(id) {
+  const o = allOrders.find(x => x._id === id);
+  if (!o) return;
+  document.getElementById('orderEditId').value   = id;
+  document.getElementById('orderStatus').value   = o.status;
+  document.getElementById('orderTracking').value = o.tracking_number || '';
+  document.getElementById('orderNotes').value    = o.notes || '';
+  document.getElementById('modal-ord-num').textContent = `Order ${o.order_number}`;
+
   document.getElementById('orderDetailView').innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-cell"><div class="detail-key">Customer</div><div class="detail-val">${o.customer_name}</div></div>
-      <div class="detail-cell"><div class="detail-key">Email</div><div class="detail-val" style="font-size:12px;">${o.customer_email}</div></div>
-      <div class="detail-cell"><div class="detail-key">Phone</div><div class="detail-val">${o.customer_phone||'—'}</div></div>
-      <div class="detail-cell"><div class="detail-key">Payment</div><div class="detail-val">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
+      <span class="ord-num" style="font-size:13px;">#${o.order_number}</span>
+      ${statusBadge(o.status)}
     </div>
-    <div class="detail-cell" style="margin-bottom:12px;">
-      <div class="detail-key">Ship To</div>
-      <div class="detail-val" style="font-size:12.5px;">${o.shipping_address?.line1}, ${o.shipping_address?.city}, ${o.shipping_address?.state} — ${o.shipping_address?.pincode}</div>
+    <div class="od-grid">
+      <div><div class="od-key">Customer</div><div class="od-val">${o.customer_name}</div></div>
+      <div><div class="od-key">Email</div><div class="od-val" style="font-size:12px;">${o.customer_email}</div></div>
+      <div><div class="od-key">Phone</div><div class="od-val">${o.customer_phone||'—'}</div></div>
+      <div><div class="od-key">Payment</div><div class="od-val">${o.payment_method==='razorpay'?'⚡ Razorpay':'💵 COD'}</div></div>
     </div>
-    <div class="items-list">
-      ${(o.items||[]).map(i=>`<div class="item-row"><span style="color:var(--text2);">${i.name} <span style="color:var(--text4);">×${i.qty}</span></span><span class="mono" style="font-weight:600;">₹${i.price}</span></div>`).join('')}
-      <div class="item-total">
-        <span style="color:var(--text2);">Total</span>
-        <span class="mono" style="color:var(--brand3);">₹${o.total?.toFixed(2)}</span>
+    <div style="margin-bottom:12px;">
+      <div class="od-key">Ship To</div>
+      <div class="od-val" style="font-size:12.5px;margin-top:3px;line-height:1.5;">
+        ${o.shipping_address?.line1}, ${o.shipping_address?.city},
+        ${o.shipping_address?.state} — ${o.shipping_address?.pincode}
+      </div>
+    </div>
+    <div class="od-items">
+      ${(o.items||[]).map(i=>`
+        <div class="od-item-row">
+          <span>${i.name} <span style="color:var(--text3);">×${i.qty}</span></span>
+          <span style="font-family:'DM Mono',monospace;font-weight:600;">₹${i.price}</span>
+        </div>`).join('')}
+      <div class="od-total-row">
+        <span>Total</span>
+        <span style="font-family:'DM Mono',monospace;color:var(--accent2);">₹${o.total?.toFixed(2)}</span>
       </div>
     </div>`;
+
   openModal('orderModal');
 }
 
-async function saveOrder(){
-  const id=document.getElementById('orderEditId').value;
-  const body={
+/* ── SAVE ── */
+async function saveOrder() {
+  const id   = document.getElementById('orderEditId').value;
+  const body = {
     status:          document.getElementById('orderStatus').value,
     tracking_number: document.getElementById('orderTracking').value.trim(),
     notes:           document.getElementById('orderNotes').value.trim()
   };
   try {
-    await apiFetch(`/stores/${currentStoreId}/orders/${id}`,{method:'PUT',body:JSON.stringify(body)});
+    await apiFetch(`/stores/${currentStoreId}/orders/${id}`, { method:'PUT', body:JSON.stringify(body) });
     closeModal('orderModal');
     await loadOrders();
-    toast('Order updated successfully','success');
-  } catch(e){ toast(e.message,'error'); }
+    toast('Order updated successfully', 'success');
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* ── EXPORT CSV ── */
-function exportCSV(){
-  if(!allOrders.length) return toast('No orders to export','error');
-  const rows=[['Order #','Customer','Email','Phone','Items','Total','Payment','Status','Date','Tracking']];
-  allOrders.forEach(o=>rows.push([
-    o.order_number,o.customer_name,o.customer_email,o.customer_phone||'',
+function exportCSV() {
+  if (!allOrders.length) return toast('No orders to export', 'error');
+  const rows = [['Order #','Customer','Email','Phone','Items','Total','Payment','Status','Date','Tracking']];
+  allOrders.forEach(o => rows.push([
+    o.order_number, o.customer_name, o.customer_email, o.customer_phone||'',
     (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(' | '),
-    o.total?.toFixed(2),o.payment_method==='razorpay'?'Razorpay':'COD',
-    o.status,new Date(o.created_at).toLocaleDateString('en-IN'),o.tracking_number||''
+    o.total?.toFixed(2), o.payment_method==='razorpay'?'Razorpay':'COD',
+    o.status, new Date(o.created_at).toLocaleDateString('en-IN'), o.tracking_number||''
   ]));
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download=`orders-${new Date().toISOString().slice(0,10)}.csv`;
+  const csv = rows.map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
-  toast('CSV exported','success');
+  toast('CSV downloaded', 'success');
 }
 
-/* ── EMPTY STATE ── */
-function renderEmpty(){
-  const el=document.getElementById('page-content');
-  el.innerHTML=`<div class="empty-state">
-    <div class="empty-illustration">📋</div>
-    <div class="empty-title">No store selected</div>
-    <div class="empty-sub">Select a store from the top bar to view your orders</div>
+/* ── EMPTY ── */
+function renderEmpty() {
+  const el = document.getElementById('page-content');
+  el.innerHTML = `<div class="ord-empty">
+    <div class="ord-empty-icon">📋</div>
+    <h3>No store selected</h3>
+    <p>Select a store from the dropdown above to view your orders.</p>
   </div>`;
-  el.style.display='block';
+  el.style.display = 'block';
 }
 </script>
 </body>
