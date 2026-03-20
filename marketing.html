@@ -201,7 +201,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .hamburger svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;font-family:var(--font)}
 .mob-logo span{color:var(--accent)}
-/* Mobile store pill */
 .mob-store-pill{
   display:flex;align-items:center;gap:4px;padding:0 10px;height:34px;border-radius:20px;
   background:var(--surface-2);border:1px solid var(--border-md);transition:var(--t);
@@ -232,7 +231,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
 }
 .theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
-/* Desktop store selector */
 .store-select-wrap{
   display:flex;align-items:center;gap:6px;padding:0 10px;height:36px;
   border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border-md);transition:var(--t);
@@ -259,70 +257,111 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .page-header-sub{font-size:12.5px;color:var(--text-3);line-height:1.5}
 
 /* ══════════════════════════════════════════════
-   DESKTOP LAYOUT — sidebar list left, form right
+   MARKETING LAYOUT
 ══════════════════════════════════════════════ */
-.marketing-layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
-
-/* ── Left panel (desktop vertical list) ── */
-.tool-panel-left{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);
-  overflow:hidden;box-shadow:var(--sh-sm);position:sticky;top:80px;
+.marketing-layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:20px;
+  align-items:start;
 }
-.tool-panel-left-header{
-  padding:12px 16px 10px;border-bottom:1px solid var(--border);
-  background:linear-gradient(135deg,var(--accent-soft),transparent 70%);
+
+/* ══════════════════════════════════════════════
+   TOOL LIST — 4 SEPARATE INDIVIDUAL CARDS
+   Each card is its own standalone box, like order cards
+══════════════════════════════════════════════ */
+.tool-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px; /* gap between individual cards */
+  position:sticky;
+  top:80px;
 }
-.tool-panel-left-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--text-3)}
 
-/* Desktop: 4 rows stacked */
-.tool-list{display:flex;flex-direction:column}
-
+/* Each tool card is a completely independent box */
 .tool-card{
-  display:flex;align-items:center;gap:11px;padding:14px 16px;
-  cursor:pointer;transition:background .14s var(--ease);
-  position:relative;border-bottom:1px solid var(--border);
-  /* no fixed height on desktop — content-sized */
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:13px 15px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  transition:border-color .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+  position:relative;
+  box-shadow:var(--sh-sm);
+  overflow:hidden;
 }
-.tool-card:last-child{border-bottom:none}
+/* Accent left bar */
 .tool-card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--accent);opacity:0;border-radius:0 3px 3px 0;transition:opacity .14s;
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--accent);
+  opacity:0;border-radius:0 2px 2px 0;
+  transition:opacity .16s;
 }
-.tool-card:hover{background:var(--surface-2)}
-.tool-card.active{background:var(--accent-dim)}
+.tool-card:hover{
+  border-color:rgba(124,111,255,0.28);
+  transform:translateY(-1px);
+  box-shadow:var(--sh);
+}
+.tool-card.active{
+  border-color:var(--accent);
+  background:var(--accent-dim);
+  box-shadow:var(--sh-accent);
+}
 .tool-card.active::before{opacity:1}
-.tool-card.active .tool-card-name{color:var(--accent)}
-.tool-card.active .tool-card-icon{background:var(--accent-dim);border-color:rgba(124,111,255,0.25)}
+.tool-card.active .tool-card-name{color:var(--accent);font-weight:700}
+.tool-card.active .tool-card-icon{
+  background:rgba(124,111,255,0.12);
+  border-color:rgba(124,111,255,0.28);
+}
 
 .tool-card-icon{
-  width:36px;height:36px;min-width:36px;min-height:36px;
-  border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
-  font-size:16px;background:var(--surface-3);border:1px solid var(--border);
-  flex-shrink:0;transition:var(--t);
+  width:38px;height:38px;min-width:38px;
+  border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  background:var(--surface-3);
+  border:1px solid var(--border);
+  flex-shrink:0;
+  transition:var(--t);
 }
-.tool-card-text{flex:1;min-width:0;overflow:hidden}
+.tool-card-text{flex:1;min-width:0}
 .tool-card-name{
-  font-size:12.5px;font-weight:700;color:var(--text);letter-spacing:-0.01em;
-  transition:color .14s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:12.5px;font-weight:600;color:var(--text);
+  letter-spacing:-0.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:color .16s;
 }
-/* Desc only visible on desktop */
-.tool-card-desc{font-size:10.5px;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* Badge — desktop only, shown inline next to name */
-.tool-card-badge-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tool-card-desc{
+  font-size:10.5px;color:var(--text-3);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .tool-card-badge{
+  flex-shrink:0;
   font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
-  padding:2px 6px;border-radius:20px;background:var(--accent-dim);color:var(--accent-2);
-  border:1px solid rgba(124,111,255,0.18);white-space:nowrap;
+  padding:2px 7px;border-radius:20px;
+  background:var(--accent-dim);color:var(--accent-2);
+  border:1px solid rgba(124,111,255,0.18);
 }
-.tool-card-arrow{font-size:11px;color:var(--text-3);opacity:0;transition:opacity .14s,transform .14s;transform:translateX(-3px)}
-.tool-card:hover .tool-card-arrow,.tool-card.active .tool-card-arrow{opacity:1;transform:translateX(0)}
-.tool-card.active .tool-card-arrow{color:var(--accent)}
+.tool-card-arrow{
+  font-size:14px;color:var(--text-3);
+  flex-shrink:0;
+  opacity:0;transition:opacity .15s,transform .15s;
+  transform:translateX(-4px);
+}
+.tool-card:hover .tool-card-arrow{opacity:1;transform:translateX(0)}
+.tool-card.active .tool-card-arrow{opacity:1;color:var(--accent);transform:translateX(0)}
 
-/* ── Right panel ── */
+/* ══ RIGHT PANEL ══ */
 .tool-panel-right{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);
-  overflow:hidden;box-shadow:var(--sh);animation:panelIn .22s var(--ease) both;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:var(--sh);
+  animation:panelIn .22s var(--ease) both;
 }
 @keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .tool-panel-header{
@@ -422,7 +461,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:240px;gap:10px;
 }
-.empty-panel-icon{font-size:40px;opacity:.3;animation:floatIcon 3s ease-in-out infinite}
+.empty-panel-icon{font-size:40px;opacity:.28;animation:floatIcon 3s ease-in-out infinite}
 @keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .empty-panel-text{font-size:13px;font-weight:600;color:var(--text-3)}
 .empty-panel-sub{font-size:11.5px;color:var(--text-3);opacity:.7}
@@ -459,78 +498,35 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 
 /* ══════════════════════════════════════════════
-   TABLET ≤900px — single column, 2×2 grid cards
+   TABLET ≤900px — stacks to single column
+   Tool cards stay as individual boxes in 2×2 grid
 ══════════════════════════════════════════════ */
 @media(max-width:900px){
   .marketing-layout{grid-template-columns:1fr}
   .inline-skel-mkt{grid-template-columns:1fr}
   .skel-mkt-grid{grid-template-columns:1fr}
-  .tool-panel-left{position:static}
-
-  /* 2x2 grid */
   .tool-list{
+    position:static;
+    /* 2×2 grid of individual cards */
     display:grid;
     grid-template-columns:1fr 1fr;
-    /* equal row heights */
-    grid-auto-rows:1fr;
-    gap:0;
+    gap:10px;
   }
-
-  /* Each card: fixed consistent layout, no variable content */
+  /* Keep each card as its own box — no changes needed */
   .tool-card{
-    /* Stack: icon top, name below */
     flex-direction:column;
     align-items:center;
-    justify-content:center;
     text-align:center;
-    gap:8px;
     padding:16px 12px;
-    border-bottom:1px solid var(--border);
-    border-right:1px solid var(--border);
-    /* Remove the left-bar indicator, use top bar instead */
+    gap:9px;
   }
-  /* Right col: no right border */
-  .tool-card:nth-child(even){border-right:none}
-  /* Bottom row: no bottom border */
-  .tool-card:nth-child(3),
-  .tool-card:nth-child(4){border-bottom:none}
-
-  /* Top accent bar replaces left bar */
-  .tool-card::before{
-    left:0;top:0;right:0;bottom:auto;
-    width:100%;height:3px;
-    border-radius:0;
-    border-bottom-left-radius:0;
-    border-bottom-right-radius:0;
-  }
-
-  /* Icon: slightly larger for centred layout */
-  .tool-card-icon{
-    width:40px;height:40px;min-width:40px;min-height:40px;
-    font-size:18px;
-    /* reset active flex-shrink */
-    flex-shrink:0;
-  }
-
-  /* Name only — no desc, no badge, no arrow in grid */
+  .tool-card-icon{width:40px;height:40px;min-width:40px;font-size:18px}
+  .tool-card-text{flex:none;width:100%}
+  .tool-card-name{font-size:12px;white-space:normal;text-align:center;line-height:1.3}
+  /* Hide desc, badge, arrow in grid mode */
   .tool-card-desc{display:none}
-  .tool-card-badge-wrap .tool-card-badge{display:none}
-  .tool-card-badge-wrap{display:none}
+  .tool-card-badge{display:none}
   .tool-card-arrow{display:none}
-
-  /* Text area centred */
-  .tool-card-text{
-    flex:none;
-    width:100%;
-    overflow:visible;
-  }
-  .tool-card-name{
-    font-size:12px;
-    white-space:normal;
-    text-align:center;
-    line-height:1.3;
-  }
-
   .field-row{grid-template-columns:1fr 1fr}
 }
 
@@ -549,22 +545,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .skel-body{padding:14px}
   .skel-mkt-grid{grid-template-columns:1fr}
   .field-row{grid-template-columns:1fr}
+  .tool-card{padding:14px 10px;gap:8px}
+  .tool-card-icon{width:36px;height:36px;min-width:36px;font-size:16px}
+  .tool-card-name{font-size:11.5px}
   .tool-panel-header{padding:16px 18px 14px;gap:11px}
   .tool-panel-header-icon{width:40px;height:40px;min-width:40px;font-size:18px}
   .tool-panel-header h2{font-size:14.5px}
   .tool-panel-body{padding:16px 18px}
   #toast-container{bottom:16px;padding:0 12px}
-
-  /* On small mobile, keep 2×2 but smaller */
-  .tool-card{padding:14px 10px;gap:7px}
-  .tool-card-icon{width:36px;height:36px;min-width:36px;min-height:36px;font-size:16px}
-  .tool-card-name{font-size:11.5px}
 }
-
 @media(max-width:360px){
   .mob-store-pill select{max-width:86px}
   .tool-card{padding:12px 8px;gap:6px}
-  .tool-card-icon{width:32px;height:32px;min-width:32px;min-height:32px;font-size:14px}
+  .tool-card-icon{width:32px;height:32px;min-width:32px;font-size:14px}
   .tool-card-name{font-size:11px}
 }
 </style>
@@ -607,12 +600,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="skel" style="height:16px;width:200px;border-radius:5px;"></div>
     <div class="skel" style="height:11px;width:320px;border-radius:4px;opacity:.6;"></div>
     <div class="skel-mkt-grid" style="margin-top:6px;">
-      <div style="border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--border);display:flex;flex-direction:column;">
-        <div class="skel" style="height:72px;border-radius:0;"></div>
-        <div class="skel" style="height:72px;border-radius:0;opacity:.8;margin-top:1px;"></div>
-        <div class="skel" style="height:72px;border-radius:0;opacity:.65;margin-top:1px;"></div>
-        <div class="skel" style="height:72px;border-radius:0;opacity:.45;margin-top:1px;"></div>
+      <!-- Left: 4 individual card skeletons -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="skel" style="height:64px;border-radius:var(--r-lg);"></div>
+        <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.8;"></div>
+        <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.65;"></div>
+        <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.45;"></div>
       </div>
+      <!-- Right: form panel -->
       <div class="skel" style="height:540px;border-radius:var(--r-xl);opacity:.9;"></div>
     </div>
   </div>
@@ -730,12 +725,11 @@ let selectedTone='friendly';
 let _loadToken=0;
 
 const TOOLS={
-  instagram:{icon:'📸',name:'Instagram Post',desc:'Captions + hashtags',help:'Generate scroll-stopping captions with trending hashtags for your products or store.',badge:'Popular',label:'Post'},
-  whatsapp: {icon:'💬',name:'WhatsApp Broadcast',desc:'Promotional messages',help:'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.',label:'Message'},
-  email:    {icon:'📧',name:'Email Campaign',desc:'Subject + full body copy',help:'Generate a compelling email with subject line, preview text and persuasive body copy.',label:'Email'},
-  sms:      {icon:'📱',name:'SMS Blast',desc:'Punchy 160-char texts',help:'Short, conversion-optimized SMS messages that respect the 160-character limit.',label:'SMS'}
+  instagram:{icon:'📸',name:'Instagram Post',  desc:'Captions + hashtags',    help:'Generate scroll-stopping captions with trending hashtags for your products or store.',  badge:'Popular', label:'Post'},
+  whatsapp: {icon:'💬',name:'WhatsApp Broadcast',desc:'Promotional messages',  help:'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.', label:'Message'},
+  email:    {icon:'📧',name:'Email Campaign',  desc:'Subject + full body copy',help:'Generate a compelling email with subject line, preview text and persuasive body copy.',   label:'Email'},
+  sms:      {icon:'📱',name:'SMS Blast',       desc:'Punchy 160-char texts',   help:'Short, conversion-optimized SMS messages that respect the 160-character limit.',          label:'SMS'}
 };
-
 const TONES=[
   {key:'friendly',    label:'😊 Friendly'},
   {key:'professional',label:'💼 Professional'},
@@ -744,7 +738,7 @@ const TONES=[
   {key:'luxurious',   label:'✨ Premium'},
 ];
 
-/* ── HELPERS ── */
+/* ── STORE HELPERS ── */
 function setStoreLoading(on){
   const w=document.getElementById('store-select-wrap');
   if(w) on?w.classList.add('store-loading'):w.classList.remove('store-loading');
@@ -760,9 +754,16 @@ function onMobStoreChange(id){
   currentStoreId=id;
   loadStoreData();
 }
+
+/* ── TRANSITIONS ── */
 function inlineSkeletonHTML(){
   return `<div class="inline-skel-mkt">
-    <div class="skel" style="height:340px;border-radius:var(--r-xl);"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div class="skel" style="height:64px;border-radius:var(--r-lg);"></div>
+      <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.8;"></div>
+      <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.65;"></div>
+      <div class="skel" style="height:64px;border-radius:var(--r-lg);opacity:.45;"></div>
+    </div>
     <div class="skel" style="height:520px;border-radius:var(--r-xl);opacity:.9;"></div>
   </div>`;
 }
@@ -812,7 +813,6 @@ async function loadFirstLoad(){
   requestAnimationFrame(()=>dismissSkeleton());
   setStoreLoading(false);
 }
-
 async function loadStoreData(){
   const token=++_loadToken;
   const c=document.getElementById('page-content');
@@ -826,7 +826,6 @@ async function loadStoreData(){
   renderPage();fadeIn(c);
   setStoreLoading(false);
 }
-
 function showNoStoreState(){
   document.getElementById('page-content').innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 200px);text-align:center;">
@@ -846,28 +845,26 @@ function renderPage(){
       <div class="page-header-sub">Generate on-brand content for every channel in seconds — powered by AI.</div>
     </div>
     <div class="marketing-layout">
-      <div class="tool-panel-left">
-        <div class="tool-panel-left-header">
-          <div class="tool-panel-left-title">Choose a tool</div>
-        </div>
-        <div class="tool-list" id="toolList">
-          ${Object.entries(TOOLS).map(([key,t])=>`
-            <div class="tool-card${currentTool===key?' active':''}" onclick="switchTool('${key}')" role="button" tabindex="0">
-              <div class="tool-card-icon">${t.icon}</div>
-              <div class="tool-card-text">
-                <div class="tool-card-name">${t.name}</div>
-                <div class="tool-card-desc">${t.desc}</div>
-              </div>
-              <div class="tool-card-badge-wrap">
-                ${t.badge?`<span class="tool-card-badge">${t.badge}</span>`:''}
-                <span class="tool-card-arrow">›</span>
-              </div>
-            </div>`).join('')}
-        </div>
+
+      <!-- LEFT: 4 individual standalone cards -->
+      <div class="tool-list" id="toolList">
+        ${Object.entries(TOOLS).map(([key,t])=>`
+          <div class="tool-card${currentTool===key?' active':''}" onclick="switchTool('${key}')" role="button" tabindex="0">
+            <div class="tool-card-icon">${t.icon}</div>
+            <div class="tool-card-text">
+              <div class="tool-card-name">${t.name}</div>
+              <div class="tool-card-desc">${t.desc}</div>
+            </div>
+            ${t.badge?`<span class="tool-card-badge">${t.badge}</span>`:''}
+            <span class="tool-card-arrow">›</span>
+          </div>`).join('')}
       </div>
+
+      <!-- RIGHT: form panel -->
       <div class="tool-panel-right" id="toolPanel">
         ${renderToolPanel(productOptions)}
       </div>
+
     </div>`;
   c.querySelectorAll('.tool-card').forEach(card=>{
     card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click();}});
@@ -889,7 +886,6 @@ function renderToolPanel(productOptions){
   const toneChips=TONES.map(tone=>
     `<button class="tone-chip${selectedTone===tone.key?' active':''}" onclick="setTone('${tone.key}',this)">${tone.label}</button>`
   ).join('');
-
   return `
     <div class="tool-panel-header">
       <div class="tool-panel-header-icon">${t.icon}</div>
@@ -1080,7 +1076,6 @@ function renderResult(content){
   html+='</div>';
   res.innerHTML=html;
 }
-
 function resultBlock(title,text,id){
   return `<div class="result-block">
     <div class="result-block-header">
