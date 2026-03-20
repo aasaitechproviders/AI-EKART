@@ -24,6 +24,10 @@
   --font:'Plus Jakarta Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
   --ease:cubic-bezier(0.4,0,0.2,1);--t:all 0.18s cubic-bezier(0.4,0,0.2,1);
   --sidebar-w:248px;
+
+  /* Pill token — tweak one place, applies everywhere */
+  --pill-h:44px;
+  --pill-radius:100px;
 }
 [data-theme="dark"] {
   --bg:#07080D;--surface:#0C0E16;--surface-2:#111420;--surface-3:#171B28;--surface-4:#1D2133;
@@ -41,92 +45,119 @@
 html{background:var(--bg);height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100%}
 
-/* ═══════════════════════════════════════════════
-   PILL STORE SELECTOR — one component, used everywhere
-═══════════════════════════════════════════════ */
-.store-pill{
-  display:inline-flex;
-  align-items:stretch;
-  height:40px;
-  border-radius:100px;
-  border:1.5px solid var(--border-md);
-  background:var(--surface);
-  position:relative;
-  overflow:hidden;
-  flex-shrink:0;
-  box-shadow:var(--sh-sm);
-  transition:border-color .18s var(--ease), box-shadow .18s var(--ease);
-  max-width:280px;
-  cursor:pointer;
+/* ═══════════════════════════════════════════════════════
+   STORE PILL  — matches screenshot exactly
+   Left half: gray badge "STORE"
+   Right half: white store name + chevron
+   Both halves visually distinct, joined as one pill
+═══════════════════════════════════════════════════════ */
+.store-pill {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--pill-h);
+  border-radius: var(--pill-radius);
+  border: 1.5px solid var(--border-md);
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: var(--sh-sm);
+  transition: box-shadow .18s var(--ease), border-color .18s var(--ease);
+  max-width: 300px;
 }
-.store-pill:hover{
-  border-color:rgba(0,0,0,0.22);
-  box-shadow:0 3px 12px rgba(0,0,0,0.12);
+.store-pill:hover {
+  border-color: rgba(0,0,0,0.2);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.10);
 }
-[data-theme="dark"] .store-pill:hover{
-  border-color:rgba(255,255,255,0.22);
-  box-shadow:0 3px 12px rgba(0,0,0,0.45);
+[data-theme="dark"] .store-pill:hover {
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.5);
 }
-/* Left: gray "STORE" badge */
-.store-pill-badge{
-  display:flex;
-  align-items:center;
-  padding:0 14px;
-  background:var(--surface-3);
-  border-right:1.5px solid var(--border-md);
-  border-radius:100px 0 0 100px;
-  font-size:9.5px;
-  font-weight:800;
-  letter-spacing:0.13em;
-  text-transform:uppercase;
-  color:var(--text-3);
-  white-space:nowrap;
-  flex-shrink:0;
-  user-select:none;
+
+/* Left: "STORE" gray badge */
+.store-pill-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  background: var(--surface-3);
+  border-right: 1.5px solid var(--border-md);
+  /* Fully rounded on the left side only */
+  border-radius: var(--pill-radius) 0 0 var(--pill-radius);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
 }
+[data-theme="dark"] .store-pill-badge {
+  background: var(--surface-3);
+  border-right-color: var(--border-md);
+}
+
 /* Right: store name + chevron */
-.store-pill-body{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  padding:0 12px 0 14px;
-  flex:1;
-  min-width:0;
-  background:var(--surface);
+.store-pill-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 0 18px;
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  /* Fully rounded on the right side only */
+  border-radius: 0 var(--pill-radius) var(--pill-radius) 0;
 }
-.store-pill-name{
-  font-size:13.5px;
-  font-weight:700;
-  color:var(--text);
-  letter-spacing:-0.02em;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  flex:1;
-  min-width:0;
-  user-select:none;
+.store-pill-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  user-select: none;
 }
-.store-pill-chevron{
-  display:flex;
-  align-items:center;
-  flex-shrink:0;
+.store-pill-chevron {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
-.store-pill-chevron svg{
-  width:12px;height:12px;
-  stroke:var(--text-3);stroke-width:2.5;fill:none;
-  stroke-linecap:round;stroke-linejoin:round;
+.store-pill-chevron svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text-3);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-/* Invisible native <select> covers the whole pill for interaction */
-.store-pill select{
-  position:absolute;
-  inset:0;
-  opacity:0;
-  width:100%;
-  height:100%;
-  cursor:pointer;
-  font-size:16px; /* prevents iOS auto-zoom */
-  border-radius:100px;
+/* Invisible native <select> covers the whole pill */
+.store-pill select {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  font-size: 16px; /* prevents iOS zoom */
+  border-radius: var(--pill-radius);
 }
+
+/* Mobile pill — slightly smaller */
+.store-pill.pill-sm {
+  --pill-h: 40px;
+  max-width: 220px;
+}
+.store-pill.pill-sm .store-pill-badge { padding: 0 14px; font-size: 9.5px; }
+.store-pill.pill-sm .store-pill-body  { padding: 0 13px 0 15px; gap: 6px; }
+.store-pill.pill-sm .store-pill-name  { font-size: 13px; }
+.store-pill.pill-sm .store-pill-chevron svg { width: 12px; height: 12px; }
 
 /* SKELETON */
 @keyframes skelShimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
@@ -152,122 +183,64 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .skel-two{display:grid;grid-template-columns:360px 1fr;gap:16px;}
 
 /* SIDEBAR */
-.sidebar-backdrop{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
-  z-index:149;opacity:0;transition:opacity .22s var(--ease);pointer-events:none;
-}
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:149;opacity:0;transition:opacity .22s var(--ease);pointer-events:none;}
 .sidebar-backdrop.open{opacity:1;pointer-events:all}
-.sidebar{
-  width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:150;
-  overflow:hidden;overflow-y:auto;scrollbar-width:none;
-  transition:transform .25s cubic-bezier(0.4,0,0.2,1);
-}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:150;overflow:hidden;overflow-y:auto;scrollbar-width:none;transition:transform .25s cubic-bezier(0.4,0,0.2,1);}
 .sidebar::-webkit-scrollbar{display:none}
-.sidebar-logo{
-  display:flex;align-items:center;gap:9px;padding:18px 18px 16px;
-  font-size:19px;font-weight:800;letter-spacing:-0.05em;color:var(--text);
-  text-decoration:none;border-bottom:1px solid var(--border);flex-shrink:0;
-}
-.sidebar-logo::before{
-  content:'';display:inline-block;width:26px;height:26px;
-  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
-  border-radius:7px;box-shadow:0 4px 12px rgba(124,111,255,0.3);flex-shrink:0;
-}
+.sidebar-logo{display:flex;align-items:center;gap:9px;padding:18px 18px 16px;font-size:19px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sidebar-logo::before{content:'';display:inline-block;width:26px;height:26px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);border-radius:7px;box-shadow:0 4px 12px rgba(124,111,255,0.3);flex-shrink:0;}
 .logo-k{color:var(--accent)}
 .sidebar-user-skel{display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);}
 #sidebar-user-skel.loaded{display:none}
 .sidebar-user.loading{display:none}
-.sidebar-user{
-  display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;
-  border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);
-  transition:var(--t);cursor:default;overflow:hidden;min-width:0;
-}
+.sidebar-user{display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);transition:var(--t);cursor:default;overflow:hidden;min-width:0;}
 .sidebar-user:hover{border-color:var(--border-md);background:var(--surface-3)}
-.sidebar-avatar{
-  width:34px;height:34px;min-width:34px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),var(--accent-3));
-  font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;
-  color:white;flex-shrink:0;overflow:hidden;line-height:1;
-}
+.sidebar-avatar{width:34px;height:34px;min-width:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-3));font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;overflow:hidden;line-height:1;}
 .sidebar-avatar img{width:34px;height:34px;object-fit:cover;border-radius:50%;display:block;}
 .sidebar-user-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
 .sidebar-user-name{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-user-email{font-size:10.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .nav-section{padding:6px 10px;flex-shrink:0}
 .nav-section-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);padding:8px 8px 5px}
-.nav-item{
-  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);
-  font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;
-  transition:var(--t);position:relative;margin-bottom:1px;
-}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;transition:var(--t);position:relative;margin-bottom:1px;}
 .nav-item:hover{background:var(--surface-3);color:var(--text)}
 .nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:600}
 .nav-item.active::before{content:'';position:absolute;left:-10px;top:22%;bottom:22%;width:3px;border-radius:0 3px 3px 0;background:var(--accent);}
 .nav-icon{font-size:15px;width:20px;display:flex;justify-content:center;flex-shrink:0;opacity:.8}
 .nav-item.active .nav-icon{opacity:1}
 .sidebar-bottom{margin-top:auto;padding:10px;border-top:1px solid var(--border);flex-shrink:0}
-.btn-logout{
-  width:100%;padding:9px 11px;border-radius:var(--r-sm);
-  border:1px solid var(--border-md);background:transparent;
-  color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;
-  text-align:left;transition:var(--t);display:flex;align-items:center;gap:7px;font-family:var(--font);
-}
+.btn-logout{width:100%;padding:9px 11px;border-radius:var(--r-sm);border:1px solid var(--border-md);background:transparent;color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;text-align:left;transition:var(--t);display:flex;align-items:center;gap:7px;font-family:var(--font);}
 .btn-logout:hover{background:var(--red-dim);border-color:var(--red-border);color:var(--red)}
 
 /* MOBILE TOPBAR */
-.mobile-topbar{
-  display:none;height:58px;background:var(--surface);border-bottom:1px solid var(--border);
-  align-items:center;padding:0 14px;
-  position:sticky;top:0;z-index:60;flex-shrink:0;box-shadow:var(--sh-sm);
-  gap:8px;
-}
+.mobile-topbar{display:none;height:64px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;padding:0 14px;position:sticky;top:0;z-index:60;flex-shrink:0;box-shadow:var(--sh-sm);gap:10px;}
 .mob-left{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.mob-right{display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:0;}
-.hamburger{
-  width:36px;height:36px;border-radius:var(--r-sm);background:var(--surface-2);
-  border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:var(--t);
-}
+.mob-right{display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end;min-width:0;}
+.hamburger{width:38px;height:38px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:var(--t);}
 .hamburger:hover{background:var(--surface-3);border-color:var(--accent)}
 .hamburger svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;white-space:nowrap;}
 .mob-logo span{color:var(--accent)}
 
+/* THEME TOGGLE */
+.theme-toggle{width:44px;height:44px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;transition:var(--t);}
+.theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
+/* Match pill height on desktop topbar */
+.topbar .theme-toggle{width:var(--pill-h);height:var(--pill-h);}
+/* Match pill-sm height on mobile topbar */
+.mobile-topbar .theme-toggle{width:40px;height:40px;font-size:16px;}
+
 /* MAIN + DESKTOP TOPBAR */
 .main-wrap{margin-left:var(--sidebar-w);min-height:100vh;background:var(--bg);display:flex;flex-direction:column;}
-.topbar{
-  height:60px;background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;position:sticky;top:0;z-index:50;flex-shrink:0;gap:12px;
-}
+.topbar{height:68px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;flex-shrink:0;gap:12px;}
 .topbar-left{display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .topbar-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 
-/* THEME TOGGLE */
-.theme-toggle{
-  width:36px;height:36px;border-radius:var(--r-sm);background:var(--surface-2);
-  border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
-}
-.theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
-
 /* TABS BAR */
-.tabs-bar{
-  height:44px;background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:stretch;padding:0 24px;
-  position:sticky;top:60px;z-index:40;flex-shrink:0;
-  overflow-x:auto;scrollbar-width:none;
-}
+.tabs-bar{height:44px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 24px;position:sticky;top:68px;z-index:40;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
 .tabs-bar::-webkit-scrollbar{display:none}
-.tab-btn{
-  display:flex;align-items:center;gap:6px;padding:0 15px;
-  font-size:12.5px;font-weight:600;color:var(--text-3);letter-spacing:-0.01em;
-  cursor:pointer;border:none;background:none;font-family:var(--font);
-  border-bottom:2px solid transparent;transition:var(--t);white-space:nowrap;flex-shrink:0;
-}
+.tab-btn{display:flex;align-items:center;gap:6px;padding:0 15px;font-size:12.5px;font-weight:600;color:var(--text-3);letter-spacing:-0.01em;cursor:pointer;border:none;background:none;font-family:var(--font);border-bottom:2px solid transparent;transition:var(--t);white-space:nowrap;flex-shrink:0;}
 .tab-btn:hover{color:var(--text-2);}
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
 .tab-panel{display:none;}
@@ -277,12 +250,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .content{flex:1;padding:24px 28px;background:var(--bg);min-width:0;}
 
 /* BUTTONS */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  font-family:var(--font);font-size:13px;font-weight:600;
-  border-radius:var(--r-sm);border:none;cursor:pointer;
-  transition:var(--t);white-space:nowrap;letter-spacing:-0.01em;text-decoration:none;
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font);font-size:13px;font-weight:600;border-radius:var(--r-sm);border:none;cursor:pointer;transition:var(--t);white-space:nowrap;letter-spacing:-0.01em;text-decoration:none;}
 .btn:active{transform:scale(0.96)}
 .btn:disabled{opacity:.5;cursor:not-allowed !important;transform:none !important;pointer-events:none;}
 .btn-primary{background:var(--accent);color:white;padding:0 18px;height:36px;box-shadow:0 4px 14px rgba(124,111,255,0.3);}
@@ -293,11 +261,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .btn-sm{height:30px;padding:0 11px;font-size:12px;border-radius:var(--r-xs)}
 .btn-danger{background:var(--red);color:white;padding:0 18px;height:36px;}
 .btn-danger:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.btn-refund{
-  display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;
-  border-radius:var(--r-xs);background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);
-  font-size:11.5px;font-weight:700;font-family:var(--font);cursor:pointer;transition:var(--t);
-}
+.btn-refund{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:var(--r-xs);background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);font-size:11.5px;font-weight:700;font-family:var(--font);cursor:pointer;transition:var(--t);}
 .btn-refund:hover{background:rgba(224,82,82,0.16);}
 .btn-refund:disabled{opacity:.4;cursor:not-allowed;}
 .btn-copy{background:none;border:none;cursor:pointer;color:var(--accent);font-size:13px;flex-shrink:0;padding:3px;border-radius:5px;transition:var(--t);}
@@ -312,17 +276,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
 /* STAT CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.stat-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
-  padding:18px 20px;display:flex;align-items:flex-start;gap:14px;
-  transition:var(--t);position:relative;overflow:hidden;box-shadow:var(--sh-sm);
-}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;display:flex;align-items:flex-start;gap:14px;transition:var(--t);position:relative;overflow:hidden;box-shadow:var(--sh-sm);}
 .stat-card:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--sh)}
-.stat-icon-wrap{
-  width:40px;height:40px;border-radius:var(--r-sm);background:var(--surface-3);
-  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
-  font-size:17px;flex-shrink:0;transition:var(--t);
-}
+.stat-icon-wrap{width:40px;height:40px;border-radius:var(--r-sm);background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:var(--t);}
 .stat-card:hover .stat-icon-wrap{background:var(--accent-dim);border-color:rgba(124,111,255,0.2)}
 .stat-info{flex:1;min-width:0;}
 .stat-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px;}
@@ -344,30 +300,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:10.5px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
 .field label span{font-weight:400;text-transform:none;letter-spacing:0;opacity:.7;}
-.field input,.field textarea,.field select{
-  width:100%;font-family:var(--font);font-size:13px;height:40px;padding:0 12px;
-  border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface-2);color:var(--text);
-  outline:none;transition:var(--t);
-}
+.field input,.field textarea,.field select{width:100%;font-family:var(--font);font-size:13px;height:40px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface-2);color:var(--text);outline:none;transition:var(--t);}
 .field textarea{height:72px;padding:10px 12px;resize:vertical;}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);background:var(--surface-3);}
 .field input::placeholder,.field textarea::placeholder{color:var(--text-3);}
-.field select{
-  appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
-}
+.field select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
 .field select option{background:var(--surface);color:var(--text);}
 .field input[class~="mono"]{font-family:var(--mono);font-size:12.5px;}
 .field-hint{font-size:10.5px;color:var(--text-3);margin-top:5px;line-height:1.55;}
 .field-hint code{background:var(--surface-3);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--accent-2);}
 
 /* TOGGLE */
-.toggle-row{
-  display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
-  border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);
-  margin-bottom:16px;transition:var(--t);
-}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);margin-bottom:16px;transition:var(--t);}
 .toggle-row:hover{border-color:var(--border-md);}
 .toggle-label{font-size:13px;font-weight:700;color:var(--text);}
 .toggle-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
@@ -447,7 +391,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 .empty-state h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;}
 .empty-state p{font-size:12px;color:var(--text-2);}
 
-/* TWO-COL GRID */
+/* TWO-COL */
 .two-col{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;}
 
 /* MODAL */
@@ -473,33 +417,29 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 @keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .card-in{animation:cardIn .25s var(--ease) both;}
 
-/* ─── RESPONSIVE ─────────────────────────────── */
+/* ── RESPONSIVE ────────────────────────────────── */
 @media(max-width:1200px){
   .stats-row{grid-template-columns:repeat(2,1fr);}
   .payout-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:1000px){
   .two-col,.links-grid{grid-template-columns:1fr;}
-  /* Slightly smaller pill on tablet */
-  .store-pill{height:38px;}
-  .store-pill-name{font-size:13px;}
-  .store-pill-badge{font-size:9px;}
 }
 @media(max-width:900px){
   .stats-row{grid-template-columns:repeat(2,1fr);}
   .payout-grid{grid-template-columns:1fr;}
 }
+/* MOBILE */
 @media(max-width:648px){
-  /* Switch to mobile topbar */
   .mobile-topbar{display:flex;}
   .topbar{display:none !important;}
-  .tabs-bar{top:58px;}
+  .tabs-bar{top:64px;}
   .sidebar{transform:translateX(-100%);box-shadow:8px 0 40px rgba(0,0,0,0.15);}
   .sidebar.mob-open{transform:translateX(0);}
   .sidebar-backdrop{display:block;}
   .main-wrap{margin-left:0;}
   .content{padding:14px 14px 80px;}
-  #page-skeleton{left:0;top:58px;}
+  #page-skeleton{left:0;top:64px;}
   .skel-stats{grid-template-columns:repeat(2,1fr);gap:10px;}
   .skel-two{grid-template-columns:1fr;}
   .stats-row{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
@@ -511,16 +451,11 @@ tr:hover td{background:rgba(124,111,255,0.03);}
   .modal{padding:18px;border-radius:var(--r-lg);}
   .modal-overlay{padding:10px;}
   #toast-container{bottom:16px;padding:0 12px;}
-  /* Mobile pill sizing */
-  .store-pill{height:38px;max-width:210px;}
-  .store-pill-badge{padding:0 11px;font-size:9px;}
-  .store-pill-name{font-size:12.5px;}
-  .store-pill-body{padding:0 10px 0 12px;}
 }
 @media(max-width:380px){
-  .store-pill{max-width:170px;}
-  .store-pill-badge{padding:0 9px;}
-  .store-pill-name{font-size:12px;}
+  .store-pill.pill-sm{max-width:180px;}
+  .store-pill.pill-sm .store-pill-badge{padding:0 11px;}
+  .store-pill.pill-sm .store-pill-name{font-size:12px;}
 }
 </style>
 <script>
@@ -546,8 +481,8 @@ tr:hover td{background:rgba(124,111,255,0.03);}
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
   <div class="mob-right">
-    <!-- Pill store selector — mobile -->
-    <div class="store-pill" id="mob-store-pill" style="display:none;" title="Switch store">
+    <!-- Mobile pill — pill-sm modifier for slightly smaller size -->
+    <div class="store-pill pill-sm" id="mob-store-pill" style="display:none;" title="Switch store">
       <span class="store-pill-badge">Store</span>
       <div class="store-pill-body">
         <span class="store-pill-name" id="mob-store-name">—</span>
@@ -555,7 +490,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
       </div>
       <select id="mob-store-selector" onchange="onStoreChange(this.value)"></select>
     </div>
-    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" style="width:34px;height:34px;font-size:14px;">☀️</button>
+    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()">☀️</button>
   </div>
 </div>
 
@@ -564,8 +499,9 @@ tr:hover td{background:rgba(124,111,255,0.03);}
   <div class="skel-topbar">
     <div class="skel" style="height:14px;width:80px;border-radius:5px;"></div>
     <div style="display:flex;gap:10px;align-items:center;">
-      <div class="skel" style="height:40px;width:200px;border-radius:100px;opacity:.6;"></div>
-      <div class="skel" style="height:36px;width:36px;border-radius:10px;opacity:.4;"></div>
+      <!-- Pill-shaped skeleton -->
+      <div class="skel" style="height:44px;width:220px;border-radius:100px;opacity:.6;"></div>
+      <div class="skel" style="height:44px;width:44px;border-radius:10px;opacity:.4;"></div>
     </div>
   </div>
   <div class="skel-tabsbar">
@@ -632,13 +568,14 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 
 <!-- ══ MAIN ══ -->
 <div class="main-wrap">
+
   <!-- Desktop / Tablet topbar -->
   <div class="topbar">
     <div class="topbar-left">
       <span class="topbar-title">Payments</span>
     </div>
     <div class="topbar-right">
-      <!-- Pill store selector — desktop/tablet -->
+      <!-- Desktop pill — full size (--pill-h: 44px) -->
       <div class="store-pill" id="desk-store-pill" style="display:none;" title="Switch store">
         <span class="store-pill-badge">Store</span>
         <div class="store-pill-body">
@@ -652,7 +589,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
   </div>
 
   <!-- TABS -->
-  <div class="tabs-bar" id="tabs-bar">
+  <div class="tabs-bar">
     <button class="tab-btn active" data-tab="setup"        onclick="switchTab('setup',this)">⚙️ Setup</button>
     <button class="tab-btn"        data-tab="transactions" onclick="switchTab('transactions',this)">📄 Transactions</button>
     <button class="tab-btn"        data-tab="payouts"      onclick="switchTab('payouts',this)">💰 Payouts</button>
@@ -675,27 +612,9 @@ tr:hover td{background:rgba(124,111,255,0.03);}
                 <div><div class="toggle-label">Enable Payments</div><div class="toggle-sub">Allow customers to pay online</div></div>
                 <label class="toggle"><input type="checkbox" id="pay-enabled" onchange="saveEnabled()"><span class="toggle-slider"></span></label>
               </div>
-              <div class="field">
-                <label>Key ID</label>
-                <input class="mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off">
-                <div class="field-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (testing)</div>
-              </div>
-              <div class="field">
-                <label>Key Secret</label>
-                <input id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password" style="font-family:var(--mono);letter-spacing:0.08em;font-size:12.5px;">
-                <div class="field-hint">Never exposed to customers. Stored encrypted on the server.</div>
-              </div>
-              <div class="field">
-                <label>Currency</label>
-                <select id="pay-currency">
-                  <option value="INR">INR — Indian Rupee ₹</option>
-                  <option value="USD">USD — US Dollar $</option>
-                  <option value="EUR">EUR — Euro €</option>
-                  <option value="GBP">GBP — British Pound £</option>
-                  <option value="SGD">SGD — Singapore Dollar S$</option>
-                  <option value="AED">AED — UAE Dirham</option>
-                </select>
-              </div>
+              <div class="field"><label>Key ID</label><input class="mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off"><div class="field-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (testing)</div></div>
+              <div class="field"><label>Key Secret</label><input id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password" style="font-family:var(--mono);letter-spacing:0.08em;font-size:12.5px;"><div class="field-hint">Never exposed to customers. Stored encrypted on the server.</div></div>
+              <div class="field"><label>Currency</label><select id="pay-currency"><option value="INR">INR — Indian Rupee ₹</option><option value="USD">USD — US Dollar $</option><option value="EUR">EUR — Euro €</option><option value="GBP">GBP — British Pound £</option><option value="SGD">SGD — Singapore Dollar S$</option><option value="AED">AED — UAE Dirham</option></select></div>
               <button class="btn btn-secondary full" id="btn-verify" onclick="verifyKeys()" style="margin-bottom:10px;">🔍 Test Connection</button>
               <div class="verify-status" id="verify-status"></div>
               <button class="btn btn-primary full" id="btn-save" onclick="saveSettings()">💾 Save Settings</button>
@@ -712,7 +631,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
               <ol class="setup-steps">
                 <li class="step"><div class="step-num">1</div><div class="step-body"><h4>Create a Razorpay account</h4><p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank" rel="noopener">dashboard.razorpay.com</a> and complete KYC verification for live payments.</p></div></li>
                 <li class="step"><div class="step-num">2</div><div class="step-body"><h4>Generate API keys</h4><p>Go to <strong>Settings → API Keys → Generate Key</strong>. Copy both the <code>Key ID</code> and <code>Key Secret</code> — the secret is shown only once.</p></div></li>
-                <li class="step"><div class="step-num">3</div><div class="step-body"><h4>Paste keys above</h4><p>Use <code>rzp_test_</code> keys while testing, switch to <code>rzp_live_</code> when you go live with real payments.</p></div></li>
+                <li class="step"><div class="step-num">3</div><div class="step-body"><h4>Paste keys above</h4><p>Use <code>rzp_test_</code> keys while testing, switch to <code>rzp_live_</code> when you go live.</p></div></li>
                 <li class="step"><div class="step-num">4</div><div class="step-body"><h4>Set up Webhook <span style="color:var(--text-3);font-weight:400;">(recommended)</span></h4><p>In Razorpay Dashboard → <strong>Settings → Webhooks</strong>, add:<br><code>https://apiv2.aasaitech.in/webhooks/razorpay</code><br>Events: <code>payment.captured</code>, <code>payment.failed</code>, <code>refund.processed</code></p></div></li>
                 <li class="step"><div class="step-num">5</div><div class="step-body"><h4>Test &amp; go live</h4><p>Toggle <strong>Enable Payments</strong> on, click <strong>Test Connection</strong> to verify, then <strong>Save Settings</strong>. You're live!</p></div></li>
               </ol>
@@ -724,11 +643,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 
     <!-- TRANSACTIONS TAB -->
     <div class="tab-panel" id="tab-transactions">
-      <div id="txn-not-configured" class="not-configured" style="display:none;">
-        <span class="nc-icon">💳</span><h3>Razorpay not configured</h3>
-        <p>Set up your Razorpay credentials in the Setup tab to view transactions.</p>
-        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
-      </div>
+      <div id="txn-not-configured" class="not-configured" style="display:none;"><span class="nc-icon">💳</span><h3>Razorpay not configured</h3><p>Set up your Razorpay credentials in the Setup tab to view transactions.</p><button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button></div>
       <div id="txn-content">
         <div class="stats-row">
           <div class="stat-card"><div class="stat-icon-wrap">💰</div><div class="stat-info"><div class="stat-label">Total Collected</div><div class="stat-value green stat-loading" id="stat-collected">—</div><div class="stat-sub">Last 30 days</div></div></div>
@@ -740,50 +655,31 @@ tr:hover td{background:rgba(124,111,255,0.03);}
           <div class="table-hd">
             <span class="table-title">Payment History</span>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <div class="search-wrap">
-                <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input class="search-input" id="txn-search" placeholder="Search ID or email…" oninput="filterTxns()">
-              </div>
+              <div class="search-wrap"><svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input class="search-input" id="txn-search" placeholder="Search ID or email…" oninput="filterTxns()"></div>
               <button class="btn btn-secondary btn-sm" onclick="loadTransactions()">↻ Refresh</button>
             </div>
           </div>
-          <div class="tbl-overflow">
-            <table>
-              <thead><tr><th>Payment ID</th><th>Amount</th><th>Method</th><th>Customer</th><th>Status</th><th>Date</th><th></th></tr></thead>
-              <tbody id="txn-tbody"><tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text-3);">Loading transactions…</td></tr></tbody>
-            </table>
-          </div>
+          <div class="tbl-overflow"><table><thead><tr><th>Payment ID</th><th>Amount</th><th>Method</th><th>Customer</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="txn-tbody"><tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text-3);">Loading transactions…</td></tr></tbody></table></div>
         </div>
       </div>
     </div>
 
     <!-- PAYOUTS TAB -->
     <div class="tab-panel" id="tab-payouts">
-      <div id="payout-not-configured" class="not-configured" style="display:none;">
-        <span class="nc-icon">💰</span><h3>Razorpay not configured</h3>
-        <p>Set up your Razorpay credentials in the Setup tab to view payout summary.</p>
-        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
-      </div>
+      <div id="payout-not-configured" class="not-configured" style="display:none;"><span class="nc-icon">💰</span><h3>Razorpay not configured</h3><p>Set up your Razorpay credentials in the Setup tab to view payout summary.</p><button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button></div>
       <div id="payout-content">
         <div class="payout-grid">
           <div class="payout-card"><span class="payout-card-emoji">💰</span><div class="payout-card-label">Net Collected</div><div class="payout-card-value green" id="payout-net">—</div><div class="payout-card-sub" id="payout-period">INR · Last 30 days</div></div>
           <div class="payout-card"><span class="payout-card-emoji">🔄</span><div class="payout-card-label">Total Refunded</div><div class="payout-card-value red" id="payout-refunded">—</div><div class="payout-card-sub">Refunds issued</div></div>
           <div class="payout-card"><span class="payout-card-emoji">❌</span><div class="payout-card-label">Failed Payments</div><div class="payout-card-value amber" id="payout-failed">—</div><div class="payout-card-sub">Not collected</div></div>
         </div>
-        <div class="section-card">
-          <div class="section-card-hd"><div class="section-card-title"><div class="section-card-icon">📊</div>Payment Method Breakdown</div></div>
-          <div class="section-card-bd"><div class="method-row" id="method-breakdown"><div style="color:var(--text-3);font-size:12.5px;">Loading breakdown…</div></div></div>
-        </div>
+        <div class="section-card"><div class="section-card-hd"><div class="section-card-title"><div class="section-card-icon">📊</div>Payment Method Breakdown</div></div><div class="section-card-bd"><div class="method-row" id="method-breakdown"><div style="color:var(--text-3);font-size:12.5px;">Loading breakdown…</div></div></div></div>
       </div>
     </div>
 
     <!-- PAYMENT LINKS TAB -->
     <div class="tab-panel" id="tab-links">
-      <div id="links-not-configured" class="not-configured" style="display:none;">
-        <span class="nc-icon">🔗</span><h3>Razorpay not configured</h3>
-        <p>Set up your Razorpay credentials in the Setup tab to generate payment links.</p>
-        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
-      </div>
+      <div id="links-not-configured" class="not-configured" style="display:none;"><span class="nc-icon">🔗</span><h3>Razorpay not configured</h3><p>Set up your Razorpay credentials in the Setup tab to generate payment links.</p><button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button></div>
       <div id="links-content">
         <div class="links-grid">
           <div>
@@ -816,15 +712,9 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 <!-- REFUND MODAL -->
 <div class="modal-overlay" id="modal-refund">
   <div class="modal">
-    <div class="modal-hd">
-      <div><div class="modal-title">💸 Issue Refund</div><div class="modal-sub">Processing refund for <span id="refund-pid" style="font-family:var(--mono);font-size:11px;color:var(--accent-2);"></span></div></div>
-      <button class="modal-close" onclick="closeModal('modal-refund')">✕</button>
-    </div>
+    <div class="modal-hd"><div><div class="modal-title">💸 Issue Refund</div><div class="modal-sub">Processing refund for <span id="refund-pid" style="font-family:var(--mono);font-size:11px;color:var(--accent-2);"></span></div></div><button class="modal-close" onclick="closeModal('modal-refund')">✕</button></div>
     <div class="field"><label>Refund Amount (₹) <span>— leave blank for full refund</span></label><input class="mono" id="refund-amount" type="number" min="1" placeholder="Full refund"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('modal-refund')">Cancel</button>
-      <button class="btn btn-danger" id="btn-confirm-refund" onclick="confirmRefund()">💸 Confirm Refund</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-refund')">Cancel</button><button class="btn btn-danger" id="btn-confirm-refund" onclick="confirmRefund()">💸 Confirm Refund</button></div>
   </div>
 </div>
 
@@ -833,7 +723,7 @@ tr:hover td{background:rgba(124,111,255,0.03);}
 function toast(msg,type){
   type=type||'success';
   if(typeof window._toast==='function') return window._toast(msg,type);
-  let c=document.getElementById('toast-container');
+  const c=document.getElementById('toast-container');
   const el=document.createElement('div');
   el.className='toast '+type;
   const icons={success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
@@ -857,151 +747,108 @@ function toggleTheme(){applyTheme(!_isDark);}
 applyTheme(_isDark);
 
 /* STATE */
-let currentStoreId='';
-let paymentSettings=null;
-let allTxns=[];
-let refundTarget=null;
-let _activeTab='setup';
+let currentStoreId='',paymentSettings=null,allTxns=[],refundTarget=null,_activeTab='setup';
 
 /* SKELETON */
 function dismissSkeleton(){
   const s=document.getElementById('page-skeleton');
-  if(!s||s._gone) return; s._gone=true;
+  if(!s||s._gone)return; s._gone=true;
   s.classList.add('skel-hiding');
   s.addEventListener('transitionend',()=>s.remove(),{once:true});
   setTimeout(()=>{if(s.parentNode)s.remove();},500);
 }
 function revealSidebarUser(){
-  const s=document.getElementById('sidebar-user-skel');
-  const r=document.getElementById('sidebar-user-real');
+  const s=document.getElementById('sidebar-user-skel'),r=document.getElementById('sidebar-user-real');
   if(s)s.classList.add('loaded'); if(r)r.classList.remove('loading');
 }
 
 /* MOBILE SIDEBAR */
-function openMobileSidebar(){
-  document.getElementById('sidebar').classList.add('mob-open');
-  document.getElementById('sidebarBackdrop').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeMobileSidebar(){
-  document.getElementById('sidebar').classList.remove('mob-open');
-  document.getElementById('sidebarBackdrop').classList.remove('open');
-  document.body.style.overflow='';
-}
+function openMobileSidebar(){document.getElementById('sidebar').classList.add('mob-open');document.getElementById('sidebarBackdrop').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('mob-open');document.getElementById('sidebarBackdrop').classList.remove('open');document.body.style.overflow='';}
 
 /* INIT */
 window.addEventListener('DOMContentLoaded', async()=>{
   applyTheme(_isDark);
-  const nav = await renderNav('payments');
-  if(!nav){ dismissSkeleton(); return; }
+  const nav=await renderNav('payments');
+  if(!nav){dismissSkeleton();return;}
   revealSidebarUser();
-  const stores = nav.stores || [];
-  currentStoreId = nav.currentStoreId || (stores[0]?._id || '');
-  buildStoreSelector(stores, currentStoreId);
+  const stores=nav.stores||[];
+  currentStoreId=nav.currentStoreId||(stores[0]?._id||'');
+  buildStoreSelector(stores,currentStoreId);
   await loadAll();
 });
 
-/* BUILD PILL — populates BOTH desktop + mobile pills identically */
-function buildStoreSelector(stores, activeId){
-  if(!stores.length) return;
-  const active = stores.find(s=>s._id===activeId) || stores[0];
-  const opts   = stores.map(s=>`<option value="${s._id}"${s._id===activeId?' selected':''}>${s.name}</option>`).join('');
+/* BUILD BOTH PILLS — identical content, different size via pill-sm */
+function buildStoreSelector(stores,activeId){
+  if(!stores.length)return;
+  const active=stores.find(s=>s._id===activeId)||stores[0];
+  const opts=stores.map(s=>`<option value="${s._id}"${s._id===activeId?' selected':''}>${s.name}</option>`).join('');
 
-  // Desktop pill
   const dPill=document.getElementById('desk-store-pill');
-  const dSel=document.getElementById('desk-store-selector');
-  const dName=document.getElementById('desk-store-name');
-  if(dPill) dPill.style.display='inline-flex';
-  if(dSel)  dSel.innerHTML=opts;
-  if(dName && active) dName.textContent=active.name;
+  if(dPill){dPill.style.display='inline-flex';document.getElementById('desk-store-selector').innerHTML=opts;document.getElementById('desk-store-name').textContent=active.name;}
 
-  // Mobile pill
   const mPill=document.getElementById('mob-store-pill');
-  const mSel=document.getElementById('mob-store-selector');
-  const mName=document.getElementById('mob-store-name');
-  if(mPill) mPill.style.display='inline-flex';
-  if(mSel)  mSel.innerHTML=opts;
-  if(mName && active) mName.textContent=active.name;
+  if(mPill){mPill.style.display='inline-flex';document.getElementById('mob-store-selector').innerHTML=opts;document.getElementById('mob-store-name').textContent=active.name;}
 }
 
 function onStoreChange(id){
   currentStoreId=id;
-  // Sync both selects + both name spans
-  ['desk-store-selector','mob-store-selector'].forEach(sid=>{
-    const el=document.getElementById(sid); if(el&&el.value!==id) el.value=id;
-  });
-  const opt=document.querySelector(`#desk-store-selector option[value="${id}"]`)
-          ||document.querySelector(`#mob-store-selector option[value="${id}"]`);
-  if(opt){
-    ['desk-store-name','mob-store-name'].forEach(nid=>{
-      const el=document.getElementById(nid); if(el) el.textContent=opt.textContent;
-    });
-  }
+  ['desk-store-selector','mob-store-selector'].forEach(sid=>{const el=document.getElementById(sid);if(el&&el.value!==id)el.value=id;});
+  const opt=document.querySelector(`#desk-store-selector option[value="${id}"]`)||document.querySelector(`#mob-store-selector option[value="${id}"]`);
+  if(opt){['desk-store-name','mob-store-name'].forEach(nid=>{const el=document.getElementById(nid);if(el)el.textContent=opt.textContent;});}
   loadAll();
 }
 
 /* LOAD ALL */
 async function loadAll(){
-  if(!currentStoreId) return;
+  if(!currentStoreId)return;
   try{
     await loadSettings();
     document.getElementById('page-content').style.display='';
     dismissSkeleton();
-    if(_activeTab==='transactions') loadTransactions();
-    else if(_activeTab==='payouts') loadPayouts();
-    else if(_activeTab==='links') loadLinks();
-  }catch(e){ dismissSkeleton(); toast(e.message||'Failed to load','error'); }
+    if(_activeTab==='transactions')loadTransactions();
+    else if(_activeTab==='payouts')loadPayouts();
+    else if(_activeTab==='links')loadLinks();
+  }catch(e){dismissSkeleton();toast(e.message||'Failed to load','error');}
 }
 
 /* SETTINGS */
 async function loadSettings(){
   try{
-    const data=await apiFetch(`/stores/${currentStoreId}/payment-settings`);
-    paymentSettings=data;
-    const el=(id)=>document.getElementById(id);
-    if(el('pay-enabled')) el('pay-enabled').checked=data.enabled;
-    if(el('key-id'))      el('key-id').value=data.razorpay_key_id||'';
-    if(el('key-secret'))  el('key-secret').value=data.has_secret?'••••••••••••••••••••':'';
-    if(el('pay-currency'))el('pay-currency').value=data.currency||'INR';
-  }catch(e){ paymentSettings=null; }
+    const d=await apiFetch(`/stores/${currentStoreId}/payment-settings`);
+    paymentSettings=d;
+    const g=id=>document.getElementById(id);
+    if(g('pay-enabled'))g('pay-enabled').checked=d.enabled;
+    if(g('key-id'))g('key-id').value=d.razorpay_key_id||'';
+    if(g('key-secret'))g('key-secret').value=d.has_secret?'••••••••••••••••••••':'';
+    if(g('pay-currency'))g('pay-currency').value=d.currency||'INR';
+  }catch(e){paymentSettings=null;}
 }
-
 async function saveEnabled(){
-  const enabled=document.getElementById('pay-enabled').checked;
-  try{
-    await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({enabled})});
-    toast(enabled?'Payments enabled':'Payments disabled',enabled?'success':'info');
-  }catch(e){toast(e.message||'Failed','error');}
+  const en=document.getElementById('pay-enabled').checked;
+  try{await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({enabled:en})});toast(en?'Payments enabled':'Payments disabled',en?'success':'info');}
+  catch(e){toast(e.message||'Failed','error');}
 }
-
 async function saveSettings(){
   const btn=document.getElementById('btn-save');
   btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Saving…';
   try{
     const ks=document.getElementById('key-secret').value;
     const body={razorpay_key_id:document.getElementById('key-id').value.trim(),currency:document.getElementById('pay-currency').value,enabled:document.getElementById('pay-enabled').checked};
-    if(ks&&!ks.startsWith('•')) body.razorpay_key_secret=ks.trim();
+    if(ks&&!ks.startsWith('•'))body.razorpay_key_secret=ks.trim();
     await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify(body)});
-    toast('Settings saved successfully!','success');
-    await loadSettings();
+    toast('Settings saved successfully!','success');await loadSettings();
   }catch(e){toast(e.message||'Failed to save','error');}
   finally{btn.disabled=false;btn.innerHTML='💾 Save Settings';}
 }
-
 async function verifyKeys(){
-  const btn=document.getElementById('btn-verify');
-  const status=document.getElementById('verify-status');
+  const btn=document.getElementById('btn-verify'),status=document.getElementById('verify-status');
   btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Testing…';
   status.className='verify-status';status.style.display='none';
-  const ki=document.getElementById('key-id').value.trim();
-  const ks=document.getElementById('key-secret').value;
-  if(ki&&ks&&!ks.startsWith('•')){
-    try{await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({razorpay_key_id:ki,razorpay_key_secret:ks})});}catch(e){}
-  }
-  try{
-    const d=await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`,{method:'POST'});
-    status.className='verify-status ok';status.innerHTML='✅ '+d.message;
-  }catch(e){status.className='verify-status err';status.innerHTML='❌ '+(e.message||'Verification failed');}
+  const ki=document.getElementById('key-id').value.trim(),ks=document.getElementById('key-secret').value;
+  if(ki&&ks&&!ks.startsWith('•')){try{await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({razorpay_key_id:ki,razorpay_key_secret:ks})});}catch(e){}}
+  try{const d=await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`,{method:'POST'});status.className='verify-status ok';status.innerHTML='✅ '+d.message;}
+  catch(e){status.className='verify-status err';status.innerHTML='❌ '+(e.message||'Verification failed');}
   finally{btn.disabled=false;btn.innerHTML='🔍 Test Connection';}
 }
 
@@ -1010,132 +857,84 @@ function switchTab(name,btn){
   _activeTab=name;
   document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  else{const b=document.querySelector(`[data-tab="${name}"]`);if(b)b.classList.add('active');}
-  const panel=document.getElementById('tab-'+name);
-  if(panel) panel.classList.add('active');
-  if(name==='transactions') loadTransactions();
-  else if(name==='payouts') loadPayouts();
-  else if(name==='links') loadLinks();
+  if(btn)btn.classList.add('active'); else{const b=document.querySelector(`[data-tab="${name}"]`);if(b)b.classList.add('active');}
+  const panel=document.getElementById('tab-'+name);if(panel)panel.classList.add('active');
+  if(name==='transactions')loadTransactions();else if(name==='payouts')loadPayouts();else if(name==='links')loadLinks();
 }
 
 /* TRANSACTIONS */
 async function loadTransactions(){
-  const notCfg=document.getElementById('txn-not-configured');
-  const content=document.getElementById('txn-content');
-  if(!notCfg||!content) return;
-  if(!paymentSettings?.razorpay_key_id){notCfg.style.display='';content.style.display='none';return;}
-  notCfg.style.display='none';content.style.display='';
-  ['stat-collected','stat-count','stat-refunded','stat-failed'].forEach(id=>{
-    const el=document.getElementById(id);if(el){el.textContent='—';el.classList.add('stat-loading');}
-  });
+  const nc=document.getElementById('txn-not-configured'),ct=document.getElementById('txn-content');
+  if(!nc||!ct)return;
+  if(!paymentSettings?.razorpay_key_id){nc.style.display='';ct.style.display='none';return;}
+  nc.style.display='none';ct.style.display='';
+  ['stat-collected','stat-count','stat-refunded','stat-failed'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='—';el.classList.add('stat-loading');}});
   const tbody=document.getElementById('txn-tbody');
-  if(tbody) tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3);">Loading transactions…</td></tr>`;
+  if(tbody)tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3);">Loading transactions…</td></tr>`;
   try{
-    const [txns,summary]=await Promise.all([apiFetch(`/stores/${currentStoreId}/payments`),apiFetch(`/stores/${currentStoreId}/payments/summary`)]);
-    allTxns=txns.items||[];
-    const cur=summary.currency||'INR';
-    setStatVal('stat-collected',fmtAmt(summary.total_collected,cur));
-    setStatVal('stat-count',summary.total_transactions||0);
-    setStatVal('stat-refunded',fmtAmt(summary.total_refunded,cur));
-    setStatVal('stat-failed',summary.failed_count||0);
+    const [txns,sum]=await Promise.all([apiFetch(`/stores/${currentStoreId}/payments`),apiFetch(`/stores/${currentStoreId}/payments/summary`)]);
+    allTxns=txns.items||[];const cur=sum.currency||'INR';
+    setStatVal('stat-collected',fmtAmt(sum.total_collected,cur));setStatVal('stat-count',sum.total_transactions||0);
+    setStatVal('stat-refunded',fmtAmt(sum.total_refunded,cur));setStatVal('stat-failed',sum.failed_count||0);
     renderTxns(allTxns);
-  }catch(e){
-    if(tbody) tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--red);">⚠️ ${e.message}</td></tr>`;
-    toast('Failed to load transactions: '+e.message,'error');
-  }
+  }catch(e){if(tbody)tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--red);">⚠️ ${e.message}</td></tr>`;toast('Failed to load transactions','error');}
 }
 function setStatVal(id,val){const el=document.getElementById(id);if(el){el.textContent=val;el.classList.remove('stat-loading');}}
 function renderTxns(items){
-  const tbody=document.getElementById('txn-tbody');if(!tbody) return;
+  const tbody=document.getElementById('txn-tbody');if(!tbody)return;
   if(!items.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><span class="empty-icon">📄</span><h3>No transactions yet</h3><p>Transactions will appear here once customers start paying.</p></div></td></tr>`;return;}
   const sm={captured:'badge-green',refunded:'badge-amber',failed:'badge-red'};
   tbody.innerHTML=items.map(p=>{
-    const amt=(p.amount/100).toFixed(2);
-    const date=new Date(p.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-    return`<tr>
-      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent-2);">${p.id}</span></td>
-      <td><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);">₹${amt}</span></td>
-      <td style="text-transform:capitalize;font-weight:600;font-size:12.5px;">${p.method||'—'}</td>
-      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.email||p.contact||'—'}</td>
-      <td><span class="badge ${sm[p.status]||'badge-gray'}">● ${p.status}</span></td>
-      <td style="font-size:11.5px;white-space:nowrap;">${date}</td>
-      <td>${p.status==='captured'?`<button class="btn-refund" onclick="openRefund('${p.id}',${p.amount})">💸 Refund</button>`:'—'}</td>
-    </tr>`;
+    const amt=(p.amount/100).toFixed(2),date=new Date(p.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    return`<tr><td><span style="font-family:var(--mono);font-size:11px;color:var(--accent-2);">${p.id}</span></td><td><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);">₹${amt}</span></td><td style="text-transform:capitalize;font-weight:600;font-size:12.5px;">${p.method||'—'}</td><td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.email||p.contact||'—'}</td><td><span class="badge ${sm[p.status]||'badge-gray'}">● ${p.status}</span></td><td style="font-size:11.5px;white-space:nowrap;">${date}</td><td>${p.status==='captured'?`<button class="btn-refund" onclick="openRefund('${p.id}',${p.amount})">💸 Refund</button>`:'—'}</td></tr>`;
   }).join('');
 }
-function filterTxns(){
-  const q=document.getElementById('txn-search').value.toLowerCase();
-  renderTxns(q?allTxns.filter(p=>p.id.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.contact||'').includes(q)):allTxns);
-}
+function filterTxns(){const q=document.getElementById('txn-search').value.toLowerCase();renderTxns(q?allTxns.filter(p=>p.id.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.contact||'').includes(q)):allTxns);}
 
 /* PAYOUTS */
 async function loadPayouts(){
-  const notCfg=document.getElementById('payout-not-configured');
-  const content=document.getElementById('payout-content');
-  if(!notCfg||!content) return;
-  if(!paymentSettings?.razorpay_key_id){notCfg.style.display='';content.style.display='none';return;}
-  notCfg.style.display='none';content.style.display='';
+  const nc=document.getElementById('payout-not-configured'),ct=document.getElementById('payout-content');
+  if(!nc||!ct)return;
+  if(!paymentSettings?.razorpay_key_id){nc.style.display='';ct.style.display='none';return;}
+  nc.style.display='none';ct.style.display='';
   try{
-    const [summary,txns]=await Promise.all([apiFetch(`/stores/${currentStoreId}/payments/summary`),apiFetch(`/stores/${currentStoreId}/payments`)]);
-    const cur=summary.currency||'INR';
-    document.getElementById('payout-net').textContent=fmtAmt(summary.total_collected,cur);
-    document.getElementById('payout-refunded').textContent=fmtAmt(summary.total_refunded,cur);
-    document.getElementById('payout-failed').textContent=summary.failed_count||0;
+    const [sum,txns]=await Promise.all([apiFetch(`/stores/${currentStoreId}/payments/summary`),apiFetch(`/stores/${currentStoreId}/payments`)]);
+    const cur=sum.currency||'INR';
+    document.getElementById('payout-net').textContent=fmtAmt(sum.total_collected,cur);
+    document.getElementById('payout-refunded').textContent=fmtAmt(sum.total_refunded,cur);
+    document.getElementById('payout-failed').textContent=sum.failed_count||0;
     document.getElementById('payout-period').textContent=`${cur} · Last 30 days`;
-    const items=txns.items||[]; const methods={};
-    items.filter(p=>p.status==='captured').forEach(p=>{const m=p.method||'other';methods[m]=(methods[m]||0)+p.amount/100;});
+    const methods={};(txns.items||[]).filter(p=>p.status==='captured').forEach(p=>{const m=p.method||'other';methods[m]=(methods[m]||0)+p.amount/100;});
     const total=Object.values(methods).reduce((a,b)=>a+b,0)||1;
     const icons={upi:'📱',card:'💳',netbanking:'🏦',wallet:'👛',emi:'📅',other:'💰'};
     const bd=document.getElementById('method-breakdown');
-    if(bd){
-      const sorted=Object.entries(methods).sort((a,b)=>b[1]-a[1]);
-      bd.innerHTML=sorted.length?sorted.map(([m,amt])=>{
-        const pct=Math.round((amt/total)*100);
-        return`<div class="method-item card-in"><div class="method-top"><span class="method-name">${icons[m]||'💰'} ${m}</span><span class="method-amt">${fmtAmt(amt,cur)} <span style="color:var(--text-3);font-size:10px;">(${pct}%)</span></span></div><div class="method-bar-bg"><div class="method-bar-fill" style="width:${pct}%;"></div></div></div>`;
-      }).join(''):`<div style="color:var(--text-3);font-size:12.5px;text-align:center;padding:20px;">No captured payments yet</div>`;
-    }
-  }catch(e){toast('Failed to load payout data: '+e.message,'error');}
+    const sorted=Object.entries(methods).sort((a,b)=>b[1]-a[1]);
+    if(bd)bd.innerHTML=sorted.length?sorted.map(([m,amt])=>{const pct=Math.round((amt/total)*100);return`<div class="method-item card-in"><div class="method-top"><span class="method-name">${icons[m]||'💰'} ${m}</span><span class="method-amt">${fmtAmt(amt,cur)} <span style="color:var(--text-3);font-size:10px;">(${pct}%)</span></span></div><div class="method-bar-bg"><div class="method-bar-fill" style="width:${pct}%;"></div></div></div>`;}).join(''):`<div style="color:var(--text-3);font-size:12.5px;text-align:center;padding:20px;">No captured payments yet</div>`;
+  }catch(e){toast('Failed to load payout data','error');}
 }
 
 /* PAYMENT LINKS */
 async function loadLinks(){
-  const notCfg=document.getElementById('links-not-configured');
-  const content=document.getElementById('links-content');
-  if(!notCfg||!content) return;
-  if(!paymentSettings?.razorpay_key_id){notCfg.style.display='';content.style.display='none';return;}
-  notCfg.style.display='none';content.style.display='';
+  const nc=document.getElementById('links-not-configured'),ct=document.getElementById('links-content');
+  if(!nc||!ct)return;
+  if(!paymentSettings?.razorpay_key_id){nc.style.display='';ct.style.display='none';return;}
+  nc.style.display='none';ct.style.display='';
   const container=document.getElementById('links-list');
-  if(container) container.innerHTML=`<div style="color:var(--text-3);font-size:12.5px;padding:18px;text-align:center;">Loading links…</div>`;
+  if(container)container.innerHTML=`<div style="color:var(--text-3);font-size:12.5px;padding:18px;text-align:center;">Loading links…</div>`;
   try{
-    const data=await apiFetch(`/stores/${currentStoreId}/payment-links`);
-    const items=data.items||[];
-    if(!container) return;
+    const data=await apiFetch(`/stores/${currentStoreId}/payment-links`),items=data.items||[];
+    if(!container)return;
     if(!items.length){container.innerHTML=`<div class="empty-state"><span class="empty-icon">🔗</span><h3>No payment links yet</h3><p>Create your first payment link using the form.</p></div>`;return;}
     const sm={created:'badge-amber',paid:'badge-green',cancelled:'badge-red',expired:'badge-gray'};
     container.innerHTML=items.map((l,i)=>{
-      const amt=(l.amount/100).toFixed(2);
-      const date=new Date(l.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-      const url=l.short_url||l.id||'';
-      return`<div class="link-card card-in" style="animation-delay:${i*0.04}s;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <div><div class="link-amount">₹${amt}</div><div class="link-desc">${l.description||'No description'}</div></div>
-          <span class="badge ${sm[l.status]||'badge-gray'}">● ${l.status}</span>
-        </div>
-        ${url?`<div class="link-url"><span class="link-url-text">${url}</span><button class="btn-copy" onclick="copyText('${url}')" title="Copy link">📋</button></div>`:''}
-        <div class="link-footer">
-          <span style="font-size:11px;color:var(--text-3);">${date}</span>
-          ${l.customer?.name?`<span style="font-size:11.5px;color:var(--text-2);">👤 ${l.customer.name}</span>`:''}
-        </div>
-      </div>`;
+      const amt=(l.amount/100).toFixed(2),date=new Date(l.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),url=l.short_url||l.id||'';
+      return`<div class="link-card card-in" style="animation-delay:${i*0.04}s;"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;"><div><div class="link-amount">₹${amt}</div><div class="link-desc">${l.description||'No description'}</div></div><span class="badge ${sm[l.status]||'badge-gray'}">● ${l.status}</span></div>${url?`<div class="link-url"><span class="link-url-text">${url}</span><button class="btn-copy" onclick="copyText('${url}')" title="Copy link">📋</button></div>`:''}<div class="link-footer"><span style="font-size:11px;color:var(--text-3);">${date}</span>${l.customer?.name?`<span style="font-size:11.5px;color:var(--text-2);">👤 ${l.customer.name}</span>`:''}</div></div>`;
     }).join('');
-  }catch(e){toast('Failed to load links: '+e.message,'error');}
+  }catch(e){toast('Failed to load links','error');}
 }
-
 async function createPaymentLink(){
   const btn=document.getElementById('btn-create-link');
-  const amount=parseFloat(document.getElementById('link-amount').value);
-  const desc=document.getElementById('link-desc').value.trim();
+  const amount=parseFloat(document.getElementById('link-amount').value),desc=document.getElementById('link-desc').value.trim();
   if(!amount||amount<1){toast('Enter a valid amount','error');return;}
   if(!desc){toast('Enter a description','error');return;}
   btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Generating…';
@@ -1145,29 +944,19 @@ async function createPaymentLink(){
     toast('Payment link created!','success');
     if(d.link?.short_url){navigator.clipboard.writeText(d.link.short_url).catch(()=>{});toast('Link copied to clipboard!','info');}
     ['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById('link-expiry').value='';
-    await loadLinks();
+    document.getElementById('link-expiry').value='';await loadLinks();
   }catch(e){toast(e.message||'Failed to create link','error');}
   finally{btn.disabled=false;btn.innerHTML='✨ Generate Payment Link';}
 }
 
 /* REFUNDS */
-function openRefund(paymentId,amountPaise){
-  refundTarget={paymentId,maxAmount:amountPaise/100};
-  document.getElementById('refund-pid').textContent=paymentId;
-  document.getElementById('refund-amount').value='';
-  document.getElementById('refund-amount').placeholder=`Full refund (₹${(amountPaise/100).toFixed(2)})`;
-  openModal('modal-refund');
-}
+function openRefund(pid,ap){refundTarget={paymentId:pid,maxAmount:ap/100};document.getElementById('refund-pid').textContent=pid;document.getElementById('refund-amount').value='';document.getElementById('refund-amount').placeholder=`Full refund (₹${(ap/100).toFixed(2)})`;openModal('modal-refund');}
 async function confirmRefund(){
-  if(!refundTarget) return;
-  const btn=document.getElementById('btn-confirm-refund');
-  const amount=parseFloat(document.getElementById('refund-amount').value)||undefined;
+  if(!refundTarget)return;
+  const btn=document.getElementById('btn-confirm-refund'),amount=parseFloat(document.getElementById('refund-amount').value)||undefined;
   btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Processing…';
-  try{
-    await apiFetch(`/stores/${currentStoreId}/payments/${refundTarget.paymentId}/refund`,{method:'POST',body:JSON.stringify({amount})});
-    toast('Refund issued successfully!','success');closeModal('modal-refund');await loadTransactions();
-  }catch(e){toast(e.message||'Refund failed','error');}
+  try{await apiFetch(`/stores/${currentStoreId}/payments/${refundTarget.paymentId}/refund`,{method:'POST',body:JSON.stringify({amount})});toast('Refund issued successfully!','success');closeModal('modal-refund');await loadTransactions();}
+  catch(e){toast(e.message||'Refund failed','error');}
   finally{btn.disabled=false;btn.innerHTML='💸 Confirm Refund';}
 }
 
