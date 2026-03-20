@@ -203,18 +203,46 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   background:var(--surface-2);
   border:1px solid var(--border);
   transition:var(--t);cursor:default;
+  overflow:hidden; /* prevent avatar bleed */
+  min-width:0;
 }
 .sidebar-user:hover{border-color:var(--border-md);background:var(--surface-3)}
 .sidebar-avatar{
-  width:34px;height:34px;border-radius:50%;
+  /* Hard-lock size so it never grows regardless of content */
+  width:34px;height:34px;
+  min-width:34px;min-height:34px;
+  max-width:34px;max-height:34px;
+  border-radius:50%;
   background:linear-gradient(135deg,var(--accent),var(--accent-3));
-  font-size:12px;font-weight:700;
+  font-size:13px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
   color:white;flex-shrink:0;
   font-family:var(--font);letter-spacing:-0.01em;
+  overflow:hidden; /* clip any injected img */
+  line-height:1;
 }
-.sidebar-user-name{font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sidebar-user-email{font-size:11px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* If nav.js injects an <img> inside the avatar */
+.sidebar-avatar img{
+  width:34px;height:34px;
+  object-fit:cover;
+  border-radius:50%;
+  display:block;
+}
+.sidebar-user-info{
+  flex:1;min-width:0;overflow:hidden;
+  display:flex;flex-direction:column;gap:2px;
+}
+.sidebar-user-name{
+  font-size:12.5px;font-weight:600;color:var(--text);
+  letter-spacing:-0.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100%;
+}
+.sidebar-user-email{
+  font-size:10.5px;color:var(--text-3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100%;
+}
 
 /* Nav */
 .nav-section{padding:6px 10px;flex-shrink:0}
@@ -1037,7 +1065,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   <!-- User real -->
   <div class="sidebar-user loading" id="sidebar-user-real">
     <div class="sidebar-avatar" id="nav-avatar">…</div>
-    <div style="min-width:0;">
+    <div class="sidebar-user-info">
       <div class="sidebar-user-name" id="nav-user-name">…</div>
       <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
