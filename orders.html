@@ -221,9 +221,19 @@ body {
 }
 .sidebar-user-email { font-size: 10.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Sidebar user skeleton */
-#sidebar-user-skel { display: flex; align-items: center; gap: 10px; margin: 10px 10px 4px; padding: 10px 11px; border-radius: var(--r-sm); }
-#sidebar-user-skel.loaded { display: none; }
+/*
+  Sidebar user skeleton:
+  ─ No inline display style in HTML (removed from element)
+  ─ JS calls showSidebarSkeleton() → style.display='flex' while loading
+  ─ JS calls revealSidebarUser()   → style.display='none'  (inline beats any CSS)
+*/
+#sidebar-user-skel {
+  /* hidden by default via CSS; JS overrides with inline style */
+  display: none;
+  align-items: center; gap: 10px;
+  margin: 10px 10px 4px; padding: 10px 11px;
+  border-radius: var(--r-sm);
+}
 .sidebar-user.loading { display: none; }
 
 /* Nav */
@@ -681,7 +691,6 @@ body {
   .skel-stats-row { grid-template-columns: repeat(2,1fr); }
 }
 @media(max-width:900px) {
-  /* Hide less important columns */
   .ord-table .col-email { display: none; }
   .ord-table .col-tracking { display: none; }
 }
@@ -690,51 +699,34 @@ body {
    RESPONSIVE — MOBILE (≤648px)
 ═══════════════════════════════════════════════ */
 @media(max-width:648px) {
-  /* Show mobile topbar, hide desktop topbar */
   .mobile-topbar { display: flex; }
   .topbar { display: none !important; }
-
-  /* Sidebar slide-over */
   .sidebar { transform: translateX(-100%); box-shadow: 8px 0 40px rgba(0,0,0,0.15); }
   .sidebar.mob-open { transform: translateX(0); }
   .sidebar-backdrop { display: block; }
-
-  /* Main layout */
   .main-wrap { margin-left: 0; }
   .content { padding: 14px 14px 80px; }
-
-  /* Skeleton fix on mobile */
   #page-skeleton { left: 0; top: 56px; }
   .skel-stats-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
   .skel-body { padding: 14px; }
-
-  /* Stats — 2 column grid */
   .order-stats { grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 16px; }
   .ostat { padding: 14px; gap: 10px; }
   .ostat-icon { width: 34px; height: 34px; font-size: 14px; }
   .ostat-val { font-size: 20px; }
   .ostat-sub { font-size: 9.5px; }
-
-  /* Toolbar — stack on mobile */
   .ord-toolbar { padding: 10px; gap: 8px; }
   .ord-search-wrap { min-width: 0; width: 100%; order: 1; }
   .ord-filter { order: 2; flex: 1; min-width: 0; }
   .ord-count  { order: 3; margin-left: 0; }
   .ord-divider { display: none; }
-
-  /* Hide table, show mobile cards */
   .ord-card { display: none; }
   .ord-mobile-list { display: flex; }
-
-  /* Modal */
   .modal { padding: 20px; border-radius: var(--r-lg); max-height: calc(100vh - 20px); }
   .modal-hdr-title { font-size: 14px; }
   .od-grid { grid-template-columns: 1fr; gap: 8px; }
   .modal-overlay { padding: 10px; }
   .modal-footer { flex-wrap: wrap; }
   .modal-footer .btn { flex: 1; justify-content: center; }
-
-  /* Toast */
   #toast-container { bottom: 16px; padding: 0 12px; }
 }
 
@@ -803,8 +795,13 @@ body {
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
 
-  <!-- User skeleton -->
-  <div id="sidebar-user-skel" style="display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);">
+  <!--
+    FIX: Removed inline style="display:flex" from this element.
+    CSS sets it to display:none by default.
+    showSidebarSkeleton() sets style.display='flex' while nav loads.
+    revealSidebarUser()   sets style.display='none' — inline style always wins.
+  -->
+  <div id="sidebar-user-skel">
     <div class="skel" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
       <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
@@ -963,10 +960,24 @@ function dismissSkeleton(){
   skel.addEventListener('transitionend', ()=>skel.remove(), {once:true});
   setTimeout(()=>{ if(skel.parentNode) skel.remove(); }, 500);
 }
+
+/* ════════════════════════════════════════════════
+   SIDEBAR USER SKELETON
+   ─ showSidebarSkeleton(): called at page start,
+     sets inline style.display='flex' to show it
+   ─ revealSidebarUser(): sets inline style.display='none'
+     (inline style has higher specificity than any CSS rule,
+      so this is guaranteed to hide it — fixes the ghost
+      skeleton container that was stuck visible)
+════════════════════════════════════════════════ */
+function showSidebarSkeleton(){
+  const s = document.getElementById('sidebar-user-skel');
+  if(s) s.style.display = 'flex';
+}
 function revealSidebarUser(){
   const s = document.getElementById('sidebar-user-skel');
   const r = document.getElementById('sidebar-user-real');
-  if(s) s.classList.add('loaded');
+  if(s) s.style.display = 'none';   // ← THE FIX: inline style beats everything
   if(r) r.classList.remove('loading');
 }
 
@@ -1010,17 +1021,17 @@ let _tok = 0;
    INIT
 ════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  showSidebarSkeleton(); // show skeleton while nav.js loads user data
+
   const nav = await renderNav('orders');
   if(!nav){ dismissSkeleton(); return; }
 
-  revealSidebarUser();
+  revealSidebarUser(); // hide skeleton, show real user
 
-  // Populate store selector
   allStores = nav.stores || [];
   currentStoreId = nav.currentStoreId || (allStores[0]?._id || '');
   buildStoreSel();
 
-  // Export button
   setTopbarActions(`
     <button class="btn-export" onclick="exportCSV()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
