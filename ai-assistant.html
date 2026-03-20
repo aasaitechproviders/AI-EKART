@@ -287,6 +287,27 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .mob-logo { font-size: 17px; font-weight: 800; letter-spacing: -0.05em; color: var(--text); text-decoration: none; font-family: var(--font); }
 .mob-logo span { color: var(--accent); }
 
+/* Mobile store selector */
+.mob-store-wrap {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--surface-2); border: 1px solid var(--border-md);
+  border-radius: var(--r-sm); padding: 0 8px 0 10px; height: 32px;
+  position: relative; transition: var(--t); max-width: 130px;
+}
+.mob-store-wrap:focus-within {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.mob-store-selector {
+  background: none; border: none; outline: none;
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--text);
+  cursor: pointer; appearance: none; -webkit-appearance: none;
+  max-width: 100px; min-width: 60px; padding-right: 2px;
+}
+.mob-store-arrow {
+  width: 10px; height: 10px; flex-shrink: 0;
+  color: var(--text-3); pointer-events: none;
+}
+
 /* ══════════════════════════════════════════════════════════
    MAIN WRAP + TOPBAR
 ══════════════════════════════════════════════════════════ */
@@ -840,7 +861,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
   .msg-bubble { font-size: 13px; padding: 9px 13px; }
   .lang-btn { min-width: 58px; }
   #toast-container { bottom: 16px; padding: 0 12px; }
-  .store-select-wrap { display: none; } /* hidden on mobile topbar, accessible via sidebar */
+  /* desktop store wrap hidden on mobile — mobile has its own */
+  .store-select-wrap { display: none; }
+  /* hide mob store wrap if no stores loaded */
+  #mob-store-wrap:empty { display: none; }
 }
 
 @media (max-width: 380px) {
@@ -884,6 +908,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
   <div class="mob-right">
+    <div class="mob-store-wrap" id="mob-store-wrap">
+      <select class="mob-store-selector" id="mob-store-selector"></select>
+      <svg class="mob-store-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
     <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:32px;height:32px;font-size:14px;">☀️</button>
   </div>
 </div>
@@ -1169,6 +1199,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('ai-assistant', (id) => {
     if (id !== currentStoreId) {
       currentStoreId = id;
+      syncMobileStoreSelector(); // keep mobile in sync
       onStoreChange();
     }
   });
@@ -1177,6 +1208,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   currentStoreId = nav.currentStoreId;
   userName       = nav.userName || 'there';
   revealSidebarUser();
+  syncMobileStoreSelector(); // populate mobile dropdown after nav renders
 
   if (currentStoreId) await loadStoreData();
   setupInput();
@@ -1187,8 +1219,34 @@ window.addEventListener('DOMContentLoaded', async () => {
   const content = document.getElementById('page-content');
   if (content) content.style.display = '';
   dismissSkeleton();
-  applyTheme(_isDark); // re-apply so toggles get right icon after nav load
+  applyTheme(_isDark);
 });
+
+/* ── Mirror the desktop store selector into the mobile one ── */
+function syncMobileStoreSelector() {
+  const desktop = document.getElementById('store-selector');
+  const mobile  = document.getElementById('mob-store-selector');
+  const wrap    = document.getElementById('mob-store-wrap');
+  if (!desktop || !mobile) return;
+
+  // Clone all options from desktop → mobile
+  mobile.innerHTML = desktop.innerHTML;
+  mobile.value     = desktop.value;
+
+  // Show/hide based on whether there are stores
+  if (wrap) wrap.style.display = desktop.options.length ? '' : 'none';
+
+  // When mobile selector changes, drive the desktop one (nav.js listens to desktop)
+  mobile.onchange = () => {
+    desktop.value = mobile.value;
+    desktop.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  // When desktop changes (nav.js updates it), keep mobile in sync
+  desktop.addEventListener('change', () => {
+    if (mobile.value !== desktop.value) mobile.value = desktop.value;
+  });
+}
 
 /* ── Store change ── */
 async function onStoreChange() {
