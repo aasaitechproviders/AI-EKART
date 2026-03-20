@@ -221,14 +221,7 @@ body {
 }
 .sidebar-user-email { font-size: 10.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/*
-  Sidebar user skeleton:
-  ─ No inline display style in HTML (removed from element)
-  ─ JS calls showSidebarSkeleton() → style.display='flex' while loading
-  ─ JS calls revealSidebarUser()   → style.display='none'  (inline beats any CSS)
-*/
 #sidebar-user-skel {
-  /* hidden by default via CSS; JS overrides with inline style */
   display: none;
   align-items: center; gap: 10px;
   margin: 10px 10px 4px; padding: 10px 11px;
@@ -271,12 +264,12 @@ body {
   display: none; height: 56px; background: var(--surface);
   border-bottom: 1px solid var(--border);
   align-items: center; justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 12px 0 12px;
   position: sticky; top: 0; z-index: 60; flex-shrink: 0;
-  box-shadow: var(--sh-sm);
+  box-shadow: var(--sh-sm); gap: 8px;
 }
-.mob-left { display: flex; align-items: center; gap: 10px; }
-.mob-right { display: flex; align-items: center; gap: 8px; }
+.mob-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.mob-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .hamburger {
   width: 36px; height: 36px; border-radius: var(--r-sm);
   background: var(--surface-2); border: 1px solid var(--border-md);
@@ -287,6 +280,36 @@ body {
 .hamburger svg { width: 16px; height: 16px; stroke: var(--text-2); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .mob-logo { font-size: 17px; font-weight: 800; letter-spacing: -0.05em; color: var(--text); text-decoration: none; font-family: var(--font); }
 .mob-logo span { color: var(--accent); }
+
+/* ── Mobile store selector ── */
+.mob-store-wrap {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface-2); border: 1px solid var(--border-md);
+  border-radius: var(--r-sm); padding: 0 8px; height: 34px;
+  transition: var(--t); overflow: hidden;
+}
+.mob-store-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+.mob-store-label {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-3); white-space: nowrap; flex-shrink: 0;
+}
+.mob-store-selector {
+  background: transparent; border: none; outline: none;
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--text); cursor: pointer; min-width: 0; width: 100%;
+  /* custom caret */
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23878BAA' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0px center;
+  padding-right: 14px;
+}
+[data-theme="light"] .mob-store-selector {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0px center;
+  padding-right: 14px;
+}
+.mob-store-selector option { background: var(--surface); color: var(--text); }
 
 /* ═══════════════════════════════════════════════
    MAIN WRAP + TOPBAR
@@ -372,7 +395,6 @@ body {
 .ostat-val { font-size: 24px; font-weight: 700; letter-spacing: -0.04em; font-family: var(--mono); line-height: 1; }
 .ostat-sub { font-size: 10.5px; color: var(--text-3); margin-top: 5px; font-weight: 500; }
 
-/* Loading animation for stats */
 @keyframes kpiPulse { 0%,100%{opacity:1}50%{opacity:.3} }
 .ostat-val.loading { color: var(--surface-4); animation: kpiPulse 1.4s ease-in-out infinite; }
 
@@ -684,7 +706,7 @@ body {
 .pg-enter { animation: pgIn .28s cubic-bezier(.22,1,.36,1) both; }
 
 /* ═══════════════════════════════════════════════
-   RESPONSIVE — TABLET (900px–1200px)
+   RESPONSIVE — TABLET
 ═══════════════════════════════════════════════ */
 @media(max-width:1100px) {
   .order-stats { grid-template-columns: repeat(2,1fr); }
@@ -738,6 +760,7 @@ body {
   .ostat { padding: 12px; gap: 8px; }
   .ostat-val { font-size: 18px; }
   .omc-kpis { grid-template-columns: repeat(3,1fr); }
+  .mob-store-label { display: none; }
 }
 </style>
 </head>
@@ -746,7 +769,9 @@ body {
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<!-- MOBILE TOPBAR -->
+<!-- ═══════════════════════════════════════════
+     MOBILE TOPBAR — with store selector
+═══════════════════════════════════════════ -->
 <div class="mobile-topbar" id="mobileTopbar">
   <div class="mob-left">
     <button class="hamburger" onclick="openMobileSidebar()" aria-label="Open menu">
@@ -754,6 +779,13 @@ body {
     </button>
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
+
+  <!-- Store selector — centred, fills available space -->
+  <div class="mob-store-wrap" id="mob-store-wrap">
+    <span class="mob-store-label">Store</span>
+    <select class="mob-store-selector" id="mob-store-selector" onchange="onStoreChange(this.value)"></select>
+  </div>
+
   <div class="mob-right">
     <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:32px;height:32px;font-size:14px;">🌙</button>
   </div>
@@ -795,12 +827,6 @@ body {
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
 
-  <!--
-    FIX: Removed inline style="display:flex" from this element.
-    CSS sets it to display:none by default.
-    showSidebarSkeleton() sets style.display='flex' while nav loads.
-    revealSidebarUser()   sets style.display='none' — inline style always wins.
-  -->
   <div id="sidebar-user-skel">
     <div class="skel" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
@@ -808,7 +834,6 @@ body {
       <div class="skel" style="height:8px;width:120px;border-radius:3px;"></div>
     </div>
   </div>
-  <!-- User real -->
   <div class="sidebar-user loading" id="sidebar-user-real">
     <div class="sidebar-avatar" id="nav-avatar">…</div>
     <div class="sidebar-user-info">
@@ -963,12 +988,6 @@ function dismissSkeleton(){
 
 /* ════════════════════════════════════════════════
    SIDEBAR USER SKELETON
-   ─ showSidebarSkeleton(): called at page start,
-     sets inline style.display='flex' to show it
-   ─ revealSidebarUser(): sets inline style.display='none'
-     (inline style has higher specificity than any CSS rule,
-      so this is guaranteed to hide it — fixes the ghost
-      skeleton container that was stuck visible)
 ════════════════════════════════════════════════ */
 function showSidebarSkeleton(){
   const s = document.getElementById('sidebar-user-skel');
@@ -977,7 +996,7 @@ function showSidebarSkeleton(){
 function revealSidebarUser(){
   const s = document.getElementById('sidebar-user-skel');
   const r = document.getElementById('sidebar-user-real');
-  if(s) s.style.display = 'none';   // ← THE FIX: inline style beats everything
+  if(s) s.style.display = 'none';
   if(r) r.classList.remove('loading');
 }
 
@@ -1021,12 +1040,12 @@ let _tok = 0;
    INIT
 ════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
-  showSidebarSkeleton(); // show skeleton while nav.js loads user data
+  showSidebarSkeleton();
 
   const nav = await renderNav('orders');
   if(!nav){ dismissSkeleton(); return; }
 
-  revealSidebarUser(); // hide skeleton, show real user
+  revealSidebarUser();
 
   allStores = nav.stores || [];
   currentStoreId = nav.currentStoreId || (allStores[0]?._id || '');
@@ -1048,17 +1067,29 @@ window.addEventListener('DOMContentLoaded', async () => {
   else { renderEmpty('no-store'); dismissSkeleton(); }
 });
 
+/* ════════════════════════════════════════════════
+   BUILD STORE SELECTORS
+   — populates BOTH desktop (#store-selector) and
+     mobile (#mob-store-selector) from the same data
+════════════════════════════════════════════════ */
 function buildStoreSel(){
-  const sel = document.getElementById('store-selector');
-  if(!sel) return;
-  sel.innerHTML = allStores.map(s =>
-    `<option value="${s._id}" ${s._id===currentStoreId?'selected':''}>${s.name}</option>`
-  ).join('');
-  if(!allStores.length) sel.innerHTML = '<option value="">No stores</option>';
+  const opts = allStores.length
+    ? allStores.map(s => `<option value="${s._id}" ${s._id===currentStoreId?'selected':''}>${s.name}</option>`).join('')
+    : '<option value="">No stores</option>';
+
+  const desk = document.getElementById('store-selector');
+  const mob  = document.getElementById('mob-store-selector');
+  if(desk) desk.innerHTML = opts;
+  if(mob)  mob.innerHTML  = opts;
 }
 
 async function onStoreChange(id){
   currentStoreId = id;
+  // keep both selectors in sync when one changes
+  const desk = document.getElementById('store-selector');
+  const mob  = document.getElementById('mob-store-selector');
+  if(desk && desk.value !== id) desk.value = id;
+  if(mob  && mob.value  !== id) mob.value  = id;
   await loadOrders();
 }
 
