@@ -1,714 +1,590 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#080910">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>eKart — Payments</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Shared nav styles — sidebar comes from here, do not override -->
-<link rel="stylesheet" href="nav.css">
-
-<script>
-(function(){
-  if(localStorage.getItem('ekart_theme')==='light'){
-    document.documentElement.setAttribute('data-theme','light');
-    document.documentElement.style.background='#f0f0f5';
-  }
-})();
-</script>
-
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════
-   LIGHT THEME TOKENS  (content area only)
-══════════════════════════════════════════ */
-[data-theme="light"]{
-  --surface: #ffffff;
-  --surface2:#f3f4f6;
-  --surface3:#e9eaf0;
-  --border:  rgba(0,0,0,.09);
-  --border2: rgba(0,0,0,.13);
-  --text:    #111827;
-  --text2:   #374151;
-  --text3:   #9ca3af;
-  --accent:  #6c63ff;
-  --accent2: #5b52e0;
-  --green:   #16a34a;
-  --red:     #dc2626;
-  --yellow:  #ca8a04;
-  background:#f0f0f5 !important;
+:root {
+  --bg:#F2F3F9;--surface:#FFFFFF;--surface-2:#F7F8FD;--surface-3:#EFF1F8;--surface-4:#E5E8F4;
+  --border:rgba(0,0,0,0.07);--border-md:rgba(0,0,0,0.11);--border-lg:rgba(0,0,0,0.17);
+  --text:#0F1117;--text-2:#5A5E78;--text-3:#9EA3BB;
+  --accent:#7C6FFF;--accent-2:#6A5DEE;--accent-3:#5A4DDD;
+  --accent-dim:rgba(124,111,255,0.08);--accent-glow:rgba(124,111,255,0.18);
+  --green:#19a37a;--green-dim:rgba(25,163,122,0.09);--green-border:rgba(25,163,122,0.22);
+  --amber:#d97706;--amber-dim:rgba(217,119,6,0.09);--amber-border:rgba(217,119,6,0.25);
+  --red:#e05252;--red-dim:rgba(224,82,82,0.09);--red-border:rgba(224,82,82,0.22);
+  --r-xs:6px;--r-sm:10px;--r:14px;--r-lg:18px;--r-xl:24px;
+  --sh-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --sh:0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+  --sh-lg:0 12px 40px rgba(0,0,0,0.14),0 4px 12px rgba(0,0,0,0.06);
+  --sh-accent:0 6px 24px rgba(124,111,255,0.2);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(0.4,0,0.2,1);--t:all 0.18s cubic-bezier(0.4,0,0.2,1);
+  --sidebar-w:248px;
 }
-[data-theme="light"] body           { background:#f0f0f5 !important; }
-[data-theme="light"] .main-wrap     { background:#f0f0f5 !important; }
-[data-theme="light"] .content       { background:#f0f0f5 !important; }
-[data-theme="light"] .topbar        { background:#fff !important; border-bottom-color:rgba(0,0,0,.09) !important; }
-[data-theme="light"] .topbar-title  { color:#111827 !important; }
+[data-theme="dark"] {
+  --bg:#07080D;--surface:#0C0E16;--surface-2:#111420;--surface-3:#171B28;--surface-4:#1D2133;
+  --border:rgba(255,255,255,0.055);--border-md:rgba(255,255,255,0.09);--border-lg:rgba(255,255,255,0.14);
+  --text:#ECEDF4;--text-2:#878BAA;--text-3:#474B65;
+  --accent-dim:rgba(124,111,255,0.11);--accent-glow:rgba(124,111,255,0.22);
+  --green:#2DD4A0;--green-dim:rgba(45,212,160,0.10);--green-border:rgba(45,212,160,0.22);
+  --amber:#F5A523;--amber-dim:rgba(245,165,35,0.10);--amber-border:rgba(245,165,35,0.25);
+  --red:#F26B6B;--red-dim:rgba(242,107,107,0.10);--red-border:rgba(242,107,107,0.22);
+  --sh-sm:0 1px 4px rgba(0,0,0,0.4);
+  --sh:0 4px 20px rgba(0,0,0,0.35),0 1px 4px rgba(0,0,0,0.2);
+  --sh-lg:0 16px 48px rgba(0,0,0,0.5),0 4px 12px rgba(0,0,0,0.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100%}
 
-/* ══════════════════════════════════════════
-   SKELETON  — mirrors real layout exactly
-══════════════════════════════════════════ */
-@keyframes skel-shimmer{
-  0%  {background-position:-600px 0}
-  100%{background-position: 600px 0}
-}
+/* SKELETON */
+@keyframes skelShimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
 .skel{
-  border-radius:7px;
-  background:linear-gradient(90deg,
-    rgba(255,255,255,.04) 25%,
-    rgba(255,255,255,.09) 50%,
-    rgba(255,255,255,.04) 75%);
-  background-size:600px 100%;
-  animation:skel-shimmer 1.4s infinite linear;
+  border-radius:var(--r-xs);
+  background:linear-gradient(90deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.09) 40%,rgba(0,0,0,0.04) 80%);
+  background-size:600px 100%;animation:skelShimmer 1.6s ease-in-out infinite;
 }
-[data-theme="light"] .skel{
-  background:linear-gradient(90deg,
-    rgba(0,0,0,.05) 25%,
-    rgba(0,0,0,.10) 50%,
-    rgba(0,0,0,.05) 75%);
+[data-theme="dark"] .skel{
+  background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.08) 40%,rgba(255,255,255,0.03) 80%);
   background-size:600px 100%;
 }
 #page-skeleton{
-  position:fixed;inset:0;display:flex;z-index:9999;
-  background:inherit;transition:opacity .25s ease;
+  position:fixed;top:0;right:0;bottom:0;left:var(--sidebar-w);
+  display:flex;flex-direction:column;z-index:9999;
+  background:var(--bg);opacity:1;transition:opacity 0.3s var(--ease);pointer-events:none;
 }
-#page-skeleton.skel-hidden{opacity:0;pointer-events:none;}
+#page-skeleton.skel-hiding{opacity:0}
+.skel-topbar{height:60px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;}
+.skel-tabsbar{height:44px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:24px;padding:0 28px;}
+.skel-body{flex:1;padding:24px 28px;display:flex;flex-direction:column;gap:16px;overflow:hidden;}
+.skel-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.skel-two{display:grid;grid-template-columns:360px 1fr;gap:16px;}
 
-.skel-sidebar{
-  width:var(--sidebar-w,220px);flex-shrink:0;height:100%;
-  background:var(--surface,#0f1018);
-  border-right:1px solid var(--border,rgba(255,255,255,.06));
-  padding:20px 14px;display:flex;flex-direction:column;gap:10px;
-  box-sizing:border-box;
-}
-[data-theme="light"] .skel-sidebar{background:#fff;border-right-color:rgba(0,0,0,.09);}
-.skel-main{flex:1;display:flex;flex-direction:column;}
-.skel-topbar{
-  height:58px;background:var(--surface,#0f1018);
-  border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;box-sizing:border-box;flex-shrink:0;
-}
-[data-theme="light"] .skel-topbar{background:#fff;}
-.skel-tabs{
-  height:46px;background:var(--surface,#0f1018);
-  border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  display:flex;align-items:center;gap:8px;padding:0 24px;flex-shrink:0;
-}
-[data-theme="light"] .skel-tabs{background:#fff;}
-.skel-body{flex:1;padding:22px 24px;display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;}
-@media(max-width:768px){
-  .skel-sidebar{display:none;}
-  .skel-body{grid-template-columns:1fr;}
-}
-
-/* ══════════════════════════════════════════
-   PAGE TRANSITION
-══════════════════════════════════════════ */
-@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.page-enter{animation:pageIn .28s ease both;}
-
-/* ══════════════════════════════════════════
-   THEME TOGGLE  (topbar icon)
-══════════════════════════════════════════ */
-.theme-toggle{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--surface2,rgba(255,255,255,.06));
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:14px;flex-shrink:0;
-  transition:all .2s;
-}
-.theme-toggle:hover{
-  border-color:rgba(108,99,255,.4);
-  background:rgba(108,99,255,.08);
-  transform:rotate(12deg) scale(1.06);
-}
-
-/* Store loading spinner */
-.store-loading{position:relative;}
-.store-loading::after{
-  content:'';position:absolute;right:-18px;top:50%;transform:translateY(-50%);
-  width:12px;height:12px;border-radius:50%;
-  border:2px solid rgba(108,99,255,.25);border-top-color:var(--accent,#6c63ff);
-  animation:spin .65s linear infinite;pointer-events:none;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ══════════════════════════════════════════
-   HAMBURGER  (mobile only)
-══════════════════════════════════════════ */
-.menu-btn{
-  display:none;background:none;border:none;cursor:pointer;
-  color:var(--text2,#8892a4);padding:5px;border-radius:7px;
-  transition:all .15s;
-}
-.menu-btn:hover{color:var(--text,#f0f2ff);background:var(--surface2,rgba(255,255,255,.06));}
-@media(max-width:768px){.menu-btn{display:flex;align-items:center;justify-content:center;}}
-
-/* Mobile overlay backdrop */
+/* SIDEBAR */
 .sidebar-backdrop{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
-  z-index:199;opacity:0;transition:opacity .28s ease;
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  z-index:149;opacity:0;transition:opacity .22s var(--ease);pointer-events:none;
 }
-.sidebar-backdrop.visible{opacity:1;}
-@media(max-width:768px){.sidebar-backdrop{display:block;}}
-
-/* ══════════════════════════════════════════
-   TOPBAR
-══════════════════════════════════════════ */
-.topbar-left{display:flex;align-items:center;gap:10px;}
-.topbar-title{font-size:15px;font-weight:800;letter-spacing:-.02em;color:var(--text,#f0f2ff);}
-.topbar-right{display:flex;align-items:center;gap:8px;}
-
-/* ══════════════════════════════════════════
-   CONTENT AREA
-══════════════════════════════════════════ */
-.content{
-  padding:20px 24px;flex:1;
-  background:var(--bg,#080910);
-  overflow-y:auto;
+.sidebar-backdrop.open{opacity:1;pointer-events:all}
+.sidebar{
+  width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:150;
+  overflow:hidden;overflow-y:auto;scrollbar-width:none;
+  transition:transform .25s cubic-bezier(0.4,0,0.2,1);
 }
-.content::-webkit-scrollbar{width:4px;}
-.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:4px;}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar-logo{
+  display:flex;align-items:center;gap:9px;padding:18px 18px 16px;
+  font-size:19px;font-weight:800;letter-spacing:-0.05em;color:var(--text);
+  text-decoration:none;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-logo::before{
+  content:'';display:inline-block;width:26px;height:26px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
+  border-radius:7px;box-shadow:0 4px 12px var(--accent-glow);flex-shrink:0;
+}
+.logo-k{color:var(--accent)}
+.sidebar-user-skel{display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);}
+#sidebar-user-skel.loaded{display:none}
+.sidebar-user.loading{display:none}
+.sidebar-user{
+  display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;
+  border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);
+  transition:var(--t);cursor:default;overflow:hidden;min-width:0;
+}
+.sidebar-user:hover{border-color:var(--border-md);background:var(--surface-3)}
+.sidebar-avatar{
+  width:34px;height:34px;min-width:34px;max-width:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-3));
+  font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  color:white;flex-shrink:0;overflow:hidden;line-height:1;
+}
+.sidebar-avatar img{width:34px;height:34px;object-fit:cover;border-radius:50%;display:block;}
+.sidebar-user-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.sidebar-user-name{font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-user-email{font-size:10.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-section{padding:6px 10px;flex-shrink:0}
+.nav-section-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);padding:8px 8px 5px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;
+  transition:var(--t);position:relative;margin-bottom:1px;
+}
+.nav-item:hover{background:var(--surface-3);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:-10px;top:22%;bottom:22%;width:3px;border-radius:0 3px 3px 0;background:var(--accent);}
+.nav-icon{font-size:15px;width:20px;display:flex;justify-content:center;flex-shrink:0;opacity:.8}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-bottom{margin-top:auto;padding:10px;border-top:1px solid var(--border);flex-shrink:0}
+.btn-logout{
+  width:100%;padding:9px 11px;border-radius:var(--r-sm);
+  border:1px solid var(--border-md);background:transparent;
+  color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;
+  text-align:left;transition:var(--t);display:flex;align-items:center;gap:7px;font-family:var(--font);
+}
+.btn-logout:hover{background:var(--red-dim);border-color:var(--red-border);color:var(--red)}
 
-/* ══════════════════════════════════════════
-   TABS BAR
-══════════════════════════════════════════ */
+/* MOBILE TOPBAR */
+.mobile-topbar{
+  display:none;height:56px;background:var(--surface);border-bottom:1px solid var(--border);
+  align-items:center;justify-content:space-between;padding:0 16px;
+  position:sticky;top:0;z-index:60;flex-shrink:0;box-shadow:var(--sh-sm);
+}
+.mob-left{display:flex;align-items:center;gap:10px}
+.mob-right{display:flex;align-items:center;gap:8px}
+.hamburger{
+  width:36px;height:36px;border-radius:var(--r-sm);background:var(--surface-2);
+  border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:var(--t);
+}
+.hamburger:hover{background:var(--surface-3);border-color:var(--accent)}
+.hamburger svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;}
+.mob-logo span{color:var(--accent)}
+
+/* MAIN + TOPBAR */
+.main-wrap{margin-left:var(--sidebar-w);min-height:100vh;background:var(--bg);display:flex;flex-direction:column;}
+.topbar{
+  height:60px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;position:sticky;top:0;z-index:50;flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.topbar-right{display:flex;align-items:center;gap:8px}
+
+/* Store selector */
+.store-sel-wrap{display:flex;align-items:center;gap:7px;}
+.store-sel-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.09em;white-space:nowrap;}
+.store-selector{
+  height:36px;padding:0 30px 0 12px;border-radius:var(--r-sm);
+  border:1px solid var(--border-md);background:var(--surface-2);color:var(--text);
+  font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;outline:none;
+  transition:var(--t);appearance:none;min-width:130px;max-width:200px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.store-selector:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.store-selector option{background:var(--surface);color:var(--text);}
+.theme-toggle{
+  width:36px;height:36px;border-radius:var(--r-sm);background:var(--surface-2);
+  border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
+}
+.theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
+
+/* TABS BAR */
 .tabs-bar{
-  display:flex;gap:0;padding:0 24px;
-  border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  background:var(--surface,#0f1018);
-  position:sticky;top:58px;z-index:40;
-  overflow-x:auto;flex-shrink:0;
+  height:44px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:stretch;padding:0 24px;
+  position:sticky;top:60px;z-index:40;flex-shrink:0;
+  overflow-x:auto;scrollbar-width:none;
 }
-.tabs-bar::-webkit-scrollbar{display:none;}
-[data-theme="light"] .tabs-bar{background:#fff;border-bottom-color:rgba(0,0,0,.09);}
-
-.tab-item{
-  padding:0 16px;height:44px;
-  font-size:12.5px;font-weight:600;
-  color:var(--text3,#4a5568);cursor:pointer;
-  border-bottom:2px solid transparent;
-  transition:all .16s;white-space:nowrap;
-  display:flex;align-items:center;gap:6px;
-  letter-spacing:-.01em;
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{
+  display:flex;align-items:center;gap:6px;padding:0 15px;
+  font-size:12.5px;font-weight:600;color:var(--text-3);letter-spacing:-0.01em;
+  cursor:pointer;border:none;background:none;font-family:var(--font);
+  border-bottom:2px solid transparent;transition:var(--t);white-space:nowrap;flex-shrink:0;
 }
-.tab-item:hover{color:var(--text2,#8892a4);}
-.tab-item.active{color:var(--accent2,#a78bfa);border-bottom-color:var(--accent,#6c63ff);}
+.tab-btn:hover{color:var(--text-2);}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
-/* ══════════════════════════════════════════
-   STAT CARDS
-══════════════════════════════════════════ */
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;margin-bottom:18px;
-}
-@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:600px) {.stats-grid{grid-template-columns:repeat(2,1fr);}}
+/* CONTENT */
+.content{flex:1;padding:24px 28px;background:var(--bg);min-width:0;}
 
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  border-radius:var(--r-sm);border:none;cursor:pointer;
+  transition:var(--t);white-space:nowrap;letter-spacing:-0.01em;text-decoration:none;
+}
+.btn:active{transform:scale(0.96)}
+.btn:disabled{opacity:.5;cursor:not-allowed !important;transform:none !important;pointer-events:none;}
+.btn-primary{background:var(--accent);color:white;padding:0 18px;height:36px;box-shadow:0 4px 14px var(--accent-glow);}
+.btn-primary:hover{background:var(--accent-2);box-shadow:0 6px 20px var(--accent-glow);transform:translateY(-1px)}
+.btn-primary.full{width:100%;height:40px;}
+.btn-secondary{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border-md);padding:0 14px;height:36px;}
+.btn-secondary:hover{background:var(--surface-4);color:var(--text);border-color:var(--border-lg)}
+.btn-sm{height:30px;padding:0 11px;font-size:12px;border-radius:var(--r-xs)}
+.btn-danger{background:var(--red);color:white;padding:0 18px;height:36px;}
+.btn-danger:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-refund{
+  display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 10px;
+  border-radius:var(--r-xs);background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);
+  font-size:11.5px;font-weight:700;font-family:var(--font);cursor:pointer;transition:var(--t);
+}
+.btn-refund:hover{background:rgba(224,82,82,0.16);}
+.btn-refund:disabled{opacity:.4;cursor:not-allowed;}
+.btn-copy{background:none;border:none;cursor:pointer;color:var(--accent);font-size:13px;flex-shrink:0;padding:3px;border-radius:5px;transition:var(--t);}
+.btn-copy:hover{background:var(--accent-dim);transform:scale(1.1);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;border-radius:20px;padding:2px 8px;letter-spacing:0.01em;}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.badge-amber{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.badge-gray{background:var(--surface-3);color:var(--text-2);border:1px solid var(--border)}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
 .stat-card{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  border-radius:14px;padding:16px;
-  position:relative;overflow:hidden;
-  transition:all .2s ease;cursor:default;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 20px;display:flex;align-items:flex-start;gap:14px;
+  transition:var(--t);position:relative;overflow:hidden;box-shadow:var(--sh-sm);
 }
-[data-theme="light"] .stat-card{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.stat-card::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,var(--c,rgba(108,99,255,.06)) 0%,transparent 60%);
-  pointer-events:none;
+.stat-card:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--sh)}
+.stat-icon-wrap{
+  width:40px;height:40px;border-radius:var(--r-sm);background:var(--surface-3);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;transition:var(--t);
 }
-.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.18);border-color:var(--border2,rgba(255,255,255,.10));}
-.stat-top-bar{
-  position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--c2,var(--accent,#6c63ff));
-  opacity:0;transition:opacity .2s;
-}
-.stat-card:hover .stat-top-bar{opacity:1;}
-.stat-icon{
-  font-size:16px;margin-bottom:10px;display:block;
-  width:30px;height:30px;border-radius:8px;
-  background:rgba(255,255,255,.05);
-  display:flex;align-items:center;justify-content:center;
-}
-[data-theme="light"] .stat-icon{background:rgba(0,0,0,.04);}
-.stat-label{
-  font-size:9.5px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--text3,#4a5568);margin-bottom:5px;
-}
-.stat-value{
-  font-family:'DM Mono',monospace;
-  font-size:20px;font-weight:500;letter-spacing:-.03em;
-  line-height:1;color:var(--text,#f0f2ff);
-}
-.stat-sub{font-size:10.5px;color:var(--text3,#4a5568);margin-top:5px;}
+.stat-card:hover .stat-icon-wrap{background:var(--accent-dim);border-color:rgba(124,111,255,0.2)}
+.stat-info{flex:1;min-width:0;}
+.stat-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px;}
+.stat-value{font-size:22px;font-weight:700;letter-spacing:-0.04em;font-family:var(--mono);color:var(--text);line-height:1;}
+.stat-value.green{color:var(--green)} .stat-value.red{color:var(--red)} .stat-value.amber{color:var(--amber)}
+.stat-sub{font-size:10.5px;color:var(--text-3);margin-top:5px;}
+@keyframes kpiPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.stat-loading{animation:kpiPulse 1.4s ease-in-out infinite;color:var(--surface-4)!important;}
 
-/* ══════════════════════════════════════════
-   CARDS  (setup, payouts, etc.)
-══════════════════════════════════════════ */
-.pk-card{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  border-radius:16px;
-  transition:border-color .2s,box-shadow .2s;
-}
-[data-theme="light"] .pk-card{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.pk-card:hover{border-color:var(--border2,rgba(255,255,255,.10));}
-.pk-card-header{padding:18px 20px 0;}
-.pk-card-title{
-  font-size:13px;font-weight:800;color:var(--text,#f0f2ff);
-  display:flex;align-items:center;gap:8px;letter-spacing:-.02em;
-  margin-bottom:4px;
-}
-.pk-card-title-icon{
-  width:26px;height:26px;border-radius:7px;
-  background:rgba(108,99,255,.12);
-  display:flex;align-items:center;justify-content:center;font-size:13px;
-}
-.pk-card-sub{font-size:12px;color:var(--text2,#8892a4);line-height:1.55;margin-bottom:18px;}
-.pk-card-body{padding:18px 20px;}
+/* SECTION CARD */
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-sm);overflow:hidden;}
+.section-card-hd{padding:18px 22px 14px;border-bottom:1px solid var(--border);}
+.section-card-title{font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.03em;display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.section-card-icon{width:28px;height:28px;border-radius:8px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.section-card-sub{font-size:12px;color:var(--text-2);line-height:1.6;}
+.section-card-bd{padding:20px 22px;}
 
-/* ══════════════════════════════════════════
-   SETUP GRID
-══════════════════════════════════════════ */
-.setup-grid{
-  display:grid;grid-template-columns:380px 1fr;
-  gap:18px;align-items:start;
+/* FORM */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10.5px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.field label span{font-weight:400;text-transform:none;letter-spacing:0;opacity:.7;}
+.field input,.field textarea,.field select{
+  width:100%;font-family:var(--font);font-size:13px;height:40px;padding:0 12px;
+  border-radius:var(--r-sm);border:1px solid var(--border-md);background:var(--surface-2);color:var(--text);
+  outline:none;transition:var(--t);
 }
-@media(max-width:900px){.setup-grid{grid-template-columns:1fr;}}
-
-/* ══════════════════════════════════════════
-   FORMS
-══════════════════════════════════════════ */
-.form-group{margin-bottom:14px;}
-.form-label{
-  display:block;font-size:10.5px;font-weight:700;
-  color:var(--text2,#8892a4);text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:6px;
-}
-.form-label span{font-weight:400;text-transform:none;letter-spacing:0;opacity:.7;}
-.form-input{
-  width:100%;padding:9px 12px;
-  background:var(--bg,#080910);
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  border-radius:9px;color:var(--text,#f0f2ff);
-  font-family:'Outfit',sans-serif;font-size:13px;
-  outline:none;transition:all .15s;box-sizing:border-box;
-}
-[data-theme="light"] .form-input{background:rgba(0,0,0,.03);}
-.form-input::placeholder{color:var(--text3,#4a5568);}
-.form-input:focus{
-  border-color:var(--accent,#6c63ff);
-  box-shadow:0 0 0 3px rgba(108,99,255,.12);
-}
-.form-input.mono{font-family:'DM Mono',monospace;font-size:12.5px;}
-.form-input.secret{font-family:'DM Mono',monospace;letter-spacing:.08em;}
-select.form-input{
+.field textarea{height:72px;padding:10px 12px;resize:vertical;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);background:var(--surface-3);}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-3);}
+.field select{
   appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 11px center;
-  padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
 }
-.form-hint{font-size:10.5px;color:var(--text3,#4a5568);margin-top:5px;line-height:1.5;}
-.form-hint a{color:var(--accent2,#a78bfa);text-decoration:none;}
-.form-hint code{
-  background:var(--surface2,rgba(255,255,255,.06));
-  padding:1px 5px;border-radius:4px;
-  font-family:'DM Mono',monospace;font-size:10.5px;
-  color:var(--accent2,#a78bfa);
-}
+.field select option{background:var(--surface);color:var(--text);}
+.field input[class~="mono"]{font-family:var(--mono);font-size:12.5px;}
+.field-hint{font-size:10.5px;color:var(--text-3);margin-top:5px;line-height:1.55;}
+.field-hint code{background:var(--surface-3);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--accent-2);}
 
-/* ══════════════════════════════════════════
-   TOGGLE ROW
-══════════════════════════════════════════ */
+/* TOGGLE */
 .toggle-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px;border-radius:10px;
-  background:var(--surface2,rgba(255,255,255,.06));
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  margin-bottom:16px;transition:border-color .2s;
+  display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
+  border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);
+  margin-bottom:16px;transition:var(--t);
 }
-.toggle-row:hover{border-color:var(--border2,rgba(255,255,255,.10));}
-[data-theme="light"] .toggle-row{background:#f3f4f6;border-color:rgba(0,0,0,.09);}
-.toggle-label{font-size:13px;font-weight:700;color:var(--text,#f0f2ff);}
-.toggle-sub  {font-size:11px;color:var(--text2,#8892a4);margin-top:2px;}
+.toggle-row:hover{border-color:var(--border-md);}
+.toggle-label{font-size:13px;font-weight:700;color:var(--text);}
+.toggle-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
 .toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
-.toggle input{opacity:0;width:0;height:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
 .toggle-slider{
-  position:absolute;inset:0;
-  background:var(--surface3,#1e2030);
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  border-radius:22px;cursor:pointer;transition:.22s ease;
+  position:absolute;inset:0;background:var(--surface-4);
+  border:1px solid var(--border-md);border-radius:22px;cursor:pointer;transition:.22s ease;
 }
-[data-theme="light"] .toggle-slider{background:#d1d5db;border-color:rgba(0,0,0,.15);}
 .toggle-slider::before{
-  content:'';position:absolute;
-  width:16px;height:16px;left:2px;bottom:2px;
-  background:#fff;border-radius:50%;
-  transition:.22s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 1px 4px rgba(0,0,0,.3);
+  content:'';position:absolute;width:16px;height:16px;left:2px;bottom:2px;
+  background:#fff;border-radius:50%;transition:.22s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,0.2);
 }
-.toggle input:checked + .toggle-slider{
-  background:var(--accent,#6c63ff);border-color:var(--accent,#6c63ff);
-  box-shadow:0 0 10px rgba(108,99,255,.3);
-}
+.toggle input:checked + .toggle-slider{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);}
 .toggle input:checked + .toggle-slider::before{transform:translateX(18px);}
 
-/* ══════════════════════════════════════════
-   BUTTONS  (content area only)
-══════════════════════════════════════════ */
-.btn-primary{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:9px 18px;border-radius:9px;
-  background:linear-gradient(135deg,var(--accent,#6c63ff),#8b5cf6);
-  color:#fff;border:none;font-family:'Outfit',sans-serif;
-  font-size:13px;font-weight:700;cursor:pointer;
-  box-shadow:0 3px 14px rgba(108,99,255,.3);
-  transition:all .18s;
-}
-.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,99,255,.4);}
-.btn-primary:disabled{opacity:.45;cursor:not-allowed;}
-.btn-primary.full{width:100%;}
+/* VERIFY STATUS */
+.verify-status{padding:10px 13px;border-radius:var(--r-sm);font-size:12.5px;font-weight:600;display:none;align-items:center;gap:7px;margin-bottom:10px;}
+.verify-status.ok{background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);display:flex;}
+.verify-status.err{background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);display:flex;}
 
-.btn-verify{
-  width:100%;padding:9px;
-  background:var(--surface2,rgba(255,255,255,.06));
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  color:var(--text2,#8892a4);border-radius:9px;
-  font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .18s;margin-bottom:10px;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.btn-verify:hover:not(:disabled){
-  border-color:var(--accent,#6c63ff);
-  color:var(--accent2,#a78bfa);
-  background:rgba(108,99,255,.08);
-}
-.btn-verify:disabled{opacity:.45;cursor:not-allowed;}
-
-.btn-ghost{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:7px 14px;border-radius:9px;
-  background:transparent;color:var(--text2,#8892a4);
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  font-family:'Outfit',sans-serif;font-size:12.5px;font-weight:600;
-  cursor:pointer;transition:all .15s;
-}
-.btn-ghost:hover{color:var(--text,#f0f2ff);background:var(--surface2,rgba(255,255,255,.06));}
-
-.btn-refund{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:5px 11px;border-radius:7px;
-  background:rgba(248,113,113,.1);color:var(--red,#f87171);
-  border:1px solid rgba(248,113,113,.2);
-  font-family:'Outfit',sans-serif;font-size:11.5px;font-weight:700;
-  cursor:pointer;transition:all .14s;
-}
-.btn-refund:hover{background:rgba(248,113,113,.18);transform:translateY(-1px);}
-.btn-refund:disabled{opacity:.4;cursor:not-allowed;}
-
-/* Verify status */
-.verify-status{
-  padding:10px 13px;border-radius:9px;
-  font-size:12.5px;font-weight:600;
-  display:none;align-items:center;gap:7px;margin-bottom:10px;
-}
-.verify-status.ok {background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#34d399;display:flex;}
-.verify-status.err{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);color:#f87171;display:flex;}
-
-/* ══════════════════════════════════════════
-   SETUP STEPS
-══════════════════════════════════════════ */
-.setup-steps{list-style:none;display:flex;flex-direction:column;gap:16px;}
+/* SETUP STEPS */
+.setup-steps{list-style:none;display:flex;flex-direction:column;gap:18px;}
 .step{display:flex;gap:12px;align-items:flex-start;}
 .step-num{
   width:26px;height:26px;border-radius:50%;flex-shrink:0;
-  background:rgba(108,99,255,.12);border:1.5px solid rgba(108,99,255,.2);
-  color:var(--accent2,#a78bfa);font-size:11px;font-weight:800;
+  background:var(--accent-dim);border:1.5px solid rgba(124,111,255,0.2);
+  color:var(--accent-2);font-size:11px;font-weight:800;
   display:flex;align-items:center;justify-content:center;
 }
-.step-body h4{font-size:12.5px;font-weight:700;color:var(--text,#f0f2ff);margin-bottom:3px;}
-.step-body p {font-size:11.5px;color:var(--text2,#8892a4);line-height:1.6;}
-.step-body a {color:var(--accent2,#a78bfa);text-decoration:none;font-weight:600;}
-.step-body code{
-  background:var(--surface2,rgba(255,255,255,.06));
-  padding:1px 5px;border-radius:4px;
-  font-family:'DM Mono',monospace;font-size:10.5px;
-  color:var(--accent2,#a78bfa);
-}
+.step-body h4{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.step-body p{font-size:12px;color:var(--text-2);line-height:1.65;}
+.step-body a{color:var(--accent-2);text-decoration:none;font-weight:600;}
+.step-body a:hover{text-decoration:underline;}
+.step-body code{background:var(--surface-3);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--accent-2);}
 
-/* ══════════════════════════════════════════
-   TABLE
-══════════════════════════════════════════ */
-.table-wrap{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  border-radius:14px;overflow:hidden;
-}
-[data-theme="light"] .table-wrap{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.table-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px;border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  gap:10px;flex-wrap:wrap;
-}
-.table-title{font-size:13px;font-weight:800;color:var(--text,#f0f2ff);letter-spacing:-.02em;}
-[data-theme="light"] .table-title{color:#111827;}
-
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-sm);}
+.table-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap;}
+.table-title{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
 .search-wrap{position:relative;}
-.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3,#4a5568);pointer-events:none;}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none;}
 .search-input{
-  padding:7px 12px 7px 30px;
-  background:var(--surface2,rgba(255,255,255,.06));
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  border-radius:8px;color:var(--text,#f0f2ff);
-  font-family:'Outfit',sans-serif;font-size:12.5px;
-  outline:none;width:190px;transition:all .16s;
+  padding:7px 12px 7px 30px;background:var(--surface-2);border:1px solid var(--border-md);
+  border-radius:var(--r-sm);color:var(--text);font-family:var(--font);font-size:12.5px;
+  outline:none;width:190px;transition:var(--t);
 }
-[data-theme="light"] .search-input{background:rgba(0,0,0,.04);}
-.search-input::placeholder{color:var(--text3,#4a5568);}
-.search-input:focus{border-color:var(--accent,#6c63ff);width:215px;box-shadow:0 0 0 3px rgba(108,99,255,.1);}
-
+.search-input::placeholder{color:var(--text-3);}
+.search-input:focus{border-color:var(--accent);width:210px;box-shadow:0 0 0 3px var(--accent-dim);}
+.tbl-overflow{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
 th{
-  padding:9px 14px;text-align:left;
-  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--text3,#4a5568);
-  background:var(--surface2,rgba(255,255,255,.04));
-  border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  white-space:nowrap;
+  padding:9px 14px;text-align:left;font-size:9.5px;font-weight:800;text-transform:uppercase;
+  letter-spacing:0.1em;color:var(--text-3);
+  background:var(--surface-2);border-bottom:1px solid var(--border);white-space:nowrap;
 }
-[data-theme="light"] th{background:rgba(0,0,0,.02);color:#9ca3af;}
 td{
-  padding:11px 14px;font-size:12.5px;
-  border-bottom:1px solid var(--border,rgba(255,255,255,.06));
-  vertical-align:middle;color:var(--text2,#8892a4);
-  transition:background .1s;
+  padding:11px 14px;font-size:12.5px;border-bottom:1px solid var(--border);
+  vertical-align:middle;color:var(--text-2);transition:background .1s;
 }
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:rgba(108,99,255,.03);}
+tr:hover td{background:rgba(124,111,255,0.03);}
 
-/* ══════════════════════════════════════════
-   BADGES
-══════════════════════════════════════════ */
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 9px;border-radius:6px;
-  font-size:10px;font-weight:800;
-  text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;
-}
-.badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;}
-.badge-green {background:rgba(52,211,153,.1); color:#34d399;border:1px solid rgba(52,211,153,.2);}
-.badge-red   {background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2);}
-.badge-yellow{background:rgba(251,191,36,.1); color:#fbbf24;border:1px solid rgba(251,191,36,.2);}
-.badge-gray  {background:rgba(255,255,255,.05);color:var(--text2,#8892a4);border:1px solid var(--border,rgba(255,255,255,.06));}
-[data-theme="light"] .badge-gray{background:rgba(0,0,0,.05);color:#374151;border-color:rgba(0,0,0,.1);}
-
-/* ══════════════════════════════════════════
-   PAYOUT GRID
-══════════════════════════════════════════ */
-.payout-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:14px;margin-bottom:18px;
-}
-@media(max-width:900px){.payout-grid{grid-template-columns:1fr;}}
-@media(max-width:600px) {.payout-grid{grid-template-columns:1fr;}}
-
+/* PAYOUT CARDS */
+.payout-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
 .payout-card{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  border-radius:16px;padding:22px 20px;text-align:center;
-  transition:all .2s ease;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:22px 20px;text-align:center;transition:var(--t);box-shadow:var(--sh-sm);
 }
-[data-theme="light"] .payout-card{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.payout-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.16);border-color:var(--border2,rgba(255,255,255,.10));}
-.payout-card-emoji{font-size:28px;margin-bottom:10px;display:block;}
-.payout-card-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text3,#4a5568);margin-bottom:6px;}
-.payout-card-value{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:-.03em;color:var(--text,#f0f2ff);}
-.payout-card-sub  {font-size:11px;color:var(--text3,#4a5568);margin-top:5px;}
+.payout-card:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:var(--sh);}
+.payout-card-emoji{font-size:28px;display:block;margin-bottom:10px;}
+.payout-card-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);margin-bottom:6px;}
+.payout-card-value{font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.04em;color:var(--text);}
+.payout-card-sub{font-size:11px;color:var(--text-3);margin-top:5px;}
 
-/* Method bars */
-.method-row{display:flex;flex-direction:column;gap:12px;}
+/* METHOD BARS */
+.method-row{display:flex;flex-direction:column;gap:14px;}
 .method-item{display:flex;flex-direction:column;gap:6px;}
 .method-top{display:flex;align-items:center;justify-content:space-between;}
-.method-name{font-size:12.5px;font-weight:600;color:var(--text,#f0f2ff);display:flex;align-items:center;gap:6px;text-transform:capitalize;}
-.method-amount{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--text2,#8892a4);}
-.method-bar-bg{height:5px;background:var(--surface2,rgba(255,255,255,.06));border-radius:4px;overflow:hidden;}
-.method-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent,#6c63ff),#a78bfa);border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.method-name{font-size:12.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;text-transform:capitalize;}
+.method-amt{font-family:var(--mono);font-size:12px;color:var(--text-2);}
+.method-bar-bg{height:5px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
+.method-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),#a78bfa);border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1);}
 
-/* ══════════════════════════════════════════
-   PAYMENT LINKS
-══════════════════════════════════════════ */
-.links-grid{
-  display:grid;grid-template-columns:380px 1fr;
-  gap:18px;align-items:start;
-}
-@media(max-width:900px){.links-grid{grid-template-columns:1fr;}}
-
+/* PAYMENT LINKS */
+.links-grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;}
 .link-card{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border,rgba(255,255,255,.06));
-  border-radius:12px;padding:14px 16px;
-  display:flex;flex-direction:column;gap:9px;
-  transition:all .18s;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;display:flex;flex-direction:column;gap:9px;transition:var(--t);
 }
-[data-theme="light"] .link-card{background:#fff;}
-.link-card:hover{border-color:rgba(108,99,255,.3);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
-.link-amount{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--text,#f0f2ff);letter-spacing:-.02em;}
-.link-desc  {font-size:12px;color:var(--text2,#8892a4);}
+.link-card:hover{border-color:rgba(124,111,255,0.3);transform:translateY(-2px);box-shadow:var(--sh);}
+.link-amount{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.link-desc{font-size:12px;color:var(--text-2);}
 .link-url{
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--accent2,#a78bfa);
-  background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.15);
-  padding:7px 10px;border-radius:7px;
-  word-break:break-all;display:flex;align-items:center;justify-content:space-between;gap:7px;
+  font-family:var(--mono);font-size:11px;color:var(--accent-2);
+  background:var(--accent-dim);border:1px solid rgba(124,111,255,0.15);
+  padding:7px 10px;border-radius:var(--r-xs);word-break:break-all;
+  display:flex;align-items:center;justify-content:space-between;gap:7px;
 }
-.btn-copy{
-  background:none;border:none;cursor:pointer;
-  color:var(--accent2,#a78bfa);font-size:13px;flex-shrink:0;
-  padding:2px;border-radius:5px;transition:all .14s;
-}
-.btn-copy:hover{background:rgba(108,99,255,.1);transform:scale(1.1);}
+.link-url-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
 .link-footer{display:flex;align-items:center;justify-content:space-between;}
 
-/* ══════════════════════════════════════════
-   NOT CONFIGURED / EMPTY STATE
-══════════════════════════════════════════ */
+/* NOT CONFIGURED / EMPTY */
 .not-configured{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  border-radius:16px;padding:60px 28px;text-align:center;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:60px 28px;text-align:center;box-shadow:var(--sh-sm);
 }
-[data-theme="light"] .not-configured{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.not-configured .icon{font-size:40px;display:block;margin-bottom:14px;}
-.not-configured h3{font-size:15px;font-weight:800;color:var(--text,#f0f2ff);margin-bottom:7px;}
-.not-configured p {font-size:12.5px;color:var(--text2,#8892a4);margin-bottom:18px;}
-.empty-state{padding:52px 18px;text-align:center;}
-.empty-icon {font-size:34px;margin-bottom:11px;opacity:.35;}
-.empty-state h3{font-size:14px;font-weight:700;color:var(--text,#f0f2ff);margin-bottom:5px;}
-.empty-state p {font-size:12px;color:var(--text2,#8892a4);}
+.not-configured .nc-icon{font-size:40px;display:block;margin-bottom:14px;}
+.not-configured h3{font-size:15px;font-weight:800;color:var(--text);margin-bottom:7px;}
+.not-configured p{font-size:12.5px;color:var(--text-2);margin-bottom:20px;}
+.empty-state{padding:48px 18px;text-align:center;}
+.empty-icon{font-size:34px;margin-bottom:11px;opacity:.35;display:block;}
+.empty-state h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;}
+.empty-state p{font-size:12px;color:var(--text-2);}
 
-/* ══════════════════════════════════════════
-   MODAL
-══════════════════════════════════════════ */
+/* TWO-COL GRID */
+.two-col{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;}
+
+/* MODAL */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);
-  backdrop-filter:blur(7px);z-index:1000;display:none;
-  align-items:center;justify-content:center;padding:18px;
+  position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  z-index:300;display:none;align-items:center;justify-content:center;padding:20px;
 }
 .modal-overlay.open{display:flex;}
 .modal{
-  background:var(--surface,#0f1018);
-  border:1px solid var(--border2,rgba(255,255,255,.10));
-  border-radius:18px;padding:24px;
-  width:100%;max-width:420px;
-  animation:modalIn .26s cubic-bezier(.34,1.4,.64,1);
+  background:var(--surface);border:1px solid var(--border-md);border-radius:var(--r-xl);
+  padding:26px;width:100%;max-width:440px;max-height:calc(100vh - 40px);overflow-y:auto;
+  box-shadow:var(--sh-lg);
 }
-[data-theme="light"] .modal{background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.15);}
-@keyframes modalIn{
-  from{opacity:0;transform:scale(.93) translateY(12px)}
-  to  {opacity:1;transform:scale(1) translateY(0)}
-}
-.modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
-.modal-title{font-size:15px;font-weight:800;color:var(--text,#f0f2ff);letter-spacing:-.02em;}
-.modal-sub  {font-size:12px;color:var(--text2,#8892a4);margin-top:3px;line-height:1.5;}
+[data-theme="dark"] .modal{box-shadow:0 24px 64px rgba(0,0,0,0.55),0 8px 24px rgba(0,0,0,0.3);}
+.modal-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.modal-title{font-size:16px;font-weight:800;letter-spacing:-0.03em;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.5;}
 .modal-close{
-  background:none;border:none;cursor:pointer;color:var(--text3,#4a5568);
-  padding:3px;border-radius:6px;transition:color .14s;font-size:16px;
+  width:30px;height:30px;border-radius:var(--r-sm);background:var(--surface-3);
+  border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;color:var(--text-2);transition:var(--t);flex-shrink:0;
 }
-.modal-close:hover{color:var(--text,#f0f2ff);}
-.modal-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px;}
+.modal-close:hover{background:var(--red-dim);border-color:var(--red-border);color:var(--red)}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
 
-.mono{font-family:'DM Mono',monospace;}
-.spinning{animation:spin .7s linear infinite;display:inline-block;}
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;width:100%;max-width:400px;padding:0 16px;}
+.toast{
+  background:var(--surface);border:1px solid var(--border-md);border-radius:var(--r);
+  padding:12px 18px;font-size:13px;font-weight:500;color:var(--text);
+  box-shadow:var(--sh-lg);display:flex;align-items:center;gap:9px;
+  animation:toastIn .25s var(--ease) both;pointer-events:all;width:100%;
+}
+.toast.fade-out{animation:toastOut .25s var(--ease) forwards}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--accent)}
+.toast.warning{border-left:3px solid var(--amber)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 
-/* Fade transitions */
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .25s ease both;}
+/* SPINNER */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{display:inline-block;animation:spin .7s linear infinite;}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-in{animation:cardIn .25s var(--ease) both;}
 
-/* ══════════════════════════════════════════
-   SMOOTH PAGE CONTENT TRANSITIONS
-══════════════════════════════════════════ */
-#page-content{will-change:opacity,transform;}
+/* RESPONSIVE — TABLET */
+@media(max-width:1200px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .payout-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:1000px){
+  .two-col,.links-grid{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .payout-grid{grid-template-columns:1fr;}
+}
+
+/* RESPONSIVE — MOBILE */
+@media(max-width:648px){
+  .mobile-topbar{display:flex;}
+  .topbar{display:none !important;}
+  .tabs-bar{top:56px;}
+  .sidebar{transform:translateX(-100%);box-shadow:8px 0 40px rgba(0,0,0,0.15);}
+  .sidebar.mob-open{transform:translateX(0);}
+  .sidebar-backdrop{display:block;}
+  .main-wrap{margin-left:0;}
+  .content{padding:14px 14px 80px;}
+  #page-skeleton{left:0;top:56px;}
+  .skel-stats{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .skel-two{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+  .stat-card{padding:14px;gap:10px;}
+  .stat-value{font-size:18px !important;}
+  .payout-grid{grid-template-columns:1fr;}
+  .two-col,.links-grid{grid-template-columns:1fr;}
+  .tbl-overflow{overflow-x:auto;}
+  th,td{padding:9px 10px;}
+  .modal{padding:18px;border-radius:var(--r-lg);}
+  .modal-overlay{padding:10px;}
+  #toast-container{bottom:16px;padding:0 12px;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .store-sel-label{display:none;}
+  .store-selector{min-width:110px;}
+}
 </style>
-
+<script>
+;(function(){
+  var saved = localStorage.getItem('ekart_theme');
+  if(saved === 'dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    document.documentElement.style.background = '#07080D';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.style.background = '#F2F3F9';
+  }
+})();
+</script>
 <script src="api.js"></script>
 <script src="nav.js"></script>
 </head>
 <body>
 
-<!-- ══ SKELETON ══════════════════════════════ -->
-<div id="page-skeleton" aria-hidden="true">
-  <div class="skel-sidebar">
-    <div class="skel" style="height:18px;width:68px;border-radius:5px;margin-bottom:14px;"></div>
-    <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;">
-      <div class="skel" style="width:30px;height:30px;border-radius:50%;flex-shrink:0;"></div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
-        <div class="skel" style="height:8px;width:72px;"></div>
-        <div class="skel" style="height:7px;width:110px;"></div>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:4px;">
-      <div class="skel" style="height:7px;width:50px;opacity:.4;margin-bottom:4px;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.8;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:7px;width:58px;opacity:.4;margin:10px 0 4px;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
-      <div class="skel" style="height:7px;width:44px;opacity:.4;margin:10px 0 4px;"></div>
-      <div class="skel" style="height:30px;border-radius:8px;opacity:.28;"></div>
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- MOBILE TOPBAR -->
+<div class="mobile-topbar" id="mobileTopbar">
+  <div class="mob-left">
+    <button class="hamburger" onclick="openMobileSidebar()" aria-label="Open menu">
+      <svg viewBox="0 0 16 16"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="15" y2="8"/><line x1="1" y1="12" x2="15" y2="12"/></svg>
+    </button>
+    <a class="mob-logo" href="home.html">e<span>K</span>art</a>
+  </div>
+  <div class="mob-right">
+    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" style="width:32px;height:32px;font-size:14px;">☀️</button>
+  </div>
+</div>
+
+<!-- SKELETON -->
+<div id="page-skeleton">
+  <div class="skel-topbar">
+    <div class="skel" style="height:14px;width:80px;border-radius:5px;"></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="skel" style="height:36px;width:160px;border-radius:10px;opacity:.6;"></div>
+      <div class="skel" style="height:36px;width:36px;border-radius:10px;opacity:.4;"></div>
     </div>
   </div>
-  <div class="skel-main">
-    <div class="skel-topbar">
-      <div class="skel" style="height:13px;width:70px;border-radius:4px;"></div>
-      <div style="display:flex;gap:8px;">
-        <div class="skel" style="height:30px;width:130px;border-radius:8px;opacity:.6;"></div>
-        <div class="skel" style="height:30px;width:30px;border-radius:7px;opacity:.4;"></div>
-      </div>
+  <div class="skel-tabsbar">
+    <div class="skel" style="height:13px;width:52px;border-radius:4px;opacity:.9;"></div>
+    <div class="skel" style="height:13px;width:80px;border-radius:4px;opacity:.6;"></div>
+    <div class="skel" style="height:13px;width:56px;border-radius:4px;opacity:.4;"></div>
+    <div class="skel" style="height:13px;width:96px;border-radius:4px;opacity:.28;"></div>
+  </div>
+  <div class="skel-body">
+    <div class="skel-stats">
+      <div class="skel" style="height:88px;border-radius:14px;"></div>
+      <div class="skel" style="height:88px;border-radius:14px;opacity:.75;"></div>
+      <div class="skel" style="height:88px;border-radius:14px;opacity:.55;"></div>
+      <div class="skel" style="height:88px;border-radius:14px;opacity:.38;"></div>
     </div>
-    <div class="skel-tabs">
-      <div class="skel" style="height:15px;width:54px;border-radius:4px;opacity:.9;"></div>
-      <div class="skel" style="height:15px;width:80px;border-radius:4px;opacity:.55;"></div>
-      <div class="skel" style="height:15px;width:56px;border-radius:4px;opacity:.38;"></div>
-      <div class="skel" style="height:15px;width:96px;border-radius:4px;opacity:.28;"></div>
-    </div>
-    <div class="skel-body">
-      <div class="skel" style="height:420px;border-radius:16px;"></div>
-      <div class="skel" style="height:420px;border-radius:16px;opacity:.6;"></div>
+    <div class="skel-two">
+      <div class="skel" style="height:420px;border-radius:18px;"></div>
+      <div class="skel" style="height:420px;border-radius:18px;opacity:.6;"></div>
     </div>
   </div>
 </div>
 
-<!-- ══ MOBILE BACKDROP ════════════════════════ -->
-<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+<!-- SIDEBAR BACKDROP -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
 
-<!-- ══ SIDEBAR — rendered by nav.js into #sidebar ══ -->
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="home.html">
-    e<span class="logo-k">K</span>art<span class="logo-dot"></span>
-  </a>
-  <div class="sidebar-user">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
+  <div class="sidebar-user-skel" id="sidebar-user-skel">
+    <div class="skel" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+      <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
+      <div class="skel" style="height:8px;width:120px;border-radius:3px;"></div>
+    </div>
+  </div>
+  <div class="sidebar-user loading" id="sidebar-user-real">
     <div class="sidebar-avatar" id="nav-avatar">…</div>
-    <div style="min-width:0;">
-      <div class="sidebar-user-name"  id="nav-user-name">…</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name" id="nav-user-name">…</div>
       <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">Merchant</div>
     <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
     <a class="nav-item active" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
@@ -724,60 +600,49 @@ tr:hover td{background:rgba(108,99,255,.03);}
     <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
   </div>
   <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+    <button class="btn-logout" onclick="logout()">↩&nbsp; Log out</button>
   </div>
 </div>
 
-<!-- ══ MAIN ══════════════════════════════════ -->
+<!-- MAIN -->
 <div class="main-wrap">
-
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-left">
-      <!-- Hamburger: mobile only -->
-      <button class="menu-btn" onclick="openSidebar()" aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" x2="21" y1="6"  y2="6"/>
-          <line x1="3" x2="21" y1="12" y2="12"/>
-          <line x1="3" x2="21" y1="18" y2="18"/>
-        </svg>
-      </button>
       <span class="topbar-title">Payments</span>
     </div>
     <div class="topbar-right">
-      <!-- Store selector injected by nav.js into store-select-wrap -->
-      <div class="store-select-wrap" id="store-select-wrap">
-        <span class="store-select-label">Store</span>
-        <select class="store-selector" id="store-selector"></select>
+      <div class="store-sel-wrap" id="store-sel-wrap" style="display:none;">
+        <span class="store-sel-label">Store</span>
+        <select class="store-selector" id="store-selector" onchange="onStoreChange(this.value)"></select>
       </div>
-      <div id="topbar-actions"></div>
+      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
     </div>
   </div>
 
-  <!-- TABS BAR — persistent, never wiped -->
+  <!-- TABS -->
   <div class="tabs-bar" id="tabs-bar">
-    <div class="tab-item active" data-tab="setup"        onclick="switchTab('setup')">⚙️ Setup</div>
-    <div class="tab-item"        data-tab="transactions" onclick="switchTab('transactions')">📄 Transactions</div>
-    <div class="tab-item"        data-tab="payouts"      onclick="switchTab('payouts')">💰 Payouts</div>
-    <div class="tab-item"        data-tab="links"        onclick="switchTab('links')">🔗 Payment Links</div>
+    <button class="tab-btn active" data-tab="setup"        onclick="switchTab('setup',this)">⚙️ Setup</button>
+    <button class="tab-btn"        data-tab="transactions" onclick="switchTab('transactions',this)">📄 Transactions</button>
+    <button class="tab-btn"        data-tab="payouts"      onclick="switchTab('payouts',this)">💰 Payouts</button>
+    <button class="tab-btn"        data-tab="links"        onclick="switchTab('links',this)">🔗 Payment Links</button>
   </div>
 
-  <!-- PAGE CONTENT -->
-  <div id="page-content" class="content page-enter" style="display:none;">
+  <div id="page-content" class="content" style="display:none;">
 
-    <!-- ── SETUP TAB ── -->
+    <!-- ══ SETUP TAB ══ -->
     <div class="tab-panel active" id="tab-setup">
-      <div class="setup-grid">
+      <div class="two-col">
+        <!-- Left: credentials form -->
         <div>
-          <div class="pk-card">
-            <div class="pk-card-header">
-              <div class="pk-card-title">
-                <div class="pk-card-title-icon">💳</div>
+          <div class="section-card">
+            <div class="section-card-hd">
+              <div class="section-card-title">
+                <div class="section-card-icon">💳</div>
                 Razorpay Credentials
               </div>
-              <div class="pk-card-sub">Connect your Razorpay account to start accepting payments.</div>
+              <div class="section-card-sub">Connect your Razorpay account to start accepting payments on your storefront.</div>
             </div>
-            <div class="pk-card-body">
+            <div class="section-card-bd">
               <div class="toggle-row">
                 <div>
                   <div class="toggle-label">Enable Payments</div>
@@ -788,22 +653,19 @@ tr:hover td{background:rgba(108,99,255,.03);}
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Key ID</label>
-                <input class="form-input mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off">
-                <div class="form-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (testing)</div>
+              <div class="field">
+                <label>Key ID</label>
+                <input class="mono" id="key-id" type="text" placeholder="rzp_live_xxxxxxxxxxxx" autocomplete="off">
+                <div class="field-hint">Starts with <code>rzp_live_</code> (production) or <code>rzp_test_</code> (testing)</div>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Key Secret</label>
-                <input class="form-input secret" id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password">
-                <div class="form-hint">Never exposed to customers. Stored encrypted on the server.</div>
+              <div class="field">
+                <label>Key Secret</label>
+                <input id="key-secret" type="password" placeholder="••••••••••••••••••••" autocomplete="new-password" style="font-family:var(--mono);letter-spacing:0.08em;font-size:12.5px;">
+                <div class="field-hint">Never exposed to customers. Stored encrypted on the server.</div>
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Currency</label>
-                <select class="form-input" id="pay-currency">
+              <div class="field">
+                <label>Currency</label>
+                <select id="pay-currency">
                   <option value="INR">INR — Indian Rupee ₹</option>
                   <option value="USD">USD — US Dollar $</option>
                   <option value="EUR">EUR — Euro €</option>
@@ -812,50 +674,50 @@ tr:hover td{background:rgba(108,99,255,.03);}
                   <option value="AED">AED — UAE Dirham</option>
                 </select>
               </div>
-
-              <button class="btn-verify" id="btn-verify" onclick="verifyKeys()">🔍 Test Connection</button>
+              <button class="btn btn-secondary full" id="btn-verify" onclick="verifyKeys()" style="margin-bottom:10px;">🔍 Test Connection</button>
               <div class="verify-status" id="verify-status"></div>
-              <button class="btn-primary full" onclick="saveSettings()" id="btn-save">💾 Save Settings</button>
+              <button class="btn btn-primary full" id="btn-save" onclick="saveSettings()">💾 Save Settings</button>
             </div>
           </div>
         </div>
 
+        <!-- Right: how-to guide -->
         <div>
-          <div class="pk-card">
-            <div class="pk-card-header">
-              <div class="pk-card-title">
-                <div class="pk-card-title-icon">📋</div>
+          <div class="section-card">
+            <div class="section-card-hd">
+              <div class="section-card-title">
+                <div class="section-card-icon">📋</div>
                 How to get your API keys
               </div>
-              <div class="pk-card-sub">Follow these steps to connect your Razorpay account.</div>
+              <div class="section-card-sub">Follow these steps to connect your Razorpay account.</div>
             </div>
-            <div class="pk-card-body">
+            <div class="section-card-bd">
               <ol class="setup-steps">
                 <li class="step">
                   <div class="step-num">1</div>
                   <div class="step-body">
                     <h4>Create a Razorpay account</h4>
-                    <p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank">dashboard.razorpay.com</a> and complete KYC verification for live payments.</p>
+                    <p>Sign up at <a href="https://dashboard.razorpay.com/signup" target="_blank" rel="noopener">dashboard.razorpay.com</a> and complete KYC verification for live payments.</p>
                   </div>
                 </li>
                 <li class="step">
                   <div class="step-num">2</div>
                   <div class="step-body">
-                    <h4>Get your API keys</h4>
-                    <p>Go to <strong>Settings → API Keys → Generate Key</strong>. Copy both the <code>Key ID</code> and <code>Key Secret</code> — the secret shows only once.</p>
+                    <h4>Generate API keys</h4>
+                    <p>Go to <strong>Settings → API Keys → Generate Key</strong>. Copy both the <code>Key ID</code> and <code>Key Secret</code> — the secret is shown only once.</p>
                   </div>
                 </li>
                 <li class="step">
                   <div class="step-num">3</div>
                   <div class="step-body">
                     <h4>Paste keys above</h4>
-                    <p>Use <code>rzp_test_</code> keys while testing, switch to <code>rzp_live_</code> when going live.</p>
+                    <p>Use <code>rzp_test_</code> keys while testing, switch to <code>rzp_live_</code> when you go live with real payments.</p>
                   </div>
                 </li>
                 <li class="step">
                   <div class="step-num">4</div>
                   <div class="step-body">
-                    <h4>Set up Webhook <span style="color:var(--text3);font-weight:400;">(recommended)</span></h4>
+                    <h4>Set up Webhook <span style="color:var(--text-3);font-weight:400;">(recommended)</span></h4>
                     <p>In Razorpay Dashboard → <strong>Settings → Webhooks</strong>, add:<br>
                     <code>https://apiv2.aasaitech.in/webhooks/razorpay</code><br>
                     Events: <code>payment.captured</code>, <code>payment.failed</code>, <code>refund.processed</code></p>
@@ -865,7 +727,7 @@ tr:hover td{background:rgba(108,99,255,.03);}
                   <div class="step-num">5</div>
                   <div class="step-body">
                     <h4>Test &amp; go live</h4>
-                    <p>Toggle Enable Payments on, click <strong>Test Connection</strong>, then <strong>Save Settings</strong>. You're live!</p>
+                    <p>Toggle <strong>Enable Payments</strong> on, click <strong>Test Connection</strong> to verify, then <strong>Save Settings</strong>. You're live!</p>
                   </div>
                 </li>
               </ol>
@@ -875,57 +737,61 @@ tr:hover td{background:rgba(108,99,255,.03);}
       </div>
     </div>
 
-    <!-- ── TRANSACTIONS TAB ── -->
+    <!-- ══ TRANSACTIONS TAB ══ -->
     <div class="tab-panel" id="tab-transactions">
-      <div id="transactions-not-configured" class="not-configured" style="display:none;">
-        <span class="icon">💳</span>
+      <div id="txn-not-configured" class="not-configured" style="display:none;">
+        <span class="nc-icon">💳</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to view transactions.</p>
-        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
       </div>
-      <div id="transactions-content">
-        <div class="stats-grid" id="txn-stats">
-          <div class="stat-card" style="--c:rgba(52,211,153,.06);">
-            <div class="stat-top-bar" style="background:#34d399;"></div>
-            <div class="stat-icon">💰</div>
-            <div class="stat-label">Total Collected</div>
-            <div class="stat-value" id="stat-collected">—</div>
-            <div class="stat-sub">Last 30 days</div>
-          </div>
-          <div class="stat-card" style="--c:rgba(108,99,255,.06);">
-            <div class="stat-top-bar" style="background:#6c63ff;"></div>
-            <div class="stat-icon">📊</div>
-            <div class="stat-label">Transactions</div>
-            <div class="stat-value" id="stat-count">—</div>
-            <div class="stat-sub">Total payments</div>
-          </div>
-          <div class="stat-card" style="--c:rgba(248,113,113,.06);">
-            <div class="stat-top-bar" style="background:#f87171;"></div>
-            <div class="stat-icon">🔄</div>
-            <div class="stat-label">Refunded</div>
-            <div class="stat-value" id="stat-refunded" style="color:#f87171;">—</div>
-            <div class="stat-sub">Amount refunded</div>
-          </div>
-          <div class="stat-card" style="--c:rgba(251,191,36,.06);">
-            <div class="stat-top-bar" style="background:#fbbf24;"></div>
-            <div class="stat-icon">⚠️</div>
-            <div class="stat-label">Failed</div>
-            <div class="stat-value" id="stat-failed" style="color:#fbbf24;">—</div>
-            <div class="stat-sub">Failed payments</div>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <div class="table-header">
-            <span class="table-title">Payment History</span>
-            <div class="search-wrap">
-              <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input class="search-input" id="txn-search" placeholder="Search payment ID…" oninput="filterTxns()">
+      <div id="txn-content">
+        <div class="stats-row" id="txn-stats-row">
+          <div class="stat-card">
+            <div class="stat-icon-wrap">💰</div>
+            <div class="stat-info">
+              <div class="stat-label">Total Collected</div>
+              <div class="stat-value green stat-loading" id="stat-collected">—</div>
+              <div class="stat-sub">Last 30 days</div>
             </div>
           </div>
-          <div style="overflow-x:auto;">
+          <div class="stat-card">
+            <div class="stat-icon-wrap">📊</div>
+            <div class="stat-info">
+              <div class="stat-label">Transactions</div>
+              <div class="stat-value stat-loading" id="stat-count">—</div>
+              <div class="stat-sub">Total payments</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap">🔄</div>
+            <div class="stat-info">
+              <div class="stat-label">Refunded</div>
+              <div class="stat-value red stat-loading" id="stat-refunded">—</div>
+              <div class="stat-sub">Amount refunded</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap">⚠️</div>
+            <div class="stat-info">
+              <div class="stat-label">Failed</div>
+              <div class="stat-value amber stat-loading" id="stat-failed">—</div>
+              <div class="stat-sub">Failed payments</div>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-hd">
+            <span class="table-title">Payment History</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="search-wrap">
+                <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="search-input" id="txn-search" placeholder="Search ID or email…" oninput="filterTxns()">
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="loadTransactions()">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="tbl-overflow">
             <table>
               <thead>
                 <tr>
@@ -933,8 +799,8 @@ tr:hover td{background:rgba(108,99,255,.03);}
                   <th>Customer</th><th>Status</th><th>Date</th><th></th>
                 </tr>
               </thead>
-              <tbody id="txn-table-body">
-                <tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text3);">Loading transactions…</td></tr>
+              <tbody id="txn-tbody">
+                <tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text-3);">Loading transactions…</td></tr>
               </tbody>
             </table>
           </div>
@@ -942,93 +808,93 @@ tr:hover td{background:rgba(108,99,255,.03);}
       </div>
     </div>
 
-    <!-- ── PAYOUTS TAB ── -->
+    <!-- ══ PAYOUTS TAB ══ -->
     <div class="tab-panel" id="tab-payouts">
-      <div id="payouts-not-configured" class="not-configured" style="display:none;">
-        <span class="icon">💰</span>
+      <div id="payout-not-configured" class="not-configured" style="display:none;">
+        <span class="nc-icon">💰</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to view payout summary.</p>
-        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
       </div>
-      <div id="payouts-content">
+      <div id="payout-content">
         <div class="payout-grid">
           <div class="payout-card">
             <span class="payout-card-emoji">💰</span>
             <div class="payout-card-label">Net Collected</div>
-            <div class="payout-card-value" id="payout-net">—</div>
-            <div class="payout-card-sub" id="payout-currency">INR · Last 30 days</div>
+            <div class="payout-card-value green" id="payout-net">—</div>
+            <div class="payout-card-sub" id="payout-period">INR · Last 30 days</div>
           </div>
           <div class="payout-card">
             <span class="payout-card-emoji">🔄</span>
             <div class="payout-card-label">Total Refunded</div>
-            <div class="payout-card-value" id="payout-refunded" style="color:#f87171;">—</div>
+            <div class="payout-card-value red" id="payout-refunded">—</div>
             <div class="payout-card-sub">Refunds issued</div>
           </div>
           <div class="payout-card">
             <span class="payout-card-emoji">❌</span>
             <div class="payout-card-label">Failed Payments</div>
-            <div class="payout-card-value" id="payout-failed" style="color:#fbbf24;">—</div>
+            <div class="payout-card-value amber" id="payout-failed">—</div>
             <div class="payout-card-sub">Not collected</div>
           </div>
         </div>
-        <div class="pk-card">
-          <div class="pk-card-header">
-            <div class="pk-card-title">
-              <div class="pk-card-title-icon">📊</div>
+        <div class="section-card">
+          <div class="section-card-hd">
+            <div class="section-card-title">
+              <div class="section-card-icon">📊</div>
               Payment Method Breakdown
             </div>
           </div>
-          <div class="pk-card-body">
+          <div class="section-card-bd">
             <div class="method-row" id="method-breakdown">
-              <div style="color:var(--text2);font-size:12.5px;">Loading breakdown…</div>
+              <div style="color:var(--text-3);font-size:12.5px;">Loading breakdown…</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── PAYMENT LINKS TAB ── -->
+    <!-- ══ PAYMENT LINKS TAB ══ -->
     <div class="tab-panel" id="tab-links">
       <div id="links-not-configured" class="not-configured" style="display:none;">
-        <span class="icon">🔗</span>
+        <span class="nc-icon">🔗</span>
         <h3>Razorpay not configured</h3>
         <p>Set up your Razorpay credentials in the Setup tab to generate payment links.</p>
-        <button class="btn-primary" onclick="switchTab('setup')">Go to Setup</button>
+        <button class="btn btn-primary" onclick="switchTab('setup',document.querySelector('[data-tab=setup]'))">Go to Setup</button>
       </div>
       <div id="links-content">
         <div class="links-grid">
           <div>
-            <div class="pk-card">
-              <div class="pk-card-header">
-                <div class="pk-card-title">
-                  <div class="pk-card-title-icon">🔗</div>
+            <div class="section-card">
+              <div class="section-card-hd">
+                <div class="section-card-title">
+                  <div class="section-card-icon">🔗</div>
                   Create Payment Link
                 </div>
               </div>
-              <div class="pk-card-body">
-                <div class="form-group">
-                  <label class="form-label">Amount (₹)</label>
-                  <input class="form-input mono" id="link-amount" type="number" min="1" placeholder="999">
+              <div class="section-card-bd">
+                <div class="field">
+                  <label>Amount (₹)</label>
+                  <input class="mono" id="link-amount" type="number" min="1" placeholder="999">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Description</label>
-                  <input class="form-input" id="link-desc" type="text" placeholder="e.g. Custom order for customer">
+                <div class="field">
+                  <label>Description</label>
+                  <input id="link-desc" type="text" placeholder="e.g. Custom order #1234">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Customer Name <span>(optional)</span></label>
-                  <input class="form-input" id="link-name" type="text" placeholder="John Doe">
+                <div class="field">
+                  <label>Customer Name <span>(optional)</span></label>
+                  <input id="link-name" type="text" placeholder="John Doe">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Customer Email <span>(optional)</span></label>
-                  <input class="form-input" id="link-email" type="email" placeholder="john@example.com">
+                <div class="field">
+                  <label>Customer Email <span>(optional)</span></label>
+                  <input id="link-email" type="email" placeholder="john@example.com">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Customer Phone <span>(optional)</span></label>
-                  <input class="form-input mono" id="link-phone" type="tel" placeholder="+91 98765 43210">
+                <div class="field">
+                  <label>Customer Phone <span>(optional)</span></label>
+                  <input class="mono" id="link-phone" type="tel" placeholder="+91 98765 43210">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Expires in</label>
-                  <select class="form-input" id="link-expiry">
+                <div class="field">
+                  <label>Expires in</label>
+                  <select id="link-expiry">
                     <option value="">Never</option>
                     <option value="24">24 hours</option>
                     <option value="48">48 hours</option>
@@ -1037,19 +903,18 @@ tr:hover td{background:rgba(108,99,255,.03);}
                     <option value="720">30 days</option>
                   </select>
                 </div>
-                <button class="btn-primary full" onclick="createPaymentLink()" id="btn-create-link">✨ Generate Payment Link</button>
+                <button class="btn btn-primary full" id="btn-create-link" onclick="createPaymentLink()">✨ Generate Payment Link</button>
               </div>
             </div>
           </div>
-
           <div>
             <div class="table-wrap">
-              <div class="table-header">
+              <div class="table-hd">
                 <span class="table-title">Recent Links</span>
-                <button class="btn-ghost" onclick="loadLinks()">↻ Refresh</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadLinks()">↻ Refresh</button>
               </div>
-              <div id="links-list" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-                <div style="color:var(--text2);font-size:12.5px;padding:18px;text-align:center;">Loading links…</div>
+              <div id="links-list" style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <div style="color:var(--text-3);font-size:12.5px;padding:18px;text-align:center;">Loading links…</div>
               </div>
             </div>
           </div>
@@ -1060,237 +925,185 @@ tr:hover td{background:rgba(108,99,255,.03);}
   </div><!-- /page-content -->
 </div><!-- /main-wrap -->
 
-<!-- ── REFUND MODAL ── -->
+<!-- REFUND MODAL -->
 <div class="modal-overlay" id="modal-refund">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-hd">
       <div>
         <div class="modal-title">💸 Issue Refund</div>
-        <div class="modal-sub">Processing refund for <span id="refund-payment-id" class="mono" style="color:var(--accent2);font-size:11px;"></span></div>
+        <div class="modal-sub">Processing refund for <span id="refund-pid" style="font-family:var(--mono);font-size:11px;color:var(--accent-2);"></span></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-refund')">✕</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Refund Amount (₹) <span>— leave blank for full refund</span></label>
-      <input class="form-input mono" id="refund-amount" type="number" min="1" placeholder="Full refund">
+    <div class="field">
+      <label>Refund Amount (₹) <span>— leave blank for full refund</span></label>
+      <input class="mono" id="refund-amount" type="number" min="1" placeholder="Full refund">
     </div>
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeModal('modal-refund')">Cancel</button>
-      <button id="btn-confirm-refund" onclick="confirmRefund()"
-        style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:9px;background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(239,68,68,.3);transition:all .18s;">
-        💸 Confirm Refund
-      </button>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-refund')">Cancel</button>
+      <button class="btn btn-danger" id="btn-confirm-refund" onclick="confirmRefund()">💸 Confirm Refund</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ══ MOBILE SIDEBAR ══════════════════════════ */
-function openSidebar(){
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.getElementById('sidebar-backdrop').classList.add('visible');
-  document.body.style.overflow='hidden';
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('sidebar-backdrop').classList.remove('visible');
-  document.body.style.overflow='';
-}
-window.addEventListener('resize',()=>{ if(window.innerWidth>768) closeSidebar(); });
-
-/* ══ SKELETON ════════════════════════════════ */
-function hideSkeleton(){
-  const s=document.getElementById('page-skeleton');
-  if(!s) return;
-  s.classList.add('skel-hidden');
-  setTimeout(()=>s.remove(),280);
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+function toast(msg,type){
+  type=type||'success';
+  if(typeof window._toast==='function') return window._toast(msg,type);
+  let c=document.getElementById('toast-container');
+  if(!c){c=document.createElement('div');c.id='toast-container';document.body.appendChild(c);}
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  const icons={success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
+  el.innerHTML='<span style="font-size:14px;">'+(icons[type]||'✓')+'</span><span>'+msg+'</span>';
+  c.appendChild(el);
+  setTimeout(()=>{el.classList.add('fade-out');el.addEventListener('animationend',()=>el.remove());},3200);
 }
 
-/* ══ FADE TRANSITIONS ════════════════════════ */
-const FADE=160;
-function fadeOut(el){
-  return new Promise(r=>{
-    el.style.transition=`opacity ${FADE}ms ease,transform ${FADE}ms ease`;
-    el.style.opacity='0';
-    el.style.transform='translateY(-5px)';
-    el.style.pointerEvents='none';
-    setTimeout(r,FADE);
-  });
-}
-function fadeIn(el){
-  el.style.transition='none';
-  el.style.opacity='0';
-  el.style.transform='translateY(7px)';
-  el.style.display='';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    el.style.transition=`opacity ${FADE+40}ms ease,transform ${FADE+40}ms ease`;
-    el.style.opacity='1';
-    el.style.transform='translateY(0)';
-    el.style.pointerEvents='';
-  }));
-}
-
-/* ══ INLINE SKELETON ════════════════════════ */
-function inlineSkeletonHTML(tab){
-  if(tab==='setup') return`
-    <div style="display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;">
-      <div class="skel" style="height:400px;border-radius:16px;"></div>
-      <div class="skel" style="height:400px;border-radius:16px;opacity:.6;"></div>
-    </div>`;
-  if(tab==='links') return`
-    <div style="display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start;">
-      <div class="skel" style="height:460px;border-radius:16px;"></div>
-      <div class="skel" style="height:460px;border-radius:16px;opacity:.6;"></div>
-    </div>`;
-  if(tab==='payouts'){
-    const c=[.95,.82,.69].map(o=>`<div class="skel" style="height:140px;border-radius:16px;opacity:${o};"></div>`).join('');
-    return`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;">${c}</div>
-           <div class="skel" style="height:200px;border-radius:16px;opacity:.75;"></div>`;
-  }
-  const rows=[.95,.82,.69,.56,.43].map((o,i)=>
-    `<div class="skel" style="height:50px;border-radius:0;opacity:${o};${i<4?'margin-bottom:1px;':''}"></div>`
-  ).join('');
-  return`
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
-      <div class="skel" style="height:82px;border-radius:14px;"></div>
-      <div class="skel" style="height:82px;border-radius:14px;opacity:.78;"></div>
-      <div class="skel" style="height:82px;border-radius:14px;opacity:.56;"></div>
-      <div class="skel" style="height:82px;border-radius:14px;opacity:.38;"></div>
-    </div>
-    <div style="border-radius:14px;overflow:hidden;">
-      <div class="skel" style="height:44px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
-      <div class="skel" style="height:38px;border-radius:0;opacity:.5;margin-bottom:1px;"></div>
-      ${rows}
-    </div>`;
-}
-
-/* ══ STORE LOADING ════════════════════════════ */
-function setStoreLoading(on){
-  const w=document.getElementById('store-select-wrap');
-  if(w) on?w.classList.add('store-loading'):w.classList.remove('store-loading');
-}
-
-/* ══ THEME ════════════════════════════════════ */
-let _isDark=localStorage.getItem('ekart_theme')!=='light';
+/* ══════════════════════════════════════════════
+   THEME
+══════════════════════════════════════════════ */
+let _isDark=localStorage.getItem('ekart_theme')==='dark';
 function applyTheme(dark){
   _isDark=dark;
   const r=document.documentElement;
-  dark?r.removeAttribute('data-theme'):r.setAttribute('data-theme','light');
-  r.style.background=dark?'#080910':'#f0f0f5';
-  const b=document.getElementById('themeToggleBtn');
-  if(b) b.textContent=dark?'🌙':'☀️';
+  if(dark){r.setAttribute('data-theme','dark');r.style.background='#07080D';}
+  else{r.removeAttribute('data-theme');r.style.background='#F2F3F9';}
+  const icon=dark?'🌙':'☀️';
+  const b1=document.getElementById('themeToggleBtn');
+  const b2=document.getElementById('themeToggleMob');
+  if(b1)b1.textContent=icon;
+  if(b2)b2.textContent=icon;
   localStorage.setItem('ekart_theme',dark?'dark':'light');
 }
-function toggleTheme(){ applyTheme(!_isDark); }
+function toggleTheme(){applyTheme(!_isDark);}
 applyTheme(_isDark);
 
-/* ══ STATE ════════════════════════════════════ */
-let currentStoreId='', paymentSettings=null, allTxns=[], refundTarget=null;
-let _activeTab='setup', _loadToken=0, _originalHTML='';
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let currentStoreId='';
+let paymentSettings=null;
+let allTxns=[];
+let refundTarget=null;
+let _activeTab='setup';
 
-/* ══ INIT ══════════════════════════════════════ */
-window.addEventListener('DOMContentLoaded',async()=>{
-  _originalHTML=document.getElementById('page-content').innerHTML;
+/* ══════════════════════════════════════════════
+   SKELETON
+══════════════════════════════════════════════ */
+function dismissSkeleton(){
+  const s=document.getElementById('page-skeleton');
+  if(!s||s._gone) return;
+  s._gone=true;
+  s.classList.add('skel-hiding');
+  s.addEventListener('transitionend',()=>s.remove(),{once:true});
+  setTimeout(()=>{if(s.parentNode)s.remove();},500);
+}
+function revealSidebarUser(){
+  const s=document.getElementById('sidebar-user-skel');
+  const r=document.getElementById('sidebar-user-real');
+  if(s)s.classList.add('loaded');
+  if(r)r.classList.remove('loading');
+}
 
-  const nav=await renderNav('payments',(id)=>{
-    currentStoreId=id; loadAll();
-  });
-  if(!nav){ hideSkeleton(); return; }
-  currentStoreId=nav.currentStoreId;
+/* ══════════════════════════════════════════════
+   MOBILE SIDEBAR
+══════════════════════════════════════════════ */
+function openMobileSidebar(){
+  document.getElementById('sidebar').classList.add('mob-open');
+  document.getElementById('sidebarBackdrop').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMobileSidebar(){
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+  document.body.style.overflow='';
+}
 
-  // Inject theme toggle into topbar
-  const ta=document.getElementById('topbar-actions');
-  if(ta&&!document.getElementById('themeToggleBtn')){
-    const btn=document.createElement('button');
-    btn.className='theme-toggle'; btn.id='themeToggleBtn';
-    btn.title='Toggle theme'; btn.onclick=toggleTheme;
-    btn.textContent=_isDark?'🌙':'☀️';
-    ta.appendChild(btn);
-  }
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async()=>{
   applyTheme(_isDark);
+  const nav = await renderNav('payments');
+  if(!nav){ dismissSkeleton(); return; }
+  revealSidebarUser();
+
+  // Build store selector
+  const stores = nav.stores || [];
+  currentStoreId = nav.currentStoreId || (stores[0]?._id || '');
+  buildStoreSelector(stores, currentStoreId);
+
   await loadAll();
 });
 
-/* ══ LOAD ALL ══════════════════════════════════ */
+function buildStoreSelector(stores, activeId){
+  const wrap = document.getElementById('store-sel-wrap');
+  const sel  = document.getElementById('store-selector');
+  if(!stores.length){ wrap.style.display='none'; return; }
+  wrap.style.display='flex';
+  sel.innerHTML = stores.map(s=>`<option value="${s._id}"${s._id===activeId?' selected':''}>${s.name}</option>`).join('');
+}
+
+function onStoreChange(id){
+  currentStoreId = id;
+  loadAll();
+}
+
+/* ══════════════════════════════════════════════
+   LOAD ALL
+══════════════════════════════════════════════ */
 async function loadAll(){
   if(!currentStoreId) return;
-  const token=++_loadToken;
-  const content=document.getElementById('page-content');
-  const isFirst=content.style.display==='none';
-  setStoreLoading(true);
-
-  if(!isFirst){
-    await fadeOut(content);
-    if(token!==_loadToken) return;
-    content.innerHTML=inlineSkeletonHTML(_activeTab);
-    fadeIn(content);
-  }
-
   try{
-    await loadSettings(token);
-    if(token!==_loadToken) return;
-    if(!isFirst){ await fadeOut(content); if(token!==_loadToken) return; }
-    rebuildTabContent();
-    if(isFirst){ content.style.display=''; requestAnimationFrame(()=>hideSkeleton()); }
-    else fadeIn(content);
+    await loadSettings();
+    const pc=document.getElementById('page-content');
+    pc.style.display='';
+    dismissSkeleton();
+    // Load active tab data
     if(_activeTab==='transactions') loadTransactions();
     else if(_activeTab==='payouts') loadPayouts();
-    else if(_activeTab==='links')   loadLinks();
+    else if(_activeTab==='links') loadLinks();
   }catch(e){
-    if(token!==_loadToken) return;
-    if(isFirst) hideSkeleton();
-    content.innerHTML=`<div class="empty-state" style="padding:72px 20px;">
-      <div class="empty-icon">⚠️</div><h3>Failed to load</h3><p>${e.message}</p></div>`;
-    fadeIn(content);
-    toast(e.message,'error');
-  }finally{
-    if(token===_loadToken) setStoreLoading(false);
+    dismissSkeleton();
+    toast(e.message||'Failed to load','error');
   }
 }
 
-/* ══ REBUILD ════════════════════════════════════ */
-function rebuildTabContent(){
-  const content=document.getElementById('page-content');
-  content.innerHTML=_originalHTML;
-  if(paymentSettings){
-    const pi=document.getElementById('pay-enabled');
-    const ki=document.getElementById('key-id');
-    const ks=document.getElementById('key-secret');
-    const cu=document.getElementById('pay-currency');
-    if(pi) pi.checked=paymentSettings.enabled;
-    if(ki) ki.value=paymentSettings.razorpay_key_id||'';
-    if(ks) ks.value=paymentSettings.has_secret?'••••••••••••••••••••':'';
-    if(cu) cu.value=paymentSettings.currency||'INR';
-  }
-  applyActiveTab(_activeTab);
-}
-
-/* ══ SETTINGS ════════════════════════════════ */
-async function loadSettings(token){
+/* ══════════════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════════════ */
+async function loadSettings(){
   try{
     const data=await apiFetch(`/stores/${currentStoreId}/payment-settings`);
-    if(token!==undefined&&token!==_loadToken) return;
     paymentSettings=data;
     const pi=document.getElementById('pay-enabled');
     const ki=document.getElementById('key-id');
     const ks=document.getElementById('key-secret');
     const cu=document.getElementById('pay-currency');
-    if(pi) pi.checked=data.enabled;
-    if(ki) ki.value=data.razorpay_key_id||'';
-    if(ks) ks.value=data.has_secret?'••••••••••••••••••••':'';
-    if(cu) cu.value=data.currency||'INR';
-  }catch(e){ paymentSettings=null; }
+    if(pi)pi.checked=data.enabled;
+    if(ki)ki.value=data.razorpay_key_id||'';
+    if(ks)ks.value=data.has_secret?'••••••••••••••••••••':'';
+    if(cu)cu.value=data.currency||'INR';
+  }catch(e){
+    paymentSettings=null;
+  }
 }
 
 async function saveEnabled(){
   const enabled=document.getElementById('pay-enabled').checked;
-  await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({enabled})});
-  toast(enabled?'Payments enabled':'Payments disabled',enabled?'success':'info');
+  try{
+    await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({enabled})});
+    toast(enabled?'Payments enabled':'Payments disabled',enabled?'success':'info');
+  }catch(e){toast(e.message||'Failed','error');}
 }
 
 async function saveSettings(){
   const btn=document.getElementById('btn-save');
-  btn.disabled=true; btn.textContent='⏳ Saving…';
+  btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Saving…';
   try{
     const ks=document.getElementById('key-secret').value;
     const body={
@@ -1300,52 +1113,69 @@ async function saveSettings(){
     };
     if(ks&&!ks.startsWith('•')) body.razorpay_key_secret=ks.trim();
     await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify(body)});
-    toast('Settings saved!','success');
+    toast('Settings saved successfully!','success');
     await loadSettings();
-  }catch(e){ toast(e.message||'Failed to save','error'); }
-  finally{ btn.disabled=false; btn.innerHTML='💾 Save Settings'; }
+  }catch(e){toast(e.message||'Failed to save','error');}
+  finally{btn.disabled=false;btn.innerHTML='💾 Save Settings';}
 }
 
 async function verifyKeys(){
   const btn=document.getElementById('btn-verify');
   const status=document.getElementById('verify-status');
-  btn.disabled=true; btn.innerHTML='<span class="spinning">⏳</span> Testing…';
-  status.className='verify-status'; status.style.display='none';
+  btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Testing…';
+  status.className='verify-status';status.style.display='none';
   const ki=document.getElementById('key-id').value.trim();
   const ks=document.getElementById('key-secret').value;
-  if(ki&&ks&&!ks.startsWith('•'))
-    await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({razorpay_key_id:ki,razorpay_key_secret:ks})});
+  if(ki&&ks&&!ks.startsWith('•')){
+    try{await apiFetch(`/stores/${currentStoreId}/payment-settings`,{method:'PUT',body:JSON.stringify({razorpay_key_id:ki,razorpay_key_secret:ks})});}
+    catch(e){}
+  }
   try{
     const d=await apiFetch(`/stores/${currentStoreId}/payment-settings/verify`,{method:'POST'});
-    status.className='verify-status ok'; status.style.display='flex'; status.innerHTML='✅ '+d.message;
+    status.className='verify-status ok';status.innerHTML='✅ '+d.message;
   }catch(e){
-    status.className='verify-status err'; status.style.display='flex'; status.innerHTML='❌ '+(e.message||'Verification failed');
-  }finally{ btn.disabled=false; btn.innerHTML='🔍 Test Connection'; }
+    status.className='verify-status err';status.innerHTML='❌ '+(e.message||'Verification failed');
+  }
+  finally{btn.disabled=false;btn.innerHTML='🔍 Test Connection';}
 }
 
-/* ══ TABS ════════════════════════════════════════ */
-function applyActiveTab(name){
-  document.querySelectorAll('#tabs-bar .tab-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+/* ══════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════ */
+function switchTab(name, btn){
+  _activeTab=name;
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else{
+    const b=document.querySelector(`[data-tab="${name}"]`);
+    if(b)b.classList.add('active');
+  }
   const panel=document.getElementById('tab-'+name);
-  if(panel) panel.classList.add('active');
-}
-function switchTab(name){
-  _activeTab=name; applyActiveTab(name);
+  if(panel)panel.classList.add('active');
   if(name==='transactions') loadTransactions();
   else if(name==='payouts') loadPayouts();
-  else if(name==='links')   loadLinks();
+  else if(name==='links') loadLinks();
 }
 
-/* ══ TRANSACTIONS ════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   TRANSACTIONS
+══════════════════════════════════════════════ */
 async function loadTransactions(){
-  const notCfg=document.getElementById('transactions-not-configured');
-  const content=document.getElementById('transactions-content');
+  const notCfg=document.getElementById('txn-not-configured');
+  const content=document.getElementById('txn-content');
   if(!notCfg||!content) return;
   if(!paymentSettings?.razorpay_key_id){
-    notCfg.style.display='block'; content.style.display='none'; return;
+    notCfg.style.display='';content.style.display='none';return;
   }
-  notCfg.style.display='none'; content.style.display='block';
+  notCfg.style.display='none';content.style.display='';
+  // Set loading state
+  ['stat-collected','stat-count','stat-refunded','stat-failed'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent='—';el.classList.add('stat-loading');}
+  });
+  const tbody=document.getElementById('txn-tbody');
+  if(tbody)tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-3);">Loading transactions…</td></tr>`;
   try{
     const [txns,summary]=await Promise.all([
       apiFetch(`/stores/${currentStoreId}/payments`),
@@ -1353,34 +1183,40 @@ async function loadTransactions(){
     ]);
     allTxns=txns.items||[];
     const cur=summary.currency||'INR';
-    document.getElementById('stat-collected').textContent=formatAmount(summary.total_collected,cur);
-    document.getElementById('stat-count').textContent=summary.total_transactions||0;
-    document.getElementById('stat-refunded').textContent=formatAmount(summary.total_refunded,cur);
-    document.getElementById('stat-failed').textContent=summary.failed_count||0;
+    setStatVal('stat-collected',fmtAmt(summary.total_collected,cur));
+    setStatVal('stat-count',summary.total_transactions||0);
+    setStatVal('stat-refunded',fmtAmt(summary.total_refunded,cur));
+    setStatVal('stat-failed',summary.failed_count||0);
     renderTxns(allTxns);
   }catch(e){
-    const tb=document.getElementById('txn-table-body');
-    if(tb) tb.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:28px;color:#f87171;">⚠️ ${e.message}</td></tr>`;
+    if(tbody)tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--red);">⚠️ ${e.message}</td></tr>`;
+    toast('Failed to load transactions: '+e.message,'error');
   }
 }
 
+function setStatVal(id,val){
+  const el=document.getElementById(id);
+  if(el){el.textContent=val;el.classList.remove('stat-loading');}
+}
+
 function renderTxns(items){
-  const tbody=document.getElementById('txn-table-body');
+  const tbody=document.getElementById('txn-tbody');
   if(!tbody) return;
   if(!items.length){
-    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📄</div><h3>No transactions yet</h3><p>Transactions will appear here once customers start paying</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><span class="empty-icon">📄</span><h3>No transactions yet</h3><p>Transactions will appear here once customers start paying.</p></div></td></tr>`;
     return;
   }
-  const sm={captured:'badge-green',refunded:'badge-yellow',failed:'badge-red'};
+  const sm={captured:'badge-green',refunded:'badge-amber',failed:'badge-red'};
   tbody.innerHTML=items.map(p=>{
     const amt=(p.amount/100).toFixed(2);
+    const date=new Date(p.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
     return`<tr>
-      <td><span class="mono" style="font-size:11px;color:var(--accent2,#a78bfa);">${p.id}</span></td>
-      <td><span class="mono" style="font-size:13px;font-weight:600;color:var(--text,#f0f2ff);">₹${amt}</span></td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:var(--accent-2);">${p.id}</span></td>
+      <td><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);">₹${amt}</span></td>
       <td style="text-transform:capitalize;font-weight:600;font-size:12.5px;">${p.method||'—'}</td>
-      <td style="font-size:12px;">${p.email||p.contact||'—'}</td>
-      <td><span class="badge ${sm[p.status]||'badge-gray'}">${p.status}</span></td>
-      <td style="font-size:11.5px;">${new Date(p.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.email||p.contact||'—'}</td>
+      <td><span class="badge ${sm[p.status]||'badge-gray'}">● ${p.status}</span></td>
+      <td style="font-size:11.5px;white-space:nowrap;">${date}</td>
       <td>${p.status==='captured'?`<button class="btn-refund" onclick="openRefund('${p.id}',${p.amount})">💸 Refund</button>`:'—'}</td>
     </tr>`;
   }).join('');
@@ -1388,147 +1224,181 @@ function renderTxns(items){
 
 function filterTxns(){
   const q=document.getElementById('txn-search').value.toLowerCase();
-  renderTxns(q?allTxns.filter(p=>p.id.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)):allTxns);
+  renderTxns(q?allTxns.filter(p=>p.id.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q)||(p.contact||'').includes(q)):allTxns);
 }
 
-/* ══ PAYOUTS ════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   PAYOUTS
+══════════════════════════════════════════════ */
 async function loadPayouts(){
-  const notCfg=document.getElementById('payouts-not-configured');
-  const content=document.getElementById('payouts-content');
+  const notCfg=document.getElementById('payout-not-configured');
+  const content=document.getElementById('payout-content');
   if(!notCfg||!content) return;
   if(!paymentSettings?.razorpay_key_id){
-    notCfg.style.display='block'; content.style.display='none'; return;
+    notCfg.style.display='';content.style.display='none';return;
   }
-  notCfg.style.display='none'; content.style.display='block';
+  notCfg.style.display='none';content.style.display='';
   try{
     const [summary,txns]=await Promise.all([
       apiFetch(`/stores/${currentStoreId}/payments/summary`),
       apiFetch(`/stores/${currentStoreId}/payments`),
     ]);
     const cur=summary.currency||'INR';
-    document.getElementById('payout-net').textContent=formatAmount(summary.total_collected,cur);
-    document.getElementById('payout-refunded').textContent=formatAmount(summary.total_refunded,cur);
+    document.getElementById('payout-net').textContent=fmtAmt(summary.total_collected,cur);
+    document.getElementById('payout-refunded').textContent=fmtAmt(summary.total_refunded,cur);
     document.getElementById('payout-failed').textContent=summary.failed_count||0;
-    document.getElementById('payout-currency').textContent=`${cur} · Last 30 days`;
+    document.getElementById('payout-period').textContent=`${cur} · Last 30 days`;
+    // Method breakdown
     const items=txns.items||[];
     const methods={};
     items.filter(p=>p.status==='captured').forEach(p=>{
-      const m=p.method||'other'; methods[m]=(methods[m]||0)+p.amount/100;
+      const m=p.method||'other';
+      methods[m]=(methods[m]||0)+p.amount/100;
     });
     const total=Object.values(methods).reduce((a,b)=>a+b,0)||1;
     const icons={upi:'📱',card:'💳',netbanking:'🏦',wallet:'👛',emi:'📅',other:'💰'};
     const bd=document.getElementById('method-breakdown');
     if(bd){
       const sorted=Object.entries(methods).sort((a,b)=>b[1]-a[1]);
-      bd.innerHTML=sorted.length?sorted.map(([m,amt])=>{
-        const pct=Math.round((amt/total)*100);
-        return`<div class="method-item">
-          <div class="method-top">
-            <span class="method-name">${icons[m]||'💰'} ${m}</span>
-            <span class="method-amount">₹${amt.toFixed(2)} <span style="color:var(--text3);font-size:10px;">(${pct}%)</span></span>
-          </div>
-          <div class="method-bar-bg"><div class="method-bar-fill" style="width:${pct}%;"></div></div>
-        </div>`;
-      }).join(''):'<div style="color:var(--text2);font-size:12.5px;">No captured payments yet</div>';
+      if(sorted.length){
+        bd.innerHTML=sorted.map(([m,amt])=>{
+          const pct=Math.round((amt/total)*100);
+          return`<div class="method-item card-in">
+            <div class="method-top">
+              <span class="method-name">${icons[m]||'💰'} ${m}</span>
+              <span class="method-amt">${fmtAmt(amt,cur)} <span style="color:var(--text-3);font-size:10px;">(${pct}%)</span></span>
+            </div>
+            <div class="method-bar-bg"><div class="method-bar-fill" style="width:${pct}%;"></div></div>
+          </div>`;
+        }).join('');
+      } else {
+        bd.innerHTML=`<div style="color:var(--text-3);font-size:12.5px;text-align:center;padding:20px;">No captured payments yet</div>`;
+      }
     }
-  }catch(e){ toast('Failed to load payout data: '+e.message,'error'); }
+  }catch(e){toast('Failed to load payout data: '+e.message,'error');}
 }
 
-/* ══ PAYMENT LINKS ════════════════════════════ */
+/* ══════════════════════════════════════════════
+   PAYMENT LINKS
+══════════════════════════════════════════════ */
 async function loadLinks(){
   const notCfg=document.getElementById('links-not-configured');
   const content=document.getElementById('links-content');
   if(!notCfg||!content) return;
   if(!paymentSettings?.razorpay_key_id){
-    notCfg.style.display='block'; content.style.display='none'; return;
+    notCfg.style.display='';content.style.display='none';return;
   }
-  notCfg.style.display='none'; content.style.display='block';
+  notCfg.style.display='none';content.style.display='';
+  const container=document.getElementById('links-list');
+  if(container)container.innerHTML=`<div style="color:var(--text-3);font-size:12.5px;padding:18px;text-align:center;">Loading links…</div>`;
   try{
     const data=await apiFetch(`/stores/${currentStoreId}/payment-links`);
     const items=data.items||[];
-    const container=document.getElementById('links-list');
     if(!container) return;
     if(!items.length){
-      container.innerHTML=`<div class="empty-state"><div class="empty-icon">🔗</div><h3>No payment links yet</h3><p>Create your first link using the form</p></div>`;
+      container.innerHTML=`<div class="empty-state"><span class="empty-icon">🔗</span><h3>No payment links yet</h3><p>Create your first payment link using the form.</p></div>`;
       return;
     }
-    const sm={created:'badge-yellow',paid:'badge-green',cancelled:'badge-red',expired:'badge-gray'};
-    container.innerHTML=items.map(l=>{
+    const sm={created:'badge-amber',paid:'badge-green',cancelled:'badge-red',expired:'badge-gray'};
+    container.innerHTML=items.map((l,i)=>{
       const amt=(l.amount/100).toFixed(2);
-      return`<div class="link-card fade-up">
+      const date=new Date(l.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      const url=l.short_url||l.id||'';
+      return`<div class="link-card card-in" style="animation-delay:${i*0.04}s;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div>
             <div class="link-amount">₹${amt}</div>
             <div class="link-desc">${l.description||'No description'}</div>
           </div>
-          <span class="badge ${sm[l.status]||'badge-gray'}">${l.status}</span>
+          <span class="badge ${sm[l.status]||'badge-gray'}">● ${l.status}</span>
         </div>
-        <div class="link-url">
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${l.short_url||l.id}</span>
-          <button class="btn-copy" onclick="navigator.clipboard.writeText('${l.short_url}');toast('Link copied!','success')" title="Copy">📋</button>
-        </div>
+        ${url?`<div class="link-url">
+          <span class="link-url-text">${url}</span>
+          <button class="btn-copy" onclick="copyText('${url}')" title="Copy link">📋</button>
+        </div>`:''}
         <div class="link-footer">
-          <span style="font-size:11px;color:var(--text3);">${new Date(l.created_at*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
-          ${l.customer?.name?`<span style="font-size:11.5px;color:var(--text2);">👤 ${l.customer.name}</span>`:''}
+          <span style="font-size:11px;color:var(--text-3);">${date}</span>
+          ${l.customer?.name?`<span style="font-size:11.5px;color:var(--text-2);">👤 ${l.customer.name}</span>`:''}
         </div>
       </div>`;
     }).join('');
-  }catch(e){ toast('Failed to load links: '+e.message,'error'); }
+  }catch(e){toast('Failed to load links: '+e.message,'error');}
 }
 
 async function createPaymentLink(){
   const btn=document.getElementById('btn-create-link');
   const amount=parseFloat(document.getElementById('link-amount').value);
   const desc=document.getElementById('link-desc').value.trim();
-  if(!amount||amount<1){ toast('Enter a valid amount','error'); return; }
-  if(!desc)             { toast('Enter a description','error'); return; }
-  btn.disabled=true; btn.innerHTML='<span class="spinning">⏳</span> Generating…';
+  if(!amount||amount<1){toast('Enter a valid amount','error');return;}
+  if(!desc){toast('Enter a description','error');return;}
+  btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Generating…';
   try{
     const body={
       amount,description:desc,
-      customer_name:  document.getElementById('link-name').value.trim(),
-      customer_email: document.getElementById('link-email').value.trim(),
-      customer_phone: document.getElementById('link-phone').value.trim(),
-      expire_hours:   parseInt(document.getElementById('link-expiry').value)||undefined,
+      customer_name:document.getElementById('link-name').value.trim(),
+      customer_email:document.getElementById('link-email').value.trim(),
+      customer_phone:document.getElementById('link-phone').value.trim(),
+      expire_hours:parseInt(document.getElementById('link-expiry').value)||undefined,
     };
     const d=await apiFetch(`/stores/${currentStoreId}/payment-links`,{method:'POST',body:JSON.stringify(body)});
     toast('Payment link created!','success');
-    if(d.link?.short_url){ navigator.clipboard.writeText(d.link.short_url).catch(()=>{}); toast('Link copied!','success'); }
-    ['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id=>{ const el=document.getElementById(id);if(el)el.value=''; });
+    if(d.link?.short_url){
+      navigator.clipboard.writeText(d.link.short_url).catch(()=>{});
+      toast('Link copied to clipboard!','info');
+    }
+    ['link-amount','link-desc','link-name','link-email','link-phone'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value='';
+    });
+    document.getElementById('link-expiry').value='';
     await loadLinks();
-  }catch(e){ toast(e.message||'Failed to create link','error'); }
-  finally{ btn.disabled=false; btn.innerHTML='✨ Generate Payment Link'; }
+  }catch(e){toast(e.message||'Failed to create link','error');}
+  finally{btn.disabled=false;btn.innerHTML='✨ Generate Payment Link';}
 }
 
-/* ══ REFUNDS ════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   REFUNDS
+══════════════════════════════════════════════ */
 function openRefund(paymentId,amountPaise){
   refundTarget={paymentId,maxAmount:amountPaise/100};
-  document.getElementById('refund-payment-id').textContent=paymentId;
-  document.getElementById('refund-amount').placeholder=`Full refund (₹${(amountPaise/100).toFixed(2)})`;
+  document.getElementById('refund-pid').textContent=paymentId;
   document.getElementById('refund-amount').value='';
+  document.getElementById('refund-amount').placeholder=`Full refund (₹${(amountPaise/100).toFixed(2)})`;
   openModal('modal-refund');
 }
+
 async function confirmRefund(){
   if(!refundTarget) return;
   const btn=document.getElementById('btn-confirm-refund');
   const amount=parseFloat(document.getElementById('refund-amount').value)||undefined;
-  btn.disabled=true; btn.innerHTML='<span class="spinning">⏳</span> Processing…';
+  btn.disabled=true;btn.innerHTML='<span class="spinning">⏳</span> Processing…';
   try{
     await apiFetch(`/stores/${currentStoreId}/payments/${refundTarget.paymentId}/refund`,{method:'POST',body:JSON.stringify({amount})});
     toast('Refund issued successfully!','success');
     closeModal('modal-refund');
     await loadTransactions();
-  }catch(e){ toast(e.message||'Refund failed','error'); }
-  finally{ btn.disabled=false; btn.innerHTML='💸 Confirm Refund'; }
+  }catch(e){toast(e.message||'Refund failed','error');}
+  finally{btn.disabled=false;btn.innerHTML='💸 Confirm Refund';}
 }
 
-/* ══ UTILS ════════════════════════════════════ */
-function formatAmount(amount,currency){
-  const s={INR:'₹',USD:'$',EUR:'€',GBP:'£',SGD:'S$',AED:'AED '};
-  return (s[currency]||'')+(amount||0).toFixed(2);
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+function fmtAmt(amount,currency){
+  const sym={INR:'₹',USD:'$',EUR:'€',GBP:'£',SGD:'S$',AED:'AED '};
+  return(sym[currency]||'')+(amount||0).toFixed(2);
 }
-function openModal(id) { document.getElementById(id).classList.add('open');    }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>toast('Copied!','success')).catch(()=>toast(text,'info'));
+}
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target===ov) closeModal(ov.id); });
+});
+// Escape key
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(ov=>closeModal(ov.id)); });
 </script>
 </body>
 </html>
