@@ -12,7 +12,6 @@
    DESIGN TOKENS — LIGHT DEFAULT
 ═══════════════════════════════════════════════ */
 :root {
-  /* Light theme is DEFAULT */
   --bg:           #F2F3F9;
   --surface:      #FFFFFF;
   --surface-2:    #F7F8FD;
@@ -54,7 +53,6 @@
   --sidebar-w: 248px;
 }
 
-/* Dark theme overrides */
 [data-theme="dark"] {
   --bg:           #07080D;
   --surface:      #0C0E16;
@@ -128,7 +126,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .skel-topbar-btn{height:36px;width:120px;border-radius:var(--r-sm)}
 .skel-body{flex:1;padding:24px 28px;overflow:hidden;display:flex;flex-direction:column;gap:20px}
 .skel-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex-shrink:0}
-.skel-stat-card{height:88px;border-radius:var(--r)}
 .skel-stores-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .skel-store-card{border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border)}
 .skel-store-stripe{height:3px;flex-shrink:0}
@@ -185,7 +182,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 .logo-k{color:var(--accent)}
 
-/* Sidebar user */
 .sidebar-user-skel{
   display:flex;align-items:center;gap:10px;
   margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm);
@@ -203,12 +199,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   background:var(--surface-2);
   border:1px solid var(--border);
   transition:var(--t);cursor:default;
-  overflow:hidden; /* prevent avatar bleed */
+  overflow:hidden;
   min-width:0;
 }
 .sidebar-user:hover{border-color:var(--border-md);background:var(--surface-3)}
 .sidebar-avatar{
-  /* Hard-lock size so it never grows regardless of content */
   width:34px;height:34px;
   min-width:34px;min-height:34px;
   max-width:34px;max-height:34px;
@@ -218,10 +213,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   display:flex;align-items:center;justify-content:center;
   color:white;flex-shrink:0;
   font-family:var(--font);letter-spacing:-0.01em;
-  overflow:hidden; /* clip any injected img */
+  overflow:hidden;
   line-height:1;
 }
-/* If nav.js injects an <img> inside the avatar */
 .sidebar-avatar img{
   width:34px;height:34px;
   object-fit:cover;
@@ -244,7 +238,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   max-width:100%;
 }
 
-/* Nav */
 .nav-section{padding:6px 10px;flex-shrink:0}
 .nav-section-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);padding:8px 8px 5px}
 .nav-item{
@@ -321,7 +314,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .topbar-right{display:flex;align-items:center;gap:8px}
 .content{flex:1;padding:24px 28px;background:var(--bg);min-width:0}
 
-/* Theme toggle */
 .theme-toggle{
   width:36px;height:36px;border-radius:var(--r-sm);
   background:var(--surface-2);border:1px solid var(--border-md);
@@ -409,7 +401,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 ═══════════════════════════════════════════════ */
 .stores-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));
+  /* Auto-fill: naturally shows 2 cols when space allows, 1 col on small screens */
+  grid-template-columns:repeat(auto-fill, minmax(min(300px,100%), 1fr));
   gap:14px;
 }
 @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -784,7 +777,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   border-top:1px solid var(--border);
 }
 
-/* Card style picker */
 .card-style-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
 .card-style-opt{
   border:1px solid var(--border-md);border-radius:var(--r-sm);
@@ -839,21 +831,36 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 
 /* ═══════════════════════════════════════════════
-   RESPONSIVE — TABLET  (900px–1200px)
+   RESPONSIVE — LARGE DESKTOP (>1400px)
+   4 stat cols + 3 store cols
 ═══════════════════════════════════════════════ */
-@media(max-width:1200px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:900px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .stores-grid{grid-template-columns:1fr}
+@media(min-width:1400px){
+  .stores-grid{grid-template-columns:repeat(3,1fr)}
 }
 
 /* ═══════════════════════════════════════════════
-   RESPONSIVE — MOBILE  (≤648px)
+   RESPONSIVE — MEDIUM DESKTOP (1025px–1399px)
+   4 stat cols + 2 store cols (auto-fill handles)
+═══════════════════════════════════════════════ */
+@media(max-width:1399px) and (min-width:1025px){
+  .stats-row{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — TABLET (649px–1024px)
+   Sidebar still visible; 2 stat cols + 2 store cols
+═══════════════════════════════════════════════ */
+@media(max-width:1024px) and (min-width:649px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  /* stores-grid auto-fill naturally handles 2 cols here */
+  .skel-stats-row{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤648px)
 ═══════════════════════════════════════════════ */
 @media(max-width:648px){
-  /* Hide desktop topbar, show mobile topbar */
+  /* Show mobile topbar, hide desktop topbar */
   .mobile-topbar{display:flex}
   .topbar{display:none !important}
 
@@ -865,11 +872,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .sidebar.mob-open{transform:translateX(0)}
   .sidebar-backdrop{display:block}
 
-  /* Main layout */
+  /* Main layout — full width, extra bottom padding for last card */
   .main-wrap{margin-left:0}
   .content{padding:14px 14px 80px}
 
-  /* Skeleton fix on mobile */
+  /* Skeleton: full-width, starts below mobile topbar */
   #page-skeleton{left:0;top:56px}
   .skel-stats-row{grid-template-columns:repeat(2,1fr);gap:10px}
   .skel-stores-grid{grid-template-columns:1fr}
@@ -886,7 +893,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .stat-value{font-size:20px !important}
   .stat-label{font-size:9px !important}
 
-  /* Store cards */
+  /* Store cards — 1 col on mobile */
   .stores-grid{grid-template-columns:1fr;gap:10px}
   .store-card{border-radius:var(--r)}
   .store-card-header{padding:12px 14px 8px;gap:9px}
@@ -897,7 +904,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .store-kpi-val{font-size:12px}
   .store-kpi-label{font-size:7.5px}
 
-  /* Panel becomes full-screen-ish bottom sheet style */
+  /* Panel: bottom sheet */
   .store-panel{
     width:100% !important;
     max-width:100% !important;
@@ -906,14 +913,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     bottom:0 !important;
     left:0 !important;
     right:0 !important;
-    transform:translateY(100%) !important;
+    transform:translate(0,100%) !important; /* slide from bottom */
     opacity:1 !important;
     border-radius:var(--r-xl) var(--r-xl) 0 0 !important;
     border-bottom:none !important;
   }
   .store-panel.open{
-    transform:translateY(0) !important;
-    opacity:1 !important;
+    transform:translate(0,0) !important;
   }
   .sp-body{max-height:calc(92vh - 220px) !important}
   .sp-kpi-row{grid-template-columns:repeat(3,1fr);gap:6px}
@@ -927,15 +933,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   }
   .modal h2{font-size:16px;margin-bottom:16px}
   .field-row{grid-template-columns:1fr}
-  .modal-overlay{padding:10px}
+  .modal-overlay{padding:10px;align-items:flex-end}
   .card-style-picker{grid-template-columns:repeat(2,1fr)}
 
-  /* Domain input on mobile */
+  /* Domain input */
   .domain-input-wrap{flex-direction:column;gap:6px}
   .domain-save-btn{width:100%}
 
+  /* Panel actions wrap neatly */
+  .sp-actions{gap:6px}
+  .sp-btn{min-width:calc(50% - 3px)}
+
   /* Toast */
   #toast-container{bottom:16px;padding:0 12px}
+
+  /* Empty state: more compact on small screens */
+  .stores-empty-state{min-height:calc(100vh - 200px)}
+  .stores-empty-inner h3{font-size:18px}
+  .stores-empty-inner p{font-size:13px}
 }
 
 /* ═══════════════════════════════════════════════
@@ -947,12 +962,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .stat-value{font-size:18px !important}
   .sp-kpi-row{gap:5px}
   .sp-kpi-val{font-size:13px}
-  .sp-actions{flex-direction:column}
-  .sp-btn{flex:none;width:100%}
+  .sp-actions{flex-direction:column;gap:6px}
+  .sp-btn{flex:none;width:100%;min-width:unset}
+  .content{padding:12px 12px 80px}
 }
 </style>
 
-<!-- Theme init: light default; dark only if explicitly saved -->
+<!-- Theme init -->
 <script>
 ;(function(){
   var p = new URLSearchParams(location.search), t = p.get('token');
@@ -985,7 +1001,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   </div>
   <div class="mob-right">
     <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:32px;height:32px;font-size:14px;">☀️</button>
-    <button class="btn btn-primary btn-sm" onclick="openCreateStore()">+ New</button>
+    <!-- id="mobNewStoreBtn" so JS can sync visibility -->
+    <button class="btn btn-primary btn-sm" id="mobNewStoreBtn" onclick="openCreateStore()">+ New</button>
   </div>
 </div>
 
@@ -1054,7 +1071,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
 
-  <!-- User skel -->
+  <!-- User skeleton -->
   <div class="sidebar-user-skel" id="sidebar-user-skel">
     <div class="skel skel-avatar" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
@@ -1221,11 +1238,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
 <script>
 /* ════════════════════════════════════════════════
-   TOAST — inline, works even if api.js omits it
+   TOAST
 ════════════════════════════════════════════════ */
 function toast(msg, type){
   type = type || 'success';
-  if(typeof window._toast === 'function') return window._toast(msg, type); // delegate if api.js defines one
+  if(typeof window._toast === 'function') return window._toast(msg, type);
   let c = document.getElementById('toast-container');
   if(!c){ c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
   const el = document.createElement('div');
@@ -1237,7 +1254,7 @@ function toast(msg, type){
 }
 
 /* ════════════════════════════════════════════════
-   THEME — light is default
+   THEME
 ════════════════════════════════════════════════ */
 let _isDark = localStorage.getItem('ekart_theme') === 'dark';
 
@@ -1252,10 +1269,10 @@ function applyTheme(dark){
     root.style.background = '#F2F3F9';
   }
   const icon = dark ? '🌙' : '☀️';
-  const b1 = document.getElementById('themeToggleBtn');
-  const b2 = document.getElementById('themeToggleMob');
-  if(b1) b1.textContent = icon;
-  if(b2) b2.textContent = icon;
+  ['themeToggleBtn','themeToggleMob'].forEach(id => {
+    const b = document.getElementById(id);
+    if(b) b.textContent = icon;
+  });
   localStorage.setItem('ekart_theme', dark ? 'dark' : 'light');
 }
 function toggleTheme(){ applyTheme(!_isDark); }
@@ -1463,7 +1480,6 @@ function stepsHtml(key){
     `<div class="dns-step"><div class="dns-step-num">${i+1}</div><div class="dns-step-text">${st}</div></div>`
   ).join('');
 }
-
 function switchPanelReg(key, btn){
   document.querySelectorAll('#panel-reg-tabs .reg-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
@@ -1474,14 +1490,22 @@ function switchPanelReg(key, btn){
 function closeStorePanel(){
   document.getElementById('panelBackdrop').classList.remove('open');
   document.getElementById('storePanel').classList.remove('open');
-  if(!document.getElementById('sidebar').classList.contains('mob-open')){
+  // Only unlock scroll if no other overlay is open
+  if(!document.getElementById('sidebar').classList.contains('mob-open') &&
+     !document.getElementById('storeModal').classList.contains('open')){
     document.body.style.overflow = '';
   }
   _panelStoreId = null;
 }
 
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape') closeStorePanel();
+  if(e.key === 'Escape'){
+    if(document.getElementById('storeModal').classList.contains('open')){
+      closeModal('storeModal');
+    } else {
+      closeStorePanel();
+    }
+  }
 });
 
 /* ════════════════════════════════════════════════
@@ -1545,8 +1569,15 @@ function renderStores(){
   container.querySelector('.stores-grid')?.remove();
   container.querySelector('.stores-empty-state')?.remove();
 
-  const topbarNewBtn = document.getElementById('topbarNewStoreBtn');
-  if(topbarNewBtn) topbarNewBtn.style.display = allStores.length ? '' : 'none';
+  // Sync both topbar new-store buttons
+  const topbarBtn = document.getElementById('topbarNewStoreBtn');
+  const mobBtn    = document.getElementById('mobNewStoreBtn');
+  // Show + New button on both bars only when stores exist
+  // (empty state shows its own big CTA)
+  if(topbarBtn) topbarBtn.style.display = allStores.length ? '' : 'none';
+  // Mobile button stays always visible so user can always get back to creation
+  // (on mobile the empty state CTA might be scrolled past)
+  if(mobBtn) mobBtn.style.display = '';
 
   if(!allStores.length){
     container.insertAdjacentHTML('beforeend', `
@@ -1578,7 +1609,7 @@ function renderStores(){
     } else if(domain && dstatus === 'pending'){
       domainHint = `<div class="store-domain-hint"><span class="sdh-dot amber"></span><span class="sdh-text amber">${domain} — pending</span></div>`;
     } else {
-      domainHint = `<div class="store-domain-hint"><span class="sdh-text">No domain — click to set up</span></div>`;
+      domainHint = `<div class="store-domain-hint"><span class="sdh-text">No domain — tap to set up</span></div>`;
     }
 
     return `<div class="store-card" onclick="openStorePanel('${s._id}')">
@@ -1821,6 +1852,23 @@ function previewLogo(input){
 }
 
 /* ════════════════════════════════════════════════
+   MODAL HELPERS
+════════════════════════════════════════════════ */
+function openModal(id){
+  const el = document.getElementById(id);
+  if(el){ el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeModal(id){
+  const el = document.getElementById(id);
+  if(el){ el.classList.remove('open'); }
+  // Only restore scroll if panel also closed
+  if(!document.getElementById('storePanel').classList.contains('open') &&
+     !document.getElementById('sidebar').classList.contains('mob-open')){
+    document.body.style.overflow = '';
+  }
+}
+
+/* ════════════════════════════════════════════════
    MOBILE SIDEBAR
 ════════════════════════════════════════════════ */
 function openMobileSidebar(){
@@ -1831,7 +1879,8 @@ function openMobileSidebar(){
 function closeMobileSidebar(){
   document.getElementById('sidebar').classList.remove('mob-open');
   document.getElementById('sidebarBackdrop').classList.remove('open');
-  if(!document.getElementById('storePanel').classList.contains('open')){
+  if(!document.getElementById('storePanel').classList.contains('open') &&
+     !document.getElementById('storeModal').classList.contains('open')){
     document.body.style.overflow = '';
   }
 }
