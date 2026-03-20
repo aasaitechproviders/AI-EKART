@@ -191,7 +191,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   position:sticky;top:0;z-index:60;flex-shrink:0;box-shadow:var(--sh-sm);
 }
 .mob-left{display:flex;align-items:center;gap:10px}
-.mob-right{display:flex;align-items:center;gap:6px}
+.mob-right{display:flex;align-items:center;gap:8px}
 .hamburger{
   width:36px;height:36px;border-radius:var(--r-sm);background:var(--surface-2);
   border:1px solid var(--border-md);display:flex;align-items:center;justify-content:center;
@@ -203,120 +203,113 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .mob-logo span{color:var(--accent)}
 
 /* ══════════════════════════════════════════════
-   STORE SELECTOR — matches screenshot EXACTLY
-   Two separate rounded pills with a gap:
-   [  STORE  ]  [  Arun store  ▾  ]
+   STORE PILL — single rounded pill, two zones
+   ┌─────────────┬──────────────────────┐
+   │  STORE  │  Aravinth  ∨  │
+   └─────────────┴──────────────────────┘
+   Left zone: slightly greyed fill, muted label
+   Right zone: white bg, bold name, chevron
+   One outer border + border-radius, no gap
 ══════════════════════════════════════════════ */
-.store-selector-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;              /* gap between the two pills */
-  flex-shrink: 0;
-}
-
-/* Left pill — "STORE" label only */
-.store-label-pill {
-  height: 38px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
+.store-pill {
+  display: inline-flex;
+  align-items: stretch;
+  height: 40px;
   border-radius: 100px;
-  background: var(--surface-2);
   border: 1.5px solid var(--border-md);
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  color: var(--text-3);
-  white-space: nowrap;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-/* Right pill — native select + ▾ */
-.store-value-pill {
-  height: 38px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 14px 0 16px;
-  border-radius: 100px;
   background: var(--surface);
-  border: 1.5px solid var(--border-md);
-  box-shadow: var(--sh-sm);
-  transition: var(--t);
-  cursor: pointer;
+  overflow: hidden;
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
   flex-shrink: 0;
 }
-.store-value-pill:hover {
+.store-pill:hover {
   border-color: var(--border-lg);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
-.store-value-pill:focus-within {
+.store-pill:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
-.store-value-pill select {
+
+/* Left zone — "STORE" */
+.store-pill__badge {
+  display: flex;
+  align-items: center;
+  padding: 0 14px 0 16px;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  background: var(--surface-3);        /* slightly greyed — matches screenshot */
+  border-right: 1.5px solid var(--border-md);
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Right zone — store name + chevron */
+.store-pill__select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px 0 16px;
+  background: var(--surface);
+  min-width: 0;
+  flex: 1;
+}
+.store-pill__select {
   background: none;
   border: none;
   outline: none;
   font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--text);
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
   min-width: 0;
-  max-width: 160px;
+  max-width: 180px;
+  white-space: nowrap;
 }
-.store-value-pill select option { background: var(--surface); color: var(--text); }
-.store-value-pill .pill-chevron {
-  font-size: 11px;
+.store-pill__select option { background: var(--surface); color: var(--text); }
+
+.store-pill__chevron {
+  font-size: 12px;
   color: var(--text-2);
   flex-shrink: 0;
   pointer-events: none;
   line-height: 1;
-  margin-top: 1px;
   user-select: none;
 }
 
-/* Loading state */
-@keyframes pillSpin { to { transform: rotate(360deg); } }
-.store-selector-group.loading .pill-chevron { display: none; }
-.store-selector-group.loading .store-value-pill::after {
+/* Loading spinner */
+@keyframes storeSpin { to { transform: rotate(360deg); } }
+.store-pill.loading .store-pill__chevron { display: none; }
+.store-pill.loading .store-pill__select-wrap::after {
   content: '';
   display: block;
-  width: 13px; height: 13px;
+  width: 14px; height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(124,111,255,0.2);
   border-top-color: var(--accent);
-  animation: pillSpin .65s linear infinite;
+  animation: storeSpin .65s linear infinite;
   flex-shrink: 0;
-  margin-right: 2px;
 }
 
-/* Mobile: slightly compact */
+/* Mobile: compact to fit 56px bar */
 @media (max-width: 648px) {
-  .store-selector-group { gap: 5px; }
-  .store-label-pill {
-    height: 34px;
-    padding: 0 10px;
-    font-size: 8.5px;
-    letter-spacing: 0.11em;
-  }
-  .store-value-pill {
-    height: 34px;
-    padding: 0 11px 0 13px;
-    gap: 5px;
-  }
-  .store-value-pill select { font-size: 12.5px; max-width: 100px; }
-  .store-value-pill .pill-chevron { font-size: 10px; }
+  .store-pill             { height: 36px; }
+  .store-pill__badge      { padding: 0 11px 0 13px; font-size: 8.5px; letter-spacing: 0.1em; }
+  .store-pill__select-wrap{ padding: 0 11px 0 13px; gap: 5px; }
+  .store-pill__select     { font-size: 13px; max-width: 110px; }
+  .store-pill__chevron    { font-size: 10px; }
 }
-@media (max-width: 380px) {
-  .store-value-pill select { max-width: 76px; }
-  .store-label-pill { display: none; } /* hide label on tiny screens to save space */
+@media (max-width: 360px) {
+  .store-pill__select { max-width: 80px; }
 }
 
 /* ══ MAIN WRAP + TOPBAR ══ */
@@ -330,14 +323,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .topbar-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .content{flex:1;padding:24px 28px;background:var(--bg);min-width:0}
+
+/* Theme toggle — rounded square, same height as pill */
 .theme-toggle{
-  width:38px;height:38px;border-radius:var(--r-sm);background:var(--surface-2);
-  border:1.5px solid var(--border-md);display:flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1.5px solid var(--border-md);
+  display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:16px;flex-shrink:0;transition:var(--t);
 }
 .theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
 @media(max-width:648px){
-  .theme-toggle{width:34px;height:34px;font-size:14px;}
+  .theme-toggle{width:36px;height:36px;font-size:14px;}
 }
 
 /* ══ PAGE HEADER ══ */
@@ -397,14 +393,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .tone-chip.active{border-color:var(--accent);color:var(--accent-2);background:var(--accent-dim);font-weight:700}
 
 /* ══ GENERATE BUTTON ══ */
-.btn-generate{
-  width:100%;padding:13px;border-radius:var(--r-sm);border:none;cursor:pointer;
-  font-family:var(--font);font-size:13.5px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
-  color:white;box-shadow:0 4px 18px var(--accent-glow);
-  transition:all .2s var(--ease);letter-spacing:-0.01em;position:relative;overflow:hidden;margin-top:4px;
-}
+.btn-generate{width:100%;padding:13px;border-radius:var(--r-sm);border:none;cursor:pointer;font-family:var(--font);font-size:13.5px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);color:white;box-shadow:0 4px 18px var(--accent-glow);transition:all .2s var(--ease);letter-spacing:-0.01em;position:relative;overflow:hidden;margin-top:4px}
 .btn-generate::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.13),transparent);pointer-events:none}
 .btn-generate:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px var(--accent-glow)}
 .btn-generate:active:not(:disabled){transform:translateY(0)}
@@ -413,9 +402,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 /* ══ RESULTS ══ */
 .mkt-results{margin-top:20px;display:flex;flex-direction:column;gap:12px}
 .result-block{background:var(--surface-2);border:1px solid var(--border-md);border-radius:var(--r);overflow:hidden;animation:resultIn .22s var(--ease) both}
-.result-block:nth-child(2){animation-delay:.05s}
-.result-block:nth-child(3){animation-delay:.10s}
-.result-block:nth-child(4){animation-delay:.15s}
+.result-block:nth-child(2){animation-delay:.05s}.result-block:nth-child(3){animation-delay:.10s}.result-block:nth-child(4){animation-delay:.15s}
 @keyframes resultIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .result-block-header{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--surface)}
 .result-block-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-3)}
@@ -428,16 +415,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .insta-hashtags{display:flex;flex-wrap:wrap;gap:5px;padding-top:2px}
 .hashtag{font-size:11.5px;font-weight:600;color:var(--accent-2);background:var(--accent-dim);border-radius:var(--r-xs);padding:3px 9px;border:1px solid rgba(124,111,255,0.15)}
 .char-counter{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:8px;padding:4px 10px;border-radius:var(--r-xs)}
-.char-counter.ok{background:var(--green-dim);color:var(--green)}
-.char-counter.warn{background:var(--amber-dim);color:var(--amber)}
-.char-counter.over{background:var(--red-dim);color:var(--red)}
+.char-counter.ok{background:var(--green-dim);color:var(--green)}.char-counter.warn{background:var(--amber-dim);color:var(--amber)}.char-counter.over{background:var(--red-dim);color:var(--red)}
 
 /* ══ EMPTY / LOADING ══ */
 .empty-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px;gap:10px}
 .empty-panel-icon{font-size:40px;opacity:.28;animation:floatIcon 3s ease-in-out infinite}
 @keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.empty-panel-text{font-size:13px;font-weight:600;color:var(--text-3)}
-.empty-panel-sub{font-size:11.5px;color:var(--text-3);opacity:.7}
+.empty-panel-text{font-size:13px;font-weight:600;color:var(--text-3)}.empty-panel-sub{font-size:11.5px;color:var(--text-3);opacity:.7}
 .generating-state{display:flex;flex-direction:column;align-items:center;gap:14px;padding:44px 0}
 .generating-bar{width:200px;height:3px;background:var(--surface-3);border-radius:3px;overflow:hidden}
 .generating-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-3));border-radius:3px;animation:genProg 2.2s var(--ease) infinite}
@@ -445,8 +429,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .generating-label{font-size:12px;color:var(--text-3);font-weight:600}
 .loading-dots{display:flex;gap:5px;align-items:center;justify-content:center}
 .loading-dots span{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:dotBounce 1.2s ease-in-out infinite}
-.loading-dots span:nth-child(2){animation-delay:.15s}
-.loading-dots span:nth-child(3){animation-delay:.3s}
+.loading-dots span:nth-child(2){animation-delay:.15s}.loading-dots span:nth-child(3){animation-delay:.3s}
 @keyframes dotBounce{0%,80%,100%{transform:scale(0.7);opacity:.4}40%{transform:scale(1);opacity:1}}
 .inline-skel-mkt{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
 
@@ -454,9 +437,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 #toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;width:100%;max-width:400px;padding:0 16px}
 .toast{background:var(--surface);border:1px solid var(--border-md);border-radius:var(--r);padding:12px 18px;font-size:13px;font-weight:500;color:var(--text);box-shadow:var(--sh-lg);display:flex;align-items:center;gap:9px;animation:toastIn .25s var(--ease) both;pointer-events:all;width:100%}
 .toast.fade-out{animation:toastOut .25s var(--ease) forwards}
-.toast.success{border-left:3px solid var(--green)}
-.toast.error{border-left:3px solid var(--red)}
-.toast.info{border-left:3px solid var(--accent)}
+.toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--accent)}
 @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 
@@ -515,12 +496,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
   <div class="mob-right">
-    <!-- Two-pill store selector — identical structure to desktop -->
-    <div class="store-selector-group" id="mob-store-group">
-      <span class="store-label-pill">Store</span>
-      <div class="store-value-pill">
-        <select id="mob-store-selector" onchange="onMobStoreChange(this.value)"></select>
-        <span class="pill-chevron">▾</span>
+    <!-- Single pill: greyed STORE badge | store name ∨ -->
+    <div class="store-pill" id="mob-store-pill">
+      <span class="store-pill__badge">Store</span>
+      <div class="store-pill__select-wrap">
+        <select class="store-pill__select" id="mob-store-selector" onchange="onMobStoreChange(this.value)"></select>
+        <span class="store-pill__chevron">∨</span>
       </div>
     </div>
     <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme">☀️</button>
@@ -532,9 +513,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   <div class="skel-topbar">
     <div class="skel" style="height:14px;width:88px;border-radius:5px;"></div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <div class="skel" style="height:38px;width:72px;border-radius:100px;opacity:.6;"></div>
-      <div class="skel" style="height:38px;width:150px;border-radius:100px;opacity:.8;"></div>
-      <div class="skel" style="height:38px;width:38px;border-radius:var(--r-sm);opacity:.5;"></div>
+      <div class="skel" style="height:40px;width:220px;border-radius:100px;opacity:.75;"></div>
+      <div class="skel" style="height:40px;width:40px;border-radius:var(--r-sm);opacity:.5;"></div>
     </div>
   </div>
   <div class="skel-body">
@@ -600,12 +580,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   <div class="topbar">
     <div class="topbar-left"><span class="topbar-title">Marketing</span></div>
     <div class="topbar-right">
-      <!-- Two-pill store selector — identical structure to mobile -->
-      <div class="store-selector-group" id="desk-store-group">
-        <span class="store-label-pill">Store</span>
-        <div class="store-value-pill">
-          <select id="store-selector"></select>
-          <span class="pill-chevron">▾</span>
+      <!-- Single pill: greyed STORE badge | store name ∨ -->
+      <div class="store-pill" id="desk-store-pill">
+        <span class="store-pill__badge">Store</span>
+        <div class="store-pill__select-wrap">
+          <select class="store-pill__select" id="store-selector"></select>
+          <span class="store-pill__chevron">∨</span>
         </div>
       </div>
       <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
@@ -647,25 +627,18 @@ applyTheme(_isDark);
 function dismissSkeleton(){
   const skel=document.getElementById('page-skeleton');
   if(!skel||skel._dismissed)return;
-  skel._dismissed=true;
-  skel.classList.add('skel-hiding');
+  skel._dismissed=true;skel.classList.add('skel-hiding');
   skel.addEventListener('transitionend',()=>skel.remove(),{once:true});
   setTimeout(()=>{if(skel.parentNode)skel.remove();},500);
 }
 function revealSidebarUser(){
   const s=document.getElementById('sidebar-user-skel');
   const r=document.getElementById('sidebar-user-real');
-  if(s)s.classList.add('loaded');
-  if(r)r.classList.remove('loading');
+  if(s)s.classList.add('loaded');if(r)r.classList.remove('loading');
 }
 
 /* ── STATE ── */
-let currentStoreId='';
-let currentTool='instagram';
-let allProducts=[];
-let allStores=[];
-let selectedTone='friendly';
-let _loadToken=0;
+let currentStoreId='',currentTool='instagram',allProducts=[],allStores=[],selectedTone='friendly',_loadToken=0;
 
 const TOOLS={
   instagram:{icon:'📸',name:'Instagram Post',  desc:'Captions + hashtags',    help:'Generate scroll-stopping captions with trending hashtags for your products or store.',  badge:'Popular',label:'Post'},
@@ -674,16 +647,13 @@ const TOOLS={
   sms:      {icon:'📱',name:'SMS Blast',       desc:'Punchy 160-char texts',   help:'Short, conversion-optimized SMS messages that respect the 160-character limit.',         label:'SMS'}
 };
 const TONES=[
-  {key:'friendly',    label:'😊 Friendly'},
-  {key:'professional',label:'💼 Professional'},
-  {key:'urgent',      label:'🔥 Urgent'},
-  {key:'playful',     label:'🎉 Playful'},
-  {key:'luxurious',   label:'✨ Premium'},
+  {key:'friendly',label:'😊 Friendly'},{key:'professional',label:'💼 Professional'},
+  {key:'urgent',label:'🔥 Urgent'},{key:'playful',label:'🎉 Playful'},{key:'luxurious',label:'✨ Premium'},
 ];
 
 /* ── STORE HELPERS ── */
 function setStoreLoading(on){
-  ['desk-store-group','mob-store-group'].forEach(id=>{
+  ['desk-store-pill','mob-store-pill'].forEach(id=>{
     const w=document.getElementById(id);
     if(w) on?w.classList.add('loading'):w.classList.remove('loading');
   });
@@ -691,21 +661,16 @@ function setStoreLoading(on){
 function populateStoreSelectors(stores,selectedId){
   const opts=stores.map(s=>`<option value="${s._id}"${s._id===selectedId?' selected':''}>${s.name}</option>`).join('');
   ['store-selector','mob-store-selector'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.innerHTML=opts;
+    const el=document.getElementById(id);if(el)el.innerHTML=opts;
   });
 }
 function onMobStoreChange(id){
-  const desk=document.getElementById('store-selector');
-  if(desk)desk.value=id;
-  currentStoreId=id;
-  loadStoreData();
+  const d=document.getElementById('store-selector');if(d)d.value=id;
+  currentStoreId=id;loadStoreData();
 }
 function onDeskStoreChange(id){
-  const mob=document.getElementById('mob-store-selector');
-  if(mob)mob.value=id;
-  currentStoreId=id;
-  loadStoreData();
+  const m=document.getElementById('mob-store-selector');if(m)m.value=id;
+  currentStoreId=id;loadStoreData();
 }
 
 /* ── TRANSITIONS ── */
@@ -740,9 +705,7 @@ function fadeIn(el){
 window.addEventListener('DOMContentLoaded',async()=>{
   const nav=await renderNav('marketing',(id)=>{
     currentStoreId=id;
-    ['store-selector','mob-store-selector'].forEach(selId=>{
-      const el=document.getElementById(selId);if(el)el.value=id;
-    });
+    ['store-selector','mob-store-selector'].forEach(sid=>{const el=document.getElementById(sid);if(el)el.value=id;});
     loadStoreData();
   });
   if(!nav){dismissSkeleton();return;}
@@ -752,26 +715,21 @@ window.addEventListener('DOMContentLoaded',async()=>{
   try{allStores=await apiFetch('/stores');}catch(_){allStores=[];}
   populateStoreSelectors(allStores,currentStoreId);
   const deskSel=document.getElementById('store-selector');
-  if(deskSel) deskSel.addEventListener('change',e=>onDeskStoreChange(e.target.value));
+  if(deskSel)deskSel.addEventListener('change',e=>onDeskStoreChange(e.target.value));
   if(currentStoreId){await loadFirstLoad();}
   else{showNoStoreState();document.getElementById('page-content').style.display='';dismissSkeleton();}
 });
 
 async function loadFirstLoad(){
-  const token=++_loadToken;
-  const c=document.getElementById('page-content');
+  const token=++_loadToken;const c=document.getElementById('page-content');
   setStoreLoading(true);
   try{allProducts=await apiFetch(`/stores/${currentStoreId}/products`);if(token!==_loadToken)return;}
   catch(_){allProducts=[];}
   if(token!==_loadToken)return;
-  renderPage();
-  c.style.display='';
-  requestAnimationFrame(()=>dismissSkeleton());
-  setStoreLoading(false);
+  renderPage();c.style.display='';requestAnimationFrame(()=>dismissSkeleton());setStoreLoading(false);
 }
 async function loadStoreData(){
-  const token=++_loadToken;
-  const c=document.getElementById('page-content');
+  const token=++_loadToken;const c=document.getElementById('page-content');
   if(c.style.display==='none'){await loadFirstLoad();return;}
   setStoreLoading(true);
   await fadeOut(c);if(token!==_loadToken)return;
@@ -779,8 +737,7 @@ async function loadStoreData(){
   try{allProducts=await apiFetch(`/stores/${currentStoreId}/products`);}catch(_){allProducts=[];}
   if(token!==_loadToken)return;
   await fadeOut(c);if(token!==_loadToken)return;
-  renderPage();fadeIn(c);
-  setStoreLoading(false);
+  renderPage();fadeIn(c);setStoreLoading(false);
 }
 function showNoStoreState(){
   document.getElementById('page-content').innerHTML=`
@@ -813,69 +770,42 @@ function renderPage(){
             <span class="tool-card-arrow">›</span>
           </div>`).join('')}
       </div>
-      <div class="tool-panel-right" id="toolPanel">
-        ${renderToolPanel(productOptions)}
-      </div>
+      <div class="tool-panel-right" id="toolPanel">${renderToolPanel(productOptions)}</div>
     </div>`;
   c.querySelectorAll('.tool-card').forEach(card=>{
     card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click();}});
   });
 }
 
-/* ── TOOL PANEL HTML ── */
 function renderToolPanel(productOptions){
   const t=TOOLS[currentTool];
   const hasOffer=currentTool==='email'||currentTool==='whatsapp';
   const label=t.label||'Content';
   const storeName=(allStores.find(s=>s._id===currentStoreId)||{}).name||'';
-  const goalPlaceholders={
-    instagram:'e.g. Promote summer sale, Announce new arrivals…',
-    whatsapp: 'e.g. Flash sale this weekend, New product launch…',
-    email:    'e.g. Monthly newsletter, Re-engage inactive customers…',
-    sms:      'e.g. 48-hour sale, Limited stock alert…',
-  };
-  const toneChips=TONES.map(tone=>
-    `<button class="tone-chip${selectedTone===tone.key?' active':''}" onclick="setTone('${tone.key}',this)">${tone.label}</button>`
-  ).join('');
+  const goalPlaceholders={instagram:'e.g. Promote summer sale, Announce new arrivals…',whatsapp:'e.g. Flash sale this weekend, New product launch…',email:'e.g. Monthly newsletter, Re-engage inactive customers…',sms:'e.g. 48-hour sale, Limited stock alert…'};
+  const toneChips=TONES.map(tone=>`<button class="tone-chip${selectedTone===tone.key?' active':''}" onclick="setTone('${tone.key}',this)">${tone.label}</button>`).join('');
   return `
     <div class="tool-panel-header">
       <div class="tool-panel-header-icon">${t.icon}</div>
-      <div class="tool-panel-header-info">
-        <h2>${t.name}</h2>
-        <p>${t.help}</p>
-      </div>
+      <div class="tool-panel-header-info"><h2>${t.name}</h2><p>${t.help}</p></div>
     </div>
     <div class="tool-panel-body">
       <div class="field">
         <label>Campaign Goal <span style="color:var(--red);font-size:11px;">*</span></label>
-        <input type="text" id="mktGoal" placeholder="${goalPlaceholders[currentTool]||''}"
-          onkeydown="if(event.key==='Enter')generateMarketing()">
+        <input type="text" id="mktGoal" placeholder="${goalPlaceholders[currentTool]||''}" onkeydown="if(event.key==='Enter')generateMarketing()">
       </div>
-      ${allProducts.length?`
-      <div class="field">
-        <label>Product <span class="opt">(optional)</span></label>
-        <select id="mktProduct">
-          <option value="">— General / All Products</option>
-          ${productOptions}
-        </select>
-      </div>`:''}
+      ${allProducts.length?`<div class="field"><label>Product <span class="opt">(optional)</span></label><select id="mktProduct"><option value="">— General / All Products</option>${productOptions}</select></div>`:''}
       <div class="field">
         <label>Tone</label>
         <div class="tone-chips" id="toneChips">${toneChips}</div>
         <input type="hidden" id="mktTone" value="${selectedTone}">
       </div>
-      ${hasOffer?`
-      <div class="field">
-        <label>Offer / Discount <span class="opt">(optional)</span></label>
-        <input type="text" id="mktOffer" placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal">
-      </div>`:''}
+      ${hasOffer?`<div class="field"><label>Offer / Discount <span class="opt">(optional)</span></label><input type="text" id="mktOffer" placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal"></div>`:''}
       <div class="field">
         <label>Brand / Store Name</label>
         <input type="text" id="mktBrand" placeholder="Your store or brand name" value="${storeName}">
       </div>
-      <button class="btn-generate" onclick="generateMarketing()" id="mktGenBtn">
-        <span>✨</span> Generate ${label}
-      </button>
+      <button class="btn-generate" onclick="generateMarketing()" id="mktGenBtn"><span>✨</span> Generate ${label}</button>
       <div id="mktResult">
         <div class="empty-panel">
           <div class="empty-panel-icon">${t.icon}</div>
@@ -886,50 +816,31 @@ function renderToolPanel(productOptions){
     </div>`;
 }
 
-/* ── TONE ── */
 function setTone(tone,btn){
-  selectedTone=tone;
-  document.getElementById('mktTone').value=tone;
-  document.querySelectorAll('#toneChips .tone-chip').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
+  selectedTone=tone;document.getElementById('mktTone').value=tone;
+  document.querySelectorAll('#toneChips .tone-chip').forEach(c=>c.classList.remove('active'));btn.classList.add('active');
 }
 
-/* ── SWITCH TOOL ── */
 function switchTool(tool){
   if(currentTool===tool)return;
   currentTool=tool;
   document.querySelectorAll('.tool-card').forEach(card=>{
-    const m=card.getAttribute('onclick').match(/'(\w+)'/);
-    card.classList.toggle('active',m&&m[1]===tool);
+    const m=card.getAttribute('onclick').match(/'(\w+)'/);card.classList.toggle('active',m&&m[1]===tool);
   });
   const productOptions=allProducts.map(p=>`<option value="${p._id}">${p.name}</option>`).join('');
   const panel=document.getElementById('toolPanel');
-  panel.style.transition='opacity .12s ease,transform .12s ease';
-  panel.style.opacity='0';panel.style.transform='translateY(4px)';
-  setTimeout(()=>{
-    panel.innerHTML=renderToolPanel(productOptions);
-    panel.style.transition='opacity .18s ease,transform .18s ease';
-    panel.style.opacity='1';panel.style.transform='translateY(0)';
-  },130);
+  panel.style.transition='opacity .12s ease,transform .12s ease';panel.style.opacity='0';panel.style.transform='translateY(4px)';
+  setTimeout(()=>{panel.innerHTML=renderToolPanel(productOptions);panel.style.transition='opacity .18s ease,transform .18s ease';panel.style.opacity='1';panel.style.transform='translateY(0)';},130);
   if(window.innerWidth<=648)closeMobileSidebar();
 }
 
-/* ── GENERATE ── */
 async function generateMarketing(){
   if(!currentStoreId)return toast('Select a store first','error');
   const goal=document.getElementById('mktGoal').value.trim();
   if(!goal)return toast('Enter a campaign goal first','error');
-  const btn=document.getElementById('mktGenBtn');
-  const resultEl=document.getElementById('mktResult');
-  const label=TOOLS[currentTool].label||'Content';
-  btn.disabled=true;
-  btn.innerHTML=`<span style="display:inline-block;animation:pillSpin .7s linear infinite">⏳</span> Generating…`;
-  resultEl.innerHTML=`
-    <div class="generating-state">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="generating-bar"><div class="generating-bar-fill"></div></div>
-      <div class="generating-label">Crafting your ${label.toLowerCase()}…</div>
-    </div>`;
+  const btn=document.getElementById('mktGenBtn'),resultEl=document.getElementById('mktResult'),label=TOOLS[currentTool].label||'Content';
+  btn.disabled=true;btn.innerHTML=`<span style="display:inline-block;animation:storeSpin .7s linear infinite">⏳</span> Generating…`;
+  resultEl.innerHTML=`<div class="generating-state"><div class="loading-dots"><span></span><span></span><span></span></div><div class="generating-bar"><div class="generating-bar-fill"></div></div><div class="generating-label">Crafting your ${label.toLowerCase()}…</div></div>`;
   const productId=document.getElementById('mktProduct')?.value||'';
   const product=allProducts.find(p=>p._id===productId);
   const tone=document.getElementById('mktTone')?.value||selectedTone;
@@ -937,19 +848,8 @@ async function generateMarketing(){
   const brand=document.getElementById('mktBrand').value.trim();
   try{
     const store=allStores.find(s=>s._id===currentStoreId)||{};
-    const r=await apiFetch('/ai/marketing-content',{
-      method:'POST',
-      body:JSON.stringify({
-        store_name:brand||store.name||'My Store',
-        product_name:product?product.name:goal,
-        product_description:[product?.description||'',offer?'Offer: '+offer:'',!product?goal:''].filter(Boolean).join('. '),
-        platform:currentTool,tone,
-        currency:store.currency||'INR',
-        price:product?product.price:''
-      })
-    });
-    const all=r.content;
-    let content;
+    const r=await apiFetch('/ai/marketing-content',{method:'POST',body:JSON.stringify({store_name:brand||store.name||'My Store',product_name:product?product.name:goal,product_description:[product?.description||'',offer?'Offer: '+offer:'',!product?goal:''].filter(Boolean).join('. '),platform:currentTool,tone,currency:store.currency||'INR',price:product?product.price:''})});
+    const all=r.content;let content;
     if(currentTool==='instagram')content=all.instagram||all;
     else if(currentTool==='whatsapp')content=all.whatsapp||all;
     else if(currentTool==='email')content=all.email||all;
@@ -957,113 +857,47 @@ async function generateMarketing(){
     else content=all;
     renderResult(content);
   }catch(e){
-    resultEl.innerHTML=`
-      <div style="margin-top:16px;padding:14px 16px;background:var(--red-dim);
-        border:1px solid rgba(224,82,82,0.2);border-radius:var(--r-sm);
-        color:var(--red);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;">
-        ⚠️ ${e.message||'Something went wrong. Please try again.'}
-      </div>`;
+    resultEl.innerHTML=`<div style="margin-top:16px;padding:14px 16px;background:var(--red-dim);border:1px solid rgba(224,82,82,0.2);border-radius:var(--r-sm);color:var(--red);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;">⚠️ ${e.message||'Something went wrong. Please try again.'}</div>`;
   }
-  btn.disabled=false;
-  btn.innerHTML=`<span>✨</span> Generate ${label}`;
+  btn.disabled=false;btn.innerHTML=`<span>✨</span> Generate ${label}`;
 }
 
-/* ── RENDER RESULTS ── */
 function renderResult(content){
   const res=document.getElementById('mktResult');
   if(!content){res.innerHTML='<p style="color:var(--red);padding-top:14px;font-size:12.5px;">No content generated.</p>';return;}
   let html='<div class="mkt-results">';
   if(currentTool==='instagram'){
-    const caption=content.caption||content.text||'';
+    html+=resultBlock('📸 Caption',content.caption||content.text||'','instaCaption');
     const hashtags=content.hashtags||[];
-    html+=resultBlock('📸 Caption',caption,'instaCaption');
-    if(hashtags.length){
-      const hashStr=hashtags.map(h=>h.startsWith('#')?h:'#'+h).join(' ');
-      html+=`<div class="result-block">
-        <div class="result-block-header">
-          <span class="result-block-title">🏷️ Hashtags (${hashtags.length})</span>
-          <button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw',this)">📋 Copy all</button>
-        </div>
-        <div class="result-body">
-          <div id="instaHashtagsRaw" style="display:none;">${hashStr}</div>
-          <div class="insta-hashtags">${hashtags.map(h=>`<span class="hashtag">${h.startsWith('#')?h:'#'+h}</span>`).join('')}</div>
-        </div>
-      </div>`;
-    }
+    if(hashtags.length){const hashStr=hashtags.map(h=>h.startsWith('#')?h:'#'+h).join(' ');html+=`<div class="result-block"><div class="result-block-header"><span class="result-block-title">🏷️ Hashtags (${hashtags.length})</span><button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw',this)">📋 Copy all</button></div><div class="result-body"><div id="instaHashtagsRaw" style="display:none;">${hashStr}</div><div class="insta-hashtags">${hashtags.map(h=>`<span class="hashtag">${h.startsWith('#')?h:'#'+h}</span>`).join('')}</div></div></div>`;}
     if(content.story_text)html+=resultBlock('📱 Story Text',content.story_text,'storyText');
   }else if(currentTool==='whatsapp'){
     html+=resultBlock('💬 Message',content.message||content.text||'','waMsg');
     if(content.cta)html+=resultBlock('🔗 Call-to-Action',content.cta,'waCta');
   }else if(currentTool==='email'){
-    const subject=content.subject||'';
-    const preheader=content.preheader||'';
-    const body=content.body||content.text||'';
-    html+=`<div class="result-block">
-      <div class="result-block-header">
-        <span class="result-block-title">📌 Subject Line</span>
-        <button class="result-copy-btn" onclick="copyBlock('emailSubject',this)">📋 Copy</button>
-      </div>
-      <div class="result-body"><div class="email-subject-text" id="emailSubject">${subject}</div></div>
-    </div>`;
+    const subject=content.subject||'',preheader=content.preheader||'',body=content.body||content.text||'';
+    html+=`<div class="result-block"><div class="result-block-header"><span class="result-block-title">📌 Subject Line</span><button class="result-copy-btn" onclick="copyBlock('emailSubject',this)">📋 Copy</button></div><div class="result-body"><div class="email-subject-text" id="emailSubject">${subject}</div></div></div>`;
     if(preheader)html+=resultBlock('👁️ Preview Text',preheader,'emailPreheader');
     html+=resultBlock('📧 Email Body',body,'emailBody');
   }else if(currentTool==='sms'){
-    const msg=content.message||content.text||'';
-    const len=msg.length;
-    const cls=len>160?'over':len>140?'warn':'ok';
-    const icon=len>160?'⚠️':len>140?'⚡':'✓';
+    const msg=content.message||content.text||'',len=msg.length;
+    const cls=len>160?'over':len>140?'warn':'ok',icon=len>160?'⚠️':len>140?'⚡':'✓';
     const note=len>160?` — ${len-160} chars over`:len>140?' — Near limit':' — Good length';
-    html+=`<div class="result-block">
-      <div class="result-block-header">
-        <span class="result-block-title">📱 SMS Message</span>
-        <button class="result-copy-btn" onclick="copyBlock('smsMsg',this)">📋 Copy</button>
-      </div>
-      <div class="result-body">
-        <div class="result-content" id="smsMsg">${msg}</div>
-        <div class="char-counter ${cls}">${icon} ${len} / 160 characters${note}</div>
-      </div>
-    </div>`;
+    html+=`<div class="result-block"><div class="result-block-header"><span class="result-block-title">📱 SMS Message</span><button class="result-copy-btn" onclick="copyBlock('smsMsg',this)">📋 Copy</button></div><div class="result-body"><div class="result-content" id="smsMsg">${msg}</div><div class="char-counter ${cls}">${icon} ${len} / 160 characters${note}</div></div></div>`;
   }
-  html+='</div>';
-  res.innerHTML=html;
+  html+='</div>';res.innerHTML=html;
 }
 function resultBlock(title,text,id){
-  return `<div class="result-block">
-    <div class="result-block-header">
-      <span class="result-block-title">${title}</span>
-      <button class="result-copy-btn" onclick="copyBlock('${id}',this)">📋 Copy</button>
-    </div>
-    <div class="result-body"><div class="result-content" id="${id}">${text}</div></div>
-  </div>`;
+  return `<div class="result-block"><div class="result-block-header"><span class="result-block-title">${title}</span><button class="result-copy-btn" onclick="copyBlock('${id}',this)">📋 Copy</button></div><div class="result-body"><div class="result-content" id="${id}">${text}</div></div></div>`;
 }
-
-/* ── COPY ── */
 function copyBlock(id,btn){
   const el=document.getElementById(id);if(!el)return;
-  navigator.clipboard.writeText(el.textContent.trim())
-    .then(()=>{
-      const orig=btn.innerHTML;btn.innerHTML='✓ Copied!';btn.classList.add('copied');
-      setTimeout(()=>{btn.innerHTML=orig;btn.classList.remove('copied');},2000);
-    })
-    .catch(()=>toast('Could not copy','error'));
+  navigator.clipboard.writeText(el.textContent.trim()).then(()=>{const orig=btn.innerHTML;btn.innerHTML='✓ Copied!';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML=orig;btn.classList.remove('copied');},2000);}).catch(()=>toast('Could not copy','error'));
 }
 
-/* ── MOBILE SIDEBAR ── */
-function openMobileSidebar(){
-  document.getElementById('sidebar').classList.add('mob-open');
-  document.getElementById('sidebarBackdrop').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeMobileSidebar(){
-  document.getElementById('sidebar').classList.remove('mob-open');
-  document.getElementById('sidebarBackdrop').classList.remove('open');
-  document.body.style.overflow='';
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    el.addEventListener('click',()=>{if(window.innerWidth<=648)closeMobileSidebar();});
-  });
-});
+function openMobileSidebar(){document.getElementById('sidebar').classList.add('mob-open');document.getElementById('sidebarBackdrop').classList.add('open');document.body.style.overflow='hidden';}
+function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('mob-open');document.getElementById('sidebarBackdrop').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.nav-item').forEach(el=>{el.addEventListener('click',()=>{if(window.innerWidth<=648)closeMobileSidebar();});});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobileSidebar();});
 </script>
 </body>
