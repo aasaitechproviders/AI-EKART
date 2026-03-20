@@ -265,10 +265,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   padding:0 12px;
   position:sticky;top:0;z-index:60;flex-shrink:0;
   box-shadow:var(--sh-sm);
-  gap:8px;
 }
 .mob-left{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.mob-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.mob-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .hamburger{
   width:36px;height:36px;border-radius:var(--r-sm);
   background:var(--surface-2);border:1px solid var(--border-md);
@@ -280,54 +279,39 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;font-family:var(--font)}
 .mob-logo span{color:var(--accent)}
 
-/* ── Mobile store selector — exact same as orders page ── */
+/* ── Mobile store selector — EXACT copy from orders.html ── */
 .mob-store-wrap{
-  flex:1;
-  min-width:0;
-  display:flex;
-  align-items:center;
-  padding:0 10px;
-}
-.mob-store-pill{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:4px;
-  background:var(--surface);
-  border:1px solid var(--border-md);
-  border-radius:999px;
-  padding:0 14px 0 16px;
-  height:36px;
-  width:100%;
-  min-width:0;
+  display:inline-flex;align-items:center;
+  background:var(--surface);border:1.5px solid var(--border-md);
+  border-radius:20px;height:34px;
   transition:var(--t);
-  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink:0;width:auto;
 }
-.mob-store-pill:hover{border-color:var(--border-lg)}
-.mob-store-pill select{
-  background:none;border:none;outline:none;
+.mob-store-wrap:focus-within{border-color:var(--border-lg)}
+.mob-store-selector{
+  width:auto !important;
+  max-width:150px;
+  min-width:0;
+  height:34px !important;
+  background-color:transparent !important;
+  border:none !important;
+  outline:none;
+  box-shadow:none !important;
+  border-radius:20px;
   font-family:var(--font);font-size:13px;font-weight:600;
   color:var(--text);cursor:pointer;
-  flex:1;min-width:0;
-  -webkit-appearance:none;-moz-appearance:none;appearance:none;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  appearance:none;-webkit-appearance:none;
+  padding:0 26px 0 14px !important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 9px center !important;
 }
-.mob-store-pill select option{background:var(--surface);color:var(--text)}
-.mob-pill-chevron{
-  flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  width:16px;height:16px;
-  pointer-events:none;
+[data-theme="dark"] .mob-store-selector{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23474B65' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 9px center !important;
 }
-.mob-pill-chevron svg{
-  width:10px;height:10px;
-  stroke:var(--text-3);
-  stroke-width:2;
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  display:block;
-}
-/* Hide until stores populated */
-#mobStoreWrap{display:none}
+.mob-store-selector option{background:var(--surface);color:var(--text)}
 
 /* ═══════════════════════════════════════════════
    MAIN WRAP + TOPBAR
@@ -750,18 +734,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
 
-  <!-- Store selector — exact same style as orders page -->
-  <div class="mob-store-wrap" id="mobStoreWrap">
-    <div class="mob-store-pill">
-      <select id="mob-store-selector" onchange="onMobStoreSelectorChange(this.value)"></select>
-      <span class="mob-pill-chevron">
-        <svg viewBox="0 0 10 10"><polyline points="1,3 5,7 9,3"/></svg>
-      </span>
-    </div>
-  </div>
-
   <div class="mob-right">
-    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:32px;height:32px;font-size:14px;">☀️</button>
+    <div class="mob-store-wrap" id="mobStoreWrap" style="display:none;">
+      <select class="mob-store-selector" id="mob-store-selector" onchange="onMobStoreSelectorChange(this.value)"></select>
+    </div>
+    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:36px;height:36px;font-size:15px;">☀️</button>
   </div>
 </div>
 
@@ -1021,7 +998,7 @@ async function populateStoreSelector(stores, selectedId){
   // Mobile
   if(mobSel){
     mobSel.innerHTML = optionsHTML;
-    if(mobWrap) mobWrap.style.display = 'flex';
+    if(mobWrap) mobWrap.style.display = 'inline-flex';
   }
 }
 
