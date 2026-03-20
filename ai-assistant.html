@@ -206,10 +206,12 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .sidebar-user-skel {
   display: flex; align-items: center; gap: 10px;
   margin: 10px 10px 4px; padding: 10px 11px; border-radius: var(--r-sm);
+  /* no background — pure shimmer blocks */
 }
-#sidebar-user-skel.loaded { display: none; }
+.sidebar-user-skel[style*="display: none"],
+.sidebar-user-skel[style*="display:none"] { display: none !important; }
 .sidebar-user {
-  display: none; /* shown after nav loads */
+  display: none;
   align-items: center; gap: 10px;
   margin: 10px 10px 4px; padding: 10px 11px;
   border-radius: var(--r-sm);
@@ -1124,7 +1126,7 @@ function dismissSkeleton() {
 function revealSidebarUser() {
   const s = document.getElementById('sidebar-user-skel');
   const r = document.getElementById('sidebar-user-real');
-  if (s) s.id = 'sidebar-user-skel-done'; // remove from skel pool
+  if (s) { s.style.display = 'none'; }
   if (r) r.classList.add('visible');
 }
 
