@@ -49,8 +49,11 @@
   --green-border: rgba(25,163,122,0.22);
   --amber:        #d97706;
   --amber-dim:    rgba(217,119,6,0.09);
+  --amber-border: rgba(217,119,6,0.25);
   --red:          #e05252;
   --red-dim:      rgba(224,82,82,0.09);
+  --blue:         #3b82f6;
+  --blue-dim:     rgba(59,130,246,0.09);
   --r-xs:  6px;
   --r-sm:  10px;
   --r:     14px;
@@ -87,8 +90,11 @@
   --green-border: rgba(45,212,160,0.22);
   --amber:        #F5A523;
   --amber-dim:    rgba(245,165,35,0.10);
+  --amber-border: rgba(245,165,35,0.25);
   --red:          #F26B6B;
   --red-dim:      rgba(242,107,107,0.10);
+  --blue:         #60a5fa;
+  --blue-dim:     rgba(96,165,250,0.10);
   --sh-sm: 0 1px 4px rgba(0,0,0,0.4);
   --sh:    0 4px 20px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
   --sh-lg: 0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
@@ -137,12 +143,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   justify-content:space-between;padding:0 28px;
 }
 .skel-body{flex:1;padding:24px 28px;overflow:hidden;display:flex;flex-direction:column;gap:16px}
-.skel-mkt-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+
+.skel-mkt-header{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.skel-mkt-grid{display:grid;grid-template-columns:268px 1fr;gap:20px;align-items:start}
 .skel-tool-list{display:flex;flex-direction:column;gap:8px}
-.skel-tool-card{height:84px;border-radius:var(--r-lg)}
+.skel-tool-card{height:80px;border-radius:var(--r-lg)}
 
 /* ═══════════════════════════════════════════════
-   SIDEBAR
+   SIDEBAR BACKDROP
 ═══════════════════════════════════════════════ */
 .sidebar-backdrop{
   display:none;position:fixed;inset:0;
@@ -154,6 +162,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 .sidebar-backdrop.open{opacity:1;pointer-events:all}
 
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
 .sidebar{
   width:var(--sidebar-w);
   background:var(--surface);
@@ -315,87 +326,107 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   border-top-color:var(--accent);
   animation:spin .65s linear infinite;pointer-events:none;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+
+/* ═══════════════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════════════ */
+.page-header{
+  margin-bottom:22px;
+}
+.page-header-title{
+  font-size:20px;font-weight:800;letter-spacing:-0.04em;
+  color:var(--text);margin-bottom:4px;
+}
+.page-header-sub{font-size:12.5px;color:var(--text-3);line-height:1.5}
 
 /* ═══════════════════════════════════════════════
    MARKETING LAYOUT
 ═══════════════════════════════════════════════ */
 .marketing-layout{
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:268px 1fr;
   gap:20px;
   align-items:start;
 }
 
 /* ═══════════════════════════════════════════════
-   TOOL CARDS (Left)
+   TOOL CARDS (Left Panel)
 ═══════════════════════════════════════════════ */
-.tool-list{display:flex;flex-direction:column;gap:8px}
+.tool-panel-left{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:var(--sh-sm);
+  position:sticky;
+  top:80px;
+}
+.tool-panel-left-header{
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,var(--accent-soft),transparent 70%);
+}
+.tool-panel-left-title{
+  font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--text-3);
+}
+
+.tool-list{display:flex;flex-direction:column;gap:0}
 
 .tool-card{
-  background:var(--surface);
-  border:1.5px solid var(--border);
-  border-radius:var(--r-lg);
-  padding:16px 18px;
+  display:flex;align-items:center;gap:11px;
+  padding:13px 16px;
   cursor:pointer;
-  transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease),background .18s var(--ease);
-  position:relative;overflow:hidden;
-  box-shadow:var(--sh-sm);
+  transition:background .14s var(--ease),color .14s var(--ease);
+  position:relative;
+  border-bottom:1px solid var(--border);
 }
+.tool-card:last-child{border-bottom:none}
 .tool-card::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,var(--accent-soft),transparent 60%);
-  opacity:0;transition:opacity .2s;pointer-events:none;
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--accent);
+  opacity:0;border-radius:0 3px 3px 0;
+  transition:opacity .14s;
 }
-.tool-card:hover{
-  border-color:rgba(124,111,255,0.30);
-  transform:translateY(-2px);
-  box-shadow:var(--sh);
-}
-.tool-card:hover::before{opacity:1}
-.tool-card.active{
-  border-color:var(--accent);
-  background:var(--accent-dim);
-  box-shadow:var(--sh-accent);
-}
+.tool-card:hover{background:var(--surface-2)}
+.tool-card.active{background:var(--accent-dim)}
 .tool-card.active::before{opacity:1}
-
-.tool-card-top{display:flex;align-items:center;gap:11px;margin-bottom:5px}
-.tool-card-icon{
-  width:38px;height:38px;border-radius:var(--r-sm);
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;
-  background:var(--surface-3);border:1px solid var(--border);
-  flex-shrink:0;transition:background .18s,border-color .18s;
-}
+.tool-card.active .tool-card-name{color:var(--accent)}
 .tool-card.active .tool-card-icon{background:var(--accent-dim);border-color:rgba(124,111,255,0.25)}
-.tool-card-name{font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.02em}
-.tool-card-desc{font-size:11px;color:var(--text-3);line-height:1.55;padding-left:49px}
-.tool-card-arrow{
-  position:absolute;right:14px;top:50%;
-  transform:translateY(-50%) translateX(-4px);
-  font-size:12px;color:var(--accent-2);
-  opacity:0;transition:all .18s;
+
+.tool-card-icon{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  background:var(--surface-3);border:1px solid var(--border);
+  flex-shrink:0;transition:var(--t);
 }
-.tool-card.active .tool-card-arrow{opacity:1;transform:translateY(-50%) translateX(0)}
+.tool-card-text{flex:1;min-width:0}
+.tool-card-name{font-size:12.5px;font-weight:700;color:var(--text);letter-spacing:-0.01em;transition:color .14s}
+.tool-card-desc{font-size:10.5px;color:var(--text-3);line-height:1.4;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tool-card-badge{
-  margin-left:auto;flex-shrink:0;
-  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
-  padding:2px 7px;border-radius:20px;
+  flex-shrink:0;
+  font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;
+  padding:2px 6px;border-radius:20px;
   background:var(--accent-dim);color:var(--accent-2);
-  border:1px solid rgba(124,111,255,0.2);
+  border:1px solid rgba(124,111,255,0.18);
 }
+.tool-card-arrow{font-size:11px;color:var(--text-3);flex-shrink:0;opacity:0;transition:opacity .14s,transform .14s;transform:translateX(-3px)}
+.tool-card:hover .tool-card-arrow{opacity:1;transform:translateX(0)}
+.tool-card.active .tool-card-arrow{opacity:1;color:var(--accent);transform:translateX(0)}
 
 /* ═══════════════════════════════════════════════
    TOOL PANEL (Right)
 ═══════════════════════════════════════════════ */
-.tool-panel{
+.tool-panel-right{
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--r-xl);
   overflow:hidden;
   box-shadow:var(--sh);
-  animation:panelIn .25s var(--ease) both;
+  animation:panelIn .22s var(--ease) both;
 }
 @keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
@@ -416,8 +447,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .tool-panel-header-info{flex:1;min-width:0}
 .tool-panel-header h2{font-size:16px;font-weight:800;margin-bottom:3px;color:var(--text);letter-spacing:-0.03em}
 .tool-panel-header p{font-size:11.5px;color:var(--text-3);line-height:1.55}
+.tool-panel-header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
-.tool-panel-body{padding:24px}
+.tool-panel-body{padding:22px 24px}
 
 /* ═══════════════════════════════════════════════
    FORM FIELDS
@@ -457,6 +489,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .field-hint{font-size:11px;color:var(--text-3);margin-top:5px;line-height:1.5}
 
+/* Tone chips */
+.tone-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tone-chip{
+  padding:5px 12px;border-radius:20px;
+  font-size:11.5px;font-weight:600;
+  border:1.5px solid var(--border-md);
+  background:var(--surface-2);color:var(--text-2);
+  cursor:pointer;transition:var(--t);font-family:var(--font);
+}
+.tone-chip:hover{border-color:var(--accent);color:var(--accent-2);background:var(--accent-dim)}
+.tone-chip.active{border-color:var(--accent);color:var(--accent-2);background:var(--accent-dim);font-weight:700}
+
 /* ═══════════════════════════════════════════════
    GENERATE BUTTON
 ═══════════════════════════════════════════════ */
@@ -472,6 +516,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   transition:all .2s var(--ease);
   letter-spacing:-0.01em;
   position:relative;overflow:hidden;
+  margin-top:4px;
 }
 .btn-generate::before{
   content:'';position:absolute;inset:0;
@@ -487,9 +532,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .btn-generate .sparkle{font-size:15px}
 
 /* ═══════════════════════════════════════════════
-   RESULT BLOCKS
+   RESULT SECTION
 ═══════════════════════════════════════════════ */
-.mkt-results{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.mkt-results{margin-top:20px;display:flex;flex-direction:column;gap:12px}
 
 .result-block{
   background:var(--surface-2);
@@ -499,12 +544,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   animation:resultIn .22s var(--ease) both;
 }
 .result-block:nth-child(2){animation-delay:.05s}
-.result-block:nth-child(3){animation-delay:.1s}
+.result-block:nth-child(3){animation-delay:.10s}
+.result-block:nth-child(4){animation-delay:.15s}
 @keyframes resultIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 .result-block-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:10px 14px;
+  padding:9px 13px;
   border-bottom:1px solid var(--border);
   background:var(--surface);
 }
@@ -517,13 +563,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .result-body{padding:13px 15px}
 .result-content{
   font-size:13px;color:var(--text-2);
-  line-height:1.8;white-space:pre-wrap;word-break:break-word;
+  line-height:1.85;white-space:pre-wrap;word-break:break-word;
 }
 .email-subject-text{
   font-size:15px;font-weight:800;color:var(--text);
   line-height:1.4;letter-spacing:-0.02em;
 }
 
+.result-actions{display:flex;align-items:center;gap:6px}
 .result-copy-btn{
   background:var(--surface-2);
   border:1px solid var(--border-md);
@@ -536,6 +583,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 .result-copy-btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
 .result-copy-btn.copied{background:var(--green);color:white;border-color:var(--green)}
+
+/* Copy all bar */
+.copy-all-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface-3);
+  border:1px solid var(--border-md);
+  border-radius:var(--r-sm);
+  padding:10px 14px;
+  margin-top:4px;
+}
+.copy-all-text{font-size:11.5px;font-weight:600;color:var(--text-2)}
+.copy-all-btn{
+  background:var(--accent);color:white;
+  border:none;border-radius:var(--r-xs);
+  padding:6px 14px;
+  font-size:11.5px;font-weight:700;
+  font-family:var(--font);cursor:pointer;
+  transition:var(--t);display:flex;align-items:center;gap:5px;
+}
+.copy-all-btn:hover{background:var(--accent-2)}
 
 /* ═══════════════════════════════════════════════
    HASHTAGS
@@ -552,7 +619,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .hashtag:hover{background:rgba(124,111,255,0.16)}
 
 /* ═══════════════════════════════════════════════
-   CHAR COUNTER (SMS)
+   CHAR COUNTER
 ═══════════════════════════════════════════════ */
 .char-counter{
   display:inline-flex;align-items:center;gap:5px;
@@ -565,21 +632,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .char-counter.over{background:var(--red-dim);color:var(--red)}
 
 /* ═══════════════════════════════════════════════
-   LOADING / EMPTY STATES
+   LOADING / EMPTY
 ═══════════════════════════════════════════════ */
 .empty-panel{
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  min-height:240px;gap:10px;
+  min-height:260px;gap:10px;
   color:var(--text-3);
+  background:linear-gradient(135deg,var(--surface-2) 0%,var(--surface) 100%);
 }
-.empty-panel-icon{font-size:40px;opacity:.35}
-.empty-panel-text{font-size:12.5px;font-weight:600}
+.empty-panel-icon{font-size:42px;opacity:.3;animation:floatIcon 3s ease-in-out infinite}
+@keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.empty-panel-text{font-size:13px;font-weight:600;color:var(--text-3)}
+.empty-panel-sub{font-size:11.5px;color:var(--text-3);opacity:.7}
 
 .loading-dots{
   display:flex;gap:5px;
   align-items:center;justify-content:center;
-  padding:40px 0;
+  padding:48px 0;
 }
 .loading-dots span{
   width:8px;height:8px;border-radius:50%;
@@ -590,18 +660,43 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .loading-dots span:nth-child(3){animation-delay:.3s}
 @keyframes dotBounce{0%,80%,100%{transform:scale(0.7);opacity:.4}40%{transform:scale(1);opacity:1}}
 
+/* Generating overlay */
+.generating-state{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding:44px 0;
+}
+.generating-bar{
+  width:200px;height:3px;background:var(--surface-3);border-radius:3px;overflow:hidden;
+}
+.generating-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-3));
+  border-radius:3px;animation:genProg 2.2s var(--ease) infinite;
+}
+@keyframes genProg{0%{width:0;margin-left:0}60%{width:80%;margin-left:0}100%{width:20%;margin-left:80%}}
+.generating-label{font-size:12px;color:var(--text-3);font-weight:600}
+
+/* ═══════════════════════════════════════════════
+   NO STORE STATE
+═══════════════════════════════════════════════ */
+.no-store-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:calc(100vh - 200px);text-align:center;
+  animation:fadeUp .3s var(--ease) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.no-store-icon{font-size:48px;margin-bottom:16px;opacity:.4;animation:floatIcon 3s ease-in-out infinite}
+.no-store-title{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.03em;margin-bottom:8px}
+.no-store-sub{font-size:13px;color:var(--text-3);line-height:1.65;max-width:320px}
+
 /* ═══════════════════════════════════════════════
    INLINE SKELETON (store switch)
 ═══════════════════════════════════════════════ */
 .inline-skel-mkt{
-  display:grid;
-  grid-template-columns:260px 1fr;
-  gap:20px;align-items:start;
+  display:grid;grid-template-columns:268px 1fr;gap:20px;align-items:start;
 }
 
-/* Fade transitions for store switch */
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fade-up{animation:fadeUp .25s var(--ease) both}
+.fade-up{animation:fadeUp .22s var(--ease) both}
 
 /* ═══════════════════════════════════════════════
    TOAST
@@ -629,18 +724,41 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 @keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
 
 /* ═══════════════════════════════════════════════
-   RESPONSIVE — TABLET  (≤900px)
+   RESPONSIVE — TABLET  (≤1024px)
 ═══════════════════════════════════════════════ */
-@media(max-width:900px){
+@media(max-width:1024px){
   .marketing-layout{grid-template-columns:1fr}
   .inline-skel-mkt{grid-template-columns:1fr}
+  .skel-mkt-grid{grid-template-columns:1fr}
+
+  .tool-panel-left{position:static;top:auto}
   .tool-list{
     display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
   }
-  .tool-card-desc{padding-left:0}
-  .skel-mkt-grid{grid-template-columns:1fr}
+  .tool-card{
+    border-bottom:none;
+    border-right:1px solid var(--border);
+    flex-direction:column;align-items:flex-start;
+    padding:14px 14px;gap:8px;
+  }
+  .tool-card:last-child{border-right:none}
+  .tool-card::before{
+    left:0;top:0;right:0;bottom:auto;
+    width:auto;height:3px;
+    border-radius:0 0 3px 3px;
+  }
+  .tool-card-desc{display:none}
+  .tool-card-arrow{display:none}
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — SMALL TABLET  (≤768px)
+═══════════════════════════════════════════════ */
+@media(max-width:768px){
+  .tool-list{grid-template-columns:repeat(3,1fr)}
+  .field-row{grid-template-columns:1fr 1fr}
 }
 
 /* ═══════════════════════════════════════════════
@@ -660,16 +778,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   #page-skeleton{left:0;top:56px}
   .skel-body{padding:14px}
 
-  .tool-list{grid-template-columns:1fr;gap:7px}
+  .tool-list{grid-template-columns:repeat(2,1fr)}
+  .tool-card{padding:12px}
   .field-row{grid-template-columns:1fr}
+  .tone-chips{gap:5px}
+
+  .tool-panel-header{padding:16px 18px 14px;gap:12px}
+  .tool-panel-header-icon{width:40px;height:40px;font-size:19px}
+  .tool-panel-header h2{font-size:14.5px}
+  .tool-panel-body{padding:16px 18px}
 
   #toast-container{bottom:16px;padding:0 12px}
 }
 
-@media(max-width:400px){
-  .tool-card-top{gap:8px}
+@media(max-width:420px){
+  .tool-list{grid-template-columns:repeat(2,1fr)}
+  .tool-card-name{font-size:11.5px}
   .tool-card-icon{width:32px;height:32px;font-size:14px}
-  .tool-card-name{font-size:12.5px}
 }
 </style>
 
@@ -699,19 +824,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   <div class="skel-topbar">
     <div class="skel" style="height:14px;width:88px;border-radius:5px;"></div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <div class="skel" style="height:36px;width:164px;border-radius:var(--r-sm);opacity:.75;"></div>
+      <div class="skel" style="height:36px;width:170px;border-radius:var(--r-sm);opacity:.75;"></div>
       <div class="skel" style="height:36px;width:36px;border-radius:var(--r-sm);opacity:.5;"></div>
     </div>
   </div>
   <div class="skel-body">
+    <div class="skel-mkt-header">
+      <div class="skel" style="height:16px;width:180px;border-radius:5px;"></div>
+      <div class="skel" style="height:11px;width:280px;border-radius:4px;opacity:.6;"></div>
+    </div>
     <div class="skel-mkt-grid">
-      <div class="skel-tool-list">
-        <div class="skel skel-tool-card"></div>
-        <div class="skel skel-tool-card" style="opacity:.8"></div>
-        <div class="skel skel-tool-card" style="opacity:.6"></div>
-        <div class="skel skel-tool-card" style="opacity:.4"></div>
-      </div>
-      <div class="skel" style="height:520px;border-radius:var(--r-xl);opacity:.9;"></div>
+      <div class="skel skel-tool-list" style="height:420px;border-radius:var(--r-xl);"></div>
+      <div class="skel" style="height:560px;border-radius:var(--r-xl);opacity:.9;"></div>
     </div>
   </div>
 </div>
@@ -723,7 +847,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 <div class="sidebar" id="sidebar">
   <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
 
-  <!-- User skel -->
+  <!-- User skeleton -->
   <div class="sidebar-user-skel" id="sidebar-user-skel">
     <div class="skel" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
@@ -783,7 +907,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 
 <script>
 /* ════════════════════════════════════════════════
-   TOAST — inline fallback
+   UTILS
 ════════════════════════════════════════════════ */
 function toast(msg, type){
   type = type || 'success';
@@ -797,8 +921,16 @@ function toast(msg, type){
   setTimeout(() => { el.classList.add('fade-out'); el.addEventListener('animationend', () => el.remove()); }, 3200);
 }
 
+function openModal(id){ document.getElementById(id).classList.add('open') }
+function closeModal(id){ document.getElementById(id).classList.remove('open') }
+
+function setTopbarActions(html){
+  const el = document.getElementById('topbar-actions');
+  if(el) el.innerHTML = html;
+}
+
 /* ════════════════════════════════════════════════
-   THEME — light default
+   THEME
 ════════════════════════════════════════════════ */
 let _isDark = localStorage.getItem('ekart_theme') === 'dark';
 function applyTheme(dark){
@@ -840,34 +972,60 @@ function revealSidebarUser(){
 let currentStoreId = '';
 let currentTool    = 'instagram';
 let allProducts    = [];
+let allStores      = [];
+let selectedTone   = 'friendly';
 let _loadToken     = 0;
 
 const TOOLS = {
   instagram:{
     icon:'📸', name:'Instagram Post',
-    desc:'Captions, hashtags & story text for maximum engagement',
+    desc:'Captions + hashtags',
     help:'Generate scroll-stopping captions with trending hashtags for your products or store.',
-    badge:'Popular'
+    badge:'Popular',
+    label:'Post'
   },
   whatsapp:{
-    icon:'💬', name:'WhatsApp Broadcast',
-    desc:'Promotional messages for customer broadcasts',
-    help:'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.'
+    icon:'💬', name:'WhatsApp Blast',
+    desc:'Broadcast messages',
+    help:'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.',
+    label:'Message'
   },
   email:{
     icon:'📧', name:'Email Campaign',
-    desc:'Subject line + full email body copy',
-    help:'Generate a full email campaign with compelling subject line, preview text and body copy.'
+    desc:'Subject + full body',
+    help:'Generate a compelling email campaign with subject line, preview text and persuasive body copy.',
+    label:'Email'
   },
   sms:{
     icon:'📱', name:'SMS Blast',
-    desc:'Punchy 160-character promo texts',
-    help:'Short, conversion-optimized SMS messages that respect the 160-character limit.'
+    desc:'160-char promo texts',
+    help:'Short, punchy SMS messages optimized for the 160-character limit and high click-through.',
+    label:'SMS'
+  },
+  facebook:{
+    icon:'📘', name:'Facebook Ad',
+    desc:'Ad copy + CTA',
+    help:'Write high-converting Facebook and Instagram ad copy with headline, body text and call-to-action.',
+    label:'Ad'
+  },
+  product:{
+    icon:'🏷️', name:'Product Description',
+    desc:'SEO-ready copy',
+    help:'Write compelling, SEO-optimized product descriptions that sell and rank.',
+    label:'Description'
   }
 };
 
+const TONES = [
+  {key:'friendly',   label:'😊 Friendly'},
+  {key:'professional',label:'💼 Professional'},
+  {key:'urgent',     label:'🔥 Urgent'},
+  {key:'playful',    label:'🎉 Playful'},
+  {key:'luxurious',  label:'✨ Premium'},
+];
+
 /* ════════════════════════════════════════════════
-   STORE LOADING INDICATOR
+   STORE SELECTOR LOADING INDICATOR
 ════════════════════════════════════════════════ */
 function setStoreLoading(on){
   const w = document.getElementById('store-select-wrap');
@@ -875,17 +1033,12 @@ function setStoreLoading(on){
 }
 
 /* ════════════════════════════════════════════════
-   INLINE SKELETON for store switch
+   INLINE SKELETON (store switch)
 ════════════════════════════════════════════════ */
 function inlineSkeletonHTML(){
   return `
     <div class="inline-skel-mkt">
-      <div class="skel-tool-list">
-        <div class="skel skel-tool-card"></div>
-        <div class="skel skel-tool-card" style="opacity:.8"></div>
-        <div class="skel skel-tool-card" style="opacity:.6"></div>
-        <div class="skel skel-tool-card" style="opacity:.4"></div>
-      </div>
+      <div class="skel" style="height:420px;border-radius:var(--r-xl);"></div>
       <div class="skel" style="height:520px;border-radius:var(--r-xl);opacity:.9;"></div>
     </div>`;
 }
@@ -893,11 +1046,11 @@ function inlineSkeletonHTML(){
 /* ════════════════════════════════════════════════
    FADE HELPERS
 ════════════════════════════════════════════════ */
-const FADE_MS = 170;
+const FADE_MS = 160;
 function fadeOut(el){
   return new Promise(resolve => {
     el.style.transition = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`;
-    el.style.opacity = '0'; el.style.transform = 'translateY(-5px)';
+    el.style.opacity = '0'; el.style.transform = 'translateY(-4px)';
     el.style.pointerEvents = 'none';
     setTimeout(resolve, FADE_MS);
   });
@@ -925,9 +1078,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   currentStoreId = nav.currentStoreId;
   applyTheme(_isDark);
 
-  if(currentStoreId) await loadFirstLoad();
-  else {
-    renderPage();
+  if(currentStoreId){
+    await loadFirstLoad();
+  } else {
+    showNoStoreState();
     const c = document.getElementById('page-content');
     c.style.display = '';
     dismissSkeleton();
@@ -942,9 +1096,14 @@ async function loadFirstLoad(){
   const c = document.getElementById('page-content');
   setStoreLoading(true);
   try {
-    allProducts = await apiFetch(`/stores/${currentStoreId}/products`);
+    const [products, stores] = await Promise.allSettled([
+      apiFetch(`/stores/${currentStoreId}/products`),
+      apiFetch('/stores')
+    ]);
     if(token !== _loadToken) return;
-  } catch(_){ allProducts = []; }
+    allProducts = products.status === 'fulfilled' ? products.value : [];
+    allStores   = stores.status === 'fulfilled'   ? stores.value   : [];
+  } catch(_){ allProducts = []; allStores = []; }
   if(token !== _loadToken) return;
   renderPage();
   c.style.display = '';
@@ -969,8 +1128,13 @@ async function loadStoreData(){
   fadeIn(c);
 
   try {
-    allProducts = await apiFetch(`/stores/${currentStoreId}/products`);
-  } catch(_){ allProducts = []; }
+    const [products, stores] = await Promise.allSettled([
+      apiFetch(`/stores/${currentStoreId}/products`),
+      apiFetch('/stores')
+    ]);
+    allProducts = products.status === 'fulfilled' ? products.value : [];
+    allStores   = stores.status === 'fulfilled'   ? stores.value   : [];
+  } catch(_){ allProducts = []; allStores = []; }
   if(token !== _loadToken) return;
 
   await fadeOut(c);
@@ -978,6 +1142,19 @@ async function loadStoreData(){
   renderPage();
   fadeIn(c);
   setStoreLoading(false);
+}
+
+/* ════════════════════════════════════════════════
+   NO STORE STATE
+════════════════════════════════════════════════ */
+function showNoStoreState(){
+  const c = document.getElementById('page-content');
+  c.innerHTML = `
+    <div class="no-store-state">
+      <div class="no-store-icon">📣</div>
+      <div class="no-store-title">No store selected</div>
+      <div class="no-store-sub">Select or create a store from My Stores to start generating marketing content.</div>
+    </div>`;
 }
 
 /* ════════════════════════════════════════════════
@@ -990,23 +1167,42 @@ function renderPage(){
   ).join('');
 
   c.innerHTML = `
+    <div class="page-header">
+      <div class="page-header-title">AI Marketing Tools</div>
+      <div class="page-header-sub">Generate on-brand content for every channel in seconds — powered by AI.</div>
+    </div>
     <div class="marketing-layout">
-      <div class="tool-list" id="toolList">
-        ${Object.entries(TOOLS).map(([key,t]) => `
-          <div class="tool-card ${currentTool===key?'active':''}" onclick="switchTool('${key}')">
-            <div class="tool-card-top">
+      <div class="tool-panel-left">
+        <div class="tool-panel-left-header">
+          <div class="tool-panel-left-title">Choose a tool</div>
+        </div>
+        <div class="tool-list" id="toolList">
+          ${Object.entries(TOOLS).map(([key,t]) => `
+            <div class="tool-card ${currentTool===key?'active':''}" onclick="switchTool('${key}')" role="button" tabindex="0" aria-label="${t.name}">
               <div class="tool-card-icon">${t.icon}</div>
-              <div class="tool-card-name">${t.name}</div>
+              <div class="tool-card-text">
+                <div class="tool-card-name">${t.name}</div>
+                <div class="tool-card-desc">${t.desc}</div>
+              </div>
               ${t.badge ? `<span class="tool-card-badge">${t.badge}</span>` : ''}
-            </div>
-            <div class="tool-card-desc">${t.desc}</div>
-            <span class="tool-card-arrow">→</span>
-          </div>`).join('')}
+              <span class="tool-card-arrow">›</span>
+            </div>`).join('')}
+        </div>
       </div>
-      <div class="tool-panel" id="toolPanel">
+      <div class="tool-panel-right" id="toolPanel">
         ${renderToolPanel(productOptions)}
       </div>
     </div>`;
+
+  // Keyboard nav for tool cards
+  c.querySelectorAll('.tool-card').forEach(card => {
+    card.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        card.click();
+      }
+    });
+  });
 }
 
 /* ════════════════════════════════════════════════
@@ -1014,8 +1210,13 @@ function renderPage(){
 ════════════════════════════════════════════════ */
 function renderToolPanel(productOptions){
   const t = TOOLS[currentTool];
-  const hasOffer = currentTool === 'email' || currentTool === 'whatsapp';
-  const label = {instagram:'Post', email:'Email', sms:'SMS', whatsapp:'Message'}[currentTool] || 'Content';
+  const hasOffer   = ['email','whatsapp','facebook'].includes(currentTool);
+  const hasKeywords= currentTool === 'product';
+  const label = t.label || 'Content';
+
+  const toneChips = TONES.map(tone =>
+    `<button class="tone-chip ${selectedTone===tone.key?'active':''}" onclick="setTone('${tone.key}',this)">${tone.label}</button>`
+  ).join('');
 
   return `
     <div class="tool-panel-header">
@@ -1026,31 +1227,27 @@ function renderToolPanel(productOptions){
       </div>
     </div>
     <div class="tool-panel-body">
+
       <div class="field">
         <label>Campaign Goal <span style="color:var(--red);font-size:11px;">*</span></label>
         <input type="text" id="mktGoal"
-          placeholder="e.g. Promote summer sale, Announce new product, Drive store traffic…"
-          oninput="clearResultOnChange()">
+          placeholder="${goalPlaceholder()}"
+          onkeydown="if(event.key==='Enter')generateMarketing()">
       </div>
 
-      <div class="field-row">
-        <div class="field">
-          <label>Product <span class="opt">(optional)</span></label>
-          <select id="mktProduct">
-            <option value="">General / All Products</option>
-            ${productOptions}
-          </select>
-        </div>
-        <div class="field">
-          <label>Tone</label>
-          <select id="mktTone">
-            <option value="friendly">😊 Friendly &amp; Warm</option>
-            <option value="professional">💼 Professional</option>
-            <option value="urgent">🔥 Urgent / FOMO</option>
-            <option value="playful">🎉 Playful &amp; Fun</option>
-            <option value="luxurious">✨ Premium &amp; Luxurious</option>
-          </select>
-        </div>
+      ${allProducts.length ? `
+      <div class="field">
+        <label>Product <span class="opt">(optional)</span></label>
+        <select id="mktProduct">
+          <option value="">— General / All Products</option>
+          ${productOptions}
+        </select>
+      </div>` : ''}
+
+      <div class="field">
+        <label>Tone</label>
+        <div class="tone-chips" id="toneChips">${toneChips}</div>
+        <input type="hidden" id="mktTone" value="${selectedTone}">
       </div>
 
       ${hasOffer ? `
@@ -1060,17 +1257,58 @@ function renderToolPanel(productOptions){
           placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal">
       </div>` : ''}
 
+      ${hasKeywords ? `
+      <div class="field">
+        <label>SEO Keywords <span class="opt">(optional)</span></label>
+        <input type="text" id="mktKeywords"
+          placeholder="e.g. handmade, organic cotton, sustainable fashion">
+        <div class="field-hint">Comma-separated keywords to target in the description.</div>
+      </div>` : ''}
+
       <div class="field">
         <label>Brand / Store Name</label>
-        <input type="text" id="mktBrand" placeholder="Your store or brand name">
+        <input type="text" id="mktBrand" placeholder="Your store or brand name" value="${getStoreName()}">
       </div>
 
       <button class="btn-generate" onclick="generateMarketing()" id="mktGenBtn">
         <span class="sparkle">✨</span> Generate ${label}
       </button>
 
-      <div id="mktResult"></div>
+      <div id="mktResult">
+        <div class="empty-panel">
+          <div class="empty-panel-icon">${t.icon}</div>
+          <div class="empty-panel-text">Ready to generate</div>
+          <div class="empty-panel-sub">Fill in the fields above and hit Generate</div>
+        </div>
+      </div>
     </div>`;
+}
+
+function goalPlaceholder(){
+  const map = {
+    instagram: 'e.g. Promote summer sale, Announce new arrivals…',
+    whatsapp:  'e.g. Flash sale this weekend, New product launch…',
+    email:     'e.g. Monthly newsletter, Re-engage inactive customers…',
+    sms:       'e.g. 48-hour sale, Limited stock alert…',
+    facebook:  'e.g. Drive store traffic, Retarget cart abandoners…',
+    product:   'e.g. Describe this product for my store listing…',
+  };
+  return map[currentTool] || 'e.g. Promote summer sale, Announce new product…';
+}
+
+function getStoreName(){
+  const s = allStores.find(x => x._id === currentStoreId);
+  return s ? s.name : '';
+}
+
+/* ════════════════════════════════════════════════
+   TONE SELECTION
+════════════════════════════════════════════════ */
+function setTone(tone, btn){
+  selectedTone = tone;
+  document.getElementById('mktTone').value = tone;
+  document.querySelectorAll('#toneChips .tone-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
 }
 
 /* ════════════════════════════════════════════════
@@ -1079,25 +1317,29 @@ function renderToolPanel(productOptions){
 function switchTool(tool){
   if(currentTool === tool) return;
   currentTool = tool;
-  document.querySelectorAll('.tool-card').forEach((card, i) => {
-    card.classList.toggle('active', Object.keys(TOOLS)[i] === tool);
+
+  document.querySelectorAll('.tool-card').forEach(card => {
+    const key = card.getAttribute('onclick').match(/'(\w+)'/)?.[1];
+    card.classList.toggle('active', key === tool);
   });
+
   const productOptions = allProducts.map(p =>
     `<option value="${p._id}">${p.name}</option>`
   ).join('');
+
   const panel = document.getElementById('toolPanel');
-  panel.style.transition = 'opacity .12s ease';
+  panel.style.transition = 'opacity .12s ease, transform .12s ease';
   panel.style.opacity = '0';
+  panel.style.transform = 'translateY(4px)';
+
   setTimeout(() => {
     panel.innerHTML = renderToolPanel(productOptions);
+    panel.style.transition = 'opacity .18s ease, transform .18s ease';
     panel.style.opacity = '1';
-  }, 120);
-  // Close sidebar on mobile after tool selection
-  if(window.innerWidth <= 648) closeMobileSidebar();
-}
+    panel.style.transform = 'translateY(0)';
+  }, 130);
 
-function clearResultOnChange(){
-  // Only clear if there are results (avoid jarring on first type)
+  if(window.innerWidth <= 648) closeMobileSidebar();
 }
 
 /* ════════════════════════════════════════════════
@@ -1108,37 +1350,50 @@ async function generateMarketing(){
   const goal = document.getElementById('mktGoal').value.trim();
   if(!goal) return toast('Enter a campaign goal first', 'error');
 
-  const btn = document.getElementById('mktGenBtn');
-  const resultEl = document.getElementById('mktResult');
-  const label = {instagram:'Post',email:'Email',sms:'SMS',whatsapp:'Message'}[currentTool] || 'Content';
+  const btn     = document.getElementById('mktGenBtn');
+  const resultEl= document.getElementById('mktResult');
+  const t       = TOOLS[currentTool];
+  const label   = t.label || 'Content';
 
   btn.disabled = true;
   btn.innerHTML = `<span style="display:inline-block;animation:spin .7s linear infinite">⏳</span> Generating…`;
-  resultEl.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
+
+  resultEl.innerHTML = `
+    <div class="generating-state">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="generating-bar"><div class="generating-bar-fill"></div></div>
+      <div class="generating-label">Crafting your ${label.toLowerCase()}…</div>
+    </div>`;
 
   const productId = document.getElementById('mktProduct')?.value || '';
   const product   = allProducts.find(p => p._id === productId);
-  const tone      = document.getElementById('mktTone').value;
+  const tone      = document.getElementById('mktTone')?.value || selectedTone;
   const offer     = document.getElementById('mktOffer')?.value.trim() || '';
+  const keywords  = document.getElementById('mktKeywords')?.value.trim() || '';
   const brand     = document.getElementById('mktBrand').value.trim();
 
   try {
-    const stores = await apiFetch('/stores');
+    const stores = allStores.length ? allStores : await apiFetch('/stores');
     const store  = stores.find(s => s._id === currentStoreId);
+
+    const bodyPayload = {
+      store_name:          brand || store?.name || 'My Store',
+      product_name:        product ? product.name : goal,
+      product_description: [
+        product?.description || '',
+        offer ? 'Offer: ' + offer : '',
+        keywords ? 'Keywords: ' + keywords : '',
+        !product ? goal : ''
+      ].filter(Boolean).join('. '),
+      platform:    currentTool,
+      tone,
+      currency:    store?.currency || 'INR',
+      price:       product ? product.price : ''
+    };
 
     const r = await apiFetch('/ai/marketing-content', {
       method:'POST',
-      body: JSON.stringify({
-        store_name:          brand || store?.name || 'My Store',
-        product_name:        product ? product.name : goal,
-        product_description: product
-          ? (product.description || '') + (offer ? ' Offer: ' + offer : '')
-          : (offer || goal),
-        platform:    currentTool,
-        tone,
-        currency:    'INR',
-        price:       product ? product.price : ''
-      })
+      body: JSON.stringify(bodyPayload)
     });
 
     const allContent = r.content;
@@ -1147,11 +1402,22 @@ async function generateMarketing(){
     else if(currentTool==='whatsapp')  content = allContent.whatsapp  || allContent;
     else if(currentTool==='email')     content = allContent.email     || allContent;
     else if(currentTool==='sms')       content = { message: allContent.sms || allContent.message || '' };
+    else if(currentTool==='facebook')  content = allContent.facebook  || allContent;
+    else if(currentTool==='product')   content = allContent.product   || allContent;
     else                               content = allContent;
 
     renderResult(content);
+    saveToHistory(currentTool, goal, content);
+
   } catch(e){
-    resultEl.innerHTML = `<div style="padding:14px;color:var(--red);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;">⚠️ ${e.message}</div>`;
+    resultEl.innerHTML = `
+      <div style="margin-top:16px;padding:14px 16px;
+        background:var(--red-dim);border:1px solid rgba(224,82,82,0.2);
+        border-radius:var(--r-sm);
+        color:var(--red);font-size:12.5px;font-weight:600;
+        display:flex;align-items:center;gap:8px;">
+        ⚠️ ${e.message || 'Something went wrong. Please try again.'}
+      </div>`;
   }
 
   btn.disabled = false;
@@ -1164,65 +1430,146 @@ async function generateMarketing(){
 function renderResult(content){
   const res = document.getElementById('mktResult');
   if(!content){
-    res.innerHTML = '<p style="color:var(--red);padding-top:12px;font-size:12.5px;">No content generated.</p>';
+    res.innerHTML = '<p style="color:var(--red);padding-top:14px;font-size:12.5px;">No content was generated. Please try again.</p>';
     return;
   }
 
   let html = '<div class="mkt-results">';
+  let allText = [];
 
   if(currentTool === 'instagram'){
+    const caption  = content.caption || content.text || '';
+    const story    = content.story_text || '';
     const hashtags = content.hashtags || [];
-    html += resultBlock('📸 Caption', content.caption || content.text || '', 'instaCaption');
+    html += resultBlock('📸 Caption', caption, 'instaCaption');
+    allText.push(caption);
+
     if(hashtags.length){
+      const hashStr = hashtags.map(h => h.startsWith('#') ? h : '#'+h).join(' ');
+      allText.push(hashStr);
       html += `<div class="result-block">
         <div class="result-block-header">
-          <span class="result-block-title">🏷️ Hashtags</span>
-          <button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw',this)">📋 Copy all</button>
+          <span class="result-block-title">🏷️ Hashtags (${hashtags.length})</span>
+          <div class="result-actions">
+            <button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw',this)">📋 Copy all</button>
+          </div>
         </div>
         <div class="result-body">
-          <div id="instaHashtagsRaw" style="display:none;">${hashtags.map(h=>h.startsWith('#')?h:'#'+h).join(' ')}</div>
+          <div id="instaHashtagsRaw" style="display:none;">${hashStr}</div>
           <div class="insta-hashtags">${hashtags.map(h=>`<span class="hashtag">${h.startsWith('#')?h:'#'+h}</span>`).join('')}</div>
         </div>
       </div>`;
     }
-    if(content.story_text) html += resultBlock('📱 Story Text', content.story_text, 'storyText');
+    if(story){ html += resultBlock('📱 Story Text', story, 'storyText'); allText.push(story); }
 
   } else if(currentTool === 'whatsapp'){
-    html += resultBlock('💬 Message', content.message || content.text || '', 'waMsg');
-    if(content.cta) html += resultBlock('🔗 Call-to-Action', content.cta, 'waCta');
+    const msg = content.message || content.text || '';
+    const cta = content.cta || '';
+    html += resultBlock('💬 Message', msg, 'waMsg');
+    allText.push(msg);
+    if(cta){ html += resultBlock('🔗 Call-to-Action', cta, 'waCta'); allText.push(cta); }
 
   } else if(currentTool === 'email'){
+    const subject   = content.subject || '';
+    const preheader = content.preheader || '';
+    const body      = content.body || content.text || '';
+    allText = [subject, preheader, body].filter(Boolean);
+
     html += `<div class="result-block">
       <div class="result-block-header">
         <span class="result-block-title">📌 Subject Line</span>
-        <button class="result-copy-btn" onclick="copyBlock('emailSubject',this)">📋 Copy</button>
+        <div class="result-actions">
+          <button class="result-copy-btn" onclick="copyBlock('emailSubject',this)">📋 Copy</button>
+        </div>
       </div>
       <div class="result-body">
-        <div class="email-subject-text" id="emailSubject">${content.subject || ''}</div>
+        <div class="email-subject-text" id="emailSubject">${subject}</div>
       </div>
     </div>`;
-    if(content.preheader) html += resultBlock('👁️ Preview Text', content.preheader, 'emailPreheader');
-    html += resultBlock('📧 Email Body', content.body || content.text || '', 'emailBody');
+    if(preheader) html += resultBlock('👁️ Preview Text', preheader, 'emailPreheader');
+    html += resultBlock('📧 Email Body', body, 'emailBody');
 
   } else if(currentTool === 'sms'){
     const msg = content.message || content.text || '';
     const len = msg.length;
     const cls  = len > 160 ? 'over' : len > 140 ? 'warn' : 'ok';
     const icon = len > 160 ? '⚠️' : len > 140 ? '⚡' : '✓';
-    const note = len > 160 ? ' — Too long!' : len > 140 ? ' — Near limit' : ' — Good';
+    const note = len > 160 ? ` — ${len-160} chars over limit` : len > 140 ? ' — Near limit' : ' — Good length';
+    allText.push(msg);
     html += `<div class="result-block">
       <div class="result-block-header">
         <span class="result-block-title">📱 SMS Message</span>
-        <button class="result-copy-btn" onclick="copyBlock('smsMsg',this)">📋 Copy</button>
+        <div class="result-actions">
+          <button class="result-copy-btn" onclick="copyBlock('smsMsg',this)">📋 Copy</button>
+        </div>
       </div>
       <div class="result-body">
         <div class="result-content" id="smsMsg">${msg}</div>
         <div class="char-counter ${cls}">${icon} ${len} / 160 characters${note}</div>
       </div>
     </div>`;
+
+  } else if(currentTool === 'facebook'){
+    const headline = content.headline || '';
+    const body     = content.body || content.text || '';
+    const cta      = content.cta || '';
+    allText = [headline, body, cta].filter(Boolean);
+
+    if(headline) html += `<div class="result-block">
+      <div class="result-block-header">
+        <span class="result-block-title">📌 Headline</span>
+        <div class="result-actions">
+          <button class="result-copy-btn" onclick="copyBlock('fbHeadline',this)">📋 Copy</button>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="email-subject-text" id="fbHeadline">${headline}</div>
+      </div>
+    </div>`;
+    html += resultBlock('📘 Ad Copy', body, 'fbBody');
+    if(cta) html += resultBlock('🔗 CTA Button Text', cta, 'fbCta');
+
+  } else if(currentTool === 'product'){
+    const desc   = content.description || content.text || '';
+    const short  = content.short_description || '';
+    const bullet = content.bullet_points || [];
+    allText = [desc];
+
+    html += resultBlock('🏷️ Full Description', desc, 'prodDesc');
+    if(short) html += resultBlock('📝 Short Description', short, 'prodShort');
+    if(bullet.length){
+      allText.push(bullet.join('\n'));
+      html += `<div class="result-block">
+        <div class="result-block-header">
+          <span class="result-block-title">✅ Key Features</span>
+          <div class="result-actions">
+            <button class="result-copy-btn" onclick="copyBlock('prodBulletsRaw',this)">📋 Copy</button>
+          </div>
+        </div>
+        <div class="result-body">
+          <div id="prodBulletsRaw" style="display:none;">${bullet.join('\n')}</div>
+          <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+            ${bullet.map(b=>`<li style="font-size:13px;color:var(--text-2);line-height:1.6;">${b}</li>`).join('')}
+          </ul>
+        </div>
+      </div>`;
+    }
   }
 
-  html += '</div>';
+  // Copy all bar
+  if(allText.length > 1){
+    html += `</div>
+    <div class="copy-all-bar">
+      <span class="copy-all-text">📋 Copy everything to clipboard</span>
+      <button class="copy-all-btn" onclick="copyAllContent(${JSON.stringify(allText.join('\n\n')).replace(/'/g,'&#39;')})">
+        Copy All
+      </button>
+    </div>
+    <div id="__allText" style="display:none;">${allText.join('\n\n')}</div>`;
+  } else {
+    html += '</div>';
+  }
+
   res.innerHTML = html;
 }
 
@@ -1230,7 +1577,9 @@ function resultBlock(title, text, id){
   return `<div class="result-block">
     <div class="result-block-header">
       <span class="result-block-title">${title}</span>
-      <button class="result-copy-btn" onclick="copyBlock('${id}',this)">📋 Copy</button>
+      <div class="result-actions">
+        <button class="result-copy-btn" onclick="copyBlock('${id}',this)">📋 Copy</button>
+      </div>
     </div>
     <div class="result-body">
       <div class="result-content" id="${id}">${text}</div>
@@ -1239,18 +1588,38 @@ function resultBlock(title, text, id){
 }
 
 /* ════════════════════════════════════════════════
-   COPY TO CLIPBOARD
+   COPY
 ════════════════════════════════════════════════ */
 function copyBlock(id, btn){
   const el = document.getElementById(id);
   if(!el) return;
-  navigator.clipboard.writeText(el.textContent)
+  navigator.clipboard.writeText(el.textContent.trim())
     .then(() => {
-      btn.textContent = '✓ Copied!';
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copied!';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
     })
     .catch(() => toast('Could not copy to clipboard', 'error'));
+}
+
+function copyAllContent(text){
+  navigator.clipboard.writeText(text)
+    .then(() => toast('All content copied to clipboard!', 'success'))
+    .catch(() => toast('Could not copy to clipboard', 'error'));
+}
+
+/* ════════════════════════════════════════════════
+   HISTORY (localStorage, last 10)
+════════════════════════════════════════════════ */
+const HISTORY_KEY = 'ekart_mkt_history';
+
+function saveToHistory(tool, goal, content){
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    history.unshift({ tool, goal, content, ts: Date.now() });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+  } catch(_){}
 }
 
 /* ════════════════════════════════════════════════
@@ -1273,6 +1642,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if(window.innerWidth <= 648) closeMobileSidebar();
     });
   });
+});
+
+/* ════════════════════════════════════════════════
+   KEYBOARD SHORTCUT — Escape
+════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeMobileSidebar();
 });
 </script>
 </body>
