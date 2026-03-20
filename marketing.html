@@ -231,24 +231,54 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
 }
 .theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
+/* Desktop store selector — matches Merchant Corner style exactly */
 .store-select-wrap{
-  display:flex;align-items:center;gap:6px;padding:0 10px;height:36px;
-  border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border-md);transition:var(--t);
+  display:flex;align-items:center;gap:0;
+  height:36px;border-radius:20px;
+  background:var(--surface);
+  border:1px solid var(--border-md);
+  transition:var(--t);
+  overflow:hidden;
+  position:relative;
 }
+.store-select-wrap:hover{border-color:var(--border-lg);box-shadow:var(--sh-sm)}
 .store-select-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-.store-select-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-3);white-space:nowrap}
+
+/* "STORE" label tab on the left */
+.store-select-label{
+  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--text-3);white-space:nowrap;
+  padding:0 10px;
+  height:100%;display:flex;align-items:center;
+  border-right:1px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+
+/* Wrapper for select + chevron */
+.store-selector-inner{
+  display:flex;align-items:center;gap:4px;
+  padding:0 10px 0 11px;height:100%;flex:1;min-width:0;
+}
 .store-selector{
   background:none;border:none;outline:none;font-family:var(--font);
-  font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;max-width:180px;
+  font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;
+  max-width:160px;
+  /* hide native arrow */
+  -webkit-appearance:none;appearance:none;
+  flex:1;min-width:0;
 }
 .store-selector option{background:var(--surface);color:var(--text)}
+.store-select-chevron{
+  font-size:10px;color:var(--text-3);flex-shrink:0;pointer-events:none;
+  line-height:1;
+}
 @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
-.store-loading{position:relative}
-.store-loading::after{
-  content:'';position:absolute;right:-20px;top:50%;transform:translateY(-50%);
-  width:14px;height:14px;border-radius:50%;
+.store-loading .store-select-chevron{display:none}
+.store-loading .store-selector-inner::after{
+  content:'';display:block;width:13px;height:13px;border-radius:50%;flex-shrink:0;
   border:2px solid rgba(124,111,255,0.25);border-top-color:var(--accent);
-  animation:spin .65s linear infinite;pointer-events:none;
+  animation:spin .65s linear infinite;
 }
 
 /* ══ PAGE HEADER ══ */
@@ -663,7 +693,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="topbar-right">
       <div class="store-select-wrap" id="store-select-wrap">
         <span class="store-select-label">Store</span>
-        <select class="store-selector" id="store-selector"></select>
+        <div class="store-selector-inner">
+          <select class="store-selector" id="store-selector"></select>
+          <span class="store-select-chevron">›</span>
+        </div>
       </div>
       <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
       <div id="topbar-actions"></div>
