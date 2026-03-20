@@ -286,65 +286,76 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .mob-logo span { color: var(--accent); }
 
 /* ══════════════════════════════════════════════════════════
-   STORE PILL — shared tokens used by BOTH desktop & mobile
+   STORE PILL — single source of truth for desktop + mobile
+   Target: segmented rounded-rect with grey STORE badge
 ══════════════════════════════════════════════════════════ */
-:root {
-  --pill-h:           36px;
-  --pill-label-px:    12px;
-  --pill-label-fs:    9.5px;
-  --pill-label-ls:    0.12em;
-  --pill-select-fs:   12.5px;
-  --pill-select-px:   12px;
-  --pill-chevron:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4.5 4.5L9 1' stroke='%239EA3BB' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
 
 /* Base pill container */
 .store-pill {
-  display: flex; align-items: center;
-  height: var(--pill-h);
-  border: 1px solid var(--border-md);
-  border-radius: 50px;
+  display: inline-flex; align-items: center;
+  height: 44px;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 14px;
   overflow: hidden;
   background: var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   transition: border-color .15s, box-shadow .15s;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .store-pill {
+  border-color: rgba(255,255,255,0.10);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.3);
 }
 .store-pill:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  box-shadow: 0 0 0 3px var(--accent-dim), 0 1px 4px rgba(0,0,0,0.06);
 }
 
-/* Left badge */
+/* Left "STORE" badge */
 .store-pill-label {
   display: flex; align-items: center; justify-content: center;
-  padding: 0 var(--pill-label-px);
+  padding: 0 14px;
   height: 100%;
-  background: var(--surface-3);
-  border-right: 1px solid var(--border-md);
-  font-size: var(--pill-label-fs); font-weight: 800;
-  text-transform: uppercase; letter-spacing: var(--pill-label-ls);
-  color: var(--text-3);
+  background: #E8EBF5;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  font-family: var(--font);
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.13em;
+  color: #9EA3BB;
   flex-shrink: 0; white-space: nowrap; user-select: none;
 }
+[data-theme="dark"] .store-pill-label {
+  background: #1A1E2E;
+  border-right-color: rgba(255,255,255,0.08);
+  color: var(--text-3);
+}
 
-/* Native select inside pill */
+/* Native select — right side of pill */
 .store-pill-select {
   background: none; border: none; outline: none;
   font-family: var(--font);
-  font-size: var(--pill-select-fs); font-weight: 600;
+  font-size: 13.5px; font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  padding: 0 28px 0 var(--pill-select-px);
+  padding: 0 34px 0 14px;
   height: 100%;
-  min-width: 90px; max-width: 180px;
+  min-width: 100px; max-width: 190px;
   appearance: none; -webkit-appearance: none;
-  background-image: var(--pill-chevron);
+  /* chevron SVG — matches screenshot ˅ */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%239EA3BB' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 12px center;
 }
 .store-pill-select option { background: var(--surface); color: var(--text); }
 
-/* Mobile wrapper keeps pill constrained */
-.mob-store-wrap { max-width: 200px; }
+/* Mobile: keep pill from overflowing small screens */
+.mob-store-wrap {
+  max-width: 210px;
+  /* slightly smaller on mobile topbar */
+  height: 40px !important;
+}
+.mob-store-wrap .store-pill-label { padding: 0 11px; font-size: 9.5px; }
+.mob-store-wrap .store-pill-select { font-size: 13px; padding: 0 30px 0 11px; min-width: 80px; }
 
 /* ══════════════════════════════════════════════════════════
    MAIN WRAP + TOPBAR
@@ -365,14 +376,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .topbar-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
 .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-/* ══════════════════════════════════════════════════════════
-   STORE SELECTOR — desktop topbar uses shared pill classes
-══════════════════════════════════════════════════════════ */
-/* aliases so nav.js / existing JS selectors still work */
-.store-select-wrap  { /* extends .store-pill via HTML class */ }
-.store-select-label { /* extends .store-pill-label via HTML class */ }
-.store-selector     { /* extends .store-pill-select via HTML class */ }
 
 /* ── Theme toggle ── */
 .theme-toggle {
@@ -902,14 +905,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
   .chat-input { font-size: 13px; }
   .chat-send-btn, .chat-mic-btn-solo { width: 40px; height: 40px; }
   .lang-btn { height: 40px; min-width: 52px; }
-  /* shrink pill slightly on very small phones */
-  :root {
-    --pill-h: 32px;
-    --pill-label-px: 9px;
-    --pill-select-fs: 11.5px;
-    --pill-select-px: 9px;
-  }
-  .mob-store-wrap { max-width: 165px; }
+  .mob-store-wrap { max-width: 150px !important; }
+  .mob-store-wrap .store-pill-select { min-width: 60px; font-size: 12px; }
 }
 </style>
 
