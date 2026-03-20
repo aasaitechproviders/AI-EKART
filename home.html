@@ -924,11 +924,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 </style>
 
-<!-- Inline theme init: light is default -->
+<!-- Theme init: light default; dark only if explicitly saved -->
 <script>
-(function(){
+;(function(){
+  var p = new URLSearchParams(location.search), t = p.get('token');
+  if(t){ localStorage.setItem('ekart_token', t); history.replaceState({},'','/home.html'); }
   var saved = localStorage.getItem('ekart_theme');
-  // Default is light; only go dark if explicitly saved as dark
   if(saved === 'dark'){
     document.documentElement.setAttribute('data-theme','dark');
     document.documentElement.style.background = '#07080D';
@@ -938,70 +939,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   }
 })();
 </script>
-<!-- Stub api.js + nav.js so page works standalone -->
-<script>
-// ── Stub API & Nav (replace with real api.js / nav.js) ──
-const API = 'https://api.example.com';
-function getToken(){return localStorage.getItem('ekart_token')||'demo-token'}
-
-async function apiFetch(path, opts={}){
-  // Demo data — replace with real fetch
-  if(path==='/stores') return demoStores();
-  if(path.includes('/analytics')) return {total_revenue:Math.random()*50000,total_orders:Math.floor(Math.random()*200),today_orders:Math.floor(Math.random()*15)};
-  if(path.includes('/verify-domain')) return {connected:false};
-  if(path.includes('/publish')) return {url:'https://ekart.example.com/store'};
-  return {};
-}
-
-function demoStores(){
-  return [
-    {_id:'s1',name:'Trendy Threads',slug:'trendy-threads',tagline:'Fashion for everyone',description:'Premium clothing store',contact_email:'hello@trendythreads.com',phone:'+91 98765 43210',currency:'INR',brand_color:'#7C6FFF',card_style:'grid',published:true,published_url:'https://ekart.example.com/trendy-threads',product_count:48,custom_domain:'shop.trendythreads.com',domain_status:'connected'},
-    {_id:'s2',name:'Gourmet Bites',slug:'gourmet-bites',tagline:'Taste the difference',description:'Artisan food & snacks',contact_email:'info@gourmetbites.in',phone:'+91 91234 56789',currency:'INR',brand_color:'#F5A523',card_style:'list',published:true,published_url:'https://ekart.example.com/gourmet-bites',product_count:22,custom_domain:'gourmetbites.shop',domain_status:'pending'},
-    {_id:'s3',name:'TechGadgets Pro',slug:'techgadgets-pro',tagline:'Gadgets you love',description:'Latest tech accessories',contact_email:'support@techgadgets.in',currency:'INR',brand_color:'#2DD4A0',card_style:'magazine',published:false,product_count:11,custom_domain:'',domain_status:''},
-    {_id:'s4',name:'HomeStyle',slug:'homestyle',tagline:'Beautiful homes',description:'Home décor & furniture',contact_email:'hello@homestyle.in',currency:'INR',brand_color:'#F26B6B',card_style:'minimal',published:true,published_url:'https://ekart.example.com/homestyle',product_count:67,custom_domain:'',domain_status:''},
-  ];
-}
-
-async function renderNav(page){
-  // Stub user
-  const user={email:'merchant@example.com',name:'Ravi Merchant'};
-  // Populate sidebar user
-  const av=document.getElementById('nav-avatar');
-  const nm=document.getElementById('nav-user-name');
-  const em=document.getElementById('nav-user-email');
-  if(av) av.textContent=user.name.slice(0,2).toUpperCase();
-  if(nm) nm.textContent=user.name;
-  if(em) em.textContent=user.email;
-  return {user};
-}
-
-function setTopbarActions(html){
-  const el=document.getElementById('topbar-actions');
-  if(el) el.innerHTML=html;
-}
-
-function openModal(id){
-  const el=document.getElementById(id);
-  if(el){el.classList.add('open');document.body.style.overflow='hidden';}
-}
-function closeModal(id){
-  const el=document.getElementById(id);
-  if(el){el.classList.remove('open');document.body.style.overflow='';}
-}
-function logout(){localStorage.removeItem('ekart_token');location.href='login.html';}
-
-// Toast system
-function toast(msg,type='success'){
-  let c=document.getElementById('toast-container');
-  if(!c){c=document.createElement('div');c.id='toast-container';document.body.appendChild(c);}
-  const t=document.createElement('div');
-  t.className='toast '+(type||'success');
-  const icon=type==='error'?'✕':type==='info'?'ℹ':type==='warning'?'⚠':'✓';
-  t.innerHTML=`<span style="font-size:14px;">${icon}</span><span>${msg}</span>`;
-  c.appendChild(t);
-  setTimeout(()=>{t.classList.add('fade-out');t.addEventListener('animationend',()=>t.remove())},3200);
-}
-</script>
+<script src="api.js"></script>
+<script src="nav.js"></script>
 </head>
 <body>
 
@@ -1253,6 +1192,22 @@ function toast(msg,type='success'){
 </div>
 
 <script>
+/* ════════════════════════════════════════════════
+   TOAST — inline, works even if api.js omits it
+════════════════════════════════════════════════ */
+function toast(msg, type){
+  type = type || 'success';
+  if(typeof window._toast === 'function') return window._toast(msg, type); // delegate if api.js defines one
+  let c = document.getElementById('toast-container');
+  if(!c){ c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icons = {success:'✓', error:'✕', info:'ℹ', warning:'⚠'};
+  el.innerHTML = '<span style="font-size:14px;">'+(icons[type]||'✓')+'</span><span>'+msg+'</span>';
+  c.appendChild(el);
+  setTimeout(() => { el.classList.add('fade-out'); el.addEventListener('animationend', () => el.remove()); }, 3200);
+}
+
 /* ════════════════════════════════════════════════
    THEME — light is default
 ════════════════════════════════════════════════ */
