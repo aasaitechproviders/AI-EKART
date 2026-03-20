@@ -148,22 +148,70 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;}
 .mob-logo span{color:var(--accent)}
 
-/* Mobile store pill selector — icon & chevron removed */
+/* ── Mobile store selector — matches Merchant Corner style ── */
 .mob-store-sel{
+  display:none; /* shown via JS */
+  align-items:center;gap:0;
+  height:34px;
+  border-radius:var(--r-sm);
+  border:1px solid var(--border-md);
+  background:var(--surface-2);
+  cursor:pointer;
+  transition:var(--t);
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+  max-width:180px;
+}
+.mob-store-sel:hover{
+  border-color:var(--accent);
+  background:var(--accent-dim);
+}
+/* "STORE" label pill on the left */
+.mob-store-label{
   display:flex;align-items:center;
-  height:30px;padding:0 12px;
-  border-radius:20px;border:1px solid var(--border-md);
-  background:var(--surface-2);cursor:pointer;
-  transition:var(--t);flex-shrink:0;position:relative;
-  max-width:140px;
+  padding:0 8px 0 10px;
+  height:100%;
+  font-size:9px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text-3);
+  border-right:1px solid var(--border-md);
+  white-space:nowrap;
+  flex-shrink:0;
+  background:var(--surface-3);
+  transition:var(--t);
 }
-.mob-store-sel:hover{border-color:var(--accent);background:var(--accent-dim);}
+.mob-store-sel:hover .mob-store-label{
+  background:transparent;
+  color:var(--accent);
+  border-right-color:rgba(124,111,255,0.2);
+}
+/* store name + chevron on the right */
+.mob-store-right{
+  display:flex;align-items:center;gap:4px;
+  padding:0 8px 0 9px;
+  min-width:0;flex:1;
+}
 .mob-store-name{
-  font-size:11.5px;font-weight:700;color:var(--text);letter-spacing:-0.01em;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;
+  font-size:12px;font-weight:700;color:var(--text);letter-spacing:-0.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100px;
 }
+.mob-store-sel:hover .mob-store-name{color:var(--accent)}
+.mob-store-chevron{
+  flex-shrink:0;
+  display:flex;align-items:center;
+}
+.mob-store-chevron svg{
+  width:10px;height:10px;
+  stroke:var(--text-3);stroke-width:2.5;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+  transition:var(--t);
+}
+.mob-store-sel:hover .mob-store-chevron svg{stroke:var(--accent)}
+/* Invisible native select overlay for interaction */
 .mob-store-sel select{
-  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;font-size:16px;
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+  width:100%;height:100%;font-size:16px;
 }
 
 
@@ -516,6 +564,8 @@ tr:hover td{background:rgba(124,111,255,0.03);}
   .stats-row{grid-template-columns:1fr 1fr;}
   .store-sel-label{display:none;}
   .store-selector{min-width:110px;}
+  /* keep the store label visible even on very small screens */
+  .mob-store-label{display:flex;}
 }
 </style>
 <script>
@@ -547,9 +597,17 @@ tr:hover td{background:rgba(124,111,255,0.03);}
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
   <div class="mob-right">
-    <!-- Store name only — no icon or chevron -->
-    <div class="mob-store-sel" id="mob-store-sel" style="display:none;" title="Switch store">
-      <span class="mob-store-name" id="mob-store-name">Store</span>
+    <!-- Store selector — matches Merchant Corner style exactly -->
+    <div class="mob-store-sel" id="mob-store-sel" title="Switch store">
+      <span class="mob-store-label">Store</span>
+      <div class="mob-store-right">
+        <span class="mob-store-name" id="mob-store-name">Store</span>
+        <span class="mob-store-chevron">
+          <svg viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </span>
+      </div>
       <select id="mob-store-selector" onchange="onStoreChange(this.value)"></select>
     </div>
     <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" style="width:32px;height:32px;font-size:14px;">&#9728;&#65039;</button>
@@ -1086,6 +1144,7 @@ function buildStoreSelector(stores, activeId){
   // Mobile pill selector
   if(mobWrap) mobWrap.style.display='flex';
   if(mobSel)  mobSel.innerHTML = opts;
+
   // Show active store name in the pill
   const active = stores.find(s=>s._id===activeId) || stores[0];
   if(mobName && active) mobName.textContent = active.name;
@@ -1222,7 +1281,6 @@ async function loadTransactions(){
     notCfg.style.display='';content.style.display='none';return;
   }
   notCfg.style.display='none';content.style.display='';
-  // Set loading state
   ['stat-collected','stat-count','stat-refunded','stat-failed'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.textContent='—';el.classList.add('stat-loading');}
@@ -1301,7 +1359,6 @@ async function loadPayouts(){
     document.getElementById('payout-refunded').textContent=fmtAmt(summary.total_refunded,cur);
     document.getElementById('payout-failed').textContent=summary.failed_count||0;
     document.getElementById('payout-period').textContent=`${cur} · Last 30 days`;
-    // Method breakdown
     const items=txns.items||[];
     const methods={};
     items.filter(p=>p.status==='captured').forEach(p=>{
