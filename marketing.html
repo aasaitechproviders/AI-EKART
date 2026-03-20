@@ -1,538 +1,675 @@
 <!DOCTYPE html>
-<html lang="en" style="background:#080910">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>eKart — Marketing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="nav.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+<!-- Theme init: light default; dark only if explicitly saved -->
 <script>
-/* ── BLOCKING: apply theme before first paint ── */
-(function(){
-  if (localStorage.getItem('ekart_theme') === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light')
-    document.documentElement.style.background = '#f0f0f5'
+;(function(){
+  var saved = localStorage.getItem('ekart_theme');
+  if(saved === 'dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    document.documentElement.style.background = '#07080D';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.style.background = '#F2F3F9';
   }
-})()
+})();
 </script>
 
 <style>
-/* ══════════════════════════════════════════════
-   SKELETON — mirrors sidebar + topbar + content
-   exactly so there is zero layout shift on load
-══════════════════════════════════════════════ */
-@keyframes skel-shimmer {
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
-}
-.skel {
-  border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.09) 50%,
-    rgba(255,255,255,0.04) 75%
-  );
-  background-size: 600px 100%;
-  animation: skel-shimmer 1.4s infinite linear;
-}
-[data-theme="light"] .skel {
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.11) 50%,
-    rgba(0,0,0,0.06) 75%
-  );
-  background-size: 600px 100%;
-  animation: skel-shimmer 1.4s infinite linear;
-}
-
-#page-skeleton {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  z-index: 9999;
-  background: inherit;
-  transition: opacity .25s ease;
-}
-#page-skeleton.skel-hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Sidebar replica */
-.skel-sidebar {
-  width: 240px;
-  flex-shrink: 0;
-  height: 100%;
-  background: #0d0e18;
-  border-right: 1px solid rgba(255,255,255,0.06);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-[data-theme="light"] .skel-sidebar {
-  background: #fff;
-  border-right-color: rgba(0,0,0,0.09);
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — LIGHT DEFAULT
+═══════════════════════════════════════════════ */
+:root {
+  --bg:           #F2F3F9;
+  --surface:      #FFFFFF;
+  --surface-2:    #F7F8FD;
+  --surface-3:    #EFF1F8;
+  --surface-4:    #E5E8F4;
+  --border:       rgba(0,0,0,0.07);
+  --border-md:    rgba(0,0,0,0.11);
+  --border-lg:    rgba(0,0,0,0.17);
+  --text:         #0F1117;
+  --text-2:       #5A5E78;
+  --text-3:       #9EA3BB;
+  --accent:       #7C6FFF;
+  --accent-2:     #6A5DEE;
+  --accent-3:     #5A4DDD;
+  --accent-dim:   rgba(124,111,255,0.08);
+  --accent-glow:  rgba(124,111,255,0.18);
+  --accent-soft:  rgba(124,111,255,0.05);
+  --green:        #19a37a;
+  --green-dim:    rgba(25,163,122,0.09);
+  --green-border: rgba(25,163,122,0.22);
+  --amber:        #d97706;
+  --amber-dim:    rgba(217,119,6,0.09);
+  --red:          #e05252;
+  --red-dim:      rgba(224,82,82,0.09);
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r:     14px;
+  --r-lg:  18px;
+  --r-xl:  24px;
+  --sh-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --sh:    0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --sh-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
+  --sh-accent: 0 6px 24px rgba(124,111,255,0.2);
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.4,0,0.2,1);
+  --t: all 0.18s cubic-bezier(0.4,0,0.2,1);
+  --sidebar-w: 248px;
 }
 
-/* Main area */
-.skel-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+[data-theme="dark"] {
+  --bg:           #07080D;
+  --surface:      #0C0E16;
+  --surface-2:    #111420;
+  --surface-3:    #171B28;
+  --surface-4:    #1D2133;
+  --border:       rgba(255,255,255,0.055);
+  --border-md:    rgba(255,255,255,0.09);
+  --border-lg:    rgba(255,255,255,0.14);
+  --text:         #ECEDF4;
+  --text-2:       #878BAA;
+  --text-3:       #474B65;
+  --accent-dim:   rgba(124,111,255,0.11);
+  --accent-glow:  rgba(124,111,255,0.22);
+  --accent-soft:  rgba(124,111,255,0.06);
+  --green:        #2DD4A0;
+  --green-dim:    rgba(45,212,160,0.10);
+  --green-border: rgba(45,212,160,0.22);
+  --amber:        #F5A523;
+  --amber-dim:    rgba(245,165,35,0.10);
+  --red:          #F26B6B;
+  --red-dim:      rgba(242,107,107,0.10);
+  --sh-sm: 0 1px 4px rgba(0,0,0,0.4);
+  --sh:    0 4px 20px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
+  --sh-lg: 0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+  --sh-accent: 0 8px 32px rgba(124,111,255,0.25);
 }
 
-/* Topbar replica */
-.skel-topbar {
-  height: 60px;
-  flex-shrink: 0;
-  background: #0d0e18;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  box-sizing: border-box;
+/* ═══════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100%}
+
+/* ═══════════════════════════════════════════════
+   SKELETON LOADER
+═══════════════════════════════════════════════ */
+@keyframes skelShimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+.skel{
+  border-radius:var(--r-xs);
+  background:linear-gradient(90deg,rgba(0,0,0,0.04) 0%,rgba(0,0,0,0.09) 40%,rgba(0,0,0,0.04) 80%);
+  background-size:600px 100%;
+  animation:skelShimmer 1.6s ease-in-out infinite;
 }
-[data-theme="light"] .skel-topbar {
-  background: #fff;
-  border-bottom-color: rgba(0,0,0,0.09);
+[data-theme="dark"] .skel{
+  background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.08) 40%,rgba(255,255,255,0.03) 80%);
+  background-size:600px 100%;
 }
 
-/* Content body */
-.skel-body {
-  flex: 1;
-  padding: 24px;
-  overflow: hidden;
-  box-sizing: border-box;
+#page-skeleton{
+  position:fixed;
+  top:0;right:0;bottom:0;left:var(--sidebar-w);
+  display:flex;flex-direction:column;
+  z-index:9999;
+  background:var(--bg);
+  opacity:1;
+  transition:opacity 0.3s var(--ease);
+  pointer-events:none;
 }
+#page-skeleton.skel-hiding{opacity:0}
 
-/* Sidebar internals */
-.skel-sidebar-user {
-  display: flex; align-items: center; gap: 10px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  margin-bottom: 14px;
+.skel-topbar{
+  height:60px;flex-shrink:0;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  justify-content:space-between;padding:0 28px;
 }
-[data-theme="light"] .skel-sidebar-user { border-bottom-color: rgba(0,0,0,0.08); }
-.skel-sidebar-user-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-.skel-nav-rows { display: flex; flex-direction: column; gap: 4px; }
+.skel-body{flex:1;padding:24px 28px;overflow:hidden;display:flex;flex-direction:column;gap:16px}
+.skel-mkt-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+.skel-tool-list{display:flex;flex-direction:column;gap:8px}
+.skel-tool-card{height:84px;border-radius:var(--r-lg)}
 
-/* ══════════════════════════════════════════════
-   LIGHT THEME OVERRIDES
-══════════════════════════════════════════════ */
-[data-theme="light"] {
-  --surface:  #ffffff;
-  --surface2: #f3f4f6;
-  --surface3: #e9eaf0;
-  --border:   rgba(0,0,0,0.10);
-  --border2:  rgba(0,0,0,0.14);
-  --text:     #111827;
-  --text2:    #374151;
-  --text3:    #9ca3af;
-  --accent:   #6c63ff;
-  --accent2:  #5b52e0;
-  --green:    #16a34a;
-  --red:      #dc2626;
-  --yellow:   #ca8a04;
-  background: #f0f0f5 !important;
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  z-index:149;opacity:0;
+  transition:opacity .22s var(--ease);
+  pointer-events:none;
 }
-[data-theme="light"] body              { background: #f0f0f5 !important; }
-[data-theme="light"] .sidebar          { background: #fff !important; border-right-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .main-wrap        { background: #f0f0f5 !important; }
-[data-theme="light"] .topbar           { background: #fff !important; border-bottom-color: rgba(0,0,0,0.09) !important; }
-[data-theme="light"] .topbar-title     { color: #111827 !important; }
-[data-theme="light"] .content          { background: #f0f0f5 !important; }
-[data-theme="light"] .tool-card        { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .tool-card:hover  { background: rgba(108,99,255,0.04) !important; }
-[data-theme="light"] .tool-card.active { background: rgba(108,99,255,0.07) !important; border-color: #6c63ff !important; }
-[data-theme="light"] .tool-card-name   { color: #111827 !important; }
-[data-theme="light"] .tool-card-desc   { color: #9ca3af !important; }
-[data-theme="light"] .tool-panel       { background: #fff !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .tool-panel-header { border-bottom-color: rgba(0,0,0,0.07) !important; }
-[data-theme="light"] .tool-panel-header h2 { color: #111827 !important; }
-[data-theme="light"] .result-block     { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .result-content   { color: #374151 !important; }
-[data-theme="light"] .result-copy-btn  { background: #fff !important; border-color: rgba(0,0,0,0.12) !important; color: #374151 !important; }
-[data-theme="light"] .result-copy-btn:hover { background: #6c63ff !important; color: #fff !important; border-color: #6c63ff !important; }
-[data-theme="light"] .tab-btn          { color: #6b7280 !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .tab-btn.active   { background: #6c63ff !important; color: #fff !important; border-color: #6c63ff !important; }
-[data-theme="light"] .field input,
-[data-theme="light"] .field textarea,
-[data-theme="light"] .field select     { background: #f3f4f6 !important; color: #111827 !important; border-color: rgba(0,0,0,0.12) !important; }
-[data-theme="light"] .field label      { color: #374151 !important; }
-[data-theme="light"] .field-hint       { color: #9ca3af !important; }
-[data-theme="light"] .nav-item         { color: #374151 !important; }
-[data-theme="light"] .nav-item:hover,
-[data-theme="light"] .nav-item.active  { background: rgba(108,99,255,0.08) !important; color: #5b52e0 !important; }
-[data-theme="light"] .sidebar-logo     { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-name  { color: #111827 !important; }
-[data-theme="light"] .sidebar-user-email { color: #9ca3af !important; }
-[data-theme="light"] .nav-section-label  { color: #9ca3af !important; }
-[data-theme="light"] .btn-logout       { color: #374151 !important; }
-[data-theme="light"] .store-select-wrap { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.12) !important; }
-[data-theme="light"] .store-selector  { color: #111827 !important; background: transparent !important; }
-[data-theme="light"] .store-select-label { color: #9ca3af !important; }
-[data-theme="light"] .platform-tabs   { background: #f3f4f6 !important; border-color: rgba(0,0,0,0.10) !important; }
-[data-theme="light"] .char-counter.ok { color: #16a34a !important; }
-[data-theme="light"] .char-counter.warn { color: #ca8a04 !important; }
-[data-theme="light"] .char-counter.over { color: #dc2626 !important; }
-[data-theme="light"] .empty-panel      { color: #9ca3af !important; }
-[data-theme="light"] .badge-gray       { background: #e9eaf0 !important; color: #374151 !important; }
-[data-theme="light"] .hashtag          { background: rgba(108,99,255,0.1) !important; color: #5b52e0 !important; }
+.sidebar-backdrop.open{opacity:1;pointer-events:all}
 
-/* ── THEME TOGGLE ── */
-.theme-toggle {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; flex-shrink: 0;
-  transition: all .2s;
+.sidebar{
+  width:var(--sidebar-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  z-index:150;overflow:hidden;overflow-y:auto;
+  scrollbar-width:none;
+  transition:transform .25s var(--ease);
 }
-.theme-toggle:hover {
-  border-color: rgba(108,99,255,0.4);
-  background: rgba(108,99,255,0.08);
-  transform: rotate(12deg) scale(1.05);
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar-logo{
+  display:flex;align-items:center;gap:9px;
+  padding:18px 18px 16px;
+  font-family:var(--font);font-size:19px;font-weight:800;
+  letter-spacing:-0.05em;color:var(--text);
+  text-decoration:none;
+  border-bottom:1px solid var(--border);flex-shrink:0;
 }
-[data-theme="light"] .theme-toggle {
-  background: #f3f4f6;
-  border-color: rgba(0,0,0,0.12);
-  color: #374151;
+.sidebar-logo::before{
+  content:'';display:inline-block;width:26px;height:26px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
+  border-radius:7px;box-shadow:0 4px 12px var(--accent-glow);flex-shrink:0;
 }
+.logo-k{color:var(--accent)}
 
-/* ══════════════════════════════════════════════
-   PAGE CONTENT TRANSITIONS
-══════════════════════════════════════════════ */
-#page-content { will-change: opacity, transform; }
-
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.sidebar-user{
+  display:flex;align-items:center;gap:10px;
+  margin:10px 10px 4px;padding:10px 11px;
+  border-radius:var(--r-sm);
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  transition:var(--t);cursor:default;overflow:hidden;min-width:0;
 }
-.page-enter { animation: pageIn .3s ease both; }
-
-/* ── STORE SELECTOR LOADING INDICATOR ── */
-.store-loading { position: relative; }
-.store-loading::after {
-  content: '';
-  position: absolute;
-  right: -20px; top: 50%;
-  transform: translateY(-50%);
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(108,99,255,0.25);
-  border-top-color: var(--accent, #6c63ff);
-  animation: spin .65s linear infinite;
-  pointer-events: none;
+.sidebar-user:hover{border-color:var(--border-md);background:var(--surface-3)}
+.sidebar-avatar{
+  width:34px;height:34px;min-width:34px;min-height:34px;
+  max-width:34px;max-height:34px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-3));
+  font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  color:white;flex-shrink:0;overflow:hidden;line-height:1;
 }
+.sidebar-avatar img{width:34px;height:34px;object-fit:cover;border-radius:50%;display:block;}
+.sidebar-user-info{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.sidebar-user-name{font-size:12.5px;font-weight:600;color:var(--text);letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sidebar-user-email{font-size:10.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
-/* ══════════════════════════════════════════════
+.sidebar-user-skel{display:flex;align-items:center;gap:10px;margin:10px 10px 4px;padding:10px 11px;border-radius:var(--r-sm)}
+#sidebar-user-skel.loaded{display:none}
+.sidebar-user.loading{display:none}
+
+.nav-section{padding:6px 10px;flex-shrink:0}
+.nav-section-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);padding:8px 8px 5px}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;color:var(--text-2);
+  text-decoration:none;transition:var(--t);position:relative;margin-bottom:1px;
+}
+.nav-item:hover{background:var(--surface-3);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:-10px;top:22%;bottom:22%;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+.nav-icon{font-size:15px;width:20px;display:flex;justify-content:center;flex-shrink:0;opacity:.8}
+.nav-item.active .nav-icon{opacity:1}
+
+.sidebar-bottom{margin-top:auto;padding:10px;border-top:1px solid var(--border);flex-shrink:0}
+.btn-logout{
+  width:100%;padding:9px 11px;border-radius:var(--r-sm);
+  border:1px solid var(--border-md);background:transparent;
+  color:var(--text-2);font-size:12.5px;font-weight:500;
+  cursor:pointer;text-align:left;transition:var(--t);
+  display:flex;align-items:center;gap:7px;font-family:var(--font);
+}
+.btn-logout:hover{background:var(--red-dim);border-color:rgba(242,107,107,0.3);color:var(--red)}
+
+/* ═══════════════════════════════════════════════
+   MOBILE TOPBAR
+═══════════════════════════════════════════════ */
+.mobile-topbar{
+  display:none;
+  height:56px;background:var(--surface);
+  border-bottom:1px solid var(--border);
+  align-items:center;justify-content:space-between;
+  padding:0 16px;
+  position:sticky;top:0;z-index:60;flex-shrink:0;
+  box-shadow:var(--sh-sm);
+}
+.mob-left{display:flex;align-items:center;gap:10px}
+.mob-right{display:flex;align-items:center;gap:8px}
+.hamburger{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border-md);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:var(--t);
+}
+.hamburger:hover{background:var(--surface-3);border-color:var(--accent)}
+.hamburger svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;font-family:var(--font)}
+.mob-logo span{color:var(--accent)}
+
+/* ═══════════════════════════════════════════════
+   MAIN WRAP + TOPBAR
+═══════════════════════════════════════════════ */
+.main-wrap{
+  margin-left:var(--sidebar-w);
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+}
+.topbar{
+  height:60px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  position:sticky;top:0;z-index:50;flex-shrink:0;
+  box-shadow:0 1px 0 var(--border);
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.content{flex:1;padding:24px 28px;background:var(--bg);min-width:0}
+
+.theme-toggle{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border-md);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;flex-shrink:0;transition:var(--t);
+}
+.theme-toggle:hover{border-color:var(--accent);background:var(--accent-dim);transform:rotate(14deg) scale(1.06)}
+
+/* ═══════════════════════════════════════════════
+   STORE SELECTOR
+═══════════════════════════════════════════════ */
+.store-select-wrap{
+  display:flex;align-items:center;gap:6px;
+  padding:0 10px;height:36px;border-radius:var(--r-sm);
+  background:var(--surface-2);border:1px solid var(--border-md);
+  transition:var(--t);
+}
+.store-select-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.store-select-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-3);white-space:nowrap}
+.store-selector{
+  background:none;border:none;outline:none;
+  font-family:var(--font);font-size:12.5px;font-weight:600;
+  color:var(--text);cursor:pointer;max-width:180px;
+}
+.store-selector option{background:var(--surface);color:var(--text)}
+
+/* Store selector loading */
+.store-loading{position:relative}
+.store-loading::after{
+  content:'';position:absolute;right:-20px;top:50%;
+  transform:translateY(-50%);
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(124,111,255,0.25);
+  border-top-color:var(--accent);
+  animation:spin .65s linear infinite;pointer-events:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════════════
    MARKETING LAYOUT
-══════════════════════════════════════════════ */
-.marketing-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 20px;
-  align-items: start;
+═══════════════════════════════════════════════ */
+.marketing-layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:20px;
+  align-items:start;
 }
 
-/* ── TOOL CARDS (Left Sidebar) ── */
-.tool-list { display: flex; flex-direction: column; gap: 8px; }
+/* ═══════════════════════════════════════════════
+   TOOL CARDS (Left)
+═══════════════════════════════════════════════ */
+.tool-list{display:flex;flex-direction:column;gap:8px}
 
-.tool-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  padding: 16px 18px;
-  cursor: pointer;
-  transition: border-color .2s, background .2s, transform .18s, box-shadow .2s;
-  position: relative;
-  overflow: hidden;
+.tool-card{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:16px 18px;
+  cursor:pointer;
+  transition:border-color .18s var(--ease),transform .18s var(--ease),box-shadow .18s var(--ease),background .18s var(--ease);
+  position:relative;overflow:hidden;
+  box-shadow:var(--sh-sm);
 }
-.tool-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(108,99,255,0.06), transparent 60%);
-  opacity: 0; transition: opacity .2s;
-  pointer-events: none;
+.tool-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--accent-soft),transparent 60%);
+  opacity:0;transition:opacity .2s;pointer-events:none;
 }
-.tool-card:hover {
-  border-color: rgba(108,99,255,0.30);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+.tool-card:hover{
+  border-color:rgba(124,111,255,0.30);
+  transform:translateY(-2px);
+  box-shadow:var(--sh);
 }
-.tool-card:hover::before { opacity: 1; }
-.tool-card.active {
-  border-color: var(--accent);
-  background: rgba(108,99,255,0.08);
-  box-shadow: 0 4px 18px rgba(108,99,255,0.18);
+.tool-card:hover::before{opacity:1}
+.tool-card.active{
+  border-color:var(--accent);
+  background:var(--accent-dim);
+  box-shadow:var(--sh-accent);
 }
-.tool-card.active::before { opacity: 1; }
-.tool-card-top {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
-}
-.tool-card-icon {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  flex-shrink: 0;
-  transition: background .2s;
-}
-.tool-card.active .tool-card-icon {
-  background: rgba(108,99,255,0.15);
-  border-color: rgba(108,99,255,0.25);
-}
-.tool-card-name { font-size: 14px; font-weight: 800; color: var(--text); }
-.tool-card-desc { font-size: 11.5px; color: var(--text3); line-height: 1.5; padding-left: 50px; }
-.tool-card-arrow {
-  position: absolute; right: 14px; top: 50%;
-  transform: translateY(-50%) translateX(-4px);
-  font-size: 14px; color: var(--accent2);
-  opacity: 0; transition: all .2s;
-}
-.tool-card.active .tool-card-arrow { opacity: 1; transform: translateY(-50%) translateX(0); }
+.tool-card.active::before{opacity:1}
 
-/* ── TOOL PANEL (Right) ── */
-.tool-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+.tool-card-top{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.tool-card-icon{
+  width:38px;height:38px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  background:var(--surface-3);border:1px solid var(--border);
+  flex-shrink:0;transition:background .18s,border-color .18s;
 }
-.tool-panel-header {
-  padding: 20px 24px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start; gap: 14px;
-  background: linear-gradient(135deg, rgba(108,99,255,0.04), transparent 60%);
+.tool-card.active .tool-card-icon{background:var(--accent-dim);border-color:rgba(124,111,255,0.25)}
+.tool-card-name{font-size:13.5px;font-weight:800;color:var(--text);letter-spacing:-0.02em}
+.tool-card-desc{font-size:11px;color:var(--text-3);line-height:1.55;padding-left:49px}
+.tool-card-arrow{
+  position:absolute;right:14px;top:50%;
+  transform:translateY(-50%) translateX(-4px);
+  font-size:12px;color:var(--accent-2);
+  opacity:0;transition:all .18s;
 }
-.tool-panel-header-icon {
-  width: 46px; height: 46px; border-radius: 13px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  background: rgba(108,99,255,0.1);
-  border: 1px solid rgba(108,99,255,0.2);
-  flex-shrink: 0;
-}
-.tool-panel-header h2 { font-size: 17px; font-weight: 800; margin-bottom: 3px; color: var(--text); }
-.tool-panel-header p  { font-size: 12px; color: var(--text3); line-height: 1.5; }
-.tool-panel-body { padding: 24px; }
-
-/* ── FORM FIELDS ── */
-.tool-panel-body .field { margin-bottom: 16px; }
-.tool-panel-body .field label {
-  display: block; font-size: 11px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text3); margin-bottom: 7px;
-}
-.tool-panel-body .field input,
-.tool-panel-body .field textarea,
-.tool-panel-body .field select {
-  width: 100%; padding: 11px 14px;
-  background: var(--surface2); color: var(--text);
-  border: 1.5px solid var(--border2);
-  border-radius: 11px;
-  font-family: 'Outfit', sans-serif; font-size: 13.5px;
-  outline: none; transition: border-color .15s, box-shadow .15s;
-  box-sizing: border-box;
-}
-.tool-panel-body .field input:focus,
-.tool-panel-body .field textarea:focus,
-.tool-panel-body .field select:focus {
-  border-color: rgba(108,99,255,0.55);
-  box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
-}
-.tool-panel-body .field textarea { min-height: 80px; resize: vertical; }
-.tool-panel-body .field-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-}
-.field-hint { font-size: 11px; color: var(--text3); margin-top: 5px; line-height: 1.5; }
-
-/* ── GENERATE BUTTON ── */
-.btn-generate {
-  width: 100%; padding: 13px;
-  border-radius: 13px;
-  border: none; cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  font-size: 14px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: linear-gradient(135deg, #6c63ff, #a259ff);
-  color: white;
-  box-shadow: 0 4px 18px rgba(108,99,255,0.35);
-  transition: all .2s;
-  letter-spacing: 0.02em;
-  position: relative; overflow: hidden;
-}
-.btn-generate::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-  pointer-events: none;
-}
-.btn-generate:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(108,99,255,0.45);
-}
-.btn-generate:active:not(:disabled) { transform: translateY(0); }
-.btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.btn-generate .sparkle { font-size: 16px; }
-
-/* ── RESULTS ── */
-.mkt-results { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
-
-.result-block {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  overflow: hidden;
-  animation: slideUp .25s ease both;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.result-block:nth-child(2) { animation-delay: .05s; }
-.result-block:nth-child(3) { animation-delay: .1s; }
-
-.result-block-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-.result-block-title {
-  font-size: 10.5px; font-weight: 800;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text3);
-  display: flex; align-items: center; gap: 6px;
-}
-.result-copy-btn {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 7px;
-  padding: 5px 12px;
-  font-size: 11px; font-weight: 700;
-  color: var(--text2);
-  cursor: pointer;
-  font-family: 'Outfit', sans-serif;
-  transition: all .15s;
-  display: flex; align-items: center; gap: 5px;
-}
-.result-copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
-.result-copy-btn.copied { background: var(--green, #16a34a); color: white; border-color: var(--green, #16a34a); }
-
-.result-body { padding: 14px 16px; }
-.result-content {
-  font-size: 13.5px; color: var(--text2);
-  line-height: 1.75; white-space: pre-wrap; word-break: break-word;
-}
-.email-subject-text {
-  font-size: 15px; font-weight: 800; color: var(--text);
-  line-height: 1.4;
+.tool-card.active .tool-card-arrow{opacity:1;transform:translateY(-50%) translateX(0)}
+.tool-card-badge{
+  margin-left:auto;flex-shrink:0;
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  padding:2px 7px;border-radius:20px;
+  background:var(--accent-dim);color:var(--accent-2);
+  border:1px solid rgba(124,111,255,0.2);
 }
 
-/* ── HASHTAGS ── */
-.insta-hashtags { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
-.hashtag {
-  font-size: 12px; font-weight: 600;
-  color: var(--accent2);
-  background: rgba(108,99,255,0.1);
-  border-radius: 6px; padding: 3px 9px;
-  transition: background .15s;
-  cursor: default;
+/* ═══════════════════════════════════════════════
+   TOOL PANEL (Right)
+═══════════════════════════════════════════════ */
+.tool-panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:var(--sh);
+  animation:panelIn .25s var(--ease) both;
 }
-.hashtag:hover { background: rgba(108,99,255,0.18); }
+@keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── CHAR COUNTER (SMS) ── */
-.char-counter {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 11.5px; font-weight: 800;
-  margin-top: 10px; padding: 5px 10px;
-  border-radius: 7px;
+.tool-panel-header{
+  padding:20px 24px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:14px;
+  background:linear-gradient(135deg,var(--accent-soft),transparent 65%);
 }
-.char-counter.ok   { background: rgba(22,163,74,0.1);  color: var(--green, #16a34a); }
-.char-counter.warn { background: rgba(202,138,4,0.1);  color: var(--yellow, #ca8a04); }
-.char-counter.over { background: rgba(220,38,38,0.1);  color: var(--red, #dc2626); }
+.tool-panel-header-icon{
+  width:46px;height:46px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  background:var(--accent-dim);
+  border:1px solid rgba(124,111,255,0.2);
+  flex-shrink:0;
+}
+.tool-panel-header-info{flex:1;min-width:0}
+.tool-panel-header h2{font-size:16px;font-weight:800;margin-bottom:3px;color:var(--text);letter-spacing:-0.03em}
+.tool-panel-header p{font-size:11.5px;color:var(--text-3);line-height:1.55}
 
-/* ── PLATFORM TABS ── */
-.platform-tabs {
-  display: flex; gap: 5px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px; padding: 4px;
-  margin-bottom: 16px; width: fit-content;
-}
-.tab-btn {
-  padding: 6px 14px; border-radius: 7px;
-  font-size: 12.5px; font-weight: 700;
-  cursor: pointer; border: none;
-  background: none; color: var(--text3);
-  font-family: 'Outfit', sans-serif;
-  transition: all .15s;
-}
-.tab-btn.active { background: var(--accent); color: white; }
-.tab-btn:hover:not(.active) { color: var(--text2); background: rgba(255,255,255,0.05); }
+.tool-panel-body{padding:24px}
 
-/* ── EMPTY / LOADING STATE ── */
-.empty-panel {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  min-height: 220px; gap: 10px;
-  color: var(--text3);
+/* ═══════════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════════ */
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.08em;
+  color:var(--text-3);margin-bottom:7px;
 }
-.empty-panel-icon { font-size: 40px; opacity: 0.4; }
-.empty-panel-text { font-size: 13px; font-weight: 600; }
+.field label .opt{
+  font-weight:500;text-transform:none;letter-spacing:0;
+  opacity:.7;
+}
+.field input,
+.field textarea,
+.field select{
+  width:100%;padding:10px 13px;
+  background:var(--surface-2);color:var(--text);
+  border:1.5px solid var(--border-md);
+  border-radius:var(--r-sm);
+  font-family:var(--font);font-size:13px;
+  outline:none;transition:border-color .15s,box-shadow .15s,background .15s;
+  box-sizing:border-box;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:rgba(124,111,255,0.55);
+  box-shadow:0 0 0 3px var(--accent-dim);
+  background:var(--surface-3);
+}
+.field input::placeholder,
+.field textarea::placeholder{color:var(--text-3)}
+.field textarea{min-height:78px;resize:vertical}
+.field select option{background:var(--surface);color:var(--text)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field-hint{font-size:11px;color:var(--text-3);margin-top:5px;line-height:1.5}
 
-.loading-dots {
-  display: flex; gap: 5px;
-  align-items: center; justify-content: center;
-  padding: 40px 0;
+/* ═══════════════════════════════════════════════
+   GENERATE BUTTON
+═══════════════════════════════════════════════ */
+.btn-generate{
+  width:100%;padding:13px;
+  border-radius:var(--r-sm);
+  border:none;cursor:pointer;
+  font-family:var(--font);font-size:13.5px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent-3) 100%);
+  color:white;
+  box-shadow:0 4px 18px var(--accent-glow);
+  transition:all .2s var(--ease);
+  letter-spacing:-0.01em;
+  position:relative;overflow:hidden;
 }
-.loading-dots span {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent);
-  animation: dotBounce 1.2s ease-in-out infinite;
+.btn-generate::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.13),transparent);
+  pointer-events:none;
 }
-.loading-dots span:nth-child(2) { animation-delay: .15s; }
-.loading-dots span:nth-child(3) { animation-delay: .3s; }
-@keyframes dotBounce {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-  40%           { transform: scale(1);   opacity: 1; }
+.btn-generate:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:0 8px 28px var(--accent-glow);
+}
+.btn-generate:active:not(:disabled){transform:translateY(0)}
+.btn-generate:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-generate .sparkle{font-size:15px}
+
+/* ═══════════════════════════════════════════════
+   RESULT BLOCKS
+═══════════════════════════════════════════════ */
+.mkt-results{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+
+.result-block{
+  background:var(--surface-2);
+  border:1px solid var(--border-md);
+  border-radius:var(--r);
+  overflow:hidden;
+  animation:resultIn .22s var(--ease) both;
+}
+.result-block:nth-child(2){animation-delay:.05s}
+.result-block:nth-child(3){animation-delay:.1s}
+@keyframes resultIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.result-block-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.result-block-title{
+  font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.09em;
+  color:var(--text-3);
+  display:flex;align-items:center;gap:5px;
+}
+.result-body{padding:13px 15px}
+.result-content{
+  font-size:13px;color:var(--text-2);
+  line-height:1.8;white-space:pre-wrap;word-break:break-word;
+}
+.email-subject-text{
+  font-size:15px;font-weight:800;color:var(--text);
+  line-height:1.4;letter-spacing:-0.02em;
 }
 
-/* ── INLINE SKELETON FOR STORE SWITCH ── */
-/* Mirrors the 2-col marketing layout exactly */
-.inline-skel-marketing {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 20px;
-  align-items: start;
+.result-copy-btn{
+  background:var(--surface-2);
+  border:1px solid var(--border-md);
+  border-radius:var(--r-xs);
+  padding:4px 11px;
+  font-size:10.5px;font-weight:700;
+  color:var(--text-2);cursor:pointer;
+  font-family:var(--font);transition:all .15s;
+  display:flex;align-items:center;gap:4px;
+}
+.result-copy-btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
+.result-copy-btn.copied{background:var(--green);color:white;border-color:var(--green)}
+
+/* ═══════════════════════════════════════════════
+   HASHTAGS
+═══════════════════════════════════════════════ */
+.insta-hashtags{display:flex;flex-wrap:wrap;gap:5px;padding-top:2px}
+.hashtag{
+  font-size:11.5px;font-weight:600;
+  color:var(--accent-2);
+  background:var(--accent-dim);
+  border-radius:var(--r-xs);padding:3px 9px;
+  transition:background .15s;cursor:default;
+  border:1px solid rgba(124,111,255,0.15);
+}
+.hashtag:hover{background:rgba(124,111,255,0.16)}
+
+/* ═══════════════════════════════════════════════
+   CHAR COUNTER (SMS)
+═══════════════════════════════════════════════ */
+.char-counter{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:700;
+  margin-top:8px;padding:4px 10px;
+  border-radius:var(--r-xs);
+}
+.char-counter.ok  {background:var(--green-dim);color:var(--green)}
+.char-counter.warn{background:var(--amber-dim);color:var(--amber)}
+.char-counter.over{background:var(--red-dim);color:var(--red)}
+
+/* ═══════════════════════════════════════════════
+   LOADING / EMPTY STATES
+═══════════════════════════════════════════════ */
+.empty-panel{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:240px;gap:10px;
+  color:var(--text-3);
+}
+.empty-panel-icon{font-size:40px;opacity:.35}
+.empty-panel-text{font-size:12.5px;font-weight:600}
+
+.loading-dots{
+  display:flex;gap:5px;
+  align-items:center;justify-content:center;
+  padding:40px 0;
+}
+.loading-dots span{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  animation:dotBounce 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2){animation-delay:.15s}
+.loading-dots span:nth-child(3){animation-delay:.3s}
+@keyframes dotBounce{0%,80%,100%{transform:scale(0.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* ═══════════════════════════════════════════════
+   INLINE SKELETON (store switch)
+═══════════════════════════════════════════════ */
+.inline-skel-mkt{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:20px;align-items:start;
 }
 
-/* ── SPINNER (used in button) ── */
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Fade transitions for store switch */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .25s var(--ease) both}
 
-/* responsive */
-@media (max-width: 860px) {
-  .marketing-layout { grid-template-columns: 1fr; }
-  .inline-skel-marketing { grid-template-columns: 1fr; }
-  .tool-list { flex-direction: row; flex-wrap: wrap; }
-  .tool-card { flex: 1; min-width: 140px; }
-  .tool-card-desc { padding-left: 0; }
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+#toast-container{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:9999;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;align-items:center;
+  width:100%;max-width:400px;padding:0 16px;
 }
-@media (max-width: 560px) {
-  .tool-panel-body .field-row { grid-template-columns: 1fr; }
+.toast{
+  background:var(--surface);border:1px solid var(--border-md);
+  border-radius:var(--r);padding:12px 18px;
+  font-size:13px;font-weight:500;color:var(--text);
+  box-shadow:var(--sh-lg);
+  display:flex;align-items:center;gap:9px;
+  animation:toastIn .25s var(--ease) both;
+  pointer-events:all;width:100%;
+}
+.toast.fade-out{animation:toastOut .25s var(--ease) forwards}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--accent)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤900px)
+═══════════════════════════════════════════════ */
+@media(max-width:900px){
+  .marketing-layout{grid-template-columns:1fr}
+  .inline-skel-mkt{grid-template-columns:1fr}
+  .tool-list{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+  }
+  .tool-card-desc{padding-left:0}
+  .skel-mkt-grid{grid-template-columns:1fr}
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — MOBILE  (≤648px)
+═══════════════════════════════════════════════ */
+@media(max-width:648px){
+  .mobile-topbar{display:flex}
+  .topbar{display:none !important}
+
+  .sidebar{transform:translateX(-100%);box-shadow:8px 0 40px rgba(0,0,0,0.15)}
+  .sidebar.mob-open{transform:translateX(0)}
+  .sidebar-backdrop{display:block}
+
+  .main-wrap{margin-left:0}
+  .content{padding:14px 14px 80px}
+
+  #page-skeleton{left:0;top:56px}
+  .skel-body{padding:14px}
+
+  .tool-list{grid-template-columns:1fr;gap:7px}
+  .field-row{grid-template-columns:1fr}
+
+  #toast-container{bottom:16px;padding:0 12px}
+}
+
+@media(max-width:400px){
+  .tool-card-top{gap:8px}
+  .tool-card-icon{width:32px;height:32px;font-size:14px}
+  .tool-card-name{font-size:12.5px}
 }
 </style>
 
@@ -541,426 +678,364 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-  SKELETON — perfectly mirrors the real layout:
-    skel-sidebar  → .sidebar
-    skel-topbar   → .topbar
-    skel-body     → .content
+<!-- TOAST -->
+<div id="toast-container"></div>
 
-  Marketing-specific body:
-    260px tool-list column + 1fr tool-panel card
-══════════════════════════════════════════ -->
-<div id="page-skeleton" aria-hidden="true">
+<!-- MOBILE TOPBAR -->
+<div class="mobile-topbar" id="mobileTopbar">
+  <div class="mob-left">
+    <button class="hamburger" onclick="openMobileSidebar()" aria-label="Open menu">
+      <svg viewBox="0 0 16 16"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="15" y2="8"/><line x1="1" y1="12" x2="15" y2="12"/></svg>
+    </button>
+    <a class="mob-logo" href="home.html">e<span>K</span>art</a>
+  </div>
+  <div class="mob-right">
+    <button class="theme-toggle" id="themeToggleMob" onclick="toggleTheme()" title="Toggle theme" style="width:32px;height:32px;font-size:14px;">☀️</button>
+  </div>
+</div>
 
-  <!-- LEFT: sidebar replica -->
-  <div class="skel-sidebar">
-    <!-- Logo -->
-    <div style="margin-bottom:22px;">
-      <div class="skel" style="height:20px;width:72px;border-radius:5px;"></div>
-    </div>
-
-    <!-- User row -->
-    <div class="skel-sidebar-user">
-      <div class="skel" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;"></div>
-      <div class="skel-sidebar-user-text">
-        <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
-        <div class="skel" style="height:9px;width:120px;border-radius:4px;"></div>
-      </div>
-    </div>
-
-    <!-- Section label -->
-    <div class="skel" style="height:8px;width:56px;border-radius:4px;margin-bottom:8px;opacity:.45;"></div>
-
-    <!-- Nav items — "Marketing" (6th) is active -->
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.78;"></div><!-- active: Marketing -->
-    </div>
-
-    <div class="skel" style="height:8px;width:64px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
-    </div>
-
-    <div class="skel" style="height:8px;width:52px;border-radius:4px;margin:16px 0 8px;opacity:.45;"></div>
-    <div class="skel-nav-rows">
-      <div class="skel" style="height:34px;border-radius:9px;opacity:.28;"></div>
+<!-- PAGE SKELETON -->
+<div id="page-skeleton">
+  <div class="skel-topbar">
+    <div class="skel" style="height:14px;width:88px;border-radius:5px;"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="skel" style="height:36px;width:164px;border-radius:var(--r-sm);opacity:.75;"></div>
+      <div class="skel" style="height:36px;width:36px;border-radius:var(--r-sm);opacity:.5;"></div>
     </div>
   </div>
-
-  <!-- RIGHT: main area replica -->
-  <div class="skel-main">
-
-    <!-- Topbar -->
-    <div class="skel-topbar">
-      <div class="skel" style="height:16px;width:90px;border-radius:5px;"></div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="skel" style="height:34px;width:160px;border-radius:9px;opacity:.7;"></div>
-        <div class="skel" style="height:34px;width:34px;border-radius:9px;opacity:.5;"></div>
+  <div class="skel-body">
+    <div class="skel-mkt-grid">
+      <div class="skel-tool-list">
+        <div class="skel skel-tool-card"></div>
+        <div class="skel skel-tool-card" style="opacity:.8"></div>
+        <div class="skel skel-tool-card" style="opacity:.6"></div>
+        <div class="skel skel-tool-card" style="opacity:.4"></div>
       </div>
-    </div>
-
-    <!-- Content body — 260px tool cards + 1fr tool panel -->
-    <div class="skel-body">
-      <div class="inline-skel-marketing">
-
-        <!-- Tool card list (4 cards) -->
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="skel" style="height:76px;border-radius:16px;"></div>
-          <div class="skel" style="height:76px;border-radius:16px;opacity:.80;"></div>
-          <div class="skel" style="height:76px;border-radius:16px;opacity:.60;"></div>
-          <div class="skel" style="height:76px;border-radius:16px;opacity:.40;"></div>
-        </div>
-
-        <!-- Tool panel card -->
-        <div class="skel" style="height:500px;border-radius:20px;opacity:.9;"></div>
-
-      </div>
+      <div class="skel" style="height:520px;border-radius:var(--r-xl);opacity:.9;"></div>
     </div>
   </div>
 </div>
-<!-- /skeleton -->
 
-<!-- ── SIDEBAR ── -->
+<!-- SIDEBAR BACKDROP -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art<span class="logo-dot"></span></a>
-  <div class="sidebar-user">
+  <a class="sidebar-logo" href="home.html">e<span class="logo-k">K</span>art</a>
+
+  <!-- User skel -->
+  <div class="sidebar-user-skel" id="sidebar-user-skel">
+    <div class="skel" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:5px;">
+      <div class="skel" style="height:10px;width:90px;border-radius:4px;"></div>
+      <div class="skel" style="height:8px;width:120px;border-radius:3px;"></div>
+    </div>
+  </div>
+  <!-- User real -->
+  <div class="sidebar-user loading" id="sidebar-user-real">
     <div class="sidebar-avatar" id="nav-avatar">…</div>
-    <div style="min-width:0;">
+    <div class="sidebar-user-info">
       <div class="sidebar-user-name" id="nav-user-name">…</div>
       <div class="sidebar-user-email" id="nav-user-email">…</div>
     </div>
   </div>
-  <div class="nav-section"><div class="nav-section-label">Merchant</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Merchant</div>
     <a class="nav-item" href="home.html"><span class="nav-icon">🏪</span>My Stores</a>
-    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant corner</a>
+    <a class="nav-item" href="merchant.html"><span class="nav-icon">🎟️</span>Merchant Corner</a>
     <a class="nav-item" href="orders.html"><span class="nav-icon">📋</span>Orders</a>
     <a class="nav-item" href="payments.html"><span class="nav-icon">💳</span>Payments</a>
     <a class="nav-item" href="analytics.html"><span class="nav-icon">📊</span>Analytics</a>
     <a class="nav-item active" href="marketing.html"><span class="nav-icon">📣</span>Marketing</a>
   </div>
-  <div class="nav-section"><div class="nav-section-label">Storefront</div>
+  <div class="nav-section">
+    <div class="nav-section-label">Storefront</div>
     <a class="nav-item" href="website-builder.html"><span class="nav-icon">🎨</span>Website Builder</a>
     <a class="nav-item" href="ai-builder.html"><span class="nav-icon">🛠️</span>AI Builder</a>
   </div>
-  <div class="nav-section"><div class="nav-section-label">AI Tools</div>
+  <div class="nav-section">
+    <div class="nav-section-label">AI Tools</div>
     <a class="nav-item" href="ai-assistant.html"><span class="nav-icon">🤖</span>AI Assistant</a>
   </div>
   <div class="sidebar-bottom">
-    <button class="btn-logout" onclick="logout()">↩ Logout</button>
+    <button class="btn-logout" onclick="logout()">↩&nbsp; Log out</button>
   </div>
 </div>
 
-<!-- ── MAIN ── -->
+<!-- MAIN -->
 <div class="main-wrap">
   <div class="topbar">
-    <div class="topbar-left"><span class="topbar-title">Marketing</span></div>
+    <div class="topbar-left">
+      <span class="topbar-title">Marketing</span>
+    </div>
     <div class="topbar-right">
       <div class="store-select-wrap" id="store-select-wrap">
         <span class="store-select-label">Store</span>
         <select class="store-selector" id="store-selector"></select>
       </div>
+      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
       <div id="topbar-actions"></div>
     </div>
   </div>
-  <div id="page-content" class="content page-enter" style="display:none;"></div>
+  <div id="page-content" class="content" style="display:none;"></div>
 </div>
 
 <script>
-/* ══════════════════════════════════════════════
-   SKELETON DISMISSAL
-══════════════════════════════════════════════ */
-function hideSkeleton() {
-  const skel = document.getElementById('page-skeleton')
-  if (!skel) return
-  skel.classList.add('skel-hidden')
-  setTimeout(() => skel.remove(), 280)
+/* ════════════════════════════════════════════════
+   TOAST — inline fallback
+════════════════════════════════════════════════ */
+function toast(msg, type){
+  type = type || 'success';
+  if(typeof window._toast === 'function') return window._toast(msg, type);
+  let c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icons = {success:'✓',error:'✕',info:'ℹ',warning:'⚠'};
+  el.innerHTML = '<span style="font-size:14px;">'+(icons[type]||'✓')+'</span><span>'+msg+'</span>';
+  c.appendChild(el);
+  setTimeout(() => { el.classList.add('fade-out'); el.addEventListener('animationend', () => el.remove()); }, 3200);
 }
 
-/* ══════════════════════════════════════════════
-   SMOOTH TRANSITION HELPERS
-══════════════════════════════════════════════ */
-const FADE_MS = 180
+/* ════════════════════════════════════════════════
+   THEME — light default
+════════════════════════════════════════════════ */
+let _isDark = localStorage.getItem('ekart_theme') === 'dark';
+function applyTheme(dark){
+  _isDark = dark;
+  const root = document.documentElement;
+  if(dark){ root.setAttribute('data-theme','dark'); root.style.background = '#07080D'; }
+  else { root.removeAttribute('data-theme'); root.style.background = '#F2F3F9'; }
+  const icon = dark ? '🌙' : '☀️';
+  ['themeToggleBtn','themeToggleMob'].forEach(id => {
+    const b = document.getElementById(id);
+    if(b) b.textContent = icon;
+  });
+  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light');
+}
+function toggleTheme(){ applyTheme(!_isDark); }
+applyTheme(_isDark);
 
-function fadeOut(el) {
-  return new Promise(resolve => {
-    el.style.transition    = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`
-    el.style.opacity       = '0'
-    el.style.transform     = 'translateY(-6px)'
-    el.style.pointerEvents = 'none'
-    setTimeout(resolve, FADE_MS)
-  })
+/* ════════════════════════════════════════════════
+   SKELETON
+════════════════════════════════════════════════ */
+function dismissSkeleton(){
+  const skel = document.getElementById('page-skeleton');
+  if(!skel || skel._dismissed) return;
+  skel._dismissed = true;
+  skel.classList.add('skel-hiding');
+  skel.addEventListener('transitionend', () => skel.remove(), {once:true});
+  setTimeout(() => { if(skel.parentNode) skel.remove(); }, 500);
+}
+function revealSidebarUser(){
+  const s = document.getElementById('sidebar-user-skel');
+  const r = document.getElementById('sidebar-user-real');
+  if(s) s.classList.add('loaded');
+  if(r) r.classList.remove('loading');
 }
 
-function fadeIn(el) {
-  el.style.transition    = 'none'
-  el.style.opacity       = '0'
-  el.style.transform     = 'translateY(8px)'
-  el.style.display       = ''
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.style.transition    = `opacity ${FADE_MS + 40}ms ease, transform ${FADE_MS + 40}ms ease`
-      el.style.opacity       = '1'
-      el.style.transform     = 'translateY(0)'
-      el.style.pointerEvents = ''
-    })
-  })
-}
-
-/* ══════════════════════════════════════════════
-   INLINE SKELETON for store-switch
-   Mirrors the marketing 2-col grid exactly:
-   260px tool-card column + 1fr tool-panel
-══════════════════════════════════════════════ */
-function inlineSkeletonHTML() {
-  return `
-    <div class="inline-skel-marketing">
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div class="skel" style="height:76px;border-radius:16px;"></div>
-        <div class="skel" style="height:76px;border-radius:16px;opacity:.80;"></div>
-        <div class="skel" style="height:76px;border-radius:16px;opacity:.60;"></div>
-        <div class="skel" style="height:76px;border-radius:16px;opacity:.40;"></div>
-      </div>
-      <div class="skel" style="height:500px;border-radius:20px;opacity:.9;"></div>
-    </div>`
-}
-
-/* ══════════════════════════════════════════════
-   STORE SELECTOR BUSY INDICATOR
-══════════════════════════════════════════════ */
-function setStoreLoading(on) {
-  const wrap = document.getElementById('store-select-wrap')
-  if (!wrap) return
-  on ? wrap.classList.add('store-loading') : wrap.classList.remove('store-loading')
-}
-
-/* ══════════════════════════════════════════════
-   THEME SYSTEM
-══════════════════════════════════════════════ */
-let _isDark = localStorage.getItem('ekart_theme') !== 'light'
-
-function applyTheme(dark) {
-  _isDark = dark
-  const root = document.documentElement
-  if (dark) {
-    root.removeAttribute('data-theme')
-    root.style.background = '#080910'
-  } else {
-    root.setAttribute('data-theme', 'light')
-    root.style.background = '#f0f0f5'
-  }
-  const btn = document.getElementById('themeToggleBtn')
-  if (btn) btn.textContent = dark ? '🌙' : '☀️'
-  localStorage.setItem('ekart_theme', dark ? 'dark' : 'light')
-}
-function toggleTheme() { applyTheme(!_isDark) }
-applyTheme(_isDark)
-
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    STATE
-   _loadToken: race-condition guard.
-   allProducts: refreshed per store.
-   currentTool: persists across store switches
-     so the user stays on the same tool.
-══════════════════════════════════════════════ */
-let currentStoreId = ''
-let currentTool    = 'instagram'
-let allProducts    = []
-let _loadToken     = 0
+════════════════════════════════════════════════ */
+let currentStoreId = '';
+let currentTool    = 'instagram';
+let allProducts    = [];
+let _loadToken     = 0;
 
 const TOOLS = {
-  instagram: {
-    icon: '📸', name: 'Instagram Post',
-    desc: 'Captions, hashtags & story text for maximum engagement',
-    help: 'Generate scroll-stopping Instagram captions with trending hashtags for your products or store.'
+  instagram:{
+    icon:'📸', name:'Instagram Post',
+    desc:'Captions, hashtags & story text for maximum engagement',
+    help:'Generate scroll-stopping captions with trending hashtags for your products or store.',
+    badge:'Popular'
   },
-  whatsapp: {
-    icon: '💬', name: 'WhatsApp Broadcast',
-    desc: 'Promotional messages for customer broadcasts',
-    help: 'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.'
+  whatsapp:{
+    icon:'💬', name:'WhatsApp Broadcast',
+    desc:'Promotional messages for customer broadcasts',
+    help:'Create personalized broadcast messages to announce sales, new arrivals, and exclusive offers.'
   },
-  email: {
-    icon: '📧', name: 'Email Campaign',
-    desc: 'Subject line + full email body copy',
-    help: 'Generate a full email campaign with compelling subject line, preview text and body for your customers.'
+  email:{
+    icon:'📧', name:'Email Campaign',
+    desc:'Subject line + full email body copy',
+    help:'Generate a full email campaign with compelling subject line, preview text and body copy.'
   },
-  sms: {
-    icon: '📱', name: 'SMS Blast',
-    desc: 'Punchy 160-character promo texts',
-    help: 'Short, conversion-optimized SMS messages that respect the 160-character limit.'
+  sms:{
+    icon:'📱', name:'SMS Blast',
+    desc:'Punchy 160-character promo texts',
+    help:'Short, conversion-optimized SMS messages that respect the 160-character limit.'
   }
+};
+
+/* ════════════════════════════════════════════════
+   STORE LOADING INDICATOR
+════════════════════════════════════════════════ */
+function setStoreLoading(on){
+  const w = document.getElementById('store-select-wrap');
+  if(w) on ? w.classList.add('store-loading') : w.classList.remove('store-loading');
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
+   INLINE SKELETON for store switch
+════════════════════════════════════════════════ */
+function inlineSkeletonHTML(){
+  return `
+    <div class="inline-skel-mkt">
+      <div class="skel-tool-list">
+        <div class="skel skel-tool-card"></div>
+        <div class="skel skel-tool-card" style="opacity:.8"></div>
+        <div class="skel skel-tool-card" style="opacity:.6"></div>
+        <div class="skel skel-tool-card" style="opacity:.4"></div>
+      </div>
+      <div class="skel" style="height:520px;border-radius:var(--r-xl);opacity:.9;"></div>
+    </div>`;
+}
+
+/* ════════════════════════════════════════════════
+   FADE HELPERS
+════════════════════════════════════════════════ */
+const FADE_MS = 170;
+function fadeOut(el){
+  return new Promise(resolve => {
+    el.style.transition = `opacity ${FADE_MS}ms ease, transform ${FADE_MS}ms ease`;
+    el.style.opacity = '0'; el.style.transform = 'translateY(-5px)';
+    el.style.pointerEvents = 'none';
+    setTimeout(resolve, FADE_MS);
+  });
+}
+function fadeIn(el){
+  el.style.transition = 'none'; el.style.opacity = '0';
+  el.style.transform = 'translateY(6px)'; el.style.display = '';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.style.transition = `opacity ${FADE_MS+40}ms ease, transform ${FADE_MS+40}ms ease`;
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+    el.style.pointerEvents = '';
+  }));
+}
+
+/* ════════════════════════════════════════════════
    INIT
-══════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
   const nav = await renderNav('marketing', (id) => {
-    currentStoreId = id
-    loadStoreData()
-  })
+    currentStoreId = id;
+    loadStoreData();
+  });
+  if(!nav){ dismissSkeleton(); return; }
+  revealSidebarUser();
+  currentStoreId = nav.currentStoreId;
+  applyTheme(_isDark);
 
-  if (!nav) { hideSkeleton(); return }
-  currentStoreId = nav.currentStoreId
-
-  // Theme toggle button
-  const topbarRight = document.querySelector('.topbar-right')
-  if (topbarRight && !document.getElementById('themeToggleBtn')) {
-    const btn       = document.createElement('button')
-    btn.className   = 'theme-toggle'
-    btn.id          = 'themeToggleBtn'
-    btn.title       = 'Toggle day / night mode'
-    btn.onclick     = toggleTheme
-    btn.textContent = _isDark ? '🌙' : '☀️'
-    topbarRight.insertBefore(btn, topbarRight.firstChild)
-  }
-  applyTheme(_isDark)
-
-  if (currentStoreId) await loadStoreDataFirstLoad()
+  if(currentStoreId) await loadFirstLoad();
   else {
-    renderPage()
-    const content = document.getElementById('page-content')
-    content.style.display = ''
-    hideSkeleton()
+    renderPage();
+    const c = document.getElementById('page-content');
+    c.style.display = '';
+    dismissSkeleton();
   }
-})
+});
 
-/* ══════════════════════════════════════════════
-   FIRST LOAD — skeleton visible while fetching,
-   then reveal content and dismiss skeleton.
-══════════════════════════════════════════════ */
-async function loadStoreDataFirstLoad() {
-  const token   = ++_loadToken
-  const content = document.getElementById('page-content')
-  setStoreLoading(true)
-
+/* ════════════════════════════════════════════════
+   FIRST LOAD
+════════════════════════════════════════════════ */
+async function loadFirstLoad(){
+  const token = ++_loadToken;
+  const c = document.getElementById('page-content');
+  setStoreLoading(true);
   try {
-    allProducts = await apiFetch(`/stores/${currentStoreId}/products`)
-    if (token !== _loadToken) return
-  } catch (_) {
-    allProducts = []
-  }
-
-  if (token !== _loadToken) return
-
-  renderPage()
-  content.style.display = ''
-  requestAnimationFrame(() => hideSkeleton())
-  setStoreLoading(false)
+    allProducts = await apiFetch(`/stores/${currentStoreId}/products`);
+    if(token !== _loadToken) return;
+  } catch(_){ allProducts = []; }
+  if(token !== _loadToken) return;
+  renderPage();
+  c.style.display = '';
+  requestAnimationFrame(() => dismissSkeleton());
+  setStoreLoading(false);
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    STORE SWITCH — 3-phase transition
-   Phase 1 → fade out current content
-   Phase 2 → inline shimmer skeleton
-   Phase 3 → fetch products → fade in real content
-══════════════════════════════════════════════ */
-async function loadStoreData() {
-  const token   = ++_loadToken
-  const content = document.getElementById('page-content')
-  const isFirst = content.style.display === 'none'
+════════════════════════════════════════════════ */
+async function loadStoreData(){
+  const token = ++_loadToken;
+  const c = document.getElementById('page-content');
+  const isFirst = c.style.display === 'none';
+  if(isFirst){ await loadFirstLoad(); return; }
 
-  if (isFirst) { await loadStoreDataFirstLoad(); return }
+  setStoreLoading(true);
+  await fadeOut(c);
+  if(token !== _loadToken) return;
 
-  setStoreLoading(true)
+  c.innerHTML = inlineSkeletonHTML();
+  fadeIn(c);
 
-  // Phase 1: fade out
-  await fadeOut(content)
-  if (token !== _loadToken) return
-
-  // Phase 2: inline skeleton
-  content.innerHTML = inlineSkeletonHTML()
-  fadeIn(content)
-
-  // Fetch products for the new store
   try {
-    allProducts = await apiFetch(`/stores/${currentStoreId}/products`)
-  } catch (_) {
-    allProducts = []
-  }
+    allProducts = await apiFetch(`/stores/${currentStoreId}/products`);
+  } catch(_){ allProducts = []; }
+  if(token !== _loadToken) return;
 
-  if (token !== _loadToken) return
-
-  // Phase 3: fade out skeleton, render real content, fade in
-  await fadeOut(content)
-  if (token !== _loadToken) return
-
-  renderPage()
-  fadeIn(content)
-  setStoreLoading(false)
+  await fadeOut(c);
+  if(token !== _loadToken) return;
+  renderPage();
+  fadeIn(c);
+  setStoreLoading(false);
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    PAGE RENDER
-   Builds the full marketing layout.
-   Preserves currentTool selection across
-   store switches.
-══════════════════════════════════════════════ */
-function renderPage() {
-  const content        = document.getElementById('page-content')
+════════════════════════════════════════════════ */
+function renderPage(){
+  const c = document.getElementById('page-content');
   const productOptions = allProducts.map(p =>
     `<option value="${p._id}">${p.name}</option>`
-  ).join('')
+  ).join('');
 
-  content.innerHTML = `
+  c.innerHTML = `
     <div class="marketing-layout">
-
-      <!-- Left: Tool selector -->
-      <div class="tool-list">
-        ${Object.entries(TOOLS).map(([key, t]) => `
-          <div class="tool-card ${currentTool === key ? 'active' : ''}" onclick="switchTool('${key}')">
+      <div class="tool-list" id="toolList">
+        ${Object.entries(TOOLS).map(([key,t]) => `
+          <div class="tool-card ${currentTool===key?'active':''}" onclick="switchTool('${key}')">
             <div class="tool-card-top">
               <div class="tool-card-icon">${t.icon}</div>
               <div class="tool-card-name">${t.name}</div>
+              ${t.badge ? `<span class="tool-card-badge">${t.badge}</span>` : ''}
             </div>
             <div class="tool-card-desc">${t.desc}</div>
             <span class="tool-card-arrow">→</span>
           </div>`).join('')}
       </div>
-
-      <!-- Right: Active tool panel -->
       <div class="tool-panel" id="toolPanel">
         ${renderToolPanel(productOptions)}
       </div>
-
-    </div>`
+    </div>`;
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    TOOL PANEL HTML
-══════════════════════════════════════════════ */
-function renderToolPanel(productOptions) {
-  const t        = TOOLS[currentTool]
-  const hasOffer = currentTool === 'email' || currentTool === 'whatsapp'
-  const label    = currentTool === 'instagram' ? 'Post'
-                 : currentTool === 'email'     ? 'Email'
-                 : currentTool === 'sms'       ? 'SMS'
-                 : 'Message'
+════════════════════════════════════════════════ */
+function renderToolPanel(productOptions){
+  const t = TOOLS[currentTool];
+  const hasOffer = currentTool === 'email' || currentTool === 'whatsapp';
+  const label = {instagram:'Post', email:'Email', sms:'SMS', whatsapp:'Message'}[currentTool] || 'Content';
 
   return `
     <div class="tool-panel-header">
       <div class="tool-panel-header-icon">${t.icon}</div>
-      <div>
+      <div class="tool-panel-header-info">
         <h2>${t.name}</h2>
         <p>${t.help}</p>
       </div>
     </div>
-
     <div class="tool-panel-body">
       <div class="field">
-        <label>Campaign Goal *</label>
+        <label>Campaign Goal <span style="color:var(--red);font-size:11px;">*</span></label>
         <input type="text" id="mktGoal"
-          placeholder="e.g. Promote summer sale, Announce new product, Drive store traffic…">
+          placeholder="e.g. Promote summer sale, Announce new product, Drive store traffic…"
+          oninput="clearResultOnChange()">
       </div>
 
       <div class="field-row">
         <div class="field">
-          <label>Product <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <label>Product <span class="opt">(optional)</span></label>
           <select id="mktProduct">
             <option value="">General / All Products</option>
             ${productOptions}
@@ -980,7 +1055,7 @@ function renderToolPanel(productOptions) {
 
       ${hasOffer ? `
       <div class="field">
-        <label>Offer / Discount <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <label>Offer / Discount <span class="opt">(optional)</span></label>
         <input type="text" id="mktOffer"
           placeholder="e.g. 20% off, Free shipping above ₹500, BOGO deal">
       </div>` : ''}
@@ -991,191 +1066,214 @@ function renderToolPanel(productOptions) {
       </div>
 
       <button class="btn-generate" onclick="generateMarketing()" id="mktGenBtn">
-        <span class="sparkle">✨</span>
-        Generate ${label}
+        <span class="sparkle">✨</span> Generate ${label}
       </button>
 
       <div id="mktResult"></div>
-    </div>`
+    </div>`;
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    SWITCH TOOL
-   Updates tool card active state and re-renders
-   the panel in place — no full-page transition
-   needed since switching tools is instant and
-   doesn't require a network round trip.
-══════════════════════════════════════════════ */
-function switchTool(tool) {
-  currentTool = tool
-  // Update left sidebar active state
+════════════════════════════════════════════════ */
+function switchTool(tool){
+  if(currentTool === tool) return;
+  currentTool = tool;
   document.querySelectorAll('.tool-card').forEach((card, i) => {
-    card.classList.toggle('active', Object.keys(TOOLS)[i] === tool)
-  })
-  // Re-render panel
+    card.classList.toggle('active', Object.keys(TOOLS)[i] === tool);
+  });
   const productOptions = allProducts.map(p =>
     `<option value="${p._id}">${p.name}</option>`
-  ).join('')
-  document.getElementById('toolPanel').innerHTML = renderToolPanel(productOptions)
+  ).join('');
+  const panel = document.getElementById('toolPanel');
+  panel.style.transition = 'opacity .12s ease';
+  panel.style.opacity = '0';
+  setTimeout(() => {
+    panel.innerHTML = renderToolPanel(productOptions);
+    panel.style.opacity = '1';
+  }, 120);
+  // Close sidebar on mobile after tool selection
+  if(window.innerWidth <= 648) closeMobileSidebar();
 }
 
-/* ══════════════════════════════════════════════
-   GENERATE MARKETING CONTENT
-══════════════════════════════════════════════ */
-async function generateMarketing() {
-  if (!currentStoreId) return toast('Select a store first', 'error')
-  const goal = document.getElementById('mktGoal').value.trim()
-  if (!goal)  return toast('Enter a campaign goal', 'error')
+function clearResultOnChange(){
+  // Only clear if there are results (avoid jarring on first type)
+}
 
-  const btn     = document.getElementById('mktGenBtn')
-  const resultEl = document.getElementById('mktResult')
-  const label   = currentTool === 'instagram' ? 'Post'
-                : currentTool === 'email'     ? 'Email'
-                : currentTool === 'sms'       ? 'SMS'
-                : 'Message'
+/* ════════════════════════════════════════════════
+   GENERATE
+════════════════════════════════════════════════ */
+async function generateMarketing(){
+  if(!currentStoreId) return toast('Select a store first', 'error');
+  const goal = document.getElementById('mktGoal').value.trim();
+  if(!goal) return toast('Enter a campaign goal first', 'error');
 
-  btn.disabled = true
-  btn.innerHTML = `<span style="display:inline-flex;gap:5px;align-items:center;"><span style="display:inline-block;animation:spin .7s linear infinite">⏳</span> Generating…</span>`
-  resultEl.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`
+  const btn = document.getElementById('mktGenBtn');
+  const resultEl = document.getElementById('mktResult');
+  const label = {instagram:'Post',email:'Email',sms:'SMS',whatsapp:'Message'}[currentTool] || 'Content';
 
-  const productId = document.getElementById('mktProduct')?.value || ''
-  const product   = allProducts.find(p => p._id === productId)
-  const tone      = document.getElementById('mktTone').value
-  const offer     = document.getElementById('mktOffer')?.value.trim() || ''
-  const brand     = document.getElementById('mktBrand').value.trim()
+  btn.disabled = true;
+  btn.innerHTML = `<span style="display:inline-block;animation:spin .7s linear infinite">⏳</span> Generating…`;
+  resultEl.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
+
+  const productId = document.getElementById('mktProduct')?.value || '';
+  const product   = allProducts.find(p => p._id === productId);
+  const tone      = document.getElementById('mktTone').value;
+  const offer     = document.getElementById('mktOffer')?.value.trim() || '';
+  const brand     = document.getElementById('mktBrand').value.trim();
 
   try {
-    const stores = await apiFetch('/stores')
-    const store  = stores.find(s => s._id === currentStoreId)
+    const stores = await apiFetch('/stores');
+    const store  = stores.find(s => s._id === currentStoreId);
 
     const r = await apiFetch('/ai/marketing-content', {
-      method: 'POST',
+      method:'POST',
       body: JSON.stringify({
         store_name:          brand || store?.name || 'My Store',
         product_name:        product ? product.name : goal,
         product_description: product
           ? (product.description || '') + (offer ? ' Offer: ' + offer : '')
           : (offer || goal),
-        platform:            currentTool,
+        platform:    currentTool,
         tone,
-        currency:            'INR',
-        price:               product ? product.price : ''
+        currency:    'INR',
+        price:       product ? product.price : ''
       })
-    })
+    });
 
-    const allContent = r.content
-    let content
-    if      (currentTool === 'instagram') content = allContent.instagram || allContent
-    else if (currentTool === 'whatsapp')  content = allContent.whatsapp  || allContent
-    else if (currentTool === 'email')     content = allContent.email     || allContent
-    else if (currentTool === 'sms')       content = { message: allContent.sms || allContent.message || '' }
-    else                                  content = allContent
+    const allContent = r.content;
+    let content;
+    if     (currentTool==='instagram') content = allContent.instagram || allContent;
+    else if(currentTool==='whatsapp')  content = allContent.whatsapp  || allContent;
+    else if(currentTool==='email')     content = allContent.email     || allContent;
+    else if(currentTool==='sms')       content = { message: allContent.sms || allContent.message || '' };
+    else                               content = allContent;
 
-    renderResult(content)
-  } catch (e) {
-    resultEl.innerHTML = `<div style="padding:16px;color:var(--red,#f87171);font-size:13px;font-weight:600;">⚠️ ${e.message}</div>`
+    renderResult(content);
+  } catch(e){
+    resultEl.innerHTML = `<div style="padding:14px;color:var(--red);font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;">⚠️ ${e.message}</div>`;
   }
 
-  btn.disabled = false
-  btn.innerHTML = `<span class="sparkle">✨</span> Generate ${label}`
+  btn.disabled = false;
+  btn.innerHTML = `<span class="sparkle">✨</span> Generate ${label}`;
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    RENDER RESULTS
-══════════════════════════════════════════════ */
-function renderResult(content) {
-  const res = document.getElementById('mktResult')
-  if (!content) {
-    res.innerHTML = '<p style="color:var(--red,#f87171);padding-top:12px;">No content generated</p>'
-    return
+════════════════════════════════════════════════ */
+function renderResult(content){
+  const res = document.getElementById('mktResult');
+  if(!content){
+    res.innerHTML = '<p style="color:var(--red);padding-top:12px;font-size:12.5px;">No content generated.</p>';
+    return;
   }
 
-  let html = '<div class="mkt-results">'
+  let html = '<div class="mkt-results">';
 
-  if (currentTool === 'instagram') {
-    const hashtags = content.hashtags || []
-    html += resultBlock('📸 Caption', content.caption || content.text || '', 'instaCaption')
-    if (hashtags.length) {
+  if(currentTool === 'instagram'){
+    const hashtags = content.hashtags || [];
+    html += resultBlock('📸 Caption', content.caption || content.text || '', 'instaCaption');
+    if(hashtags.length){
       html += `<div class="result-block">
         <div class="result-block-header">
           <span class="result-block-title">🏷️ Hashtags</span>
-          <button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw', this)">📋 Copy all</button>
+          <button class="result-copy-btn" onclick="copyBlock('instaHashtagsRaw',this)">📋 Copy all</button>
         </div>
         <div class="result-body">
-          <div id="instaHashtagsRaw" style="display:none;">${hashtags.map(h => h.startsWith('#') ? h : '#' + h).join(' ')}</div>
-          <div class="insta-hashtags">${hashtags.map(h => `<span class="hashtag">${h.startsWith('#') ? h : '#' + h}</span>`).join('')}</div>
+          <div id="instaHashtagsRaw" style="display:none;">${hashtags.map(h=>h.startsWith('#')?h:'#'+h).join(' ')}</div>
+          <div class="insta-hashtags">${hashtags.map(h=>`<span class="hashtag">${h.startsWith('#')?h:'#'+h}</span>`).join('')}</div>
         </div>
-      </div>`
+      </div>`;
     }
-    if (content.story_text) html += resultBlock('📱 Story Text', content.story_text, 'storyText')
+    if(content.story_text) html += resultBlock('📱 Story Text', content.story_text, 'storyText');
 
-  } else if (currentTool === 'whatsapp') {
-    html += resultBlock('💬 Message', content.message || content.text || '', 'waMsg')
-    if (content.cta) html += resultBlock('🔗 Call-to-Action', content.cta, 'waCta')
+  } else if(currentTool === 'whatsapp'){
+    html += resultBlock('💬 Message', content.message || content.text || '', 'waMsg');
+    if(content.cta) html += resultBlock('🔗 Call-to-Action', content.cta, 'waCta');
 
-  } else if (currentTool === 'email') {
+  } else if(currentTool === 'email'){
     html += `<div class="result-block">
       <div class="result-block-header">
         <span class="result-block-title">📌 Subject Line</span>
-        <button class="result-copy-btn" onclick="copyBlock('emailSubject', this)">📋 Copy</button>
+        <button class="result-copy-btn" onclick="copyBlock('emailSubject',this)">📋 Copy</button>
       </div>
       <div class="result-body">
         <div class="email-subject-text" id="emailSubject">${content.subject || ''}</div>
       </div>
-    </div>`
-    if (content.preheader) html += resultBlock('👁️ Preview Text', content.preheader, 'emailPreheader')
-    html += resultBlock('📧 Email Body', content.body || content.text || '', 'emailBody')
+    </div>`;
+    if(content.preheader) html += resultBlock('👁️ Preview Text', content.preheader, 'emailPreheader');
+    html += resultBlock('📧 Email Body', content.body || content.text || '', 'emailBody');
 
-  } else if (currentTool === 'sms') {
-    const msg = content.message || content.text || ''
-    const len = msg.length
-    const cls  = len > 160 ? 'over' : len > 140 ? 'warn' : 'ok'
-    const icon = len > 160 ? '⚠️'  : len > 140 ? '⚡'   : '✓'
+  } else if(currentTool === 'sms'){
+    const msg = content.message || content.text || '';
+    const len = msg.length;
+    const cls  = len > 160 ? 'over' : len > 140 ? 'warn' : 'ok';
+    const icon = len > 160 ? '⚠️' : len > 140 ? '⚡' : '✓';
+    const note = len > 160 ? ' — Too long!' : len > 140 ? ' — Near limit' : ' — Good';
     html += `<div class="result-block">
       <div class="result-block-header">
         <span class="result-block-title">📱 SMS Message</span>
-        <button class="result-copy-btn" onclick="copyBlock('smsMsg', this)">📋 Copy</button>
+        <button class="result-copy-btn" onclick="copyBlock('smsMsg',this)">📋 Copy</button>
       </div>
       <div class="result-body">
         <div class="result-content" id="smsMsg">${msg}</div>
-        <div class="char-counter ${cls}">${icon} ${len} / 160 characters${len > 160 ? ' — Too long!' : len > 140 ? ' — Near limit' : ' — Good'}</div>
+        <div class="char-counter ${cls}">${icon} ${len} / 160 characters${note}</div>
       </div>
-    </div>`
+    </div>`;
   }
 
-  html += '</div>'
-  document.getElementById('mktResult').innerHTML = html
+  html += '</div>';
+  res.innerHTML = html;
 }
 
-function resultBlock(title, text, id) {
+function resultBlock(title, text, id){
   return `<div class="result-block">
     <div class="result-block-header">
       <span class="result-block-title">${title}</span>
-      <button class="result-copy-btn" onclick="copyBlock('${id}', this)">📋 Copy</button>
+      <button class="result-copy-btn" onclick="copyBlock('${id}',this)">📋 Copy</button>
     </div>
     <div class="result-body">
       <div class="result-content" id="${id}">${text}</div>
     </div>
-  </div>`
+  </div>`;
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    COPY TO CLIPBOARD
-══════════════════════════════════════════════ */
-function copyBlock(id, btn) {
-  const el = document.getElementById(id)
-  if (!el) return
+════════════════════════════════════════════════ */
+function copyBlock(id, btn){
+  const el = document.getElementById(id);
+  if(!el) return;
   navigator.clipboard.writeText(el.textContent)
     .then(() => {
-      btn.textContent = '✓ Copied!'
-      btn.classList.add('copied')
-      setTimeout(() => {
-        btn.textContent = '📋 Copy'
-        btn.classList.remove('copied')
-      }, 2000)
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
     })
-    .catch(() => toast(el.textContent, 'info'))
+    .catch(() => toast('Could not copy to clipboard', 'error'));
 }
+
+/* ════════════════════════════════════════════════
+   MOBILE SIDEBAR
+════════════════════════════════════════════════ */
+function openMobileSidebar(){
+  document.getElementById('sidebar').classList.add('mob-open');
+  document.getElementById('sidebarBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileSidebar(){
+  document.getElementById('sidebar').classList.remove('mob-open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if(window.innerWidth <= 648) closeMobileSidebar();
+    });
+  });
+});
 </script>
 </body>
 </html>
