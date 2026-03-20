@@ -280,39 +280,51 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .mob-logo{font-size:17px;font-weight:800;letter-spacing:-0.05em;color:var(--text);text-decoration:none;font-family:var(--font)}
 .mob-logo span{color:var(--accent)}
 
-/* ── Mobile store selector — matches merchant page style ── */
+/* ── Mobile store selector — exact merchant page style ── */
 .mob-store-wrap{
   flex:1;
   min-width:0;
   display:flex;
   align-items:center;
+  padding:0 6px;
 }
-.mob-store-select{
-  display:flex;align-items:center;gap:5px;
-  background:var(--surface-2);
+.mob-store-pill{
+  display:flex;align-items:center;
+  background:var(--surface);
   border:1px solid var(--border-md);
-  border-radius:var(--r-sm);
-  padding:0 10px;
-  height:34px;
+  border-radius:20px;
+  padding:0 14px 0 14px;
+  height:36px;
   width:100%;
   min-width:0;
+  max-width:220px;
+  margin:0 auto;
   transition:var(--t);
-  cursor:pointer;
+  position:relative;
+  box-shadow:var(--sh-sm);
+  overflow:hidden;
 }
-.mob-store-select:hover{border-color:var(--border-lg);background:var(--surface-3)}
-.mob-store-icon{font-size:12px;flex-shrink:0}
-.mob-store-select select{
+.mob-store-pill:hover{border-color:var(--border-lg);background:var(--surface-2)}
+.mob-store-pill select{
   background:none;border:none;outline:none;
-  font-family:var(--font);font-size:12.5px;font-weight:600;
+  font-family:var(--font);font-size:13px;font-weight:600;
   color:var(--text);cursor:pointer;
-  flex:1;min-width:0;
-  max-width:100%;
-  overflow:hidden;text-overflow:ellipsis;
+  flex:1;width:100%;
+  /* hide native arrow — we use our own */
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+  padding-right:20px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.mob-store-select select option{background:var(--surface);color:var(--text)}
-.mob-store-chevron{
-  font-size:10px;color:var(--text-3);flex-shrink:0;
+.mob-store-pill select option{background:var(--surface);color:var(--text)}
+.mob-store-pill::after{
+  content:'▾';
+  position:absolute;right:12px;top:50%;
+  transform:translateY(-50%);
+  font-size:11px;color:var(--text-3);
   pointer-events:none;
+  line-height:1;
 }
 /* Hide mobile store selector until stores are populated */
 #mobStoreWrap{display:none}
@@ -719,7 +731,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .kpi-value{font-size:19px}
   .period-tab{padding:5px 10px;font-size:12px}
   .btn{font-size:12px}
-  .mob-store-select select{font-size:12px}
+  .mob-store-pill select{font-size:12px}
 }
 </style>
 </head>
@@ -739,12 +751,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <a class="mob-logo" href="home.html">e<span>K</span>art</a>
   </div>
 
-  <!-- Store selector — same style as merchant page -->
+  <!-- Store selector — matches merchant page pill style -->
   <div class="mob-store-wrap" id="mobStoreWrap">
-    <div class="mob-store-select">
-      <span class="mob-store-icon">🏪</span>
+    <div class="mob-store-pill">
       <select id="mob-store-selector" onchange="onMobStoreSelectorChange(this.value)"></select>
-      <span class="mob-store-chevron">▾</span>
     </div>
   </div>
 
