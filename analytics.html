@@ -178,14 +178,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 ═══════════════════════════════════════════════ */
 .store-pill {
   display:        inline-flex;
-  align-items:    stretch;        /* children fill full height */
-  height:         38px;
+  align-items:    stretch;
+  height:         40px;
   border:         1.5px solid var(--border-md);
-  border-radius:  100px;
+  border-radius:  14px;           /* rounded rectangle — matches screenshot */
   background:     var(--surface);
   overflow:       hidden;
   flex-shrink:    0;
   transition:     border-color .18s var(--ease), box-shadow .18s var(--ease);
+  box-shadow:     var(--sh-sm);
   /* hidden until JS marks it ready */
   visibility:     hidden;
   pointer-events: none;
@@ -196,30 +197,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 .store-pill:hover {
   border-color: var(--border-lg);
-  box-shadow:   0 2px 12px rgba(0,0,0,0.08);
+  box-shadow:   0 2px 12px rgba(0,0,0,0.09);
 }
 .store-pill:focus-within {
-  border-color: rgba(124,111,255,0.5);
+  border-color: rgba(124,111,255,0.45);
   box-shadow:   0 0 0 3px rgba(124,111,255,0.10);
 }
 
-/* Left grey badge */
+/* Left grey "STORE" badge */
 .store-pill-label {
   display:        flex;
   align-items:    center;
   justify-content:center;
-  padding:        0 14px;
+  padding:        0 16px;
   background:     var(--surface-3);
   border-right:   1.5px solid var(--border-md);
   font-family:    var(--font);
-  font-size:      9.5px;
-  font-weight:    800;
-  letter-spacing: 0.10em;
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color:          var(--text-3);
   white-space:    nowrap;
   flex-shrink:    0;
   user-select:    none;
+}
+[data-theme="dark"] .store-pill-label {
+  background: var(--surface-3);
 }
 
 /* Right select + optional loading ring wrapper */
@@ -228,32 +232,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   align-items: center;
   flex:        1;
   min-width:   0;
+  background:  var(--surface);
 }
 
 .store-pill-select {
   flex:         1;
   min-width:    0;
-  max-width:    180px;
+  max-width:    200px;
   height:       100%;
   background:   transparent;
   border:       none;
   outline:      none;
   font-family:  var(--font);
-  font-size:    13px;
+  font-size:    13.5px;
   font-weight:  600;
   color:        var(--text);
   cursor:       pointer;
-  padding:      0 32px 0 14px;
+  padding:      0 34px 0 15px;
   appearance:   none;
   -webkit-appearance: none;
-  background-image:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%239EA3BB' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:   no-repeat;
-  background-position: right 11px center;
+  background-position: right 12px center;
 }
 [data-theme="dark"] .store-pill-select {
-  background-image:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23474B65' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image:    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23878BAA' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:   no-repeat;
-  background-position: right 11px center;
+  background-position: right 12px center;
 }
 .store-pill-select option { background:var(--surface); color:var(--text); }
 
@@ -266,17 +271,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 }
 .store-pill-ring.visible { display:block; }
 
-/* Tighten on tablet */
+/* Tablet: slight tightening */
 @media(max-width:1100px){
-  .store-pill-select { max-width:140px; padding:0 28px 0 12px; font-size:12.5px; }
-  .store-pill-label  { padding:0 12px; }
+  .store-pill        { height:38px; }
+  .store-pill-select { max-width:160px; padding:0 30px 0 13px; font-size:13px; }
+  .store-pill-label  { padding:0 14px; }
 }
 
-/* Mobile: same pill, tighter text — visually identical */
+/* Mobile: same shape, same border-radius, just slightly compact */
 @media(max-width:648px){
-  .store-pill        { height:36px; }
-  .store-pill-select { max-width:120px; padding:0 26px 0 11px; font-size:12.5px; }
-  .store-pill-label  { padding:0 11px; font-size:9px; }
+  .store-pill        { height:38px; border-radius:12px; }
+  .store-pill-select { max-width:130px; padding:0 28px 0 12px; font-size:13px; }
+  .store-pill-label  { padding:0 13px; font-size:9.5px; }
   .store-pill-ring   { margin-right:10px; }
 }
 
